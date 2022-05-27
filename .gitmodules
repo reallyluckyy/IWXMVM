@@ -1,0 +1,6 @@
+[submodule "core/third-party/spdlog"]
+	path = core/third-party/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "core/third-party/imgui"]
+	path = core/third-party/imgui
+	url = https://github.com/ocornut/imgui.git
