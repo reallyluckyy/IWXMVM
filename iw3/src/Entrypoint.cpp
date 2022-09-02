@@ -1,12 +1,17 @@
 #include "StdInclude.hpp"
 #include "Mod.hpp"
 
+#include "IW3Interface.hpp"
+
+using namespace IWXMVM;
+using namespace IW3;
+
+IW3Interface gameInterface = IW3Interface();
+
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) 
 {
-    using namespace IWXMVM;
-
     if (fdwReason == DLL_PROCESS_ATTACH) {
-        Mod::Initialize(Game::IW3);
+        Mod::Initialize(&gameInterface);
     }
     return TRUE;
 }

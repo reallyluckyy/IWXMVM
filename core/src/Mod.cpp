@@ -1,28 +1,50 @@
 #include "StdInclude.hpp"
 #include "Mod.hpp"
 
+#include "GameInterface.hpp"
 #include "WindowsConsole.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "Utilities/MemoryUtils.hpp"
+
+#include "UI/UIManager.hpp"
 
 namespace IWXMVM
 {
-	Game Mod::currentGame;
+	GameInterface* Mod::internalGameInterface = nullptr;
 
-	void Mod::Initialize(const Game game)
+	void Mod::Initialize(GameInterface* gameInterface)
 	{
-		currentGame = game;
+		try 
+		{
+			internalGameInterface = gameInterface;
 
-		WindowsConsole::Open();
-		Logger::Initialize();
+			WindowsConsole::Open();
+			Logger::Initialize();
 
-		LOG_INFO("Loading IWXMVM {}", "version goes here");
-		LOG_INFO("Game ID: {}", (uint32_t)currentGame);
-		LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
+			LOG_INFO("Loading IWXMVM {}", "version goes here");
+			LOG_INFO("Game: {}", gameInterface->GetGameName());
+			LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
 
-		// TODO: Initialize Components/Patches
-		// TODO: Initialize UI
-		// TODO: ...
+			MemoryUtils::UnprotectModule();
 
-		LOG_INFO("Initialized IWXMVM!");
+			LOG_DEBUG("Installing game hooks...");
+			gameInterface->InstallHooks();
+			gameInterface->SetupEventListeners();
+
+			UI::UIManager::Initialize();
+			// TODO: Initialize Components/Patches
+			// TODO: ...
+
+			LOG_INFO("Initialized IWXMVM!");
+		}
+		catch (std::exception& ex)
+		{
+			LOG_ERROR("An error occurred during initialization: {}", ex.what());
+			// TODO: What do we do here?
+		}
+		catch (...)
+		{
+			LOG_ERROR("An error occurred during initialization");
+		}
 	}
 }

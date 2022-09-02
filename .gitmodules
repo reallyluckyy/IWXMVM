@@ -4,3 +4,6 @@
 [submodule "core/third-party/imgui"]
 	path = core/third-party/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "core/third-party/incbin"]
+	path = core/third-party/incbin
+	url = https://github.com/graphitemaster/incbin.git

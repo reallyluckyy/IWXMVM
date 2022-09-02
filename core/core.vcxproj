@@ -46,10 +46,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(ProjectName)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\bin\$(Platform)\$(Configuration)\intermediate\</IntDir>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(ProjectName)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\bin\$(Platform)\$(Configuration)\intermediate\</IntDir>
+    <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -58,12 +62,21 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>cl third-party/incbin/incbin.c  /Fo:third-party/incbin/ /link /out:third-party/incbin/incbin.exe</Command>
+    </PreBuildEvent>
+    <PreLinkEvent>
+      <Command>"third-party/incbin/incbin.exe" src/Resources.cpp -o src/ResourceData.cpp -Ssnakecase -p""</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -74,7 +87,10 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -82,22 +98,57 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>cl third-party/incbin/incbin.c  /Fo:third-party/incbin/ /link /out:third-party/incbin/incbin.exe</Command>
+    </PreBuildEvent>
+    <PreLinkEvent>
+      <Command>"third-party/incbin/incbin.exe" src/Resources.cpp -o src/ResourceData.cpp -Ssnakecase -p""</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ResourceData.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\Resources.cpp" />
+    <ClCompile Include="src\UI\Components\ControlBar.cpp" />
+    <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
+    <ClCompile Include="src\Events.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Mod.cpp" />
-    <ClCompile Include="src\StdInclude.cpp" />
-    <ClCompile Include="src\Components\UI.cpp" />
+    <ClCompile Include="src\StdInclude.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\UI\Components\MenuBar.cpp" />
+    <ClCompile Include="src\UI\UIImage.cpp" />
+    <ClCompile Include="src\UI\UIManager.cpp" />
+    <ClCompile Include="src\Utilities\HookManager.cpp" />
+    <ClCompile Include="src\Utilities\MemoryUtils.cpp" />
     <ClCompile Include="src\Utilities\PathUtils.cpp" />
     <ClCompile Include="src\WindowsConsole.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Resources.hpp" />
+    <ClInclude Include="src\UI\Components\ControlBar.hpp" />
+    <ClInclude Include="src\UI\Components\DebugPanel.hpp" />
+    <ClInclude Include="src\UI\Components\MenuBar.hpp" />
+    <ClInclude Include="src\UI\UIComponent.hpp" />
+    <ClInclude Include="src\UI\UIImage.hpp" />
+    <ClInclude Include="src\Utilities\HookManager.hpp" />
+    <ClInclude Include="src\Events.hpp" />
+    <ClInclude Include="src\GameInterface.hpp" />
     <ClInclude Include="src\Logger.hpp" />
     <ClInclude Include="src\Mod.hpp" />
     <ClInclude Include="src\StdInclude.hpp" />
-    <ClInclude Include="src\Components\UI.hpp" />
+    <ClInclude Include="src\UI\UIManager.hpp" />
+    <ClInclude Include="src\Utilities\MemoryUtils.hpp" />
     <ClInclude Include="src\Utilities\PathUtils.hpp" />
     <ClInclude Include="src\WindowsConsole.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\pause_button.png" />
+    <Image Include="resources\play_button.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

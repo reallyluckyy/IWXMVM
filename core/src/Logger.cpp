@@ -16,7 +16,7 @@ namespace IWXMVM
 		internalLogger = std::make_shared<spdlog::logger>(LOGGER_NAME, sinks.begin(), sinks.end());
 		internalLogger->set_pattern("[%d.%m.%C %H:%M:%S] [%n] [%^%l%$] %v");
 		internalLogger->flush_on(spdlog::level::trace);
-
+		internalLogger->set_level(spdlog::level::debug);
 		LOG_INFO("Initialized Logger");
 	}
 

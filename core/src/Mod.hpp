@@ -1,20 +1,15 @@
 #pragma once
+#include "GameInterface.hpp"
 
 namespace IWXMVM
 {
-
-	enum class Game : uint32_t {
-		IW3
-	};
-
 	class Mod 
 	{
 	public:
+		static void Initialize(GameInterface* gameInterface);
 
-		static void Initialize(Game game);
-		static Game GetGame() { return currentGame; }
-
+		static GameInterface* GetGameInterface() { return internalGameInterface; }
 	private:
-		static Game currentGame;
+		static GameInterface* internalGameInterface;
 	};
 }
