@@ -2,6 +2,7 @@
 #include "Mod.hpp"
 
 #include "GameInterface.hpp"
+#include "Version.hpp"
 #include "WindowsConsole.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Utilities/MemoryUtils.hpp"
@@ -21,7 +22,7 @@ namespace IWXMVM
 			WindowsConsole::Open();
 			Logger::Initialize();
 
-			LOG_INFO("Loading IWXMVM {}", "version goes here");
+			LOG_INFO("Loading IWXMVM {}", IWXMVM_VERSION);
 			LOG_INFO("Game: {}", gameInterface->GetGameName());
 			LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
 

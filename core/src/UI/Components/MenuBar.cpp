@@ -1,6 +1,10 @@
 #include "StdInclude.hpp"
 #include "MenuBar.hpp"
 
+#include "Version.hpp"
+#include "Mod.hpp"
+#include "Utilities/PathUtils.hpp"
+
 namespace IWXMVM::UI
 {
 
@@ -26,6 +30,10 @@ namespace IWXMVM::UI
                 if (ImGui::MenuItem("Open Debug Panel", "CTRL+D")) {}
                 ImGui::EndMenu();
             }
+
+            auto windowSize = PathUtils::GetWindowSize(Mod::GetGameInterface()->GetWindowHandle());
+            ImGui::SetCursorPosX(windowSize.x - 90);
+            ImGui::Text("IWXMVM %s", IWXMVM_VERSION);
 
             ImGui::EndMainMenuBar();
         }
