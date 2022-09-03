@@ -42,13 +42,13 @@ namespace IWXMVM::IW3
 
 		void SetMouseMode(MouseMode mode) override
 		{
-			Structures::GetMouseVars()->mouseInitialized = mode == MouseMode::Capture ? 0 : 1;
+			Structures::GetMouseVars()->mouseInitialized = mode == MouseMode::Capture ? false : true;
 		}
 
 		GameState GetGameState() override
 		{
-			//if (!ingame)
-			//	return GameState::MainMenu;
+			if (!Structures::FindDvar("cl_ingame")->current.enabled)
+				return GameState::MainMenu;
 
 			if (Structures::GetClientConnection()->demoplaying)
 				return GameState::InDemo;
@@ -71,7 +71,7 @@ namespace IWXMVM::IW3
 
 		std::optional<Dvar> GetDvar(const std::string name) override
 		{
-			auto iw3Dvar = Structures::FindDvar(name);
+			const auto iw3Dvar = Structures::FindDvar(name);
 
 			if (!iw3Dvar)
 				return std::nullopt;
