@@ -456,8 +456,77 @@ namespace IWXMVM::IW3::Structures
 		int language;
 	};
 
+	union DvarValue
+	{
+		bool enabled;
+		int integer;
+		unsigned int unsignedInt;
+		float value;
+		float vector[4];
+		const char* string;
+		char color[4];
+	};
+
+	/* 754 */
+	struct $BFBB53559BEAC4289F32B924847E59CB
+	{
+		int stringCount;
+		const char** strings;
+	};
+
+	/* 755 */
+	struct $9CA192F9DB66A3CB7E01DE78A0DEA53D
+	{
+		int min;
+		int max;
+	};
+
+	/* 756 */
+	struct $251C2428A496074035CACA7AAF3D55BD
+	{
+		float min;
+		float max;
+	};
+
+	/* 757 */
+	union DvarLimits
+	{
+		$BFBB53559BEAC4289F32B924847E59CB enumeration;
+		$9CA192F9DB66A3CB7E01DE78A0DEA53D integer;
+		$251C2428A496074035CACA7AAF3D55BD value;
+		$251C2428A496074035CACA7AAF3D55BD vector;
+	};
+
+	/* 758 */
+	struct dvar_s
+	{
+		const char* name;
+		const char* description;
+		unsigned __int16 flags;
+		char type;
+		bool modified;
+		DvarValue current;
+		DvarValue latched;
+		DvarValue reset;
+		DvarLimits domain;
+		bool(__cdecl* domainFunc)(dvar_s*, DvarValue);
+		dvar_s* hashNext;
+	};
+
+	struct __declspec(align(4)) WinMouseVars_t
+	{
+		int oldButtonState;
+		tagPOINT oldPos;
+		bool mouseActive;
+		bool mouseInitialized;
+	};
+
 
 	clientConnection_t* GetClientConnection();
 	clientActive_t* GetClientActive();
+	WinMouseVars_t* GetMouseVars();
+
+	dvar_s* FindDvar(const std::string name);
+
 	std::string GetFilePath(const std::string demoName);
 }

@@ -3,6 +3,20 @@
 
 namespace IWXMVM
 {
+	struct Dvar
+	{
+		std::string name;
+		union Value
+		{
+			float floating_point;
+			uint32_t uint32;
+			int32_t int32;
+			float vector[4];
+			const char* string;
+			uint8_t color[4];
+		}* value;
+	};
+
 	class GameInterface
 	{
 	public:
@@ -17,6 +31,11 @@ namespace IWXMVM
 			MainMenu,
 			InGame,
 			InDemo
+		};
+
+		enum class MouseMode
+		{
+			Capture, Passthrough
 		};
 
 		GameInterface(const Game game) : game(game) {}
@@ -42,6 +61,7 @@ namespace IWXMVM
 		virtual IDirect3DDevice9* GetD3D9Device() = 0;
 		virtual HWND GetWindowHandle() = 0;
 		virtual uintptr_t GetWndProc() = 0;
+		virtual void SetMouseMode(MouseMode mode) = 0;
 
 		virtual GameState GetGameState() = 0;
 
@@ -71,6 +91,8 @@ namespace IWXMVM
 
 		virtual DemoInfo GetDemoInfo() = 0;
 
+
+		virtual std::optional<Dvar> GetDvar(const std::string name) = 0;
 
 	private:
 		Game game;

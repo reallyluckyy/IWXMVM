@@ -10,6 +10,8 @@ namespace IWXMVM::UI
 	float playbackSpeed;
 	bool isPlaying;
 
+	std::optional<Dvar> timescale;
+
 	void ControlBar::Initialize()
 	{
 		playbackSpeed = 1.0f;
@@ -23,6 +25,12 @@ namespace IWXMVM::UI
 	{
 		if (Mod::GetGameInterface()->GetGameState() != GameInterface::GameState::InDemo)
 			return;
+
+		if (!timescale.has_value())
+		{
+			timescale = Mod::GetGameInterface()->GetDvar("timescale");
+			return;
+		}
 
 		const auto PADDING = 20;
 
@@ -48,7 +56,7 @@ namespace IWXMVM::UI
 
 		ImGui::SameLine(playbackSpeedSliderX);
 		ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
-		ImGui::SliderFloat("##", &playbackSpeed, 0.01f, 50.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+		ImGui::SliderFloat("##", (float*)timescale.value().value, 0.01f, 50.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
 
 		auto pauseButtonSize = ImVec2(panelSize.y / 3.6f, panelSize.y / 3.6f);
 

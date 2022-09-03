@@ -40,6 +40,11 @@ namespace IWXMVM::IW3
 			return (uintptr_t)0x57BB20;
 		}
 
+		void SetMouseMode(MouseMode mode) override
+		{
+			Structures::GetMouseVars()->mouseInitialized = mode == MouseMode::Capture ? 0 : 1;
+		}
+
 		GameState GetGameState() override
 		{
 			//if (!ingame)
@@ -62,6 +67,20 @@ namespace IWXMVM::IW3
 			demoInfo.endTick = DemoParser::demoEndTick - DemoParser::demoStartTick;
 
 			return demoInfo;
+		}
+
+		std::optional<Dvar> GetDvar(const std::string name) override
+		{
+			auto iw3Dvar = Structures::FindDvar(name);
+
+			if (!iw3Dvar)
+				return std::nullopt;
+
+			Dvar dvar;
+			dvar.name = iw3Dvar->name;
+			dvar.value = (Dvar::Value*)&iw3Dvar->current;
+
+			return dvar;
 		}
 	};
 }

@@ -29,7 +29,7 @@ namespace IWXMVM::UI::UIManager
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			for (auto component : uiComponents)
+			for (const auto component : uiComponents)
 			{
 				component->Render();
 			}
@@ -70,6 +70,7 @@ namespace IWXMVM::UI::UIManager
 			PostQuitMessage(0);
 			return 0;
 		}
+
 		return GameWndProc(hWnd, msg, wParam, lParam);
 	}
 
@@ -113,11 +114,14 @@ namespace IWXMVM::UI::UIManager
 
 			SetImGuiStyle();
 
+			Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Capture);
+
 			LOG_INFO("Initialized UI");
 		}
 		catch (...)
 		{
 			throw std::runtime_error("Failed to initialize UI");
+			// TODO: panic
 		}
 	}
 }
