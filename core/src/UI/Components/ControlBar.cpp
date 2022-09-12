@@ -3,6 +3,7 @@
 
 #include "Mod.hpp"
 #include "UI/UIImage.hpp"
+#include "CustomProgressBar.hpp"
 #include "Utilities/PathUtils.hpp"
 
 namespace IWXMVM::UI
@@ -47,7 +48,7 @@ namespace IWXMVM::UI
 
 		auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
 		ImGui::SameLine(panelSize.x / 4);
-		ImGui::ProgressBar((float)demoInfo.currentTick / (float)demoInfo.endTick, ImVec2(panelSize.x / 2, panelSize.y / 3.4f), std::format("{0}", demoInfo.currentTick).c_str());
+		ImGui::DemoProgressBar(&demoInfo.currentTick, demoInfo.endTick, ImVec2(panelSize.x / 2, panelSize.y / 3.4f), std::format("{0}", demoInfo.currentTick).c_str());
 
 		// Right side 
 
