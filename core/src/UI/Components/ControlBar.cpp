@@ -9,14 +9,12 @@
 namespace IWXMVM::UI
 {
 	float playbackSpeed;
-	bool isPlaying;
 
 	std::optional<Dvar> timescale;
 
 	void ControlBar::Initialize()
 	{
 		playbackSpeed = 1.0f;
-		isPlaying = true;
 	}
 
 	INCBIN_EXTERN(IMG_PLAY_BUTTON);
@@ -61,11 +59,12 @@ namespace IWXMVM::UI
 
 		auto pauseButtonSize = ImVec2(panelSize.y / 3.6f, panelSize.y / 3.6f);
 
-		auto image = UIImage::FromResource(isPlaying ? IMG_PAUSE_BUTTON_data : IMG_PLAY_BUTTON_data, isPlaying ? IMG_PAUSE_BUTTON_size : IMG_PLAY_BUTTON_size);
+		auto image = UIImage::FromResource(Mod::GetGameInterface()->IsDemoPlaybackPaused() ? IMG_PLAY_BUTTON_data : IMG_PAUSE_BUTTON_data,
+			Mod::GetGameInterface()->IsDemoPlaybackPaused() ? IMG_PLAY_BUTTON_size : IMG_PAUSE_BUTTON_size);
 		ImGui::SameLine(playbackSpeedSliderX - 10 - pauseButtonSize.x);
 		if (ImGui::ImageButton(image.GetTextureID(), pauseButtonSize, ImVec2(0, 0), ImVec2(1, 1), 1))
 		{
-			isPlaying = !isPlaying;
+			Mod::GetGameInterface()->SetDemoPlaybackState(!Mod::GetGameInterface()->IsDemoPlaybackPaused());
 		}
 
 		ImGui::End();

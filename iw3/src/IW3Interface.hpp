@@ -7,6 +7,8 @@
 #include "Events.hpp"
 #include "DemoParser.hpp"
 
+#include "Patches/DemoPlaybackPatch.hpp"
+
 namespace IWXMVM::IW3
 {
 	class IW3Interface : public GameInterface
@@ -68,6 +70,21 @@ namespace IWXMVM::IW3
 
 			return demoInfo;
 		}
+
+
+		void SetDemoPlaybackState(bool paused) override
+		{
+			if (paused)
+				DemoPlaybackPatch::Install();
+			else
+				DemoPlaybackPatch::Uninstall();
+		}
+
+		bool IsDemoPlaybackPaused() override
+		{
+			return DemoPlaybackPatch::IsInstalled();
+		}
+
 
 		std::optional<Dvar> GetDvar(const std::string name) override
 		{

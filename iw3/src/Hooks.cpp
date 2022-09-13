@@ -8,7 +8,7 @@
 namespace IWXMVM::IW3::Hooks
 {
 
-	// TODO: Perhaps separate hooks instead of having all of them in here
+	// TODO: Turn this into a "EventCallbacks" "patch"
 
 	typedef void(*RB_EndFrame_t)();
 	RB_EndFrame_t RB_EndFrame;
