@@ -72,10 +72,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>cl third-party/incbin/incbin.c  /Fo:third-party/incbin/ /link /out:third-party/incbin/incbin.exe</Command>
+      <Command>cl third-party/incbin/incbin.c  /Fo:third-party/incbin/ /link /out:third-party/incbin/incbin.exe
+"third-party/incbin/incbin.exe" src/Resources.cpp -o src/ResourceData.cpp -Ssnakecase -p""</Command>
     </PreBuildEvent>
     <PreLinkEvent>
-      <Command>"third-party/incbin/incbin.exe" src/Resources.cpp -o src/ResourceData.cpp -Ssnakecase -p""</Command>
+      <Command>
+      </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -99,10 +101,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>cl third-party/incbin/incbin.c  /Fo:third-party/incbin/ /link /out:third-party/incbin/incbin.exe</Command>
+      <Command>cl third-party/incbin/incbin.c  /Fo:third-party/incbin/ /link /out:third-party/incbin/incbin.exe
+"third-party/incbin/incbin.exe" src/Resources.cpp -o src/ResourceData.cpp -Ssnakecase -p""</Command>
     </PreBuildEvent>
     <PreLinkEvent>
-      <Command>"third-party/incbin/incbin.exe" src/Resources.cpp -o src/ResourceData.cpp -Ssnakecase -p""</Command>
+      <Command>
+      </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
