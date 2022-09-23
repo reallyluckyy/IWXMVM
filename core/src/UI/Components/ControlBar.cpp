@@ -64,7 +64,7 @@ namespace IWXMVM::UI
 		ImGui::SameLine(playbackSpeedSliderX - 10 - pauseButtonSize.x);
 		if (ImGui::ImageButton(image.GetTextureID(), pauseButtonSize, ImVec2(0, 0), ImVec2(1, 1), 1))
 		{
-			Mod::GetGameInterface()->SetDemoPlaybackState();
+			Mod::GetGameInterface()->ToggleDemoPlaybackState();
 		}
 
 		ImGui::End();

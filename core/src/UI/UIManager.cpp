@@ -56,7 +56,8 @@ namespace IWXMVM::UI::UIManager
 	WNDPROC GameWndProc = nullptr;
 	HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam)) {
+		if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam)) 
+		{
 			return true;
 		}
 

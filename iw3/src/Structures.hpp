@@ -3,6 +3,16 @@
 namespace IWXMVM::IW3::Structures
 {
 
+	struct cmd_function_t
+	{
+		cmd_function_t* next;
+		char* name;
+		char* autocomplete1;
+		char* autocomplete2;
+		void* function;
+	};
+
+
 	enum netadrtype_t
 	{
 		NA_BOT = 0x0,

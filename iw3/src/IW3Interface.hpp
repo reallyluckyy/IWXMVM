@@ -75,16 +75,17 @@ namespace IWXMVM::IW3
 			return demoInfo;
 		}
 
-		bool pausePlayBack = false;
 
-		void SetDemoPlaybackState() override
+		bool isPlaybackPaused = false;
+
+		void ToggleDemoPlaybackState() override
 		{
-			playBackPatch = !playBackPatch;
+			isPlaybackPaused = !isPlaybackPaused;
 		}
 
 		bool IsDemoPlaybackPaused() override
 		{
-			return DemoPlaybackPatch::IsInstalled();
+			return isPlaybackPaused;
 		}
 
 
