@@ -19,7 +19,7 @@ namespace IWXMVM::IW3
 
 		void InstallHooks() override
 		{
-			Hooks::Install();
+			Hooks::Install(GetD3D9Device());
 		}
 
 		void SetupEventListeners() override
@@ -64,20 +64,22 @@ namespace IWXMVM::IW3
 		{
 			DemoInfo demoInfo;
 			demoInfo.name = Structures::GetClientConnection()->demoName;
-			demoInfo.path = Structures::GetFilePath(demoInfo.name + ".dm_1");
+
+			std::string str = static_cast<std::string>(demoInfo.name);
+			str += (str.ends_with(".dm_1")) ? "" : ".dm_1";
+			demoInfo.path = Structures::GetFilePath(std::move(str));
+
 			demoInfo.currentTick = Structures::GetClientActive()->serverTime - DemoParser::demoStartTick;
 			demoInfo.endTick = DemoParser::demoEndTick - DemoParser::demoStartTick;
 
 			return demoInfo;
 		}
 
+		bool pausePlayBack = false;
 
-		void SetDemoPlaybackState(bool paused) override
+		void SetDemoPlaybackState() override
 		{
-			if (paused)
-				DemoPlaybackPatch::Install();
-			else
-				DemoPlaybackPatch::Uninstall();
+			playBackPatch = !playBackPatch;
 		}
 
 		bool IsDemoPlaybackPaused() override

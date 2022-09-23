@@ -80,6 +80,7 @@ namespace IWXMVM
 			}
 		}
 
+		bool playBackPatch = false;
 
 		struct DemoInfo
 		{
@@ -93,7 +94,7 @@ namespace IWXMVM
 		virtual DemoInfo GetDemoInfo() = 0;
 
 
-		virtual void SetDemoPlaybackState(bool paused) = 0;
+		virtual void SetDemoPlaybackState() = 0;
 		virtual bool IsDemoPlaybackPaused() = 0;
 
 		virtual std::optional<Dvar> GetDvar(const std::string name) = 0;

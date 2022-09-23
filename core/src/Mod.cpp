@@ -26,7 +26,7 @@ namespace IWXMVM
 			LOG_INFO("Game: {}", gameInterface->GetGameName());
 			LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
 
-			MemoryUtils::UnprotectModule();
+			//MemoryUtils::UnprotectModule();
 
 			LOG_DEBUG("Installing game hooks...");
 			gameInterface->InstallHooks();

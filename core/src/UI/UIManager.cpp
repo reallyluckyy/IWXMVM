@@ -36,7 +36,7 @@ namespace IWXMVM::UI::UIManager
 
 			//ImGui::ShowDemoWindow(&show_demo_window);
 
-
+			//ImGui::EndFrame();
 			ImGui::Render();
 			ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 		}
@@ -53,25 +53,14 @@ namespace IWXMVM::UI::UIManager
 		}
 	}
 
-	typedef LRESULT(WINAPI * WndProc_t)(HWND, UINT, WPARAM, LPARAM);
-	WndProc_t GameWndProc = nullptr;
-	LRESULT WINAPI ImGuiWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	WNDPROC GameWndProc = nullptr;
+	HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam)) {
 			return true;
-
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.WantCaptureMouse || io.WantCaptureKeyboard)
-			return true;
-
-		switch (msg)
-		{
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			return 0;
 		}
 
-		return GameWndProc(hWnd, msg, wParam, lParam);
+		return CallWindowProc(GameWndProc, hWnd, uMsg, wParam, lParam);
 	}
 
 	void SetImGuiStyle()
@@ -108,7 +97,7 @@ namespace IWXMVM::UI::UIManager
 
 			// TODO: byte size is game dependent
 			LOG_DEBUG("Hooking WndProc at {0:x}", Mod::GetGameInterface()->GetWndProc());
-			GameWndProc = HookManager::CreateHook<WndProc_t>(Mod::GetGameInterface()->GetWndProc(), ImGuiWndProc, 6);
+			GameWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)ImGuiWndProc);
 
 			LOG_DEBUG("Initializing {0} UI components", uiComponents.size());
 
