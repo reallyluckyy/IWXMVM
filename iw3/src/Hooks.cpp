@@ -138,11 +138,9 @@ namespace IWXMVM::IW3::Hooks
 			mov msec_tmp, ebx
 		}
 
-
-		SV_Frame_Internal(msec);
-
 		if (msec == msec_tmp) // only true for CoD4X
 		{
+			SV_Frame_Internal(msec);
 			__asm
 			{
 				popad
@@ -152,6 +150,7 @@ namespace IWXMVM::IW3::Hooks
 		}
 		else
 		{
+			SV_Frame_Internal(msec);
 			__asm
 			{
 				popad
