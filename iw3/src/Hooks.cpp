@@ -128,22 +128,36 @@ namespace IWXMVM::IW3::Hooks
 	void __declspec(naked) SV_Frame_Hook()
 	{
 		static int msec;
+		static int msec_tmp;
 
 		__asm
 		{
 			pop ecx
 			pushad
 			mov msec, eax
+			mov msec_tmp, ebx
 		}
+
 
 		SV_Frame_Internal(msec);
 
-		__asm
+		if (msec == msec_tmp) // only true for CoD4X
 		{
-			popad
-			mov eax, msec
-			mov ebx, msec
-			ret
+			__asm
+			{
+				popad
+				mov ebx, msec
+				ret
+			}
+		}
+		else
+		{
+			__asm
+			{
+				popad
+				mov eax, msec
+				ret
+			}
 		}
 	}
 
