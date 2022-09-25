@@ -33,24 +33,10 @@ namespace IWXMVM::IW3::Hooks
 		return hr;
 	}
 
-	int realtime = 0;
-
-	// run every frame
+	/*
 	void CL_CGameRendering_Internal()
-	{
-		if (Mod::GetGameInterface()->IsDemoPlaybackPaused()) 
-		{
-			if (realtime == 0) 
-			{
-				realtime = *(int*)0x956E98; // cls->realtime
-			}
-
-			*(int*)0x956E98 = realtime;
-		}
-		else 
-		{
-			realtime = 0;
-		}
+	{	
+		// run every frame
 	}
 
 	typedef void(*CL_CGameRendering_t)();
@@ -67,6 +53,7 @@ namespace IWXMVM::IW3::Hooks
 			jmp CL_CGameRendering
 		}
 	}
+	*/
 
 	void CL_PlayDemo_Internal(uintptr_t** address, char* cmd)
 	{
@@ -115,14 +102,70 @@ namespace IWXMVM::IW3::Hooks
 		}
 	}
 
+	void SV_Frame_Internal(int& msec)
+	{
+		static double counter = 0;
+
+		if (Mod::GetGameInterface()->IsDemoPlaybackPaused())
+		{
+			msec = 0;
+			return;
+		}
+
+		std::optional<Dvar> timescale = Mod::GetGameInterface()->GetDvar("timescale");
+
+		counter += static_cast<double>(msec * timescale.value().value->floating_point);
+		if (counter >= msec)
+		{
+			counter = 0;
+		} 
+		else 
+		{
+			msec = 0;
+		}
+	}
+
+	void __declspec(naked) SV_Frame_Hook()
+	{
+		static int msec;
+
+		__asm
+		{
+			pop ecx
+			pushad
+			mov msec, eax
+		}
+
+		SV_Frame_Internal(msec);
+
+		__asm
+		{
+			popad
+			mov eax, msec
+			mov ebx, msec
+			ret
+		}
+	}
+
 	void Install(IDirect3DDevice9* device)
 	{
 		void** vTable = *reinterpret_cast<void***>(device);
 
-		EndScene = (EndScene_t)HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)&D3D_EndScene_Hook, 7, true);
-		Reset = (Reset_t)HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)&D3D_Reset_Hook, 5, true);
+		std::size_t resetBytes = 5;
+		std::size_t endSceneBytes = 7;
+
+		if (*(uint8_t*)vTable[16] != 0x8B || *(uint8_t*)vTable[42] != 0x6A) {
+			resetBytes = 6;
+			endSceneBytes = 11;
+
+			LOG_WARN("Different byte structure detected when installing D3D hooks");
+		}
+
+		Reset = (Reset_t)HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)&D3D_Reset_Hook, resetBytes, true);
+		EndScene = (EndScene_t)HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)&D3D_EndScene_Hook, endSceneBytes, true);
 
 		Cmd_ModifyServerCommand("demo", CL_PlayDemo_Hook);
-		CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
+		HookManager::CreateHook(0x53366E, (std::uintptr_t)&SV_Frame_Hook, 5, false);
+		//CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
 	}
 }

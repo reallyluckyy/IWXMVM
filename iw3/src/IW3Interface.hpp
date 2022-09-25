@@ -7,7 +7,7 @@
 #include "Events.hpp"
 #include "DemoParser.hpp"
 
-#include "Patches/DemoPlaybackPatch.hpp"
+//#include "Patches/DemoPlaybackPatch.hpp"
 
 namespace IWXMVM::IW3
 {

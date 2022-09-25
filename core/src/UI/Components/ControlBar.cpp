@@ -55,7 +55,7 @@ namespace IWXMVM::UI
 
 		ImGui::SameLine(playbackSpeedSliderX);
 		ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
-		ImGui::SliderFloat("##", (float*)timescale.value().value, 0.01f, 50.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+		ImGui::SliderFloat("##", (float*)timescale.value().value, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
 
 		auto pauseButtonSize = ImVec2(panelSize.y / 3.6f, panelSize.y / 3.6f);
 
