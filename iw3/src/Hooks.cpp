@@ -102,9 +102,39 @@ namespace IWXMVM::IW3::Hooks
 		}
 	}
 
+	auto patternGen = [](std::size_t length) 
+	{
+		std::vector<char> arr(1000);
+
+		const std::size_t onescnt = (1000.0 / (length / 1000.0) < 1) ? 1 : (1000.0 / (length / 1000.0) > 1000) ? 1000 : 1000.0 / (length / 1000.0);
+		const std::size_t len = arr.size();
+		const std::size_t zeroscnt = len - onescnt;
+		std::size_t ones = 1;
+		std::size_t zeros = 1;
+
+		for (size_t i = 0; i < len; ++i) 
+		{
+			if (ones * zeroscnt < zeros * onescnt) 
+			{
+				++ones;
+				arr[i] = 1;
+			} 
+			else 
+			{
+				++zeros;
+				arr[i] = 0;
+			}
+		}
+
+		return arr;
+	};
+
 	void SV_Frame_Internal(int& msec)
 	{
-		static double counter = 0;
+		static int stateChange = 0;
+		static int lastTime = 0;
+		static int callIndex = 0;
+		static std::vector<char> pattern;
 
 		if (Mod::GetGameInterface()->IsDemoPlaybackPaused())
 		{
@@ -113,15 +143,40 @@ namespace IWXMVM::IW3::Hooks
 		}
 
 		std::optional<Dvar> timescale = Mod::GetGameInterface()->GetDvar("timescale");
+		int frameTimeIndex = *(int*)0x7437A0;
 
-		counter += static_cast<double>(msec * timescale.value().value->floating_point);
-		if (counter >= msec)
+		if (timescale.value().value->floating_point >= 1.0f || msec > 1 || frameTimeIndex < 32)
 		{
-			counter = 0;
+			return;
+		}
+
+		std::optional<Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
+		
+		if (stateChange != (*reinterpret_cast<int*>(&com_maxfps.value().value->int32) | *reinterpret_cast<int*>(&timescale.value().value->floating_point)))
+		{
+			if (*(int*)0x1476EFC - 1000 >= lastTime) 
+			{
+				stateChange = (*reinterpret_cast<int*>(&com_maxfps.value().value->int32) | *reinterpret_cast<int*>(&timescale.value().value->floating_point));
+			}
+			else 
+			{
+				msec = 0;
+				return;
+			}
+		}
+
+		if (*(int*)0x1476EFC - 1000 >= lastTime)
+		{
+			double averageFrameTime = std::accumulate((int*)0x743720, (int*)(0x743720 + 128), 0) / 32.0;
+			double totalCalls = (1000 / averageFrameTime) / timescale.value().value->floating_point;
+
+			lastTime = *(int*)0x1476EFC;
+			pattern = patternGen(totalCalls);
 		} 
-		else 
+			
+		if (pattern.size() == 1000) 
 		{
-			msec = 0;
+			msec = pattern[callIndex++ % 1000];
 		}
 	}
 
