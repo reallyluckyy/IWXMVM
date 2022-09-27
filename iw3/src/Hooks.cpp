@@ -102,7 +102,7 @@ namespace IWXMVM::IW3::Hooks
 		}
 	}
 
-	auto patternGen = [](std::size_t length) 
+	auto GeneratePattern = [](std::size_t length) 
 	{
 		std::vector<char> arr(1000);
 
@@ -131,7 +131,7 @@ namespace IWXMVM::IW3::Hooks
 
 	void SV_Frame_Internal(int& msec)
 	{
-		static int stateChange = 0;
+		static int lastState = 0;
 		static int lastTime = 0;
 		static int callIndex = 0;
 		static std::vector<char> pattern;
@@ -151,27 +151,28 @@ namespace IWXMVM::IW3::Hooks
 		}
 
 		std::optional<Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
-		
-		if (stateChange != (*reinterpret_cast<int*>(&com_maxfps.value().value->int32) | *reinterpret_cast<int*>(&timescale.value().value->floating_point)))
-		{
-			if (*(int*)0x1476EFC - 1000 >= lastTime) 
-			{
-				stateChange = (*reinterpret_cast<int*>(&com_maxfps.value().value->int32) | *reinterpret_cast<int*>(&timescale.value().value->floating_point));
-			}
-			else 
-			{
-				msec = 0;
-				return;
-			}
-		}
 
-		if (*(int*)0x1476EFC - 1000 >= lastTime)
+		if (lastState != (com_maxfps.value().value->int32 | timescale.value().value->int32))
+		{
+			if (com_maxfps.value().value->int32 != 0 && com_maxfps.value().value->int32 <= 32)
+			{
+				lastTime = *(int*)0x1476EFC + (32 / com_maxfps.value().value->int32) * 1000;
+			} 
+			else
+			{
+				lastTime = *(int*)0x1476EFC + 100;
+			}
+			
+			lastState = com_maxfps.value().value->int32 | timescale.value().value->int32;
+			pattern = GeneratePattern(com_maxfps.value().value->int32 / timescale.value().value->floating_point);
+		}
+		else if (*(int*)0x1476EFC - 1000 >= lastTime )
 		{
 			double averageFrameTime = std::accumulate((int*)0x743720, (int*)(0x743720 + 128), 0) / 32.0;
 			double totalCalls = (1000 / averageFrameTime) / timescale.value().value->floating_point;
 
 			lastTime = *(int*)0x1476EFC;
-			pattern = patternGen(totalCalls);
+			pattern = GeneratePattern(totalCalls);
 		} 
 			
 		if (pattern.size() == 1000) 
