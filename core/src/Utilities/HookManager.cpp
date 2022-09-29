@@ -61,6 +61,8 @@ namespace IWXMVM::HookManager
 
 			if (*reinterpret_cast<uint8_t*>(from) == 0xE8 || *reinterpret_cast<uint8_t*>(from) == 0xE9) 
 			{
+				// does this work correctly?
+
 				void* gatewayTemp = static_cast<std::uintptr_t*>(gateway) + 1;
 				std::uintptr_t relativeAddress = *reinterpret_cast<std::uintptr_t*>(from + 1) + from + 5;
 				relativeAddress -= (reinterpret_cast<std::uintptr_t>(gatewayTemp) - 1 + 5);
