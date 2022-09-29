@@ -15,7 +15,7 @@ namespace IWXMVM::UI::UIManager
 	std::vector<UIComponent*> uiComponents
 	{
 		new DebugPanel(),
-		//new MenuBar(),
+		new MenuBar(),
 		new ControlBar(),
 	};
 
