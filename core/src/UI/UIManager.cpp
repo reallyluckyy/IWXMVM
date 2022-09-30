@@ -29,6 +29,7 @@ namespace IWXMVM::UI::UIManager
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
+			// TODO: move this to a proper input handling place
 			if (GetAsyncKeyState(0x30) == SHRT_MIN && GetAsyncKeyState(VK_CONTROL) == SHRT_MIN)
 			{
 				Sleep(100);

@@ -58,7 +58,7 @@ namespace IWXMVM::IW3::Hooks
 	void* ptrCL_PlayDemo_f = nullptr;
 	void* ptrCL_ReplayDemo_f = nullptr;
 
-	Structures::cmd_function_t** cmd_functions = ((Structures::cmd_function_t**)(0x1410B3C));
+	Structures::cmd_function_t** cmd_functions = (Structures::cmd_function_t**)0x1410B3C;
 	Structures::cmd_function_t** sv_cmd_functions = (Structures::cmd_function_t**)0x14099DC;
 
 	void Cmd_ModifyServerCommand(const char* cmd_name, void* function, void*& oldFunction)
@@ -78,12 +78,15 @@ namespace IWXMVM::IW3::Hooks
 		}
 	}
 
-	void Cmd_ModifyCommand(const char* cmd_name, void* function, void*& storage)
+	void Cmd_ModifyCommand(const char* cmd_name, void* function, void*& oldFunction)
 	{
-		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next) {
-			if (!strcmp(cmd_name, cmd->name) && function != nullptr) {
-				if (function != nullptr) {
-					storage = (void*)cmd->function;
+		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next)
+		{
+			if (!strcmp(cmd_name, cmd->name) && function != nullptr)
+			{
+				if (function != nullptr)
+				{
+					oldFunction = (void*)cmd->function;
 					cmd->function = function;
 
 					return;
@@ -92,7 +95,7 @@ namespace IWXMVM::IW3::Hooks
 		}
 	}
 
-	// doesn't support fullpath demos [/demo "C:\Path\demo.dm_1" fullpath] yet!
+	// TODO: doesn't support fullpath demos [/demo "C:\Path\demo.dm_1" fullpath] yet!
 	void CL_PlayDemo_Hook()
 	{
 		for (auto cmd = *sv_cmd_functions; cmd; cmd = cmd->next)
@@ -107,7 +110,7 @@ namespace IWXMVM::IW3::Hooks
 		}
 	}
 
-	// replayDemo is not supported yet because the old demo path needs to be stored!
+	// TODO: replayDemo is not supported yet because the old demo path needs to be stored!
 	void CL_ReplayDemo_Hook()
 	{
 		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next) 
@@ -122,7 +125,7 @@ namespace IWXMVM::IW3::Hooks
 		}
 	}
 
-	auto GeneratePattern = [](std::size_t length) 
+	auto GeneratePattern = [](const std::size_t length) 
 	{
 		std::vector<char> arr(1000);
 
@@ -162,15 +165,15 @@ namespace IWXMVM::IW3::Hooks
 			return;
 		}
 
-		std::optional<Dvar> timescale = Mod::GetGameInterface()->GetDvar("timescale");
-		int frameTimeIndex = *(int*)0x7437A0;
+		const std::optional<Dvar> timescale = Mod::GetGameInterface()->GetDvar("timescale");
+		const int frameTimeIndex = *(int*)0x7437A0;
 
 		if (timescale.value().value->floating_point >= 1.0f || msec > 1 || frameTimeIndex < 32)
 		{
 			return;
 		}
 
-		std::optional<Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
+		const std::optional<Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
 
 		if (lastState != (com_maxfps.value().value->int32 | timescale.value().value->int32))
 		{
@@ -188,8 +191,8 @@ namespace IWXMVM::IW3::Hooks
 		}
 		else if (*(int*)0x1476EFC - 1000 >= lastTime )
 		{
-			double averageFrameTime = std::accumulate((int*)0x743720, (int*)(0x743720 + 128), 0) / 32.0;
-			double totalCalls = (1000 / averageFrameTime) / timescale.value().value->floating_point;
+			const double averageFrameTime = std::accumulate((int*)0x743720, (int*)(0x743720 + 128), 0) / 32.0;
+			const double totalCalls = (1000 / averageFrameTime) / timescale.value().value->floating_point;
 
 			lastTime = *(int*)0x1476EFC;
 			pattern = GeneratePattern(totalCalls);
@@ -243,7 +246,8 @@ namespace IWXMVM::IW3::Hooks
 		std::size_t resetBytes = 5;
 		std::size_t endSceneBytes = 7;
 
-		if (*(uint8_t*)vTable[16] != 0x8B || *(uint8_t*)vTable[42] != 0x6A) {
+		if (*(uint8_t*)vTable[16] != 0x8B || *(uint8_t*)vTable[42] != 0x6A)
+		{
 			resetBytes = 6;
 			endSceneBytes = 11;
 
