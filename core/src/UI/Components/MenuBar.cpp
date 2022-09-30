@@ -28,6 +28,7 @@ namespace IWXMVM::UI
                 if (ImGui::MenuItem("Credits", "")) {}
                 ImGui::Separator();
                 if (ImGui::MenuItem("Open Debug Panel", "CTRL+D")) {}
+                if (ImGui::MenuItem("Hide overlay", "CTRL-0")) {}
                 ImGui::EndMenu();
             }
 

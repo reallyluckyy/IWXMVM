@@ -33,24 +33,10 @@ namespace IWXMVM::IW3::Hooks
 		return hr;
 	}
 
-	int realtime = 0;
-
-	// run every frame
+	/*
 	void CL_CGameRendering_Internal()
-	{
-		if (Mod::GetGameInterface()->IsDemoPlaybackPaused()) 
-		{
-			if (realtime == 0) 
-			{
-				realtime = *(int*)0x956E98; // cls->realtime
-			}
-
-			*(int*)0x956E98 = realtime;
-		}
-		else 
-		{
-			realtime = 0;
-		}
+	{	
+		// run every frame
 	}
 
 	typedef void(*CL_CGameRendering_t)();
@@ -67,50 +53,185 @@ namespace IWXMVM::IW3::Hooks
 			jmp CL_CGameRendering
 		}
 	}
+	*/
 
-	void CL_PlayDemo_Internal(uintptr_t** address, char* cmd)
-	{
-		if (address != 0) 
-		{
-			reinterpret_cast<uintptr_t(*)()>(*address)();
+	void* ptrCL_PlayDemo_f = nullptr;
+	void* ptrCL_ReplayDemo_f = nullptr;
 
-			if (!strcmp(cmd, "demo")) 
-			{
-				Events::Invoke(EventType::OnDemoLoad);
-			}
-		}
-	}
-
-	uintptr_t* ptrCL_PlayDemo_f = nullptr;
+	Structures::cmd_function_t** cmd_functions = ((Structures::cmd_function_t**)(0x1410B3C));
 	Structures::cmd_function_t** sv_cmd_functions = (Structures::cmd_function_t**)0x14099DC;
 
-	void Cmd_ModifyServerCommand(const char* cmd_name, void* function)
+	void Cmd_ModifyServerCommand(const char* cmd_name, void* function, void*& oldFunction)
 	{
-		for (auto cmd = *sv_cmd_functions; cmd; cmd = cmd->next) 
+		for (auto cmd = *sv_cmd_functions; cmd; cmd = cmd->next)
 		{
 			if (!strcmp(cmd_name, cmd->name) && function != nullptr) 
 			{
 				if (function != nullptr) 
 				{
-					ptrCL_PlayDemo_f = (uintptr_t*)cmd->function;
+					oldFunction = (void*)cmd->function;
 					cmd->function = function;
 
-					break;
+					return;
 				}
 			}
 		}
 	}
 
+	void Cmd_ModifyCommand(const char* cmd_name, void* function, void*& storage)
+	{
+		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next) {
+			if (!strcmp(cmd_name, cmd->name) && function != nullptr) {
+				if (function != nullptr) {
+					storage = (void*)cmd->function;
+					cmd->function = function;
+
+					return;
+				}
+			}
+		}
+	}
+
+	// doesn't support fullpath demos [/demo "C:\Path\demo.dm_1" fullpath] yet!
 	void CL_PlayDemo_Hook()
 	{
-		for (auto cmd = *sv_cmd_functions; cmd; cmd = cmd->next) 
+		for (auto cmd = *sv_cmd_functions; cmd; cmd = cmd->next)
 		{
 			if (!strcmp(cmd->name, "demo") && ptrCL_PlayDemo_f != nullptr) 
 			{
 				reinterpret_cast<uintptr_t(*)()>(ptrCL_PlayDemo_f)();
 
 				Events::Invoke(EventType::OnDemoLoad);
-				break;
+				return;
+			} 
+		}
+	}
+
+	// replayDemo is not supported yet because the old demo path needs to be stored!
+	void CL_ReplayDemo_Hook()
+	{
+		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next) 
+		{
+			if (!strcmp(cmd->name, "replayDemo") && ptrCL_ReplayDemo_f != nullptr) 
+			{
+				//reinterpret_cast<uintptr_t(*)()>(ptrCL_ReplayDemo_f)();
+
+				//Events::Invoke(EventType::OnDemoLoad); 
+				return;
+			}
+		}
+	}
+
+	auto GeneratePattern = [](std::size_t length) 
+	{
+		std::vector<char> arr(1000);
+
+		const std::size_t onescnt = (1000.0 / (length / 1000.0) < 1) ? 1 : (1000.0 / (length / 1000.0) > 1000) ? 1000 : 1000.0 / (length / 1000.0);
+		const std::size_t len = arr.size();
+		const std::size_t zeroscnt = len - onescnt;
+		std::size_t ones = 1;
+		std::size_t zeros = 1;
+
+		for (size_t i = 0; i < len; ++i) 
+		{
+			if (ones * zeroscnt < zeros * onescnt) 
+			{
+				++ones;
+				arr[i] = 1;
+			} 
+			else 
+			{
+				++zeros;
+				arr[i] = 0;
+			}
+		}
+
+		return arr;
+	};
+
+	void SV_Frame_Internal(int& msec)
+	{
+		static int lastState = 0;
+		static int lastTime = 0;
+		static int callIndex = 0;
+		static std::vector<char> pattern;
+
+		if (Mod::GetGameInterface()->IsDemoPlaybackPaused())
+		{
+			msec = 0;
+			return;
+		}
+
+		std::optional<Dvar> timescale = Mod::GetGameInterface()->GetDvar("timescale");
+		int frameTimeIndex = *(int*)0x7437A0;
+
+		if (timescale.value().value->floating_point >= 1.0f || msec > 1 || frameTimeIndex < 32)
+		{
+			return;
+		}
+
+		std::optional<Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
+
+		if (lastState != (com_maxfps.value().value->int32 | timescale.value().value->int32))
+		{
+			if (com_maxfps.value().value->int32 != 0 && com_maxfps.value().value->int32 <= 32)
+			{
+				lastTime = *(int*)0x1476EFC + (32 / com_maxfps.value().value->int32) * 1000;
+			} 
+			else
+			{
+				lastTime = *(int*)0x1476EFC + 100;
+			}
+			
+			lastState = com_maxfps.value().value->int32 | timescale.value().value->int32;
+			pattern = GeneratePattern(com_maxfps.value().value->int32 / timescale.value().value->floating_point);
+		}
+		else if (*(int*)0x1476EFC - 1000 >= lastTime )
+		{
+			double averageFrameTime = std::accumulate((int*)0x743720, (int*)(0x743720 + 128), 0) / 32.0;
+			double totalCalls = (1000 / averageFrameTime) / timescale.value().value->floating_point;
+
+			lastTime = *(int*)0x1476EFC;
+			pattern = GeneratePattern(totalCalls);
+		} 
+			
+		if (pattern.size() == 1000) 
+		{
+			msec = pattern[callIndex++ % 1000];
+		}
+	}
+
+	void __declspec(naked) SV_Frame_Hook()
+	{
+		static int msec;
+		static int msec_tmp;
+
+		__asm
+		{
+			pop ecx
+			pushad
+			mov msec, eax
+			mov msec_tmp, ebx
+		}
+
+		if (msec == msec_tmp) // only true for CoD4X
+		{
+			SV_Frame_Internal(msec);
+			__asm
+			{
+				popad
+				mov ebx, msec
+				ret
+			}
+		}
+		else
+		{
+			SV_Frame_Internal(msec);
+			__asm
+			{
+				popad
+				mov eax, msec
+				ret
 			}
 		}
 	}
@@ -119,10 +240,22 @@ namespace IWXMVM::IW3::Hooks
 	{
 		void** vTable = *reinterpret_cast<void***>(device);
 
-		EndScene = (EndScene_t)HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)&D3D_EndScene_Hook, 7, true);
-		Reset = (Reset_t)HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)&D3D_Reset_Hook, 5, true);
+		std::size_t resetBytes = 5;
+		std::size_t endSceneBytes = 7;
 
-		Cmd_ModifyServerCommand("demo", CL_PlayDemo_Hook);
-		CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
+		if (*(uint8_t*)vTable[16] != 0x8B || *(uint8_t*)vTable[42] != 0x6A) {
+			resetBytes = 6;
+			endSceneBytes = 11;
+
+			LOG_WARN("Different byte structure detected when installing D3D hooks");
+		}
+
+		Reset = (Reset_t)HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)&D3D_Reset_Hook, resetBytes, true);
+		EndScene = (EndScene_t)HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)&D3D_EndScene_Hook, endSceneBytes, true);
+
+		Cmd_ModifyServerCommand("demo", CL_PlayDemo_Hook, ptrCL_PlayDemo_f);
+		Cmd_ModifyCommand("replayDemo", CL_ReplayDemo_Hook, ptrCL_ReplayDemo_f);
+		HookManager::CreateHook(0x53366E, (std::uintptr_t)&SV_Frame_Hook, 5, false);
+		//CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
 	}
 }

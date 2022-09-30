@@ -20,6 +20,7 @@ namespace IWXMVM::UI::UIManager
 	};
 
 	bool show_demo_window = true;
+	bool hideOverlay = false;
 
 	void RunImGuiFrame()
 	{
@@ -29,9 +30,18 @@ namespace IWXMVM::UI::UIManager
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			for (const auto component : uiComponents)
+			if (GetAsyncKeyState(0x30) == SHRT_MIN && GetAsyncKeyState(VK_CONTROL) == SHRT_MIN)
 			{
-				component->Render();
+				Sleep(100);
+				hideOverlay = !hideOverlay;
+			}
+
+			if (!hideOverlay) 
+			{ 
+				for (const auto component : uiComponents)
+				{
+					component->Render();
+				}
 			}
 
 			//ImGui::ShowDemoWindow(&show_demo_window);
