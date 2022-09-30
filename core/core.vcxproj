@@ -117,7 +117,7 @@
     </ClCompile>
     <ClCompile Include="src\Resources.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
-    <ClCompile Include="src\UI\Components\CustomProgressBar.cpp" />
+    <ClCompile Include="src\UI\Components\CustomImGuiControls.cpp" />
     <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
     <ClCompile Include="src\Events.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -137,7 +137,7 @@
   <ItemGroup>
     <ClInclude Include="src\Resources.hpp" />
     <ClInclude Include="src\UI\Components\ControlBar.hpp" />
-    <ClInclude Include="src\UI\Components\CustomProgressBar.hpp" />
+    <ClInclude Include="src\UI\Components\CustomImGuiControls.hpp" />
     <ClInclude Include="src\UI\Components\DebugPanel.hpp" />
     <ClInclude Include="src\UI\Components\MenuBar.hpp" />
     <ClInclude Include="src\UI\UIComponent.hpp" />

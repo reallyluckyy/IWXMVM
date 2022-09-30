@@ -3,7 +3,7 @@
 
 #include "Mod.hpp"
 #include "UI/UIImage.hpp"
-#include "CustomProgressBar.hpp"
+#include "CustomImGuiControls.hpp"
 #include "Utilities/PathUtils.hpp"
 
 namespace IWXMVM::UI
@@ -55,7 +55,7 @@ namespace IWXMVM::UI
 
 		ImGui::SameLine(playbackSpeedSliderX);
 		ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
-		ImGui::SliderFloatSteps("##", &timescale.value().value->floating_point, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
+		ImGui::TimescaleSlider("##", &timescale.value().value->floating_point, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
 		auto pauseButtonSize = ImVec2(panelSize.y / 3.6f, panelSize.y / 3.6f);
 

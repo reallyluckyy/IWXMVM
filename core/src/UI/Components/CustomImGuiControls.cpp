@@ -1,5 +1,5 @@
 #include "StdInclude.hpp"
-#include "CustomProgressBar.hpp"
+#include "CustomImGuiControls.hpp"
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -79,7 +79,9 @@ namespace ImGui
         return value_changed;
     }
 
-    bool ImGui::SliderScalarSteps(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags flags)
+    constexpr std::array timescaleSteps{ 0.001, 0.002, 0.005, 0.01, 0.02, 0.025, 0.05, 0.075, 0.1, 0.125, 0.2, 0.25, 0.333, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 500.0, 1000.0 };
+
+    bool TimescaleSliderInternal(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags flags)
     {
         ImGuiWindow* window = GetCurrentWindow();
         if (window->SkipItems)
@@ -136,13 +138,12 @@ namespace ImGui
         if (value_changed) {
             MarkItemEdited(id);
 
-            static constexpr std::array timescales{ 0.001, 0.002, 0.005, 0.01, 0.02, 0.025, 0.05, 0.075, 0.1, 0.125, 0.2, 0.25, 0.333, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 500.0, 1000.0 };
             static constexpr double rounding = 0.00000001;
             float* ptr = static_cast<float*>(p_data);
 
-            for (std::size_t i = 1; i < timescales.size(); ++i) {
-                if (*ptr > timescales[i - 1] + rounding && *ptr < timescales[i] - rounding) {
-                    *ptr = timescales[i - 1];
+            for (std::size_t i = 1; i < timescaleSteps.size(); ++i) {
+                if (*ptr > timescaleSteps[i - 1] + rounding && *ptr < timescaleSteps[i] - rounding) {
+                    *ptr = (float)timescaleSteps[i - 1];
                     break;
                 }
             }
@@ -166,8 +167,8 @@ namespace ImGui
         return value_changed;
     }
 
-    bool SliderFloatSteps(const char* label, float* v, float v_min, float v_max, const char* format, ImGuiSliderFlags flags)
+    bool TimescaleSlider(const char* label, float* v, float v_min, float v_max, const char* format, ImGuiSliderFlags flags)
     {
-        return SliderScalarSteps(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags);
+        return TimescaleSliderInternal(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags);
     }
 }
