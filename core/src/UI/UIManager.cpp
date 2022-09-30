@@ -19,7 +19,6 @@ namespace IWXMVM::UI::UIManager
 		new ControlBar(),
 	};
 
-	bool show_demo_window = true;
 	bool hideOverlay = false;
 
 	void RunImGuiFrame()
@@ -43,8 +42,6 @@ namespace IWXMVM::UI::UIManager
 					component->Render();
 				}
 			}
-
-			//ImGui::ShowDemoWindow(&show_demo_window);
 
 			//ImGui::EndFrame();
 			ImGui::Render();
