@@ -7,8 +7,6 @@
 #include "Events.hpp"
 #include "DemoParser.hpp"
 
-//#include "Patches/DemoPlaybackPatch.hpp"
-
 namespace IWXMVM::IW3
 {
 	class IW3Interface : public GameInterface
