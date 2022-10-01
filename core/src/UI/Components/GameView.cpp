@@ -2,17 +2,19 @@
 #include "GameView.hpp"
 
 #include "Mod.hpp"
+#include "Utilities/PathUtils.hpp"
 
 namespace IWXMVM::UI
 {
 
 	IDirect3DTexture9* texture = NULL;
+	ImVec2 textureSize = ImVec2(0, 0);
 
-	bool CreateTexture()
+	bool CreateTexture(ImVec2 size)
 	{
 		auto device = Mod::GetGameInterface()->GetD3D9Device();
 
-		auto result = D3DXCreateTexture(device, 1280, 720, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &texture);
+		auto result = D3DXCreateTexture(device, size.x, size.y, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &texture);
 		if (FAILED(result))
 			return false;
 
@@ -49,7 +51,7 @@ namespace IWXMVM::UI
 
     void GameView::Initialize()
     {
-		if (!CreateTexture())
+		if (!CreateTexture(PathUtils::GetWindowSize(Mod::GetGameInterface()->GetWindowHandle())))
 		{
 			throw std::exception("Failed to create texture for game view");
 		}
@@ -57,14 +59,23 @@ namespace IWXMVM::UI
 
     void GameView::Render()
     {
+		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
+
+		auto viewportSize = ImGui::GetContentRegionMax();
+
+		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y)
+		{
+			texture->Release();
+			CreateTexture(viewportSize);
+		}
+
 		if (!CaptureBackBuffer())
 		{
 			throw std::exception("Failed to capture game view");
 		}
 
-		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
-		ImGui::Image((void*)texture, ImVec2(1280 * 0.5f, 720 * 0.5f), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+		ImGui::Image((void*)texture, viewportSize);
 
 		ImGui::ShowDemoWindow();
 
