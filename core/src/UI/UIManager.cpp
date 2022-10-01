@@ -9,6 +9,7 @@
 #include "Components/ControlBar.hpp"
 #include "Components/DebugPanel.hpp"
 #include "Components/MenuBar.hpp"
+#include "Components/GameView.hpp"
 
 namespace IWXMVM::UI::UIManager
 {
@@ -17,6 +18,7 @@ namespace IWXMVM::UI::UIManager
 		new DebugPanel(),
 		new MenuBar(),
 		new ControlBar(),
+		new GameView()
 	};
 
 	bool hideOverlay = false;
@@ -44,7 +46,7 @@ namespace IWXMVM::UI::UIManager
 				}
 			}
 
-			//ImGui::EndFrame();
+			ImGui::EndFrame();
 			ImGui::Render();
 			ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 		}
