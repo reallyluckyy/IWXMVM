@@ -3,10 +3,10 @@
 
 namespace IWXMVM::UI
 {
-	class MenuBar : public UIComponent
+	class Background : public UIComponent
 	{
 	public:
-		MenuBar()
+		Background()
 		{
 			Initialize();
 		}

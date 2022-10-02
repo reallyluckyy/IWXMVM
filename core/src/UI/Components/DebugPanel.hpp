@@ -6,7 +6,15 @@ namespace IWXMVM::UI
 	class DebugPanel : public UIComponent
 	{
 	public:
-		void Initialize() override;
-		void Render() override;
+		DebugPanel()
+		{
+			Initialize();
+		}
+
+		void Render() final;
+		void Release() final;
+
+	private:
+		void Initialize() final;
 	};
 }

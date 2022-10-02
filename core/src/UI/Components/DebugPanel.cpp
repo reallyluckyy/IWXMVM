@@ -6,9 +6,7 @@
 namespace IWXMVM::UI
 {
 	void DebugPanel::Initialize()
-	{
-
-	}
+	{}
 
 	void DebugPanel::Render()
 	{
@@ -19,4 +17,7 @@ namespace IWXMVM::UI
 		ImGui::Text("Demo End Tick: %d", Mod::GetGameInterface()->GetDemoInfo().endTick);
 		ImGui::End();
 	}
+
+	void DebugPanel::Release()
+	{}
 }
