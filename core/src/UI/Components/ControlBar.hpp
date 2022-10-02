@@ -10,6 +10,10 @@ namespace IWXMVM::UI
 		{
 			Initialize();
 		}
+		~ControlBar()
+		{
+			Release();
+		}
 
 		void Render() final;
 		void Release() final;

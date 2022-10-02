@@ -15,37 +15,37 @@ namespace IWXMVM::IW3
 
 		IW3Interface() : GameInterface(Game::IW3) {}
 
-		void InstallHooks() override
+		void InstallHooks() final
 		{
 			Hooks::Install(GetD3D9Device());
 		}
 
-		void SetupEventListeners() override
+		void SetupEventListeners() final
 		{
 			Events::RegisterListener(EventType::OnDemoLoad, DemoParser::Run);
 		}
 
-		IDirect3DDevice9* GetD3D9Device() override
+		IDirect3DDevice9* GetD3D9Device() final
 		{
 			return *(IDirect3DDevice9**)0xCC9A408;
 		}
 
-		HWND GetWindowHandle() override
+		HWND GetWindowHandle() final
 		{
 			return *(HWND*)0xCC1B6FC;
 		}
 
-		uintptr_t GetWndProc() override
+		uintptr_t GetWndProc() final
 		{
 			return (uintptr_t)0x57BB20;
 		}
 
-		void SetMouseMode(MouseMode mode) override
+		void SetMouseMode(MouseMode mode) final
 		{
-			Structures::GetMouseVars()->mouseInitialized = mode == MouseMode::Capture ? false : true;
+			Structures::GetMouseVars()->mouseInitialized = (mode == MouseMode::Capture) ? false : true;
 		}
 
-		GameState GetGameState() override
+		GameState GetGameState() final
 		{
 			if (!Structures::FindDvar("cl_ingame")->current.enabled)
 				return GameState::MainMenu;
@@ -58,7 +58,7 @@ namespace IWXMVM::IW3
 
 
 		// TODO: cache this
-		DemoInfo GetDemoInfo() override
+		DemoInfo GetDemoInfo() final
 		{
 			DemoInfo demoInfo;
 			demoInfo.name = Structures::GetClientConnection()->demoName;
@@ -76,18 +76,17 @@ namespace IWXMVM::IW3
 
 		bool isPlaybackPaused = false;
 
-		void ToggleDemoPlaybackState() override
+		void ToggleDemoPlaybackState() final
 		{
 			isPlaybackPaused = !isPlaybackPaused;
 		}
 
-		bool IsDemoPlaybackPaused() override
+		bool IsDemoPlaybackPaused() final
 		{
 			return isPlaybackPaused;
 		}
 
-
-		std::optional<Dvar> GetDvar(const std::string name) override
+		std::optional<Dvar> GetDvar(const std::string name) final
 		{
 			const auto iw3Dvar = Structures::FindDvar(name);
 

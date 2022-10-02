@@ -33,6 +33,7 @@ namespace IWXMVM::UI
 		result = texture->GetSurfaceLevel(0, &textureSurface);
 		if (FAILED(result))
 		{
+			textureSurface->Release();
 			RenderTarget->Release();
 			return false;
 		}
@@ -40,10 +41,12 @@ namespace IWXMVM::UI
 		result = device->StretchRect(RenderTarget, NULL, textureSurface, NULL, D3DTEXF_NONE);
 		if (FAILED(result))
 		{
+			textureSurface->Release();
 			RenderTarget->Release();
 			return false;
 		}
 
+		textureSurface->Release();
 		RenderTarget->Release();
 		return true;
 	}
@@ -64,17 +67,14 @@ namespace IWXMVM::UI
 
 		const auto viewportSize = ImGui::GetContentRegionMax();
 
-		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y) {
-			// short timeout (25ms) to avoid using too much resources
-			if (--counter <= 0) {
-				counter = 0.025 * ImGui::GetIO().Framerate;
-
-				textureSize = viewportSize;
-				CreateTexture(texture, viewportSize);
-			}
+		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y) 
+		{
+			textureSize = viewportSize;
+			CreateTexture(texture, viewportSize);
 		}
 
-		if (!CaptureBackBuffer(texture)) {
+		if (!CaptureBackBuffer(texture)) 
+		{
 			throw std::exception("Failed to capture game view");
 		}
 

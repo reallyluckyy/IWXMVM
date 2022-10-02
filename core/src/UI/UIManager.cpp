@@ -28,9 +28,52 @@ namespace IWXMVM::UI::UIManager
 	}();
 
 	bool hideOverlay = false;
+	int ImGuiTimeout = 0;
+
+	bool RestartImGui()
+	{
+		if (ImGuiTimeout != 0)
+			return false;
+
+		QUERY_USER_NOTIFICATION_STATE pquns;
+		if (FAILED(SHQueryUserNotificationState(&pquns)) || pquns == QUNS_RUNNING_D3D_FULL_SCREEN)
+		{
+			// 2000ms timeout so that the game can restart properly
+			ImGuiTimeout = (2 * ImGui::GetIO().Framerate < 2) ? 2 : 2 * ImGui::GetIO().Framerate;
+		}
+		else 
+		{
+			// 1000ms timeout so that the game can restart properly
+			ImGuiTimeout = (1 * ImGui::GetIO().Framerate < 1) ? 1 : 1 * ImGui::GetIO().Framerate;
+		}
+
+		for (const auto& component : uiComponents) 
+		{
+			component->Release();
+		}
+
+		ImGui_ImplDX9_Shutdown();
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+
+		return true;
+	}
 
 	void RunImGuiFrame()
 	{
+		if (ImGuiTimeout > 0) 
+		{
+			// the game must have executed vid_restart previously
+			// here's a timeout so that the game can restart properly
+			if (--ImGuiTimeout == 0) 
+			{
+				LOG_DEBUG("Reinitializing ImGui");
+				Initialize(InitType::reinitialize);
+			}
+
+			return;
+		}
+
 		try
 		{
 			ImGui_ImplDX9_NewFrame();
@@ -91,12 +134,15 @@ namespace IWXMVM::UI::UIManager
 		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
 	}
 
-	void Initialize()
+	void Initialize(InitType type)
 	{
 		try 
 		{
-			LOG_DEBUG("Registering OnFrame listener");
-			Events::RegisterListener(EventType::OnFrame, RunImGuiFrame);
+			// to avoid registering events after restarting ImGui
+			if (type == InitType::initialize) {
+				LOG_DEBUG("Registering OnFrame listener");
+				Events::RegisterListener(EventType::OnFrame, RunImGuiFrame);
+			}
 
 			LOG_DEBUG("Creating ImGui context");
 			IMGUI_CHECKVERSION();

@@ -71,5 +71,8 @@ namespace IWXMVM::UI
 	}
 
 	void ControlBar::Release()
-	{}
+	{
+		UIImage::ReleaseResource(IMG_PLAY_BUTTON_data);
+		UIImage::ReleaseResource(IMG_PAUSE_BUTTON_data);
+	}
 }

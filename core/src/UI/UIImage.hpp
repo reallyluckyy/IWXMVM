@@ -14,5 +14,6 @@ namespace IWXMVM::UI
 
 		static UIImage FromFile(std::string path);
 		static UIImage FromResource(const uint8_t data[], uint32_t size);
+		static void ReleaseResource(const uint8_t data[]);
 	};
 }

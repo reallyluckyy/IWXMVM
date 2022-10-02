@@ -32,7 +32,7 @@ namespace IWXMVM
 			gameInterface->InstallHooks();
 			gameInterface->SetupEventListeners();
 
-			UI::UIManager::Initialize();
+			UI::UIManager::Initialize(UI::UIManager::InitType::initialize);
 			// TODO: Initialize Components/Patches
 			// TODO: ...
 

@@ -7,6 +7,8 @@
 #include "IW3Interface.hpp"
 #include "Mod.hpp"
 
+#include <UI/UIManager.cpp>
+
 namespace IWXMVM::IW3::Hooks
 {
 	// TODO: Turn this into a "EventCallbacks" "patch"
@@ -26,13 +28,10 @@ namespace IWXMVM::IW3::Hooks
 
 	HRESULT __stdcall D3D_Reset_Hook(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
 	{
-		// TODO: this function needs access to IWXMVM::UI::UIManager::uiComponents
-		// if GameView::texture is not released when alt tabbing away from the game in fullscreen, it's going to crash
-
-		/*for (const auto& component : uiComponents) 
+		for (const auto& component : UI::UIManager::uiComponents) 
 		{
 			component->Release();
-		}*/
+		}
 
 		ImGui_ImplDX9_InvalidateDeviceObjects();
 		HRESULT hr = Reset(pDevice, pPresentationParameters);
@@ -65,6 +64,7 @@ namespace IWXMVM::IW3::Hooks
 
 	void* ptrCL_PlayDemo_f = nullptr;
 	void* ptrCL_ReplayDemo_f = nullptr;
+	void* ptrCL_Vid_Restart_f = nullptr;
 
 	Structures::cmd_function_t** cmd_functions = (Structures::cmd_function_t**)0x1410B3C;
 	Structures::cmd_function_t** sv_cmd_functions = (Structures::cmd_function_t**)0x14099DC;
@@ -128,6 +128,20 @@ namespace IWXMVM::IW3::Hooks
 				//reinterpret_cast<uintptr_t(*)()>(ptrCL_ReplayDemo_f)();
 
 				//Events::Invoke(EventType::OnDemoLoad); 
+				return;
+			}
+		}
+	}
+
+	void CL_Vid_Restart_Hook()
+	{
+		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next) 
+		{
+			if (!strcmp(cmd->name, "vid_restart") && ptrCL_Vid_Restart_f != nullptr)
+			{
+				if (UI::UIManager::RestartImGui()) 
+					reinterpret_cast<uintptr_t(*)()>(ptrCL_Vid_Restart_f)();
+				
 				return;
 			}
 		}
@@ -295,6 +309,7 @@ namespace IWXMVM::IW3::Hooks
 
 		Cmd_ModifyServerCommand("demo", CL_PlayDemo_Hook, ptrCL_PlayDemo_f);
 		Cmd_ModifyCommand("replayDemo", CL_ReplayDemo_Hook, ptrCL_ReplayDemo_f);
+		Cmd_ModifyCommand("vid_restart", CL_Vid_Restart_Hook, ptrCL_Vid_Restart_f);
 		HookManager::CreateHook(0x53366E, (std::uintptr_t)&SV_Frame_Hook, 5, false);
 		//CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
 	}
