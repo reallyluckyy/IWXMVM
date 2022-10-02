@@ -6,6 +6,7 @@
 #include "Mod.hpp"
 #include "Events.hpp"
 
+#include "Components/Background.hpp"
 #include "Components/ControlBar.hpp"
 #include "Components/DebugPanel.hpp"
 #include "Components/MenuBar.hpp"
@@ -13,13 +14,18 @@
 
 namespace IWXMVM::UI::UIManager
 {
-	std::vector<UIComponent*> uiComponents
-	{
-		new DebugPanel(),
-		new MenuBar(),
-		new ControlBar(),
-		new GameView()
-	};
+	std::vector<std::unique_ptr<UIComponent>> uiComponents = []() {
+		std::vector<std::unique_ptr<UIComponent>> vec;
+
+		// background should probably always come first
+		vec.emplace_back(std::make_unique<Background>());
+		vec.emplace_back(std::make_unique<GameView>());
+		vec.emplace_back(std::make_unique<DebugPanel>());
+		vec.emplace_back(std::make_unique<MenuBar>());
+		vec.emplace_back(std::make_unique<ControlBar>());
+
+		return vec;
+	}();
 
 	bool hideOverlay = false;
 
@@ -40,7 +46,7 @@ namespace IWXMVM::UI::UIManager
 
 			if (!hideOverlay) 
 			{ 
-				for (const auto component : uiComponents)
+				for (const auto& component : uiComponents)
 				{
 					component->Render();
 				}
@@ -110,12 +116,16 @@ namespace IWXMVM::UI::UIManager
 			LOG_DEBUG("Hooking WndProc at {0:x}", Mod::GetGameInterface()->GetWndProc());
 			GameWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)ImGuiWndProc);
 
+			/*
+			* these are now initialized on in the constructor!
+			* 
 			LOG_DEBUG("Initializing {0} UI components", uiComponents.size());
 
-			for (auto component : uiComponents)
+			for (auto& component : uiComponents)
 			{
 				component->Initialize();
 			}
+			*/
 
 			SetImGuiStyle();
 

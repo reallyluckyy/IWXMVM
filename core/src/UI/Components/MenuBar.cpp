@@ -9,9 +9,7 @@ namespace IWXMVM::UI
 {
 
     void MenuBar::Initialize()
-    {
-
-    }
+    {}
 
     void MenuBar::Render()
     {
@@ -39,4 +37,7 @@ namespace IWXMVM::UI
             ImGui::EndMainMenuBar();
         }
     }
+
+    void MenuBar::Release()
+    {}
 }

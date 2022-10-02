@@ -69,4 +69,7 @@ namespace IWXMVM::UI
 
 		ImGui::End();
 	}
+
+	void ControlBar::Release()
+	{}
 }

@@ -1,6 +1,8 @@
 #include "StdInclude.hpp"
 #include "PathUtils.hpp"
 
+#include "UI/UIManager.hpp"
+
 namespace IWXMVM::HookManager
 {
 	bool WriteJump(std::uintptr_t from, std::uintptr_t to, std::size_t size)

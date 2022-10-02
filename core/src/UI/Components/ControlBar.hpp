@@ -6,7 +6,15 @@ namespace IWXMVM::UI
 	class ControlBar : public UIComponent
 	{
 	public:
-		void Initialize() override;
-		void Render() override;
+		ControlBar()
+		{
+			Initialize();
+		}
+
+		void Render() final;
+		void Release() final;
+
+	private:
+		void Initialize() final;
 	};
 }

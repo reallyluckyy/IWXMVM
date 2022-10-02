@@ -116,6 +116,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Resources.cpp" />
+    <ClCompile Include="src\UI\Components\Background.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
     <ClCompile Include="src\UI\Components\CustomImGuiControls.cpp" />
     <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
@@ -137,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Resources.hpp" />
+    <ClInclude Include="src\UI\Components\Background.hpp" />
     <ClInclude Include="src\UI\Components\ControlBar.hpp" />
     <ClInclude Include="src\UI\Components\CustomImGuiControls.hpp" />
     <ClInclude Include="src\UI\Components\DebugPanel.hpp" />
