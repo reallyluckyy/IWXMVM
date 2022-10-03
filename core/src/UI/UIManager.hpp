@@ -6,8 +6,8 @@ namespace IWXMVM::UI::UIManager
 {
 	enum class InitType
 	{
-		initialize,
-		reinitialize
+		Initialize,
+		Reinitialize
 	};
 
 	void Initialize(InitType type);

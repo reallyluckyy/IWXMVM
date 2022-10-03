@@ -68,7 +68,7 @@ namespace IWXMVM::UI::UIManager
 			if (--ImGuiTimeout == 0) 
 			{
 				LOG_DEBUG("Reinitializing ImGui");
-				Initialize(InitType::reinitialize);
+				Initialize(InitType::Reinitialize);
 			}
 
 			return;
@@ -139,7 +139,7 @@ namespace IWXMVM::UI::UIManager
 		try 
 		{
 			// to avoid registering events after restarting ImGui
-			if (type == InitType::initialize) {
+			if (type == InitType::Initialize) {
 				LOG_DEBUG("Registering OnFrame listener");
 				Events::RegisterListener(EventType::OnFrame, RunImGuiFrame);
 			}
