@@ -10,6 +10,10 @@ namespace IWXMVM::UI
 		{
 			Initialize();
 		}
+		~GameView()
+		{
+			Release();
+		}
 
 		void Render() final;
 		void Release() final;
@@ -19,7 +23,5 @@ namespace IWXMVM::UI
 
 		IDirect3DTexture9* texture = NULL;
 		ImVec2 textureSize = ImVec2(0, 0);
-
-		int counter = 0;
 	};
 }

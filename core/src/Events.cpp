@@ -17,5 +17,4 @@ namespace IWXMVM::Events
 	{
 		listeners[eventType].push_back(function);
 	}
-
 }

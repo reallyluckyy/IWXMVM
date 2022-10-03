@@ -4,5 +4,11 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace IWXMVM::UI::UIManager
 {
-	void Initialize();
+	enum class InitType
+	{
+		initialize,
+		reinitialize
+	};
+
+	void Initialize(InitType type);
 }
