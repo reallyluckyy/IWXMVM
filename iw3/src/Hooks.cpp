@@ -62,91 +62,6 @@ namespace IWXMVM::IW3::Hooks
 	}
 	*/
 
-	void* ptrCL_PlayDemo_f = nullptr;
-	void* ptrCL_ReplayDemo_f = nullptr;
-	void* ptrCL_Vid_Restart_f = nullptr;
-
-	Structures::cmd_function_t** cmd_functions = (Structures::cmd_function_t**)0x1410B3C;
-	Structures::cmd_function_t** sv_cmd_functions = (Structures::cmd_function_t**)0x14099DC;
-
-	void Cmd_ModifyServerCommand(const char* cmd_name, void* function, void*& oldFunction)
-	{
-		for (auto cmd = *sv_cmd_functions; cmd; cmd = cmd->next)
-		{
-			if (!strcmp(cmd_name, cmd->name) && function != nullptr) 
-			{
-				if (function != nullptr) 
-				{
-					oldFunction = (void*)cmd->function;
-					cmd->function = function;
-
-					return;
-				}
-			}
-		}
-	}
-
-	void Cmd_ModifyCommand(const char* cmd_name, void* function, void*& oldFunction)
-	{
-		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next)
-		{
-			if (!strcmp(cmd_name, cmd->name) && function != nullptr)
-			{
-				if (function != nullptr)
-				{
-					oldFunction = (void*)cmd->function;
-					cmd->function = function;
-
-					return;
-				}
-			}
-		}
-	}
-
-	// TODO: doesn't support fullpath demos [/demo "C:\Path\demo.dm_1" fullpath] yet!
-	void CL_PlayDemo_Hook()
-	{
-		for (auto cmd = *sv_cmd_functions; cmd; cmd = cmd->next)
-		{
-			if (!strcmp(cmd->name, "demo") && ptrCL_PlayDemo_f != nullptr) 
-			{
-				reinterpret_cast<uintptr_t(*)()>(ptrCL_PlayDemo_f)();
-
-				Events::Invoke(EventType::OnDemoLoad);
-				return;
-			} 
-		}
-	}
-
-	// TODO: replayDemo is not supported yet because the old demo path needs to be stored!
-	void CL_ReplayDemo_Hook()
-	{
-		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next) 
-		{
-			if (!strcmp(cmd->name, "replayDemo") && ptrCL_ReplayDemo_f != nullptr) 
-			{
-				//reinterpret_cast<uintptr_t(*)()>(ptrCL_ReplayDemo_f)();
-
-				//Events::Invoke(EventType::OnDemoLoad); 
-				return;
-			}
-		}
-	}
-
-	void CL_Vid_Restart_Hook()
-	{
-		for (auto cmd = *cmd_functions; cmd; cmd = cmd->next) 
-		{
-			if (!strcmp(cmd->name, "vid_restart") && ptrCL_Vid_Restart_f != nullptr)
-			{
-				if (UI::UIManager::RestartImGui()) 
-					reinterpret_cast<uintptr_t(*)()>(ptrCL_Vid_Restart_f)();
-				
-				return;
-			}
-		}
-	}
-
 	auto GeneratePattern = [](const std::size_t length) 
 	{
 		// the size of the pattern is always 1000 to avoid using too much resources
@@ -289,6 +204,131 @@ namespace IWXMVM::IW3::Hooks
 		}
 	}
 
+#define MAX_TOKENIZE_STRINGS 8
+#define tokenStrings (*(struct CmdArgs*)(0x1410B40))
+#define tokenbuf (*(struct CmdArgsPrivate*)(0x1433490))
+
+	struct CmdArgsPrivate
+	{
+		char textPool[8192];
+		const char* argvPool[512];
+		int usedTextPool[MAX_TOKENIZE_STRINGS];
+		int totalUsedArgvPool;
+		int totalUsedTextPool;
+	};
+
+	struct CmdArgs
+	{
+		int nesting;
+		int localClientNum[MAX_TOKENIZE_STRINGS];
+		int argshift[MAX_TOKENIZE_STRINGS];
+		int argc[MAX_TOKENIZE_STRINGS];
+		const char** argv[MAX_TOKENIZE_STRINGS];
+	};
+
+	int	Cmd_Argc()
+	{
+		return tokenStrings.argc[tokenStrings.nesting];
+	}
+
+	const char* Cmd_Argv(int argv)
+	{
+		if (argv >= Cmd_Argc())
+			return "";
+		else
+			return tokenStrings.argv[tokenStrings.nesting][argv];
+	}
+
+	void CL_PlayDemo_Hook(void* oldFunction)
+	{
+		reinterpret_cast<void(*)()>(oldFunction)();
+
+		Events::Invoke(EventType::OnDemoLoad);
+	}
+
+	// TODO: replayDemo is not supported yet because the old demo path needs to be stored!
+	void CL_ReplayDemo_Hook(void* oldFunction)
+	{
+		//reinterpret_cast<void(*)()>(oldFunction)();
+
+		//Events::Invoke(EventType::OnDemoLoad); 
+	}
+
+	void CL_Vid_Restart_Hook(void* oldFunction)
+	{
+		if (UI::UIManager::RestartImGui())
+			reinterpret_cast<void(*)()>(oldFunction)();
+	}
+
+	void CommandWrapper();
+
+	struct FunctionStorage
+	{
+		enum struct CommandType
+		{
+			Command,
+			ServerCommand
+		};
+
+		const char* commandName = nullptr;
+		CommandType type = CommandType::Command;
+		void* hookFunction = nullptr;
+		void* newFunction = CommandWrapper;
+		void* oldFunction = nullptr;
+	};
+
+	Structures::cmd_function_t** cmd_functions = (Structures::cmd_function_t**)0x1410B3C;
+	Structures::cmd_function_t** sv_cmd_functions = (Structures::cmd_function_t**)0x14099DC;
+
+	void Cmd_ModifyCommand(FunctionStorage& fs)
+	{
+		auto cmd = (fs.type == FunctionStorage::CommandType::Command) ? *cmd_functions : *sv_cmd_functions;
+
+		for (; cmd; cmd = cmd->next) 
+		{
+			if (!strcmp(fs.commandName, cmd->name)) 
+			{
+				if (fs.newFunction != nullptr) 
+				{
+					fs.oldFunction = cmd->function;
+					cmd->function = fs.newFunction;
+				}
+
+				return;
+			}
+		}
+	}
+
+	std::vector<FunctionStorage> orgFunctions{
+		{ "vid_restart",	FunctionStorage::CommandType::ServerCommand,	CL_Vid_Restart_Hook },
+		{ "demo",		FunctionStorage::CommandType::ServerCommand,	CL_PlayDemo_Hook },
+		{ "replayDemo",		FunctionStorage::CommandType::Command,		CL_ReplayDemo_Hook }
+	};
+
+	void CommandWrapper()
+	{
+		int cmdCount = Cmd_Argc();
+
+		if (cmdCount > 0) 
+		{
+			const char* command = Cmd_Argv(0);
+			if (command == "")
+				return;
+
+			for (auto& elem : orgFunctions)
+			{
+				if (!strcmp(command, elem.commandName)) {
+					if (elem.hookFunction != nullptr)
+					{
+						reinterpret_cast<void(*)(void*)>(elem.hookFunction)(elem.oldFunction);
+					}
+
+					return;
+				}
+			}
+		}
+	}
+
 	void Install(IDirect3DDevice9* device)
 	{
 		void** vTable = *reinterpret_cast<void***>(device);
@@ -307,14 +347,21 @@ namespace IWXMVM::IW3::Hooks
 		Reset = (Reset_t)HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)&D3D_Reset_Hook, resetBytes, true);
 		EndScene = (EndScene_t)HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)&D3D_EndScene_Hook, endSceneBytes, true);
 
+		for (auto& elem : orgFunctions)
+		{
+			Cmd_ModifyCommand(elem);
+
+			if (elem.oldFunction == nullptr || *static_cast<uint8_t*>(elem.oldFunction) == 0xC3)
+			{
+				elem.type = (elem.type == FunctionStorage::CommandType::ServerCommand) ? FunctionStorage::CommandType::Command : FunctionStorage::CommandType::ServerCommand;
+				Cmd_ModifyCommand(elem);
+
+				if (elem.oldFunction == nullptr || *static_cast<uint8_t*>(elem.oldFunction) == 0xC3)
+					LOG_ERROR("An error occurred during hooking the following command: {}", elem.commandName);
+			}
+		}
+
 		HookManager::CreateHook(0x53366E, (std::uintptr_t)&SV_Frame_Hook, 5, false);
 		//CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
-
-		Cmd_ModifyCommand("replayDemo", CL_ReplayDemo_Hook, ptrCL_ReplayDemo_f);
-		Cmd_ModifyServerCommand("demo", CL_PlayDemo_Hook, ptrCL_PlayDemo_f);
-		Cmd_ModifyServerCommand("vid_restart", CL_Vid_Restart_Hook, ptrCL_Vid_Restart_f);
-
-		if (ptrCL_Vid_Restart_f == nullptr)
-			Cmd_ModifyCommand("vid_restart", CL_Vid_Restart_Hook, ptrCL_Vid_Restart_f); // CoD4X
 	}
 }
