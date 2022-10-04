@@ -226,7 +226,7 @@ namespace IWXMVM::IW3::Hooks
 		const char** argv[MAX_TOKENIZE_STRINGS];
 	};
 
-	int	Cmd_Argc()
+	int Cmd_Argc()
 	{
 		return tokenStrings.argc[tokenStrings.nesting];
 	}
