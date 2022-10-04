@@ -270,36 +270,124 @@ namespace IWXMVM::IW3::Hooks
 			ServerCommand
 		};
 
+		~FunctionStorage()
+		{
+			if (hooked) {
+				Unhook();
+			}
+		}
+
+		void Hook()
+		{
+			auto cmd = FindCommand();
+
+			if (cmd == reinterpret_cast<void*>(0xFFFFFFFF)) 
+			{
+				return;
+			}
+			else if (cmd != nullptr && cmd->function != nullptr && *static_cast<uint8_t*>(cmd->function) != 0xC3)
+			{
+				hooked = true;
+				oldFunction = cmd->function;
+				cmd->function = newFunction;
+			} 
+			else 
+			{
+				type = (type == CommandType::ServerCommand) ? CommandType::Command : CommandType::ServerCommand;
+				
+				cmd = FindCommand();
+
+				if (cmd != nullptr && cmd->function != nullptr && *static_cast<uint8_t*>(cmd->function) != 0xC3)
+				{
+					hooked = true;
+					oldFunction = cmd->function;
+					cmd->function = newFunction;
+				}
+				else 
+				{
+					LOG_ERROR("An error occurred during hooking the following command: {}", commandName);
+				}
+			}
+		}
+
+		void Unhook()
+		{
+			auto cmd = FindCommand();
+
+			if (cmd == reinterpret_cast<void*>(0xFFFFFFFF)) 
+			{
+				return;
+			}
+			else if (cmd != nullptr && oldFunction != nullptr)
+			{
+				hooked = false;
+				cmd->function = oldFunction;
+			}
+			else
+			{
+				type = (type == CommandType::ServerCommand) ? CommandType::Command : CommandType::ServerCommand;
+
+				cmd = FindCommand();
+
+				if (cmd != nullptr && oldFunction != nullptr) 
+				{
+					hooked = false;
+					cmd->function = oldFunction;
+				}
+				else
+				{
+					// TODO: this cannot be called from the destructor (e.g. when the game is closing down)
+					try {
+						LOG_ERROR("An error occurred during unhooking the following command: {}", commandName);
+					}
+					catch (...)
+					{
+					
+					}
+
+					// provide possibility to look at console output before it's closed
+					Sleep(1000);
+				}
+			}
+		}
+
 		const char* commandName = nullptr;
 		CommandType type = CommandType::Command;
 		void* hookFunction = nullptr;
 		void* newFunction = CommandWrapper;
 		void* oldFunction = nullptr;
+		bool hooked = false;
+
+	private:
+		Structures::cmd_function_t* FindCommand()
+		{
+			Structures::cmd_function_t** cmd_functions = (Structures::cmd_function_t**)0x1410B3C;
+			Structures::cmd_function_t** sv_cmd_functions = (Structures::cmd_function_t**)0x14099DC;
+
+			auto cmd = (type == FunctionStorage::CommandType::Command) ? *cmd_functions : *sv_cmd_functions;
+
+			// structure not found; either wrong address or game's closing down
+			if (cmd == nullptr)
+				return reinterpret_cast<Structures::cmd_function_t*>(0xFFFFFFFF);
+
+			for (; cmd; cmd = cmd->next) 
+			{
+				if (!strcmp(commandName, cmd->name)) 
+				{
+					if (newFunction != nullptr) 
+					{
+						return cmd;
+					}
+
+					break;
+				}
+			}
+
+			return nullptr;
+		}
 	};
 
-	Structures::cmd_function_t** cmd_functions = (Structures::cmd_function_t**)0x1410B3C;
-	Structures::cmd_function_t** sv_cmd_functions = (Structures::cmd_function_t**)0x14099DC;
-
-	void Cmd_ModifyCommand(FunctionStorage& fs)
-	{
-		auto cmd = (fs.type == FunctionStorage::CommandType::Command) ? *cmd_functions : *sv_cmd_functions;
-
-		for (; cmd; cmd = cmd->next) 
-		{
-			if (!strcmp(fs.commandName, cmd->name)) 
-			{
-				if (fs.newFunction != nullptr) 
-				{
-					fs.oldFunction = cmd->function;
-					cmd->function = fs.newFunction;
-				}
-
-				return;
-			}
-		}
-	}
-
-	std::vector<FunctionStorage> orgFunctions{
+	std::vector<FunctionStorage> CmdHooks{
 		{ "vid_restart",	FunctionStorage::CommandType::ServerCommand,	CL_Vid_Restart_Hook },
 		{ "demo",		FunctionStorage::CommandType::ServerCommand,	CL_PlayDemo_Hook },
 		{ "replayDemo",		FunctionStorage::CommandType::Command,		CL_ReplayDemo_Hook }
@@ -315,7 +403,7 @@ namespace IWXMVM::IW3::Hooks
 			if (command == "")
 				return;
 
-			for (auto& elem : orgFunctions)
+			for (auto& elem : CmdHooks)
 			{
 				if (!strcmp(command, elem.commandName)) {
 					if (elem.hookFunction != nullptr)
@@ -347,21 +435,12 @@ namespace IWXMVM::IW3::Hooks
 		Reset = (Reset_t)HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)&D3D_Reset_Hook, resetBytes, true);
 		EndScene = (EndScene_t)HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)&D3D_EndScene_Hook, endSceneBytes, true);
 
-		for (auto& elem : orgFunctions)
-		{
-			Cmd_ModifyCommand(elem);
-
-			if (elem.oldFunction == nullptr || *static_cast<uint8_t*>(elem.oldFunction) == 0xC3)
-			{
-				elem.type = (elem.type == FunctionStorage::CommandType::ServerCommand) ? FunctionStorage::CommandType::Command : FunctionStorage::CommandType::ServerCommand;
-				Cmd_ModifyCommand(elem);
-
-				if (elem.oldFunction == nullptr || *static_cast<uint8_t*>(elem.oldFunction) == 0xC3)
-					LOG_ERROR("An error occurred during hooking the following command: {}", elem.commandName);
-			}
-		}
-
 		HookManager::CreateHook(0x53366E, (std::uintptr_t)&SV_Frame_Hook, 5, false);
 		//CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
+
+		for (auto& elem : CmdHooks)
+		{
+			elem.Hook();
+		}
 	}
 }
