@@ -307,7 +307,7 @@ namespace IWXMVM::IW3::Hooks
 
 	void CommandWrapper()
 	{
-		int cmdCount = Cmd_Argc();
+		const int cmdCount = Cmd_Argc();
 
 		if (cmdCount > 0) 
 		{
