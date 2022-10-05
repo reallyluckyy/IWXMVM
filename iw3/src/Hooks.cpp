@@ -239,6 +239,7 @@ namespace IWXMVM::IW3::Hooks
 			return tokenStrings.argv[tokenStrings.nesting][argv];
 	}
 
+	// TODO: doesn't support fullpath demos [/demo "C:\Path\demo.dm_1" fullpath] yet!
 	void CL_PlayDemo_Hook(void* oldFunction)
 	{
 		reinterpret_cast<void(*)()>(oldFunction)();
