@@ -28,23 +28,23 @@ namespace IWXMVM::UI::UIManager
 	}();
 
 	bool hideOverlay = false;
-	int ImGuiTimeout = 0;
+	std::atomic<int> ImGuiTimeout = 0;
 
 	bool RestartImGui()
 	{
-		if (ImGuiTimeout != 0)
+		if (ImGuiTimeout.load() != 0)
 			return false;
 
 		QUERY_USER_NOTIFICATION_STATE pquns;
 		if (FAILED(SHQueryUserNotificationState(&pquns)) || pquns == QUNS_RUNNING_D3D_FULL_SCREEN)
 		{
 			// 2000ms timeout so that the game can restart properly
-			ImGuiTimeout = (2 * ImGui::GetIO().Framerate < 2) ? 2 : 2 * ImGui::GetIO().Framerate;
+			ImGuiTimeout.store((2 * ImGui::GetIO().Framerate < 2) ? 2 : 2 * ImGui::GetIO().Framerate);
 		}
 		else 
 		{
 			// 1000ms timeout so that the game can restart properly
-			ImGuiTimeout = (1 * ImGui::GetIO().Framerate < 1) ? 1 : 1 * ImGui::GetIO().Framerate;
+			ImGuiTimeout.store((1 * ImGui::GetIO().Framerate < 1) ? 1 : 1 * ImGui::GetIO().Framerate);
 		}
 
 		for (const auto& component : uiComponents) 
@@ -61,11 +61,11 @@ namespace IWXMVM::UI::UIManager
 
 	void RunImGuiFrame()
 	{
-		if (ImGuiTimeout > 0) 
+		if (ImGuiTimeout.load() > 0) 
 		{
 			// the game must have executed vid_restart previously
 			// here's a timeout so that the game can restart properly
-			if (--ImGuiTimeout == 0) 
+			if (ImGuiTimeout.fetch_sub(1) - 1 == 0) 
 			{
 				LOG_DEBUG("Reinitializing ImGui");
 				Initialize(InitType::Reinitialize);
@@ -74,18 +74,20 @@ namespace IWXMVM::UI::UIManager
 			return;
 		}
 
+		// TODO: move this to a proper input handling place
+		if (GetAsyncKeyState(0x30) == SHRT_MIN && GetAsyncKeyState(VK_CONTROL) == SHRT_MIN) 
+		{
+			Sleep(100);
+			hideOverlay = !hideOverlay;
+		}
+
+		// TODO: fix potential data race if the render thread (which executes this function) is already past the timeout check and the main thread shuts ImGui down
+		// this probably needs a mutex or atomic exchange and compare to fix completely!
 		try
 		{
 			ImGui_ImplDX9_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-
-			// TODO: move this to a proper input handling place
-			if (GetAsyncKeyState(0x30) == SHRT_MIN && GetAsyncKeyState(VK_CONTROL) == SHRT_MIN)
-			{
-				Sleep(100);
-				hideOverlay = !hideOverlay;
-			}
 
 			if (!hideOverlay) 
 			{ 
