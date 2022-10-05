@@ -30,22 +30,19 @@ namespace IWXMVM::UI::UIManager
 	bool hideOverlay = false;
 	std::atomic<int> ImGuiTimeout = 0;
 
-	bool RestartImGui()
+	bool SignalImGuiRestart()
 	{
 		if (ImGuiTimeout.load() != 0)
 			return false;
 
-		QUERY_USER_NOTIFICATION_STATE pquns;
-		if (FAILED(SHQueryUserNotificationState(&pquns)) || pquns == QUNS_RUNNING_D3D_FULL_SCREEN)
-		{
-			// 2000ms timeout so that the game can restart properly
-			ImGuiTimeout.store((2 * ImGui::GetIO().Framerate < 2) ? 2 : 2 * ImGui::GetIO().Framerate);
-		}
-		else 
-		{
-			// 1000ms timeout so that the game can restart properly
-			ImGuiTimeout.store((1 * ImGui::GetIO().Framerate < 1) ? 1 : 1 * ImGui::GetIO().Framerate);
-		}
+		ImGuiTimeout.store(-1);
+	}
+
+	void ShutdownImGui()
+	{
+		LOG_DEBUG("Shutting down ImGui");
+
+		ImGuiTimeout.store(1);
 
 		for (const auto& component : uiComponents) 
 		{
@@ -55,20 +52,25 @@ namespace IWXMVM::UI::UIManager
 		ImGui_ImplDX9_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
-
-		return true;
 	}
 
 	void RunImGuiFrame()
 	{
-		if (ImGuiTimeout.load() > 0) 
+		if (ImGuiTimeout.load() == -1)
 		{
 			// the game must have executed vid_restart previously
+			ShutdownImGui();
+			return;
+		}
+		else if (ImGuiTimeout.load() > 0) 
+		{
 			// here's a timeout so that the game can restart properly
-			if (ImGuiTimeout.fetch_sub(1) - 1 == 0) 
+			if (ImGuiTimeout.load() - 1 == 0) 
 			{
 				LOG_DEBUG("Reinitializing ImGui");
 				Initialize(InitType::Reinitialize);
+
+				ImGuiTimeout.store(0);
 			}
 
 			return;
@@ -81,8 +83,6 @@ namespace IWXMVM::UI::UIManager
 			hideOverlay = !hideOverlay;
 		}
 
-		// TODO: fix potential data race if the render thread (which executes this function) is already past the timeout check and the main thread shuts ImGui down
-		// this probably needs a mutex or atomic exchange and compare to fix completely!
 		try
 		{
 			ImGui_ImplDX9_NewFrame();
