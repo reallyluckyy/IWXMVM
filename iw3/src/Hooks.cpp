@@ -239,30 +239,6 @@ namespace IWXMVM::IW3::Hooks
 			return tokenStrings.argv[tokenStrings.nesting][argv];
 	}
 
-	// TODO: doesn't support fullpath demos [/demo "C:\Path\demo.dm_1" fullpath] yet!
-	void CL_PlayDemo_Hook(void* oldFunction)
-	{
-		reinterpret_cast<void(*)()>(oldFunction)();
-
-		Events::Invoke(EventType::OnDemoLoad);
-	}
-
-	// TODO: replayDemo is not supported yet because the old demo path needs to be stored!
-	void CL_ReplayDemo_Hook(void* oldFunction)
-	{
-		//reinterpret_cast<void(*)()>(oldFunction)();
-
-		//Events::Invoke(EventType::OnDemoLoad); 
-	}
-
-	void CL_Vid_Restart_Hook(void* oldFunction)
-	{
-		if (UI::UIManager::RestartImGui())
-			reinterpret_cast<void(*)()>(oldFunction)();
-	}
-
-	void CommandWrapper();
-
 	struct FunctionStorage
 	{
 		enum struct CommandType
@@ -337,7 +313,7 @@ namespace IWXMVM::IW3::Hooks
 				}
 				else
 				{
-					// TODO: this cannot be called from the destructor (e.g. when the game is closing down)
+					// TODO: this cannot always be called from the destructor (e.g. when the game is closing down)
 					try {
 						LOG_ERROR("An error occurred during unhooking the following command: {}", commandName);
 					}
@@ -354,8 +330,7 @@ namespace IWXMVM::IW3::Hooks
 
 		const char* commandName = nullptr;
 		CommandType type = CommandType::Command;
-		void* hookFunction = nullptr;
-		void* newFunction = CommandWrapper;
+		void* newFunction = nullptr;
 		void* oldFunction = nullptr;
 		bool hooked = false;
 
@@ -388,34 +363,57 @@ namespace IWXMVM::IW3::Hooks
 		}
 	};
 
+	// TODO: doesn't support fullpath demos [/demo "C:\Path\demo.dm_1" fullpath] yet!
+	void CL_PlayDemo_Hook()
+	{
+		auto* oldFunction = FindOriginalFunction(CL_PlayDemo_Hook);
+		if (oldFunction == nullptr)
+			return;
+
+		reinterpret_cast<void(*)()>(oldFunction)();
+
+		Events::Invoke(EventType::OnDemoLoad);
+	}
+
+	// TODO: replayDemo is not supported yet because the old demo path needs to be stored!
+	void CL_ReplayDemo_Hook()
+	{
+		auto* oldFunction = FindOriginalFunction(CL_ReplayDemo_Hook);
+		if (oldFunction == nullptr)
+			return;
+
+		//reinterpret_cast<void(*)()>(oldFunction)();
+
+		//Events::Invoke(EventType::OnDemoLoad); 
+	}
+
+	void CL_Vid_Restart_Hook()
+	{
+		auto* oldFunction = FindOriginalFunction(CL_Vid_Restart_Hook);
+		if (oldFunction == nullptr)
+			return;
+
+		if (UI::UIManager::RestartImGui())
+			reinterpret_cast<void(*)()>(oldFunction)();
+	}
+
 	std::vector<FunctionStorage> CmdHooks{
 		{ "vid_restart",	FunctionStorage::CommandType::ServerCommand,	CL_Vid_Restart_Hook },
 		{ "demo",		FunctionStorage::CommandType::ServerCommand,	CL_PlayDemo_Hook },
 		{ "replayDemo",		FunctionStorage::CommandType::Command,		CL_ReplayDemo_Hook }
 	};
 
-	void CommandWrapper()
+	void* FindOriginalFunction(void* hook)
 	{
-		const int cmdCount = Cmd_Argc();
-
-		if (cmdCount > 0) 
+		for (auto& elem : CmdHooks) 
 		{
-			const char* command = Cmd_Argv(0);
-			if (command == "")
-				return;
-
-			for (auto& elem : CmdHooks)
-			{
-				if (!strcmp(command, elem.commandName)) {
-					if (elem.hookFunction != nullptr)
-					{
-						reinterpret_cast<void(*)(void*)>(elem.hookFunction)(elem.oldFunction);
-					}
-
-					return;
-				}
+			if (elem.newFunction == hook)
+			{ 
+				return elem.oldFunction;
 			}
 		}
+
+		return nullptr;
 	}
 
 	void Install(IDirect3DDevice9* device)
