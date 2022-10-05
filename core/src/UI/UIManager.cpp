@@ -28,21 +28,12 @@ namespace IWXMVM::UI::UIManager
 	}();
 
 	bool hideOverlay = false;
-	std::atomic<int> ImGuiTimeout = 0;
-
-	bool SignalImGuiRestart()
-	{
-		if (ImGuiTimeout.load() != 0)
-			return false;
-
-		ImGuiTimeout.store(-1);
-	}
+	int ImGuiTimeout = 0;
+	std::mutex mtx;
 
 	void ShutdownImGui()
 	{
 		LOG_DEBUG("Shutting down ImGui");
-
-		ImGuiTimeout.store(1);
 
 		for (const auto& component : uiComponents) 
 		{
@@ -54,33 +45,44 @@ namespace IWXMVM::UI::UIManager
 		ImGui::DestroyContext();
 	}
 
+	bool RestartImGui()
+	{
+		// ensuring synchronization with the render thread so that ImGui is not shutdown while rendering a frame
+		std::lock_guard<std::mutex> guard{ mtx };
+
+		if (ImGuiTimeout != 0)
+			return false;
+
+		ShutdownImGui();
+
+		// here's a timeout so that the game can restart properly before we attempt to restart ImGui
+		ImGuiTimeout = 2;
+		return true;
+	}
+
 	void RunImGuiFrame()
 	{
-		if (ImGuiTimeout.load() == -1)
-		{
-			// the game must have executed vid_restart previously
-			ShutdownImGui();
-			return;
-		}
-		else if (ImGuiTimeout.load() > 0) 
-		{
-			// here's a timeout so that the game can restart properly
-			if (ImGuiTimeout.load() - 1 == 0) 
-			{
-				LOG_DEBUG("Reinitializing ImGui");
-				Initialize(InitType::Reinitialize);
-
-				ImGuiTimeout.store(0);
-			}
-
-			return;
-		}
-
 		// TODO: move this to a proper input handling place
 		if (GetAsyncKeyState(0x30) == SHRT_MIN && GetAsyncKeyState(VK_CONTROL) == SHRT_MIN) 
 		{
 			Sleep(100);
 			hideOverlay = !hideOverlay;
+		}
+
+		// ensuring synchronization with the main thread so that ImGui is not shutdown while rendering a frame
+		std::lock_guard<std::mutex> guard{ mtx };
+
+		if (ImGuiTimeout > 0) 
+		{
+			// vid_restart must have executed very recently
+			if (ImGuiTimeout - 1 == 0) 
+			{
+				LOG_DEBUG("Reinitializing ImGui");
+				Initialize(InitType::Reinitialize);
+			}
+
+			--ImGuiTimeout;
+			return;
 		}
 
 		try
