@@ -139,7 +139,7 @@ namespace IWXMVM::IW3::Hooks
 		{
 			if (!strcmp(cmd->name, "vid_restart") && ptrCL_Vid_Restart_f != nullptr)
 			{
-				if (UI::UIManager::SignalImGuiRestart()) 
+				if (UI::UIManager::RestartImGui()) 
 					reinterpret_cast<uintptr_t(*)()>(ptrCL_Vid_Restart_f)();
 				
 				return;
