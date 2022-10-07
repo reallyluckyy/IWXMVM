@@ -307,10 +307,14 @@ namespace IWXMVM::IW3::Hooks
 		Reset = (Reset_t)HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)&D3D_Reset_Hook, resetBytes, true);
 		EndScene = (EndScene_t)HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)&D3D_EndScene_Hook, endSceneBytes, true);
 
-		Cmd_ModifyServerCommand("demo", CL_PlayDemo_Hook, ptrCL_PlayDemo_f);
-		Cmd_ModifyCommand("replayDemo", CL_ReplayDemo_Hook, ptrCL_ReplayDemo_f);
-		Cmd_ModifyCommand("vid_restart", CL_Vid_Restart_Hook, ptrCL_Vid_Restart_f);
 		HookManager::CreateHook(0x53366E, (std::uintptr_t)&SV_Frame_Hook, 5, false);
 		//CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
+
+		Cmd_ModifyCommand("replayDemo", CL_ReplayDemo_Hook, ptrCL_ReplayDemo_f);
+		Cmd_ModifyServerCommand("demo", CL_PlayDemo_Hook, ptrCL_PlayDemo_f);
+		Cmd_ModifyServerCommand("vid_restart", CL_Vid_Restart_Hook, ptrCL_Vid_Restart_f);
+
+		if (ptrCL_Vid_Restart_f == nullptr)
+			Cmd_ModifyCommand("vid_restart", CL_Vid_Restart_Hook, ptrCL_Vid_Restart_f); // CoD4X
 	}
 }

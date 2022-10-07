@@ -29,23 +29,11 @@ namespace IWXMVM::UI::UIManager
 
 	bool hideOverlay = false;
 	int ImGuiTimeout = 0;
+	std::mutex mtx;
 
-	bool RestartImGui()
+	void ShutdownImGui()
 	{
-		if (ImGuiTimeout != 0)
-			return false;
-
-		QUERY_USER_NOTIFICATION_STATE pquns;
-		if (FAILED(SHQueryUserNotificationState(&pquns)) || pquns == QUNS_RUNNING_D3D_FULL_SCREEN)
-		{
-			// 2000ms timeout so that the game can restart properly
-			ImGuiTimeout = (2 * ImGui::GetIO().Framerate < 2) ? 2 : 2 * ImGui::GetIO().Framerate;
-		}
-		else 
-		{
-			// 1000ms timeout so that the game can restart properly
-			ImGuiTimeout = (1 * ImGui::GetIO().Framerate < 1) ? 1 : 1 * ImGui::GetIO().Framerate;
-		}
+		LOG_DEBUG("Shutting down ImGui");
 
 		for (const auto& component : uiComponents) 
 		{
@@ -55,22 +43,45 @@ namespace IWXMVM::UI::UIManager
 		ImGui_ImplDX9_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
+	}
 
+	bool RestartImGui()
+	{
+		// ensuring synchronization with the render thread so that ImGui is not shutdown while rendering a frame
+		std::lock_guard<std::mutex> guard{ mtx };
+
+		if (ImGuiTimeout != 0)
+			return false;
+
+		ShutdownImGui();
+
+		// here's a timeout so that the game can restart properly before we attempt to restart ImGui
+		ImGuiTimeout = 2;
 		return true;
 	}
 
 	void RunImGuiFrame()
 	{
+		// TODO: move this to a proper input handling place
+		if (GetAsyncKeyState(0x30) == SHRT_MIN && GetAsyncKeyState(VK_CONTROL) == SHRT_MIN) 
+		{
+			Sleep(100);
+			hideOverlay = !hideOverlay;
+		}
+
+		// ensuring synchronization with the main thread so that ImGui is not shutdown while rendering a frame
+		std::lock_guard<std::mutex> guard{ mtx };
+
 		if (ImGuiTimeout > 0) 
 		{
-			// the game must have executed vid_restart previously
-			// here's a timeout so that the game can restart properly
-			if (--ImGuiTimeout == 0) 
+			// vid_restart must have executed very recently
+			if (ImGuiTimeout - 1 == 0) 
 			{
 				LOG_DEBUG("Reinitializing ImGui");
 				Initialize(InitType::Reinitialize);
 			}
 
+			--ImGuiTimeout;
 			return;
 		}
 
@@ -79,13 +90,6 @@ namespace IWXMVM::UI::UIManager
 			ImGui_ImplDX9_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-
-			// TODO: move this to a proper input handling place
-			if (GetAsyncKeyState(0x30) == SHRT_MIN && GetAsyncKeyState(VK_CONTROL) == SHRT_MIN)
-			{
-				Sleep(100);
-				hideOverlay = !hideOverlay;
-			}
 
 			if (!hideOverlay) 
 			{ 
