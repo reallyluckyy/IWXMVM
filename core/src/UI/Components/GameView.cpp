@@ -94,7 +94,7 @@ namespace IWXMVM::UI
 			throw std::exception("Failed to capture game view");
 		}
 
-		ImGui::Image((void*)texture, WindowResizing(viewportSize, ImGui::GetFrameHeight()));
+		ImGui::Image((void*)texture, ResizeWindow(viewportSize, ImGui::GetFrameHeight()));
 
 		ImGui::ShowDemoWindow();
 
