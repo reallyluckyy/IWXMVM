@@ -51,7 +51,7 @@ namespace IWXMVM::UI
 		return true;
 	}
 
-	ImVec2 WindowResizing(ImVec2 window, float frame_height)
+	ImVec2 ResizeWindow(ImVec2 window, float frame_height)
 	{
 		float aspect_ratio = 16.0f / 9.0f; // Clamp to 16:9, should use whatever struct from cod4 dynamic scales
 
