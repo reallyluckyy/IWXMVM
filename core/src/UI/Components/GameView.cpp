@@ -51,9 +51,9 @@ namespace IWXMVM::UI
 		return true;
 	}
 
-	ImVec2 WindowResizing(ImVec2 window)
+	ImVec2 WindowResizing(ImVec2 window, float frame_height)
 	{
-		float aspect_ratio = 16.0f / 9.0f; // Clamp to 16:9, should use whatever struct from cod4 for other resolutions
+		float aspect_ratio = 16.0f / 9.0f; // Clamp to 16:9, should use whatever struct from cod4 dynamic scales
 
 		if (window.x / window.y > aspect_ratio) {
 			// If too wide, adjust width
@@ -64,7 +64,7 @@ namespace IWXMVM::UI
 			window.y = window.x / aspect_ratio;
 		}
 
-		return window;
+		return ImVec2(window.x, window.y - frame_height);
 	}
 
     void GameView::Initialize()
@@ -79,14 +79,14 @@ namespace IWXMVM::UI
 
 	void GameView::Render()
 	{
+
 		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
 		auto viewportSize = ImGui::GetContentRegionMax();
 
-		
 		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y)
 		{
-			textureSize = WindowResizing(viewportSize);
-			CreateTexture(texture, WindowResizing(viewportSize));
+			textureSize = viewportSize;
+			CreateTexture(texture, viewportSize);
 		}
 
 		if (!CaptureBackBuffer(texture))
@@ -94,7 +94,7 @@ namespace IWXMVM::UI
 			throw std::exception("Failed to capture game view");
 		}
 
-		ImGui::Image((void*)texture, WindowResizing(viewportSize));
+		ImGui::Image((void*)texture, WindowResizing(viewportSize, ImGui::GetFrameHeight()));
 
 		ImGui::ShowDemoWindow();
 
