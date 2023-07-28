@@ -62,6 +62,7 @@ namespace IWXMVM
 		virtual HWND GetWindowHandle() = 0;
 		virtual uintptr_t GetWndProc() = 0;
 		virtual void SetMouseMode(MouseMode mode) = 0;
+		virtual ImVec2 GetGameResolution() = 0;
 
 		virtual GameState GetGameState() = 0;
 

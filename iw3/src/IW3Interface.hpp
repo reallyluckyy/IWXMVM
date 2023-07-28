@@ -56,6 +56,10 @@ namespace IWXMVM::IW3
 			return GameState::InGame;
 		}
 
+		ImVec2 GetGameResolution() final
+		{
+			return ImVec2(Structures::GetRefDef()->ScreenWidth, Structures::GetRefDef()->ScreenHeight);
+		}
 
 		// TODO: cache this
 		DemoInfo GetDemoInfo() final
