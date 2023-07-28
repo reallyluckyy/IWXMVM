@@ -114,6 +114,10 @@ namespace IWXMVM
 				throw std::runtime_error("Failed to create dummy D3D device");
 			}
 
+			// Deallocate vtable if reinitializing
+			if (vTable)
+				free(vTable);
+
 			vTable = (void**)calloc(119, sizeof(void*));
 			if (!vTable) {
 				dummyDevice->Release();
@@ -171,8 +175,8 @@ namespace IWXMVM
 
 	private:
 		Game game;
-		HWND hwnd;
-		IDirect3DDevice9* device;
-		void** vTable;
+		HWND hwnd = nullptr;
+		IDirect3DDevice9* device = nullptr;
+		void** vTable = nullptr;
 	};
 }
