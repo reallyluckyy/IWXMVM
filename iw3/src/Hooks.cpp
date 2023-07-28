@@ -18,6 +18,15 @@ namespace IWXMVM::IW3::Hooks
 
 	HRESULT __stdcall D3D_EndScene_Hook(IDirect3DDevice9* pDevice)
 	{
+		// EndScene gets the game's device, so it is the one that initializes the UI
+		if (!UI::UIManager::isInitialized.load()) {
+			UI::UIManager::Initialize(UI::UIManager::InitType::Initialize, pDevice);
+		}
+		else if (UI::UIManager::needsRestart.load()) {
+			Mod::GetGameInterface()->HookD3D();
+			UI::UIManager::Initialize(UI::UIManager::InitType::Reinitialize, pDevice);
+		}
+
 		Events::Invoke(EventType::OnFrame);
 
 		return EndScene(pDevice);
@@ -418,10 +427,8 @@ namespace IWXMVM::IW3::Hooks
 		return nullptr;
 	}
 
-	void Install(IDirect3DDevice9* device)
+	void Install(void** vTable)
 	{
-		void** vTable = *reinterpret_cast<void***>(device);
-
 		std::size_t resetBytes = 5;
 		std::size_t endSceneBytes = 7;
 

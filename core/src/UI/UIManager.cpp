@@ -54,6 +54,7 @@ namespace IWXMVM::UI::UIManager
 			return false;
 
 		ShutdownImGui();
+		needsRestart.store(true);
 
 		// here's a timeout so that the game can restart properly before we attempt to restart ImGui
 		ImGuiTimeout = 2;
@@ -75,12 +76,6 @@ namespace IWXMVM::UI::UIManager
 		if (ImGuiTimeout > 0) 
 		{
 			// vid_restart must have executed very recently
-			if (ImGuiTimeout - 1 == 0) 
-			{
-				LOG_DEBUG("Reinitializing ImGui");
-				Initialize(InitType::Reinitialize);
-			}
-
 			--ImGuiTimeout;
 			return;
 		}
@@ -138,14 +133,18 @@ namespace IWXMVM::UI::UIManager
 		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
 	}
 
-	void Initialize(InitType type)
+	void Initialize(InitType type, IDirect3DDevice9* d3dDevice)
 	{
 		try 
 		{
 			// to avoid registering events after restarting ImGui
 			if (type == InitType::Initialize) {
+				LOG_DEBUG("Initializing ImGui...");
 				LOG_DEBUG("Registering OnFrame listener");
 				Events::RegisterListener(EventType::OnFrame, RunImGuiFrame);
+			}
+			else if (type == InitType::Reinitialize) {
+				LOG_DEBUG("Reinitializing ImGui...");
 			}
 
 			LOG_DEBUG("Creating ImGui context");
@@ -158,6 +157,7 @@ namespace IWXMVM::UI::UIManager
 			LOG_DEBUG("Initializing ImGui_ImplWin32 with HWND {0:x}", (uint32_t)hwnd);
 			ImGui_ImplWin32_Init(hwnd);
 
+			Mod::GetGameInterface()->SetD3D9Device(d3dDevice);
 			auto device = Mod::GetGameInterface()->GetD3D9Device();
 			LOG_DEBUG("Initializing ImGui_ImplDX9 with D3D9 Device {0:x}", (uintptr_t)device);
 			ImGui_ImplDX9_Init(device);
@@ -180,6 +180,8 @@ namespace IWXMVM::UI::UIManager
 			SetImGuiStyle();
 
 			Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Capture);
+			isInitialized.store(true);
+			needsRestart.store(false);
 
 			LOG_INFO("Initialized UI");
 		}
