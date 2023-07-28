@@ -51,6 +51,22 @@ namespace IWXMVM::UI
 		return true;
 	}
 
+	ImVec2 ResizeWindow(ImVec2 window, float frame_height)
+	{
+		float aspect_ratio = 16.0f / 9.0f; // Clamp to 16:9, should use whatever struct from cod4 dynamic scales
+
+		if (window.x / window.y > aspect_ratio) {
+			// If too wide, adjust width
+			window.x = window.y * aspect_ratio;
+		}
+		else if (window.x / window.y < aspect_ratio) {
+			// If too tall, adjust height
+			window.y = window.x / aspect_ratio;
+		}
+
+		return ImVec2(window.x, window.y - frame_height);
+	}
+
     void GameView::Initialize()
     {
 		// since this is executed inside the constructor, it's too early to use the interface pointer!
@@ -61,29 +77,29 @@ namespace IWXMVM::UI
 		}*/
     }
 
-    void GameView::Render()
-    {
+	void GameView::Render()
+	{
+
 		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
+		auto viewportSize = ImGui::GetContentRegionMax();
 
-		const auto viewportSize = ImGui::GetContentRegionMax();
-
-		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y) 
+		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y)
 		{
 			textureSize = viewportSize;
 			CreateTexture(texture, viewportSize);
 		}
 
-		if (!CaptureBackBuffer(texture)) 
+		if (!CaptureBackBuffer(texture))
 		{
 			throw std::exception("Failed to capture game view");
 		}
 
-		ImGui::Image((void*)texture, viewportSize);
+		ImGui::Image((void*)texture, ResizeWindow(viewportSize, ImGui::GetFrameHeight()));
 
 		ImGui::ShowDemoWindow();
 
 		ImGui::End();
-    }
+	}
 
 	void GameView::Release()
 	{
