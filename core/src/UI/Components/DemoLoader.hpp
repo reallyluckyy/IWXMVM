@@ -24,6 +24,6 @@ namespace IWXMVM::UI
 
 		std::vector<std::filesystem::path> discoveredDemoPaths;
 		bool initiallyLoadedDemos = false;
-
+		std::atomic<bool> isScanningDemoPaths;
 	};
 }

@@ -9,6 +9,8 @@ namespace IWXMVM::UI
 
 	void DemoLoader::FindAllDemos()
 	{
+		isScanningDemoPaths.store(true);
+
 		discoveredDemoPaths.clear();
 
 		for (std::filesystem::recursive_directory_iterator i(PathUtils::GetCurrentGameDirectory()), end; i != end; ++i)
@@ -23,6 +25,8 @@ namespace IWXMVM::UI
 				discoveredDemoPaths.push_back(i->path());
 			}
 		}
+
+		isScanningDemoPaths.store(false);
 	}
 
 	void DemoLoader::Initialize()
@@ -35,28 +39,39 @@ namespace IWXMVM::UI
 		{
 			// would be cool to be able to do this in Initialize() at some point
 			// but with the current set up we still dont have access to Mod::GetGameInterface() at that time
-			FindAllDemos();
+			std::thread([&] { FindAllDemos(); }).detach();
 			initiallyLoadedDemos = true;
 		}
 
-		ImGui::Begin("Demos", nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoResize);
-		
-		ImGui::Text("%d demos found!", discoveredDemoPaths.size()); 
-		ImGui::SameLine();
-		if (ImGui::Button("Refresh", ImVec2(100, 20)))
+		ImGui::Begin("Demos", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
+
+		if (isScanningDemoPaths.load())
 		{
-			FindAllDemos();
+			ImGui::Text("Searching for demo files...");
 		}
-
-		for (const auto& fullDemoPath : discoveredDemoPaths)
+		else
 		{
-			auto relativeDemoPath = fullDemoPath.string().substr(PathUtils::GetCurrentGameDirectory().size() + 1);
-			ImGui::Text("%s", relativeDemoPath.c_str());
-			ImGui::SameLine(500);
-
-			if (ImGui::Button(std::format("Load##{0}", relativeDemoPath).c_str(), ImVec2(60, 20)))
+			ImGui::Text("%d demos found!", discoveredDemoPaths.size());
+			ImGui::SameLine();
+			if (ImGui::Button("Refresh", ImVec2(100, 20)))
 			{
-				Mod::GetGameInterface()->PlayDemo(fullDemoPath);
+				std::thread([&] { FindAllDemos(); }).detach();
+				ImGui::End();
+				return;
+			}
+
+			for (const auto& fullDemoPath : discoveredDemoPaths)
+			{
+				auto relativeDemoPath = fullDemoPath.string().substr(PathUtils::GetCurrentGameDirectory().size() + 1);
+
+				if (ImGui::Button(std::format("Load##{0}", relativeDemoPath).c_str(), ImVec2(60, 20)))
+				{
+					Mod::GetGameInterface()->PlayDemo(fullDemoPath);
+				}
+
+				ImGui::SameLine();
+
+				ImGui::Text("%s", relativeDemoPath.c_str());
 			}
 		}
 
