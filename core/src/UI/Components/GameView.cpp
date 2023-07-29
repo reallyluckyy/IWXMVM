@@ -4,7 +4,6 @@
 #include "Mod.hpp"
 #include "Utilities/PathUtils.hpp"
 
-#define IM_MAX(A, B)            (((A) >= (B)) ? (A) : (B))
 
 namespace IWXMVM::UI
 {
@@ -53,7 +52,7 @@ namespace IWXMVM::UI
 		return true;
 	}
 
-	ImVec2 ImageClamping(ImVec2 window, float frame_height) //Clamp for texture/image
+	ImVec2 ClampImage(ImVec2 window, float frame_height) //Clamp for texture/image
 	{
 		float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y; // Clamp ratio to refDef's width/height.
 
@@ -97,8 +96,6 @@ namespace IWXMVM::UI
 	void GameView::Render()
 	{
 		//Window Centering
-		//ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-		//ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
 
 		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
@@ -115,7 +112,7 @@ namespace IWXMVM::UI
 			throw std::exception("Failed to capture game view");
 		}
 
-		ImGui::Image((void*)texture, ImageClamping(viewportSize, ImGui::GetFrameHeight() * 2)); //Resizes image to clamp aspect ratio
+		ImGui::Image((void*)texture, ClampImage(viewportSize, ImGui::GetFrameHeight() * 2)); //Resizes image to clamp aspect ratio
 
 		ImGui::ShowDemoWindow();
 
