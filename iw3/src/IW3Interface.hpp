@@ -78,6 +78,46 @@ namespace IWXMVM::IW3
 			return { ".dm_1" };
 		}
 
+		void PlayDemo(std::filesystem::path demoPath) final
+		{
+			const auto DEMO_TEMP_DIR_NAME = "iwxmvm_temp_dir";
+
+			try 
+			{
+				LOG_INFO("Playing demo {0}", demoPath.string());
+
+				if (!std::filesystem::exists(demoPath) || !std::filesystem::is_regular_file(demoPath))
+					return;
+
+				auto tempDemoDir = std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos" / DEMO_TEMP_DIR_NAME;
+				if (!std::filesystem::exists(tempDemoDir))
+				{
+					std::filesystem::create_directories(tempDemoDir);
+				}
+
+				auto targetDemoFilePath = tempDemoDir / demoPath.filename();
+				if (demoPath != targetDemoFilePath)
+				{
+					if (std::filesystem::exists(targetDemoFilePath) && std::filesystem::is_regular_file(targetDemoFilePath)) {
+						std::filesystem::remove(targetDemoFilePath);
+					}
+					LOG_DEBUG("Copying demo file from {0} to {1}", demoPath.string(), targetDemoFilePath.string());
+					std::filesystem::copy_file(demoPath, targetDemoFilePath);
+				}
+
+				Structures::Cbuf_AddText(
+					std::format("demo \"{0}/{1}\"", 
+						DEMO_TEMP_DIR_NAME,
+						demoPath.filename().string()
+					)
+				);
+			}
+			catch (std::filesystem::filesystem_error& e) 
+			{
+				LOG_ERROR("Failed to copy demo file {0}: {1}", demoPath.string(), e.what());
+			}
+		}
+
 
 		bool isPlaybackPaused = false;
 

@@ -43,15 +43,15 @@ namespace IWXMVM::UI
 			FindAllDemos();
 		}
 
-		for (const auto& demo : discoveredDemoPaths)
+		for (const auto& fullDemoPath : discoveredDemoPaths)
 		{
-			auto demoPath = demo.string().substr(PathUtils::GetCurrentGameDirectory().size());
-			ImGui::Text("%s", demoPath.c_str());
+			auto relativeDemoPath = fullDemoPath.string().substr(PathUtils::GetCurrentGameDirectory().size());
+			ImGui::Text("%s", relativeDemoPath.c_str());
 			ImGui::SameLine(500);
 
-			if (ImGui::Button(std::format("Load##{0}", demoPath).c_str(), ImVec2(60, 20)))
+			if (ImGui::Button(std::format("Load##{0}", relativeDemoPath).c_str(), ImVec2(60, 20)))
 			{
-				LOG_INFO("Loading demo {0}", demoPath);
+				Mod::GetGameInterface()->PlayDemo(fullDemoPath);
 			}
 		}
 
