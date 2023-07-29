@@ -47,46 +47,13 @@ namespace IWXMVM::D3D9Helper
 
 	void CreateDummyDevice()
 	{
-		WNDCLASSEX windowClass = {};
-		windowClass.cbSize = sizeof(WNDCLASSEX);
-		windowClass.style = CS_HREDRAW | CS_VREDRAW;
-		windowClass.lpfnWndProc = DefWindowProc;
-		windowClass.cbClsExtra = 0;
-		windowClass.cbWndExtra = 0;
-		windowClass.hInstance = GetModuleHandle(NULL);
-		windowClass.hIcon = NULL;
-		windowClass.hCursor = NULL;
-		windowClass.hbrBackground = NULL;
-		windowClass.lpszMenuName = NULL;
-		windowClass.lpszClassName = "IWXMVM";
-		windowClass.hIconSm = NULL;
-
-		RegisterClassEx(&windowClass);
-		HWND tempWindow = CreateWindow(
-			windowClass.lpszClassName,
-			"IWXMVM",
-			WS_OVERLAPPEDWINDOW,
-			0,
-			0,
-			100,
-			100,
-			NULL,
-			NULL,
-			windowClass.hInstance,
-			NULL
-		);
-
 		HWND hwnd = Mod::GetGameInterface()->GetWindowHandle();
 		if (!hwnd) {
-			DestroyWindow(tempWindow);
-			UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 			throw std::runtime_error("Failed to find HWND");
 		}
 
 		IDirect3D9* d3dObj = Direct3DCreate9(D3D_SDK_VERSION);
 		if (!d3dObj) {
-			DestroyWindow(tempWindow);
-			UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 			throw std::runtime_error("Failed to create D3D object");
 		}
 
@@ -101,7 +68,7 @@ namespace IWXMVM::D3D9Helper
 		HRESULT result = d3dObj->CreateDevice(
 			D3DADAPTER_DEFAULT,
 			D3DDEVTYPE_HAL,
-			tempWindow,
+			d3d_params.hDeviceWindow,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT,
 			&d3d_params,
 			&dummyDevice
@@ -113,7 +80,7 @@ namespace IWXMVM::D3D9Helper
 			result = d3dObj->CreateDevice(
 				D3DADAPTER_DEFAULT,
 				D3DDEVTYPE_HAL,
-				tempWindow,
+				d3d_params.hDeviceWindow,
 				D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT,
 				&d3d_params,
 				&dummyDevice
@@ -123,8 +90,6 @@ namespace IWXMVM::D3D9Helper
 		// Fail again -> death
 		if (FAILED(result) || !dummyDevice) {
 			d3dObj->Release();
-			DestroyWindow(tempWindow);
-			UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 			throw std::runtime_error("Failed to create dummy D3D device");
 		}
 
@@ -134,9 +99,6 @@ namespace IWXMVM::D3D9Helper
 
 		dummyDevice->Release();
 		d3dObj->Release();
-
-		DestroyWindow(tempWindow);
-		UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
 	}
 
 	void Hook()
