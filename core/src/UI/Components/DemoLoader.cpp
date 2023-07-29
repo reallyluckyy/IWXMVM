@@ -39,7 +39,7 @@ namespace IWXMVM::UI
 			initiallyLoadedDemos = true;
 		}
 
-		ImGui::Begin("Demos", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
+		ImGui::Begin("Demos", nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoResize);
 		
 		ImGui::Text("%d demos found!", discoveredDemoPaths.size()); 
 		ImGui::SameLine();
@@ -50,7 +50,7 @@ namespace IWXMVM::UI
 
 		for (const auto& fullDemoPath : discoveredDemoPaths)
 		{
-			auto relativeDemoPath = fullDemoPath.string().substr(PathUtils::GetCurrentGameDirectory().size());
+			auto relativeDemoPath = fullDemoPath.string().substr(PathUtils::GetCurrentGameDirectory().size() + 1);
 			ImGui::Text("%s", relativeDemoPath.c_str());
 			ImGui::SameLine(500);
 
