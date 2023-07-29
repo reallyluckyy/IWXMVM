@@ -88,7 +88,8 @@ namespace IWXMVM::UI::UIManager
 			LOG_CRITICAL("An error occurred while rendering the IWXMVM user interface");
 
 			// TODO: panic function
-			MessageBox( NULL, "An error occurred while rendering the IWXMVM user interface", "FATAL ERROR", MB_OK);
+			// MessageBox( NULL, "An error occurred while rendering the IWXMVM user interface", "FATAL ERROR", MB_OK);
+			Initialize(Mod::GetGameInterface()->GetD3D9Device());
 		}
 	}
 

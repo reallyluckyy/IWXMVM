@@ -19,12 +19,13 @@ namespace IWXMVM::D3D9Helper
 
 	HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
 	{
-		device = pDevice;
-
-		// EndScene gets the game's device, so it is the one that initializes the UI
-		if (!UI::UIManager::isInitialized.load() || UI::UIManager::needsRestart.load())
+		// If the device pointer did not change, it's most likely a premature call to EndScene and will crash
+		if (!UI::UIManager::isInitialized.load() || UI::UIManager::needsRestart.load() && device != pDevice) {
+			device = pDevice;
 			UI::UIManager::Initialize(pDevice);
+		}
 
+		// In the case in which the device pointer actually did not change, the UI will be reinitialized inside OnFrame
 		Events::Invoke(EventType::OnFrame);
 
 		return EndScene(pDevice);
