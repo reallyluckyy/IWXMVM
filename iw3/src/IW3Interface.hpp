@@ -80,8 +80,6 @@ namespace IWXMVM::IW3
 
 		void PlayDemo(std::filesystem::path demoPath) final
 		{
-			const auto DEMO_TEMP_DIR_NAME = "iwxmvm_temp_dir";
-
 			try 
 			{
 				LOG_INFO("Playing demo {0}", demoPath.string());

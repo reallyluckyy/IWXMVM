@@ -15,7 +15,10 @@ namespace IWXMVM::UI
 		{
 			auto demoExtensions = Mod::GetGameInterface()->GetDemoExtensions();
 
-			if (!std::filesystem::is_directory(i->path()) && i->path().has_extension() && std::find(demoExtensions.begin(), demoExtensions.end(), i->path().extension().string()) != demoExtensions.end())
+			if (!std::filesystem::is_directory(i->path()) 
+				&& i->path().has_extension() 
+				&& i->path().string().find(DEMO_TEMP_DIR_NAME) == std::string::npos
+				&& std::find(demoExtensions.begin(), demoExtensions.end(), i->path().extension().string()) != demoExtensions.end())
 			{
 				discoveredDemoPaths.push_back(i->path());
 			}
@@ -30,6 +33,8 @@ namespace IWXMVM::UI
 	{
 		if (!initiallyLoadedDemos) 
 		{
+			// would be cool to be able to do this in Initialize() at some point
+			// but with the current set up we still dont have access to Mod::GetGameInterface() at that time
 			FindAllDemos();
 			initiallyLoadedDemos = true;
 		}

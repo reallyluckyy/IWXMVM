@@ -3,6 +3,8 @@
 
 namespace IWXMVM
 {
+	const auto DEMO_TEMP_DIR_NAME = "IWXMVM_TEMP_DEMO_DIRECTORY";
+
 	struct Dvar
 	{
 		std::string name;
