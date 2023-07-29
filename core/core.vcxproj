@@ -112,6 +112,7 @@
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\D3D9Helper.cpp" />
     <ClCompile Include="src\ResourceData.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -138,6 +139,7 @@
     <ClCompile Include="src\WindowsConsole.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\D3D9Helper.hpp" />
     <ClInclude Include="src\Resources.hpp" />
     <ClInclude Include="src\UI\Components\Background.hpp" />
     <ClInclude Include="src\UI\Components\ControlBar.hpp" />

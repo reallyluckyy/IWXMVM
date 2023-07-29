@@ -17,8 +17,7 @@ namespace IWXMVM::IW3
 
 		void InstallHooks() final
 		{
-			HookD3D();
-			Hooks::Install(GetVTable());
+			Hooks::Install();
 		}
 
 		void SetupEventListeners() final

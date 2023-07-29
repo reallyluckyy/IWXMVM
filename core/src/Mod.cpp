@@ -7,8 +7,6 @@
 #include "Utilities/PathUtils.hpp"
 #include "Utilities/MemoryUtils.hpp"
 
-#include "UI/UIManager.hpp"
-
 namespace IWXMVM
 {
 	GameInterface* Mod::internalGameInterface = nullptr;
@@ -29,6 +27,7 @@ namespace IWXMVM
 			//MemoryUtils::UnprotectModule();
 
 			LOG_DEBUG("Installing game hooks...");
+			gameInterface->HookD3D();
 			gameInterface->InstallHooks();
 			gameInterface->SetupEventListeners();
 

@@ -6,27 +6,8 @@
 #include "Mod.hpp"
 #include "Events.hpp"
 
-#include "Components/Background.hpp"
-#include "Components/ControlBar.hpp"
-#include "Components/DebugPanel.hpp"
-#include "Components/MenuBar.hpp"
-#include "Components/GameView.hpp"
-
 namespace IWXMVM::UI::UIManager
 {
-	std::vector<std::unique_ptr<UIComponent>> uiComponents = []() {
-		std::vector<std::unique_ptr<UIComponent>> vec;
-
-		// background should probably always come first
-		vec.emplace_back(std::make_unique<Background>());
-		vec.emplace_back(std::make_unique<GameView>());
-		vec.emplace_back(std::make_unique<DebugPanel>());
-		vec.emplace_back(std::make_unique<MenuBar>());
-		vec.emplace_back(std::make_unique<ControlBar>());
-
-		return vec;
-	}();
-
 	bool hideOverlay = false;
 	int ImGuiTimeout = 0;
 	std::mutex mtx;
@@ -133,18 +114,22 @@ namespace IWXMVM::UI::UIManager
 		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
 	}
 
-	void Initialize(InitType type, IDirect3DDevice9* d3dDevice)
+	void Initialize(IDirect3DDevice9* device)
 	{
 		try 
 		{
 			// to avoid registering events after restarting ImGui
-			if (type == InitType::Initialize) {
+			if (!isInitialized.load()) {
 				LOG_DEBUG("Initializing ImGui...");
 				LOG_DEBUG("Registering OnFrame listener");
 				Events::RegisterListener(EventType::OnFrame, RunImGuiFrame);
 			}
-			else if (type == InitType::Reinitialize) {
+			else if (needsRestart.load()) {
 				LOG_DEBUG("Reinitializing ImGui...");
+			}
+			else {
+				throw std::logic_error("UIManager::Initialize called but UI is running");
+				return;
 			}
 
 			LOG_DEBUG("Creating ImGui context");
@@ -153,12 +138,10 @@ namespace IWXMVM::UI::UIManager
 
 			ImGui::StyleColorsDark();
 
-			HWND hwnd = Mod::GetGameInterface()->GetWindowHandle();;
+			HWND hwnd = FindWindow(0, Mod::GetGameInterface()->GetGameWindowName().c_str());
 			LOG_DEBUG("Initializing ImGui_ImplWin32 with HWND {0:x}", (uint32_t)hwnd);
 			ImGui_ImplWin32_Init(hwnd);
 
-			Mod::GetGameInterface()->SetD3D9Device(d3dDevice);
-			auto device = Mod::GetGameInterface()->GetD3D9Device();
 			LOG_DEBUG("Initializing ImGui_ImplDX9 with D3D9 Device {0:x}", (uintptr_t)device);
 			ImGui_ImplDX9_Init(device);
 
