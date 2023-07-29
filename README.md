@@ -3,6 +3,7 @@
 
 ## Requirements
 - Visual Studio 2022
+- DirectX SDK Jun10
 
 ## Building
 
