@@ -73,6 +73,11 @@ namespace IWXMVM::IW3
 			return demoInfo;
 		}
 
+		std::vector<std::string> GetDemoExtensions() final 
+		{
+			return { ".dm_1" };
+		}
+
 
 		bool isPlaybackPaused = false;
 

@@ -128,6 +128,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\UI\Components\DemoLoader.cpp" />
     <ClCompile Include="src\UI\Components\GameView.cpp" />
     <ClCompile Include="src\UI\Components\MenuBar.cpp" />
     <ClCompile Include="src\UI\UIImage.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="src\UI\Components\ControlBar.hpp" />
     <ClInclude Include="src\UI\Components\CustomImGuiControls.hpp" />
     <ClInclude Include="src\UI\Components\DebugPanel.hpp" />
+    <ClInclude Include="src\UI\Components\DemoLoader.hpp" />
     <ClInclude Include="src\UI\Components\GameView.hpp" />
     <ClInclude Include="src\UI\Components\MenuBar.hpp" />
     <ClInclude Include="src\UI\UIComponent.hpp" />

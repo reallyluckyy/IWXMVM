@@ -11,6 +11,7 @@
 #include "Components/DebugPanel.hpp"
 #include "Components/MenuBar.hpp"
 #include "Components/GameView.hpp"
+#include "Components/DemoLoader.hpp"
 
 namespace IWXMVM::UI::UIManager
 {
@@ -23,6 +24,7 @@ namespace IWXMVM::UI::UIManager
 		vec.emplace_back(std::make_unique<DebugPanel>());
 		vec.emplace_back(std::make_unique<MenuBar>());
 		vec.emplace_back(std::make_unique<ControlBar>());
+		vec.emplace_back(std::make_unique<DemoLoader>());
 
 		return vec;
 	}();

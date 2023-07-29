@@ -91,6 +91,7 @@ namespace IWXMVM
 		};
 
 		virtual DemoInfo GetDemoInfo() = 0;
+		virtual std::vector<std::string> GetDemoExtensions() = 0;
 
 
 		virtual void ToggleDemoPlaybackState() = 0;
