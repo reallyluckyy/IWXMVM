@@ -8,13 +8,17 @@
 
 namespace IWXMVM::UI::UIManager
 {
+	bool initRequested = false;
 	bool hideOverlay = false;
-	int ImGuiTimeout = 0;
 	std::mutex mtx;
 
 	void ShutdownImGui()
 	{
+		// ensuring synchronization with the render thread so that ImGui is not shutdown while rendering a frame
+		std::lock_guard<std::mutex> guard{ mtx };
 		LOG_DEBUG("Shutting down ImGui");
+
+		Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Passthrough);
 
 		for (const auto& component : uiComponents) 
 		{
@@ -28,17 +32,9 @@ namespace IWXMVM::UI::UIManager
 
 	bool RestartImGui()
 	{
-		// ensuring synchronization with the render thread so that ImGui is not shutdown while rendering a frame
-		std::lock_guard<std::mutex> guard{ mtx };
-
-		if (ImGuiTimeout != 0)
-			return false;
-
 		ShutdownImGui();
 		needsRestart.store(true);
 
-		// here's a timeout so that the game can restart properly before we attempt to restart ImGui
-		ImGuiTimeout = 2;
 		return true;
 	}
 
@@ -54,11 +50,18 @@ namespace IWXMVM::UI::UIManager
 		// ensuring synchronization with the main thread so that ImGui is not shutdown while rendering a frame
 		std::lock_guard<std::mutex> guard{ mtx };
 
-		if (ImGuiTimeout > 0) 
-		{
-			// vid_restart must have executed very recently
-			--ImGuiTimeout;
+		if (!isInitialized || needsRestart.load()) {
+			// This handles initialization when the D3D9 device pointer is the same after a UI restart
+			if (initRequested) {
+				Initialize(Mod::GetGameInterface()->GetD3D9Device());
+				initRequested = false;
+				return;
+			}
+			initRequested = true;
 			return;
+		}
+		else {
+			initRequested = false;
 		}
 
 		try
@@ -88,12 +91,10 @@ namespace IWXMVM::UI::UIManager
 			LOG_CRITICAL("An error occurred while rendering the IWXMVM user interface");
 
 			// TODO: panic function
-			// MessageBox( NULL, "An error occurred while rendering the IWXMVM user interface", "FATAL ERROR", MB_OK);
-			Initialize(Mod::GetGameInterface()->GetD3D9Device());
+			MessageBox( NULL, "An error occurred while rendering the IWXMVM user interface", "FATAL ERROR", MB_OK);
 		}
 	}
 
-	WNDPROC GameWndProc = nullptr;
 	HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam)) 
@@ -120,7 +121,7 @@ namespace IWXMVM::UI::UIManager
 		try 
 		{
 			// to avoid registering events after restarting ImGui
-			if (!isInitialized.load()) {
+			if (!isInitialized) {
 				LOG_DEBUG("Initializing ImGui...");
 				LOG_DEBUG("Registering OnFrame listener");
 				Events::RegisterListener(EventType::OnFrame, RunImGuiFrame);
@@ -164,7 +165,7 @@ namespace IWXMVM::UI::UIManager
 			SetImGuiStyle();
 
 			Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Capture);
-			isInitialized.store(true);
+			isInitialized = true;
 			needsRestart.store(false);
 
 			LOG_INFO("Initialized UI");

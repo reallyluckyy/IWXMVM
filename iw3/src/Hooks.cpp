@@ -393,7 +393,7 @@ namespace IWXMVM::IW3::Hooks
 
 	void Install()
 	{
-		HookManager::CreateHook(0x53366E, (std::uintptr_t)&SV_Frame_Hook, 5, false);
+		HookManager::CreateHook(0x53366E, (std::uintptr_t)SV_Frame_Hook, nullptr);
 		//CL_CGameRendering = (CL_CGameRendering_t)HookManager::CreateHook(0x474DA0, (std::uintptr_t)&CL_CGameRendering_Hook, 7, true);
 
 		for (auto& elem : CmdHooks)

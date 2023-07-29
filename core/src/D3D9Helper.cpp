@@ -1,6 +1,8 @@
 #include "StdInclude.hpp"
 #include "D3D9Helper.hpp"
 
+#include "MinHook.h"
+
 #include "Events.hpp"
 #include "Utilities/HookManager.hpp"
 #include "Mod.hpp"
@@ -9,18 +11,18 @@
 
 namespace IWXMVM::D3D9Helper
 {
-	static void* vTable[119];
-	static IDirect3DDevice9* device = nullptr;
+	void* vTable[119];
+	IDirect3DDevice9* device = nullptr;
 
 	typedef HRESULT(__stdcall* EndScene_t)(IDirect3DDevice9* pDevice);
-	static EndScene_t EndScene;
+	EndScene_t EndScene;
 	typedef HRESULT(__stdcall* Reset_t)(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
-	static Reset_t Reset;
+	Reset_t Reset;
 
 	HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
 	{
 		// If the device pointer did not change, it's most likely a premature call to EndScene and will crash
-		if (!UI::UIManager::isInitialized.load() || UI::UIManager::needsRestart.load() && device != pDevice) {
+		if (!UI::UIManager::isInitialized || UI::UIManager::needsRestart.load() && device != pDevice) {
 			device = pDevice;
 			UI::UIManager::Initialize(pDevice);
 		}
@@ -103,19 +105,13 @@ namespace IWXMVM::D3D9Helper
 
 	void Hook()
 	{
-		std::size_t resetBytes = 5;
-		std::size_t endSceneBytes = 7;
-
-		if (*(uint8_t*)vTable[16] != 0x8B || *(uint8_t*)vTable[42] != 0x6A)
-		{
-			resetBytes = 6;
-			endSceneBytes = 11;
-
-			LOG_WARN("Different byte structure detected when installing D3D hooks");
+		// TODO: move minhook initialization somewhere else
+		if (MH_Initialize() != MH_OK) {
+			throw std::runtime_error("Failed to initialize MinHook");
 		}
 
-		Reset = (Reset_t)HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)&Reset_Hook, resetBytes, true);
-		EndScene = (EndScene_t)HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)&EndScene_Hook, endSceneBytes, true);
+		HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)Reset_Hook, (std::uintptr_t*)&Reset);
+		HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)EndScene_Hook, (std::uintptr_t*)&EndScene);
 	}
 
 	void Initialize()

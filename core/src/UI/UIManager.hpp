@@ -26,9 +26,13 @@ namespace IWXMVM::UI::UIManager
 		return vec;
 	}();
 
-	inline std::atomic<bool> isInitialized = false;
+	inline std::atomic<bool> ejectRequested = false;
+	inline bool isInitialized = false;
 	inline std::atomic<bool> needsRestart = false;
 
+	inline WNDPROC GameWndProc = nullptr;
+
 	void Initialize(IDirect3DDevice9* device);
+	void ShutdownImGui();
 	bool RestartImGui();
 }

@@ -8,3 +8,10 @@
 
 #include "backends/imgui_impl_win32.cpp"
 #include "backends/imgui_impl_dx9.cpp"
+
+#include "buffer.c"
+#include "hook.c"
+#include "trampoline.c"
+
+#include "hde/hde32.c"
+#include "hde/hde64.c"
