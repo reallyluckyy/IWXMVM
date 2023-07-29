@@ -46,7 +46,6 @@ namespace IWXMVM::IW3
 			return GameState::InGame;
 		}
 
-
 		// TODO: cache this
 		DemoInfo GetDemoInfo() final
 		{

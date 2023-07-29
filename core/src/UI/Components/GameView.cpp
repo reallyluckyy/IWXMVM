@@ -4,6 +4,7 @@
 #include "Mod.hpp"
 #include "Utilities/PathUtils.hpp"
 
+
 namespace IWXMVM::UI
 {
 	bool CreateTexture(IDirect3DTexture9*& texture, ImVec2 size)
@@ -51,20 +52,35 @@ namespace IWXMVM::UI
 		return true;
 	}
 
-	ImVec2 ResizeWindow(ImVec2 window, float frame_height)
+	ImVec2 ClampImage(ImVec2 window, float frame_height) //Clamp for texture/image
 	{
-		float aspect_ratio = 16.0f / 9.0f; // Clamp to 16:9, should use whatever struct from cod4 dynamic scales
+		float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y; // Clamp ratio to refDef's width/height.
 
-		if (window.x / window.y > aspect_ratio) {
+		if (window.x / window.y > aspectRatio) {
 			// If too wide, adjust width
-			window.x = window.y * aspect_ratio;
+			window.x = window.y * aspectRatio;
 		}
-		else if (window.x / window.y < aspect_ratio) {
+		else if (window.x / window.y < aspectRatio) {
 			// If too tall, adjust height
-			window.y = window.x / aspect_ratio;
+			window.y = window.x / aspectRatio;
 		}
 
 		return ImVec2(window.x, window.y - frame_height);
+	}
+
+	void ImGuiAspectRatioClamp(ImGuiSizeCallbackData* data) //Clamp for the actual ImGui window (because resizing handle gets fucked)
+	{
+		float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y;
+		float currentRatio = data->DesiredSize.x / data->DesiredSize.y;
+
+		if (currentRatio > aspectRatio) {
+			// the window is too wide, adjust height
+			data->DesiredSize.y = data->DesiredSize.x / aspectRatio;
+		}
+		else {
+			// the window is too tall, adjust width
+			data->DesiredSize.x = data->DesiredSize.y * aspectRatio;
+		}
 	}
 
     void GameView::Initialize()
@@ -79,6 +95,8 @@ namespace IWXMVM::UI
 
 	void GameView::Render()
 	{
+		//Window Centering
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
 
 		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
 		auto viewportSize = ImGui::GetContentRegionMax();
@@ -94,7 +112,7 @@ namespace IWXMVM::UI
 			throw std::exception("Failed to capture game view");
 		}
 
-		ImGui::Image((void*)texture, ResizeWindow(viewportSize, ImGui::GetFrameHeight()));
+		ImGui::Image((void*)texture, ClampImage(viewportSize, ImGui::GetFrameHeight() * 2)); //Resizes image to clamp aspect ratio
 
 		ImGui::ShowDemoWindow();
 

@@ -399,6 +399,18 @@ namespace IWXMVM::IW3::Structures
 		$15067B6A14D88D7E1E730369692C3A81 hud;
 	};
 
+	struct refdef_t
+	{
+		int ScreenX; //0x0000
+		int ScreenY; //0x0004
+		int ScreenWidth; //0x0008
+		int ScreenHeight; //0x000C
+		float FOV[2]; //0x0010
+		float Origin[3]; //0x0018
+		float ViewAxis[3]; //0x0024
+		float ViewOffset[3]; //0x0048
+	};
+
 	struct clSnapshot_t
 	{
 		int valid;
@@ -531,7 +543,7 @@ namespace IWXMVM::IW3::Structures
 		bool mouseInitialized;
 	};
 
-
+	refdef_t* GetRefDef();
 	clientConnection_t* GetClientConnection();
 	clientActive_t* GetClientActive();
 	WinMouseVars_t* GetMouseVars();
