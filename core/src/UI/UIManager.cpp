@@ -138,7 +138,7 @@ namespace IWXMVM::UI::UIManager
 
 			ImGui::StyleColorsDark();
 
-			HWND hwnd = FindWindow(0, Mod::GetGameInterface()->GetGameWindowName().c_str());
+			HWND hwnd = Mod::GetGameInterface()->GetWindowHandle();
 			LOG_DEBUG("Initializing ImGui_ImplWin32 with HWND {0:x}", (uint32_t)hwnd);
 			ImGui_ImplWin32_Init(hwnd);
 

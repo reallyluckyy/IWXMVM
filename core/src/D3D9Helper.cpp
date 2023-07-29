@@ -98,8 +98,9 @@ namespace IWXMVM::D3D9Helper
 
 		// Try to create device - will fail if in fullscreen
 		HRESULT result = d3dObj->CreateDevice(
-			D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
-			d3d_params.hDeviceWindow,
+			D3DADAPTER_DEFAULT,
+			D3DDEVTYPE_HAL,
+			tempWindow,
 			D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT,
 			&d3d_params,
 			&dummyDevice
@@ -109,8 +110,9 @@ namespace IWXMVM::D3D9Helper
 		if (FAILED(result) || !dummyDevice) {
 			d3d_params.Windowed = false;
 			result = d3dObj->CreateDevice(
-				D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
-				d3d_params.hDeviceWindow,
+				D3DADAPTER_DEFAULT,
+				D3DDEVTYPE_HAL,
+				tempWindow,
 				D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT,
 				&d3d_params,
 				&dummyDevice
