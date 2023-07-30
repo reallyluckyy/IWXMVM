@@ -108,6 +108,8 @@
     <ClCompile Include="src\DemoParser.cpp" />
     <ClCompile Include="src\Entrypoint.cpp" />
     <ClCompile Include="src\Hooks.cpp" />
+    <ClCompile Include="src\Hooks\Commands.cpp" />
+    <ClCompile Include="src\Hooks\Playback.cpp" />
     <ClCompile Include="src\IW3Interface.hpp" />
     <ClCompile Include="src\StdInclude.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -118,6 +120,8 @@
   <ItemGroup>
     <ClInclude Include="src\DemoParser.hpp" />
     <ClInclude Include="src\Hooks.hpp" />
+    <ClInclude Include="src\Hooks\Commands.hpp" />
+    <ClInclude Include="src\Hooks\Playback.hpp" />
     <ClInclude Include="src\Structures.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
