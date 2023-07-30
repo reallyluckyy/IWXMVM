@@ -10,6 +10,11 @@ namespace IWXMVM::IW3::Structures
 		return (clientConnection_t*)0x8F4CE0;
 	}
 
+	refdef_t* GetRefDef()
+	{
+		return (refdef_t*)0x797600;
+	}
+
 	clientActive_t* GetClientActive()
 	{
 		return (clientActive_t*)0xC5F930;

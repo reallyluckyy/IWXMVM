@@ -17,22 +17,12 @@ namespace IWXMVM::IW3
 
 		void InstallHooks() final
 		{
-			Hooks::Install(GetD3D9Device());
+			Hooks::Install();
 		}
 
 		void SetupEventListeners() final
 		{
 			Events::RegisterListener(EventType::OnDemoLoad, DemoParser::Run);
-		}
-
-		IDirect3DDevice9* GetD3D9Device() final
-		{
-			return *(IDirect3DDevice9**)0xCC9A408;
-		}
-
-		HWND GetWindowHandle() final
-		{
-			return *(HWND*)0xCC1B6FC;
 		}
 
 		uintptr_t GetWndProc() final
@@ -55,7 +45,6 @@ namespace IWXMVM::IW3
 
 			return GameState::InGame;
 		}
-
 
 		// TODO: cache this
 		DemoInfo GetDemoInfo() final

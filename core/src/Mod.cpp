@@ -4,9 +4,9 @@
 #include "GameInterface.hpp"
 #include "Version.hpp"
 #include "WindowsConsole.hpp"
+#include "Utilities/HookManager.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Utilities/MemoryUtils.hpp"
-
 #include "UI/UIManager.hpp"
 
 namespace IWXMVM
@@ -29,14 +29,25 @@ namespace IWXMVM
 			//MemoryUtils::UnprotectModule();
 
 			LOG_DEBUG("Installing game hooks...");
+			gameInterface->HookD3D();
 			gameInterface->InstallHooks();
 			gameInterface->SetupEventListeners();
 
-			UI::UIManager::Initialize(UI::UIManager::InitType::Initialize);
 			// TODO: Initialize Components/Patches
 			// TODO: ...
 
 			LOG_INFO("Initialized IWXMVM!");
+
+			while (!UI::UIManager::ejectRequested.load())
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+			UI::UIManager::ShutdownImGui();
+			LOG_DEBUG("ImGui successfully shutdown");
+			HookManager::Unhook();
+			LOG_DEBUG("Unhooked");
+			SetWindowLongPtr(Mod::GetGameInterface()->GetWindowHandle(), GWLP_WNDPROC, (LONG_PTR)UI::UIManager::GameWndProc);
+
+			WindowsConsole::Close();
 		}
 		catch (std::exception& ex)
 		{

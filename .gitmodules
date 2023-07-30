@@ -7,3 +7,6 @@
 [submodule "core/third-party/incbin"]
 	path = core/third-party/incbin
 	url = https://github.com/graphitemaster/incbin.git
+[submodule "core/third-party/minhook"]
+	path = core/third-party/minhook
+	url = https://github.com/TsudaKageyu/minhook.git
