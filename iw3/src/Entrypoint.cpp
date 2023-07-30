@@ -12,8 +12,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
     if (fdwReason == DLL_PROCESS_ATTACH) 
     {
-        std::thread t1{ []() { Mod::Initialize(&gameInterface); } };
-        t1.detach();
+        ::CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(Mod::Initialize), &gameInterface, 0, nullptr);
     }
     return TRUE;
 }
