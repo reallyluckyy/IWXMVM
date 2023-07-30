@@ -39,6 +39,7 @@ namespace IWXMVM::UI
 		{
 			// would be cool to be able to do this in Initialize() at some point
 			// but with the current set up we still dont have access to Mod::GetGameInterface() at that time
+			isScanningDemoPaths.store(true);
 			std::thread([&] { FindAllDemos(); }).detach();
 			initiallyLoadedDemos = true;
 		}
@@ -55,6 +56,7 @@ namespace IWXMVM::UI
 			ImGui::SameLine();
 			if (ImGui::Button("Refresh", ImVec2(100, 20)))
 			{
+				isScanningDemoPaths.store(true);
 				std::thread([&] { FindAllDemos(); }).detach();
 				ImGui::End();
 				return;
