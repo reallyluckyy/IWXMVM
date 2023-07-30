@@ -13,6 +13,16 @@ namespace IWXMVM
 {
 	GameInterface* Mod::internalGameInterface = nullptr;
 
+	HMODULE GetCurrentModule()
+	{
+		static bool dummy;
+
+		MEMORY_BASIC_INFORMATION mbi;
+		::VirtualQuery(&dummy, &mbi, sizeof(mbi));
+
+		return static_cast<HMODULE>(mbi.AllocationBase);
+	}
+
 	void Mod::Initialize(GameInterface* gameInterface)
 	{
 		try 
@@ -41,13 +51,14 @@ namespace IWXMVM
 			while (!UI::UIManager::ejectRequested.load())
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-			UI::UIManager::ShutdownImGui();
-			LOG_DEBUG("ImGui successfully shutdown");
 			HookManager::Unhook();
 			LOG_DEBUG("Unhooked");
+			UI::UIManager::ShutdownImGui();
+			LOG_DEBUG("ImGui successfully shutdown");
 			SetWindowLongPtr(Mod::GetGameInterface()->GetWindowHandle(), GWLP_WNDPROC, (LONG_PTR)UI::UIManager::GameWndProc);
 
 			WindowsConsole::Close();
+			::FreeLibraryAndExitThread(GetCurrentModule(), 0);
 		}
 		catch (std::exception& ex)
 		{
