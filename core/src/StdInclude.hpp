@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstdio>
 #include <cstdint>
 #include <string>
@@ -11,6 +12,9 @@
 #include <filesystem>
 
 #include <d3d9.h>
+#pragma comment(lib, "d3d9.lib")
+#include <d3dx9.h>
+#pragma comment(lib, "d3dx9.lib")
 #include <Windows.h>
 
 #include "Logger.hpp"

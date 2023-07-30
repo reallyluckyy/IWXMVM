@@ -1,5 +1,6 @@
 #pragma once
 #include "StdInclude.hpp"
+#include "D3D9Helper.hpp"
 
 namespace IWXMVM
 {
@@ -54,12 +55,25 @@ namespace IWXMVM
 				return "Unknown Game";
 			}
 		}
+		std::string GetGameWindowName() const
+		{
+			switch (game)
+			{
+			case Game::IW3:
+				return "Call of Duty 4";
+			case Game::None:
+			default:
+				return "Unknown Game";
+			}
+		}
 
+		HWND GetWindowHandle() const { return FindWindow(NULL, GetGameWindowName().c_str()); }
+		IDirect3DDevice9* GetD3D9Device() const { return D3D9Helper::GetDevicePtr(); }
+
+		void HookD3D() const { D3D9Helper::Initialize(); }
 		virtual void InstallHooks() = 0;
 		virtual void SetupEventListeners() = 0;
 
-		virtual IDirect3DDevice9* GetD3D9Device() = 0;
-		virtual HWND GetWindowHandle() = 0;
 		virtual uintptr_t GetWndProc() = 0;
 		virtual void SetMouseMode(MouseMode mode) = 0;
 		virtual GameState GetGameState() = 0;

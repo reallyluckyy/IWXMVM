@@ -6,34 +6,19 @@
 #include "Mod.hpp"
 #include "Events.hpp"
 
-#include "Components/Background.hpp"
-#include "Components/ControlBar.hpp"
-#include "Components/DebugPanel.hpp"
-#include "Components/MenuBar.hpp"
-#include "Components/GameView.hpp"
-
 namespace IWXMVM::UI::UIManager
 {
-	std::vector<std::unique_ptr<UIComponent>> uiComponents = []() {
-		std::vector<std::unique_ptr<UIComponent>> vec;
-
-		// background should probably always come first
-		vec.emplace_back(std::make_unique<Background>());
-		vec.emplace_back(std::make_unique<GameView>());
-		vec.emplace_back(std::make_unique<DebugPanel>());
-		vec.emplace_back(std::make_unique<MenuBar>());
-		vec.emplace_back(std::make_unique<ControlBar>());
-
-		return vec;
-	}();
-
+	bool initRequested = false;
 	bool hideOverlay = false;
-	int ImGuiTimeout = 0;
 	std::mutex mtx;
 
 	void ShutdownImGui()
 	{
+		// ensuring synchronization with the render thread so that ImGui is not shutdown while rendering a frame
+		std::lock_guard<std::mutex> guard{ mtx };
 		LOG_DEBUG("Shutting down ImGui");
+
+		Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Passthrough);
 
 		for (const auto& component : uiComponents) 
 		{
@@ -47,16 +32,9 @@ namespace IWXMVM::UI::UIManager
 
 	bool RestartImGui()
 	{
-		// ensuring synchronization with the render thread so that ImGui is not shutdown while rendering a frame
-		std::lock_guard<std::mutex> guard{ mtx };
-
-		if (ImGuiTimeout != 0)
-			return false;
-
 		ShutdownImGui();
+		needsRestart.store(true);
 
-		// here's a timeout so that the game can restart properly before we attempt to restart ImGui
-		ImGuiTimeout = 2;
 		return true;
 	}
 
@@ -72,17 +50,18 @@ namespace IWXMVM::UI::UIManager
 		// ensuring synchronization with the main thread so that ImGui is not shutdown while rendering a frame
 		std::lock_guard<std::mutex> guard{ mtx };
 
-		if (ImGuiTimeout > 0) 
-		{
-			// vid_restart must have executed very recently
-			if (ImGuiTimeout - 1 == 0) 
-			{
-				LOG_DEBUG("Reinitializing ImGui");
-				Initialize(InitType::Reinitialize);
+		if (!isInitialized || needsRestart.load()) {
+			// This handles initialization when the D3D9 device pointer is the same after a UI restart
+			if (initRequested) {
+				Initialize(Mod::GetGameInterface()->GetD3D9Device());
+				initRequested = false;
+				return;
 			}
-
-			--ImGuiTimeout;
+			initRequested = true;
 			return;
+		}
+		else {
+			initRequested = false;
 		}
 
 		try
@@ -116,7 +95,6 @@ namespace IWXMVM::UI::UIManager
 		}
 	}
 
-	WNDPROC GameWndProc = nullptr;
 	HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam)) 
@@ -138,14 +116,22 @@ namespace IWXMVM::UI::UIManager
 		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
 	}
 
-	void Initialize(InitType type)
+	void Initialize(IDirect3DDevice9* device)
 	{
 		try 
 		{
 			// to avoid registering events after restarting ImGui
-			if (type == InitType::Initialize) {
+			if (!isInitialized) {
+				LOG_DEBUG("Initializing ImGui...");
 				LOG_DEBUG("Registering OnFrame listener");
 				Events::RegisterListener(EventType::OnFrame, RunImGuiFrame);
+			}
+			else if (needsRestart.load()) {
+				LOG_DEBUG("Reinitializing ImGui...");
+			}
+			else {
+				throw std::logic_error("UIManager::Initialize called but UI is running");
+				return;
 			}
 
 			LOG_DEBUG("Creating ImGui context");
@@ -154,11 +140,10 @@ namespace IWXMVM::UI::UIManager
 
 			ImGui::StyleColorsDark();
 
-			HWND hwnd = Mod::GetGameInterface()->GetWindowHandle();;
+			HWND hwnd = Mod::GetGameInterface()->GetWindowHandle();
 			LOG_DEBUG("Initializing ImGui_ImplWin32 with HWND {0:x}", (uint32_t)hwnd);
 			ImGui_ImplWin32_Init(hwnd);
 
-			auto device = Mod::GetGameInterface()->GetD3D9Device();
 			LOG_DEBUG("Initializing ImGui_ImplDX9 with D3D9 Device {0:x}", (uintptr_t)device);
 			ImGui_ImplDX9_Init(device);
 
@@ -180,6 +165,8 @@ namespace IWXMVM::UI::UIManager
 			SetImGuiStyle();
 
 			Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Capture);
+			isInitialized = true;
+			needsRestart.store(false);
 
 			LOG_INFO("Initialized UI");
 		}
