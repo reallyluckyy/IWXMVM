@@ -86,6 +86,14 @@ namespace IWXMVM::IW3::Structures
 		netProfileInfo_t prof;
 	};
 
+	struct clientStatic_t
+	{
+		int quit;
+		int hunkUsersStarted;
+		char servername[256];
+		// ...
+	};
+
 	struct clientConnection_t
 	{
 		int qport;
@@ -545,6 +553,7 @@ namespace IWXMVM::IW3::Structures
 
 	refdef_t* GetRefDef();
 	clientConnection_t* GetClientConnection();
+	clientStatic_t* GetClientStatic();
 	clientActive_t* GetClientActive();
 	WinMouseVars_t* GetMouseVars();
 

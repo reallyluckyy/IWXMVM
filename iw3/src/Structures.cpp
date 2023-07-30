@@ -10,6 +10,11 @@ namespace IWXMVM::IW3::Structures
 		return (clientConnection_t*)0x8F4CE0;
 	}
 
+	clientStatic_t* GetClientStatic()
+	{
+		return (clientStatic_t*)0x956D80;
+	}
+
 	refdef_t* GetRefDef()
 	{
 		return (refdef_t*)0x797600;

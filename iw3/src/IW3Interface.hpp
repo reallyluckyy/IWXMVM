@@ -50,7 +50,7 @@ namespace IWXMVM::IW3
 		DemoInfo GetDemoInfo() final
 		{
 			DemoInfo demoInfo;
-			demoInfo.name = Structures::GetClientConnection()->demoName;
+			demoInfo.name = Structures::GetClientStatic()->servername;
 
 			std::string str = static_cast<std::string>(demoInfo.name);
 			str += (str.ends_with(".dm_1")) ? "" : ".dm_1";
