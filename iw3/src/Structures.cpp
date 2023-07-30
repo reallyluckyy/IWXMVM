@@ -56,4 +56,22 @@ namespace IWXMVM::IW3::Structures
 
 		return "";
 	}
+
+	// TODO: now this should really not belong in a file called "Structures.cpp"...
+	void Cbuf_AddText(std::string command)
+	{
+		LOG_DEBUG("Executing command \"{0}\"", command);
+
+		command.append("\n");
+
+		const char* commandString = command.c_str();
+		const auto Cbuf_AddText_Address = 0x4F8D90;
+
+		__asm
+		{
+			mov eax, commandString
+			mov ecx, 0
+			call Cbuf_AddText_Address
+		}
+	}
 }
