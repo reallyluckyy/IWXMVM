@@ -19,8 +19,47 @@ namespace IWXMVM::D3D9Helper
 	typedef HRESULT(__stdcall* Reset_t)(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
 	Reset_t Reset;
 
+	bool CheckForOverlays(std::uintptr_t returnAddress)
+	{
+		static constexpr std::array overlayNames
+		{
+			"gameoverlay", // Steam
+			"discord"      // Discord
+		};
+		static std::array<std::uintptr_t, std::size(overlayNames)> returnAddresses{};
+
+		for (std::size_t i = 0; i < returnAddresses.size(); ++i) 
+		{
+			if (!returnAddresses[i]) 
+			{
+				MEMORY_BASIC_INFORMATION mbi;
+				::VirtualQuery(reinterpret_cast<LPCVOID>(returnAddress), &mbi, sizeof(MEMORY_BASIC_INFORMATION));
+
+				char module[1024];
+				::GetModuleFileName(static_cast<HMODULE>(mbi.AllocationBase), module, sizeof(module));
+
+				if (std::string_view{ module }.find(overlayNames[i]) != std::string_view::npos) 
+				{
+					returnAddresses[i] = returnAddress;
+					return true;
+				}
+			} 
+			else if (returnAddresses[i] == returnAddress) 
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
 	{
+		const std::uintptr_t returnAddress = reinterpret_cast<std::uintptr_t>(_ReturnAddress());
+		if (CheckForOverlays(returnAddress)) {
+			return EndScene(pDevice);
+		}
+		
 		// If the device pointer did not change, it's most likely a premature call to EndScene and will crash
 		if (!UI::UIManager::isInitialized || UI::UIManager::needsRestart.load() && device != pDevice) {
 			device = pDevice;
