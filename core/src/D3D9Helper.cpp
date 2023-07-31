@@ -11,6 +11,7 @@
 
 namespace IWXMVM::D3D9Helper
 {
+	HWND game_hwnd = nullptr;
 	void* vTable[119];
 	IDirect3DDevice9* device = nullptr;
 
@@ -158,6 +159,34 @@ namespace IWXMVM::D3D9Helper
 		CreateDummyDevice();
 		Hook();
 		LOG_DEBUG("Hooked D3D9");
+	}
+
+	BOOL CALLBACK CheckWindowPID(HWND hwnd, LPARAM lParam)
+	{
+		DWORD lpdwPID;
+		GetWindowThreadProcessId(hwnd, &lpdwPID);
+
+		// It's possible the console window will be found instead of the game one
+		// The console window will have the path of the game executable as its title
+		// So we need to make sure there are no backslashes in the title
+		char wndName[512];
+		GetWindowText(hwnd, wndName, 512);
+		if (lpdwPID == lParam && !strchr(wndName, (int)'\\')) {
+			game_hwnd = hwnd;
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+	HWND FindWindowHandle()
+	{
+		if (EnumWindows(CheckWindowPID, (LPARAM)GetCurrentProcessId())) {
+			LOG_CRITICAL("Failed to find the game window");
+			return nullptr;
+		}
+
+		return game_hwnd;
 	}
 
 	IDirect3DDevice9* GetDevicePtr()
