@@ -57,19 +57,8 @@ namespace IWXMVM
 				return "Unknown Game";
 			}
 		}
-		std::string GetGameWindowName() const
-		{
-			switch (game)
-			{
-			case Game::IW3:
-				return "Call of Duty 4";
-			case Game::None:
-			default:
-				return "Unknown Game";
-			}
-		}
 
-		HWND GetWindowHandle() const { return FindWindow(NULL, GetGameWindowName().c_str()); }
+		HWND GetWindowHandle() const { return D3D9Helper::FindWindowHandle(); }
 		IDirect3DDevice9* GetD3D9Device() const { return D3D9Helper::GetDevicePtr(); }
 
 		void HookD3D() const { D3D9Helper::Initialize(); }

@@ -30,7 +30,7 @@ namespace IWXMVM::UI
                 ImGui::EndMenu();
             }
 
-            auto windowSize = PathUtils::GetWindowSize(Mod::GetGameInterface()->GetWindowHandle());
+            auto windowSize = ImGui::GetIO().DisplaySize;
             ImGui::SetCursorPosX(windowSize.x - 100);
             ImGui::Text("IWXMVM %s", IWXMVM_VERSION);
 

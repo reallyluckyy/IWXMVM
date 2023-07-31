@@ -33,7 +33,7 @@ namespace IWXMVM::UI
 
 		const auto PADDING = 20;
 
-		auto windowSize = PathUtils::GetWindowSize(Mod::GetGameInterface()->GetWindowHandle());
+		auto windowSize = ImGui::GetIO().DisplaySize;
 
 		auto panelSize = ImVec2(windowSize.x, windowSize.y / 12);
 
