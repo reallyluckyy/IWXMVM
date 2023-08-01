@@ -11,7 +11,7 @@
 
 namespace IWXMVM::D3D9Helper
 {
-	HWND game_hwnd = nullptr;
+	HWND gameWindowHandle = nullptr;
 	void* vTable[119];
 	IDirect3DDevice9* device = nullptr;
 
@@ -171,8 +171,8 @@ namespace IWXMVM::D3D9Helper
 		// So we need to make sure there are no backslashes in the title
 		char wndName[512];
 		GetWindowText(hwnd, wndName, 512);
-		if (lpdwPID == lParam && !strchr(wndName, (int)'\\')) {
-			game_hwnd = hwnd;
+		if (lpdwPID == lParam && hwnd != GetConsoleWindow()) {
+			gameWindowHandle = hwnd;
 			return FALSE;
 		}
 
@@ -186,7 +186,7 @@ namespace IWXMVM::D3D9Helper
 			return nullptr;
 		}
 
-		return game_hwnd;
+		return gameWindowHandle;
 	}
 
 	IDirect3DDevice9* GetDevicePtr()
