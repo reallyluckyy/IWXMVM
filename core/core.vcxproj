@@ -119,6 +119,7 @@
     </ClCompile>
     <ClCompile Include="src\Resources.cpp" />
     <ClCompile Include="src\UI\Components\Background.cpp" />
+    <ClCompile Include="src\UI\Components\CaptureMenu.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
     <ClCompile Include="src\UI\Components\CustomImGuiControls.cpp" />
     <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="src\D3D9Helper.hpp" />
     <ClInclude Include="src\Resources.hpp" />
     <ClInclude Include="src\UI\Components\Background.hpp" />
+    <ClInclude Include="src\UI\Components\CaptureMenu.hpp" />
     <ClInclude Include="src\UI\Components\ControlBar.hpp" />
     <ClInclude Include="src\UI\Components\CustomImGuiControls.hpp" />
     <ClInclude Include="src\UI\Components\DebugPanel.hpp" />

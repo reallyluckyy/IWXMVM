@@ -99,6 +99,26 @@ namespace IWXMVM::UI
 		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
 
 		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
+
+		ImGui::Text("View:");
+		ImGui::SameLine();
+		const char* cameraComboItems[] = { "First Person Camera", "Free Camera", "Dolly Camera", "Bone Camera" };
+		static int currentCameraComboItem = 0;
+		ImGui::SetNextItemWidth(200);
+		ImGui::Combo("##gameViewCameraCombo", &currentCameraComboItem, cameraComboItems, IM_ARRAYSIZE(cameraComboItems));
+
+		if (currentCameraComboItem == 0)
+		{
+			ImGui::SameLine();
+			ImGui::Text("Player:");
+
+			ImGui::SameLine();
+			const char* playerCameraComboItems[] = { "Player 1", "Player 2", "Player 3", "Player 4" };
+			static int currentPlayerCameraComboItem = 0;
+			ImGui::SetNextItemWidth(200);
+			ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems, IM_ARRAYSIZE(playerCameraComboItems));
+		}
+
 		auto viewportSize = ImGui::GetContentRegionMax();
 
 		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y)
