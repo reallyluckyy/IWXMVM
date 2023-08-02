@@ -12,6 +12,30 @@ namespace IWXMVM::IW3::Structures
 		void* function;
 	};
 
+	typedef int qboolean;
+
+	union qfile_gut
+	{
+		FILE* o;
+		void* z;
+	};
+
+	struct qfile_ut
+	{
+		qfile_gut file;
+	};
+
+	struct fileHandleData_t
+	{
+		qfile_ut handleFiles;
+		qboolean handleSync;
+		int fileSize;
+		int zipFilePos;
+		int zipFileLen;
+		qboolean zipFile;
+		qboolean streamed;
+		char name[256];
+	};
 
 	enum netadrtype_t
 	{
