@@ -55,7 +55,6 @@ namespace IWXMVM
 			LOG_DEBUG("Unhooked");
 			UI::UIManager::ShutdownImGui();
 			LOG_DEBUG("ImGui successfully shutdown");
-			SetWindowLongPtr(Mod::GetGameInterface()->GetWindowHandle(), GWLP_WNDPROC, (LONG_PTR)UI::UIManager::GameWndProc);
 
 			WindowsConsole::Close();
 			::FreeLibraryAndExitThread(GetCurrentModule(), 0);

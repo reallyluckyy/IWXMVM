@@ -167,10 +167,7 @@ namespace IWXMVM::D3D9Helper
 		GetWindowThreadProcessId(hwnd, &lpdwPID);
 
 		// It's possible the console window will be found instead of the game one
-		// The console window will have the path of the game executable as its title
-		// So we need to make sure there are no backslashes in the title
-		char wndName[512];
-		GetWindowText(hwnd, wndName, 512);
+		// So we need to check against GetConsoleWindow()
 		if (lpdwPID == lParam && hwnd != GetConsoleWindow()) {
 			gameWindowHandle = hwnd;
 			return FALSE;

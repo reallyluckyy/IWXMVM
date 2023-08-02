@@ -46,8 +46,9 @@ namespace IWXMVM::HookManager
 
 	void Unhook()
 	{
-		MH_DisableHook(MH_ALL_HOOKS);
-		MH_RemoveHook(MH_ALL_HOOKS);
-		MH_Uninitialize();
+		if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK)
+			throw std::runtime_error("Failed to disable hooks");
+		if (MH_Uninitialize() != MH_OK)
+			throw std::runtime_error("Failed to uninitialize MinHook");
 	}
 }

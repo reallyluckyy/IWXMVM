@@ -18,6 +18,7 @@ namespace IWXMVM::UI::UIManager
 		std::lock_guard<std::mutex> guard{ mtx };
 		LOG_DEBUG("Shutting down ImGui");
 
+		SetWindowLongPtr(Mod::GetGameInterface()->GetWindowHandle(), GWLP_WNDPROC, (LONG_PTR)GameWndProc);
 		Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Passthrough);
 
 		for (const auto& component : uiComponents) 

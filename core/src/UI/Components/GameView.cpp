@@ -39,7 +39,7 @@ namespace IWXMVM::UI
 			return false;
 		}
 
-		result = device->StretchRect(RenderTarget, NULL, textureSurface, NULL, D3DTEXF_NONE);
+		result = device->StretchRect(RenderTarget, NULL, textureSurface, NULL, D3DTEXF_LINEAR);
 		if (FAILED(result))
 		{
 			textureSurface->Release();
