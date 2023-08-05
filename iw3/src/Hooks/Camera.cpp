@@ -101,6 +101,25 @@ namespace IWXMVM::IW3::Hooks::Camera
 		__asm jmp FX_SetupCamera_Trampoline
 	}
 
+	uint32_t CG_DObjGetWorldTagMatrix_Trampoline;
+	void __declspec(naked) CG_DObjGetWorldTagMatrix_Hook()
+	{
+		static float* tempEDI;
+		static float dummyViewAxis[9];
+
+		__asm mov tempEDI, edi
+		__asm pushad
+
+		{
+			if (Mod::GetCameraManager()->GetActiveCamera().IsModControlledCameraMode())
+				tempEDI = dummyViewAxis;
+		}
+
+		__asm popad
+		__asm mov edi, tempEDI
+		__asm jmp CG_DObjGetWorldTagMatrix_Trampoline
+	}
+
 	void Install()
 	{
 		// rewrite the camera position and fov
@@ -114,5 +133,8 @@ namespace IWXMVM::IW3::Hooks::Camera
 		HookManager::CreateHook(0x4A56F0, (uintptr_t)FX_SetupCamera_Hook, &FX_SetupCamera_Trampoline);
 		
 		// TODO: CG_CalcFov
+
+		// ignore writes to camera angles (this fixes things like the player knifing affecting the freecam)
+		HookManager::CreateHook(0x434070, (uintptr_t)CG_DObjGetWorldTagMatrix_Hook, &CG_DObjGetWorldTagMatrix_Trampoline);
 	}
 }
