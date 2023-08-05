@@ -36,32 +36,12 @@ namespace IWXMVM::IW3::DemoParser
 		}
 	}
 
-	void OpenFile(std::ifstream& file)
-	{
-		static constexpr std::size_t fileHandleCount = 64;
-		using FileHandle = Structures::fileHandleData_t;
-
-		for (std::size_t i = 0; i < fileHandleCount; ++i) 
-		{
-			const FileHandle& fh = *reinterpret_cast<FileHandle*>(0xCB1DCC8 + i * sizeof(FileHandle));
-
-			if (const std::string_view sv{ fh.name }; sv.ends_with(".dm_1")) 
-			{
-				file.open(sv.data(), std::ios::binary);
-				break;
-			}
-		}
-
-		if (!file.is_open()) 
-		{
-			throw std::exception("failed to open demo file");
-		}
-	}
-
 	void Run()
 	{
-		std::ifstream file;
-		OpenFile(file);
+		std::ifstream file(Mod::GetGameInterface()->GetMostRecentDemo(), std::ios::binary);
++		if (!file.is_open()) {
+ 			throw std::exception("failed to open demo file");
+ 		}
 
 		std::vector<clientArchiveData_t> archives;
 		
