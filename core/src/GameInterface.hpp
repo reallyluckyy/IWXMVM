@@ -85,6 +85,20 @@ namespace IWXMVM
 			}
 		}
 
+		void SetMostRecentDemo(const std::filesystem::path& path)
+		{
+			if (latestDemoFilePath.empty())
+			{ 
+				latestDemoFilePath = path;
+			}
+			
+			assert(latestDemoFilePath == path);
+		}
+
+		std::filesystem::path GetMostRecentDemo()
+		{
+			return latestDemoFilePath;
+		}
 
 		struct DemoInfo
 		{
@@ -106,5 +120,6 @@ namespace IWXMVM
 
 	private:
 		Game game;
+		std::filesystem::path latestDemoFilePath;
 	};
 }
