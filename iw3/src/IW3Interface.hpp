@@ -69,9 +69,34 @@ namespace IWXMVM::IW3
 
 		void PlayDemo(std::filesystem::path demoPath) final
 		{
-			Structures::Cbuf_AddText(
-				std::format(R"(demo "{0}" fullpath)", demoPath.string())
-			);
+			try 
+			{
+				LOG_INFO("Playing demo {0}", demoPath.string());
+
+				if (!std::filesystem::exists(demoPath) || !std::filesystem::is_regular_file(demoPath))
+					return;
+
+				const auto tempDemoDir = std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos" / DEMO_TEMP_DIR_NAME;
+				if (!std::filesystem::exists(tempDemoDir))
+					std::filesystem::create_directories(tempDemoDir);
+
+				const auto tempDemoFile = tempDemoDir / (std::format("{0}{1}", DEMO_TEMP_FILE_NAME, demoPath.extension().string()));
+				if (std::filesystem::exists(tempDemoFile) && std::filesystem::is_symlink(tempDemoFile))
+					std::filesystem::remove(tempDemoFile);
+
+				std::filesystem::create_symlink(demoPath, tempDemoFile);
+
+				Structures::Cbuf_AddText(
+					std::format(R"(demo {0}/{1})",
+						DEMO_TEMP_DIR_NAME,
+						tempDemoFile.filename().string()
+					)
+				);
+			}
+			catch (std::filesystem::filesystem_error& e) 
+			{
+				LOG_ERROR("Failed to create symlink for demo file {0}: {1}", demoPath.string(), e.what());
+			}
 		}
 
 
