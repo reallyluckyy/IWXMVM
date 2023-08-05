@@ -5,6 +5,7 @@
 namespace IWXMVM
 {
 	const auto DEMO_TEMP_DIR_NAME = "MVMTMP";
+	const auto DEMO_TEMP_FILE_NAME = "MVMDEMO";
 
 	struct Dvar
 	{
