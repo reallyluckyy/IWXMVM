@@ -12,6 +12,9 @@
 namespace IWXMVM
 {
 	GameInterface* Mod::internalGameInterface = nullptr;
+	Components::CameraManager* Mod::internalCameraManager = nullptr;
+
+	Components::CameraManager cameraManager = Components::CameraManager();
 
 	HMODULE GetCurrentModule()
 	{
@@ -28,6 +31,7 @@ namespace IWXMVM
 		try 
 		{
 			internalGameInterface = gameInterface;
+			internalCameraManager = &cameraManager;
 
 			WindowsConsole::Open();
 			Logger::Initialize();
@@ -43,7 +47,9 @@ namespace IWXMVM
 			gameInterface->InstallHooks();
 			gameInterface->SetupEventListeners();
 
-			// TODO: Initialize Components/Patches
+			// Initialize Components
+			cameraManager.Initialize();
+			
 			// TODO: ...
 
 			LOG_INFO("Initialized IWXMVM!");

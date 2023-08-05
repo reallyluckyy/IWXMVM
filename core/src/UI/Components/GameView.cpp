@@ -95,6 +95,9 @@ namespace IWXMVM::UI
 
 	void GameView::Render()
 	{
+		auto cameraManager = Mod::GetCameraManager();
+		auto& currentCamera = cameraManager->GetActiveCamera();
+
 		//Window Centering
 		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
 
@@ -102,12 +105,27 @@ namespace IWXMVM::UI
 
 		ImGui::Text("View:");
 		ImGui::SameLine();
-		const char* cameraComboItems[] = { "First Person Camera", "Free Camera", "Dolly Camera", "Bone Camera" };
-		static int currentCameraComboItem = 0;
 		ImGui::SetNextItemWidth(200);
-		ImGui::Combo("##gameViewCameraCombo", &currentCameraComboItem, cameraComboItems, IM_ARRAYSIZE(cameraComboItems));
 
-		if (currentCameraComboItem == 0)
+		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager->GetCameraModeLabel(currentCamera.GetMode()).c_str()))
+		{
+			for (auto cameraMode : cameraManager->GetCameraModes())
+			{
+				bool isSelected = currentCamera.GetMode()  == cameraMode;
+				if (ImGui::Selectable(cameraManager->GetCameraModeLabel(cameraMode).c_str(), currentCamera.GetMode() == cameraMode))
+				{
+					cameraManager->SetActiveCamera(cameraMode);
+				}
+
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		if (currentCamera.GetMode() == Components::Camera::Mode::FirstPerson)
 		{
 			ImGui::SameLine();
 			ImGui::Text("Player:");

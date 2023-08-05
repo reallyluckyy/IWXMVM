@@ -27,6 +27,7 @@
 #include <psapi.h>
 
 #include "Logger.hpp"
+#include "Types.hpp"
 
 #pragma warning(push, 0)
 #define IMGUI_DEFINE_MATH_OPERATORS

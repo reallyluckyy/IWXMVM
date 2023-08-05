@@ -1,6 +1,7 @@
 #pragma once
 #include "StdInclude.hpp"
 #include "D3D9Helper.hpp"
+#include "Components/Camera.hpp"
 
 namespace IWXMVM
 {
@@ -131,7 +132,11 @@ namespace IWXMVM
 		virtual void ToggleDemoPlaybackState() = 0;
 		virtual bool IsDemoPlaybackPaused() = 0;
 
+		// perhaps dvars shouldnt be exposed to core at all?
 		virtual std::optional<Dvar> GetDvar(const std::string name) = 0;
+
+		virtual void SetPlayerModelVisible(bool visible) = 0;
+		virtual void SetHUDVisible(bool visible) = 0;
 
 	private:
 		Game game;
