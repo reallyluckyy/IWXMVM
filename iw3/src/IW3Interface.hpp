@@ -86,6 +86,8 @@ namespace IWXMVM::IW3
 
 				std::filesystem::create_symlink(demoPath, tempDemoFile);
 
+				SetMostRecentDemo(tempDemoFile);
+
 				Structures::Cbuf_AddText(
 					std::format(R"(demo {0}/{1})",
 						DEMO_TEMP_DIR_NAME,
