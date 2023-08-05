@@ -19,7 +19,6 @@ namespace IWXMVM::UI
 
 			if (!std::filesystem::is_directory(i->path()) 
 				&& i->path().has_extension() 
-				&& i->path().string().find(DEMO_TEMP_DIR_NAME) == std::string::npos
 				&& std::find(demoExtensions.begin(), demoExtensions.end(), i->path().extension().string()) != demoExtensions.end())
 			{
 				discoveredDemoPaths.push_back(i->path());

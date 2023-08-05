@@ -67,38 +67,16 @@ namespace IWXMVM::IW3
 			return { ".dm_1" };
 		}
 
-		void PlayDemo(std::filesystem::path demoPath) final
+		std::filesystem::path GetDemoDirectory() final
 		{
-			try 
-			{
-				LOG_INFO("Playing demo {0}", demoPath.string());
+			return std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos";
+		}
 
-				if (!std::filesystem::exists(demoPath) || !std::filesystem::is_regular_file(demoPath))
-					return;
-
-				const auto tempDemoDir = std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos" / DEMO_TEMP_DIR_NAME;
-				if (!std::filesystem::exists(tempDemoDir))
-					std::filesystem::create_directories(tempDemoDir);
-
-				const auto tempDemoFile = tempDemoDir / (std::format("{0}{1}", DEMO_TEMP_FILE_NAME, demoPath.extension().string()));
-				if (std::filesystem::exists(tempDemoFile) && std::filesystem::is_symlink(tempDemoFile))
-					std::filesystem::remove(tempDemoFile);
-
-				std::filesystem::create_symlink(demoPath, tempDemoFile);
-
-				SetMostRecentDemo(tempDemoFile);
-
-				Structures::Cbuf_AddText(
-					std::format(R"(demo {0}/{1})",
-						DEMO_TEMP_DIR_NAME,
-						tempDemoFile.filename().string()
-					)
-				);
-			}
-			catch (std::filesystem::filesystem_error& e) 
-			{
-				LOG_ERROR("Failed to create symlink for demo file {0}: {1}", demoPath.string(), e.what());
-			}
+		void PlaySymlinkedDemo()
+		{
+			Structures::Cbuf_AddText(
+				std::format(R"(demo {0})", DEMO_SYMLINK_FILE_NAME)
+			);
 		}
 
 

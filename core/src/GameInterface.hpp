@@ -4,8 +4,7 @@
 
 namespace IWXMVM
 {
-	const auto DEMO_TEMP_DIR_NAME = "MVMTMP";
-	const auto DEMO_TEMP_FILE_NAME = "MVMDEMO";
+	const auto DEMO_SYMLINK_FILE_NAME = "IWXMVM_DEMO_LINK";
 
 	struct Dvar
 	{
@@ -85,20 +84,8 @@ namespace IWXMVM
 			}
 		}
 
-		void SetMostRecentDemo(const std::filesystem::path& path)
-		{
-			if (latestDemoFilePath.empty())
-			{ 
-				latestDemoFilePath = path;
-			}
-			
-			assert(latestDemoFilePath == path);
-		}
-
-		std::filesystem::path GetMostRecentDemo()
-		{
-			return latestDemoFilePath;
-		}
+		virtual std::filesystem::path GetDemoDirectory() = 0;
+		std::filesystem::path GetDemoSymlinkPath() { return (GetDemoDirectory() / DEMO_SYMLINK_FILE_NAME).replace_extension(GetDemoExtensions()[0]); }
 
 		struct DemoInfo
 		{
@@ -111,7 +98,35 @@ namespace IWXMVM
 
 		virtual DemoInfo GetDemoInfo() = 0;
 		virtual std::vector<std::string> GetDemoExtensions() = 0;
-		virtual void PlayDemo(std::filesystem::path demoPath) = 0;
+
+		virtual void PlaySymlinkedDemo() = 0;
+
+		void PlayDemo(std::filesystem::path demoPath)
+		{
+			try
+			{
+				LOG_INFO("Playing demo {0}", demoPath.string());
+
+				if (!std::filesystem::exists(demoPath) || !std::filesystem::is_regular_file(demoPath))
+					return;
+
+				const auto demoDirectory = GetDemoDirectory();
+				if (!std::filesystem::exists(demoDirectory))
+					std::filesystem::create_directories(demoDirectory);
+
+				const auto demoSymlink = GetDemoSymlinkPath();
+				if (std::filesystem::exists(demoSymlink) && std::filesystem::is_symlink(demoSymlink))
+					std::filesystem::remove(demoSymlink);
+
+				std::filesystem::create_symlink(demoPath, demoSymlink);
+
+				PlaySymlinkedDemo();
+			}
+			catch (std::filesystem::filesystem_error& e)
+			{
+				LOG_ERROR("Failed to create symlink for demo file {0}: {1}", demoPath.string(), e.what());
+			}
+		}
 
 		virtual void ToggleDemoPlaybackState() = 0;
 		virtual bool IsDemoPlaybackPaused() = 0;
@@ -120,6 +135,5 @@ namespace IWXMVM
 
 	private:
 		Game game;
-		std::filesystem::path latestDemoFilePath;
 	};
 }
