@@ -98,8 +98,6 @@ namespace IWXMVM::Components
 			}
 		}
 
-		// TODO: publish event for OnCameraModeChange instead of having logic here?
-		Mod::GetGameInterface()->SetPlayerModelVisible(GetActiveCamera().GetMode() != Camera::Mode::FirstPerson);
-		Mod::GetGameInterface()->SetHUDVisible(GetActiveCamera().GetMode() == Camera::Mode::FirstPerson);
+		Events::Invoke(EventType::OnCameraChanged);
 	}
 }

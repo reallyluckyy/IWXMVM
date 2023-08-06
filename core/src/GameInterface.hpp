@@ -135,9 +135,6 @@ namespace IWXMVM
 		// perhaps dvars shouldnt be exposed to core at all?
 		virtual std::optional<Dvar> GetDvar(const std::string name) = 0;
 
-		virtual void SetPlayerModelVisible(bool visible) = 0;
-		virtual void SetHUDVisible(bool visible) = 0;
-
 	private:
 		Game game;
 	};

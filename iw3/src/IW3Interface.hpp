@@ -6,6 +6,7 @@
 #include "Hooks.hpp"
 #include "Events.hpp"
 #include "DemoParser.hpp"
+#include "Hooks/Camera.hpp"
 
 namespace IWXMVM::IW3
 {
@@ -23,6 +24,7 @@ namespace IWXMVM::IW3
 		void SetupEventListeners() final
 		{
 			Events::RegisterListener(EventType::OnDemoLoad, DemoParser::Run);
+			Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
 		}
 
 		uintptr_t GetWndProc() final
@@ -104,16 +106,6 @@ namespace IWXMVM::IW3
 			dvar.value = (Dvar::Value*)&iw3Dvar->current;
 
 			return dvar;
-		}
-
-		void SetPlayerModelVisible(bool visible) final
-		{
-			GetDvar("cg_thirdperson")->value->int32 = (visible) ? 1 : 0;
-		}
-
-		void SetHUDVisible(bool visible) final
-		{
-			GetDvar("cg_draw2d")->value->int32 = (visible) ? 1 : 0;
 		}
 	};
 }

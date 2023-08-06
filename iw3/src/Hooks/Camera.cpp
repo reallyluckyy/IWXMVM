@@ -137,4 +137,16 @@ namespace IWXMVM::IW3::Hooks::Camera
 		// ignore writes to camera angles (this fixes things like the player knifing affecting the freecam)
 		HookManager::CreateHook(0x434070, (uintptr_t)CG_DObjGetWorldTagMatrix_Hook, &CG_DObjGetWorldTagMatrix_Trampoline);
 	}
+
+	void OnCameraChanged()
+	{
+		auto& camera = Mod::GetCameraManager()->GetActiveCamera();
+		auto isFreeCamera = camera.IsModControlledCameraMode();
+
+		Structures::FindDvar("cg_thirdperson")->current.enabled = (isFreeCamera) ? 1 : 0;
+		Structures::FindDvar("cg_draw2d")->current.enabled = (isFreeCamera) ? 0 : 1;
+
+		Structures::FindDvar("r_lodBiasRigid")->current.value = -40000;
+		Structures::FindDvar("r_lodBiasSkinned")->current.value = -40000;
+	}
 }
