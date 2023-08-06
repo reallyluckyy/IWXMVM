@@ -15,12 +15,8 @@ namespace IWXMVM::IW3::Hooks::Camera
 
 		if (!camera.IsModControlledCameraMode())
 		{
-			// TODO: move this somewhere else
-			auto refdef = Structures::GetRefDef();
-			camera.GetPosition()[0] = refdef->Origin[0];
-			camera.GetPosition()[1] = refdef->Origin[1];
-			camera.GetPosition()[2] = refdef->Origin[2];
-			camera.GetFov() = 90;
+			// TODO: if we want to use the first/third person cameras position in core, 
+			// TODO: we'd have to update it here with the values from refdef
 			return;
 		}
 
@@ -49,14 +45,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 		auto& camera = Mod::GetCameraManager()->GetActiveCamera();
 
 		if (!camera.IsModControlledCameraMode())
-		{			
-			// TODO: move this somewhere else
-			auto refdef = Structures::GetRefDef();
-			camera.GetRotation()[0] = angles[0];
-			camera.GetRotation()[1] = angles[1];
-			camera.GetRotation()[2] = angles[2];
 			return;
-		}
 
 		angles[0] = camera.GetRotation()[0];
 		angles[1] = camera.GetRotation()[1];
