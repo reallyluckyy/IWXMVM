@@ -6,7 +6,7 @@
 
 namespace IWXMVM::Components
 {
-	std::string CameraManager::GetCameraModeLabel(Camera::Mode cameraMode)
+	std::string_view CameraManager::GetCameraModeLabel(Camera::Mode cameraMode)
 	{
 		switch (cameraMode)
 		{

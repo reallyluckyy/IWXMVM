@@ -12,7 +12,7 @@ namespace IWXMVM::Components
 		Camera& GetCamera(Camera::Mode mode);
 		void SetActiveCamera(Camera::Mode mode);
 
-		std::string GetCameraModeLabel(Camera::Mode cameraMode);
+		std::string_view GetCameraModeLabel(Camera::Mode cameraMode);
 		std::vector<Camera::Mode> GetCameraModes();
 
 	private:

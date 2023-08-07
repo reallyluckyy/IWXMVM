@@ -107,12 +107,12 @@ namespace IWXMVM::UI
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(200);
 
-		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager->GetCameraModeLabel(currentCamera.GetMode()).c_str()))
+		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager->GetCameraModeLabel(currentCamera.GetMode()).data()))
 		{
 			for (auto cameraMode : cameraManager->GetCameraModes())
 			{
-				bool isSelected = currentCamera.GetMode()  == cameraMode;
-				if (ImGui::Selectable(cameraManager->GetCameraModeLabel(cameraMode).c_str(), currentCamera.GetMode() == cameraMode))
+				bool isSelected = currentCamera.GetMode() == cameraMode;
+				if (ImGui::Selectable(cameraManager->GetCameraModeLabel(cameraMode).data(), currentCamera.GetMode() == cameraMode))
 				{
 					cameraManager->SetActiveCamera(cameraMode);
 				}
