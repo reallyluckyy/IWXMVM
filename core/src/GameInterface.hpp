@@ -4,7 +4,7 @@
 
 namespace IWXMVM
 {
-	const auto DEMO_SYMLINK_FILE_NAME = "IWXMVM_DEMO_LINK";
+	const auto DEMO_HARDLINK_FILE_NAME = "IWXMVM_DEMO_LINK";
 
 	struct Dvar
 	{
@@ -85,7 +85,7 @@ namespace IWXMVM
 		}
 
 		virtual std::filesystem::path GetDemoDirectory() = 0;
-		std::filesystem::path GetDemoSymlinkPath() { return (GetDemoDirectory() / DEMO_SYMLINK_FILE_NAME).replace_extension(GetDemoExtensions()[0]); }
+		std::filesystem::path GetDemoHardlinkPath() { return (GetDemoDirectory() / DEMO_HARDLINK_FILE_NAME).replace_extension(GetDemoExtensions()[0]); }
 
 		struct DemoInfo
 		{
@@ -99,7 +99,7 @@ namespace IWXMVM
 		virtual DemoInfo GetDemoInfo() = 0;
 		virtual std::vector<std::string> GetDemoExtensions() = 0;
 
-		virtual void PlaySymlinkedDemo() = 0;
+		virtual void PlayHardlinkDemo() = 0;
 
 		void PlayDemo(std::filesystem::path demoPath)
 		{
@@ -114,17 +114,17 @@ namespace IWXMVM
 				if (!std::filesystem::exists(demoDirectory))
 					std::filesystem::create_directories(demoDirectory);
 
-				const auto demoSymlink = GetDemoSymlinkPath();
+				const auto demoSymlink = GetDemoHardlinkPath();
 				if (std::filesystem::exists(demoSymlink) && std::filesystem::is_symlink(demoSymlink))
 					std::filesystem::remove(demoSymlink);
 
-				std::filesystem::create_symlink(demoPath, demoSymlink);
+				std::filesystem::create_hard_link(demoPath, demoSymlink);
 
-				PlaySymlinkedDemo();
+				PlayHardlinkDemo();
 			}
 			catch (std::filesystem::filesystem_error& e)
 			{
-				LOG_ERROR("Failed to create symlink for demo file {0}: {1}", demoPath.string(), e.what());
+				LOG_ERROR("Failed to create hard link for demo file {0}: {1}", demoPath.string(), e.what());
 			}
 		}
 

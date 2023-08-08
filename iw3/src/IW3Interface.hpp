@@ -72,10 +72,10 @@ namespace IWXMVM::IW3
 			return std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos";
 		}
 
-		void PlaySymlinkedDemo()
+		void PlayHardlinkDemo()
 		{
 			Structures::Cbuf_AddText(
-				std::format(R"(demo {0})", DEMO_SYMLINK_FILE_NAME)
+				std::format(R"(demo {0})", DEMO_HARDLINK_FILE_NAME)
 			);
 		}
 
