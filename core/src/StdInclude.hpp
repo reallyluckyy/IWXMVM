@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 #include <map>
+#include <set>
 #include <numeric>
 #include <vector>
 #include <functional>

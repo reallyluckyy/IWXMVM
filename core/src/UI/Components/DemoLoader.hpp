@@ -22,6 +22,8 @@ namespace IWXMVM::UI
 		void Initialize() final;
 		void FindAllDemos();
 
+		std::vector<std::filesystem::path> searchPaths;
+		std::set<std::filesystem::path> foundDemoDirectories;
 		std::vector<std::filesystem::path> discoveredDemoPaths;
 		bool initiallyLoadedDemos = false;
 		std::atomic<bool> isScanningDemoPaths;

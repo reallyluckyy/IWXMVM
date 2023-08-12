@@ -3,6 +3,7 @@
 
 #include "Mod.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "CustomImGuiControls.hpp"
 
 namespace IWXMVM::UI
 {
@@ -12,17 +13,22 @@ namespace IWXMVM::UI
 		isScanningDemoPaths.store(true);
 
 		discoveredDemoPaths.clear();
+		foundDemoDirectories.clear();
 
-		for (std::filesystem::recursive_directory_iterator i(PathUtils::GetCurrentGameDirectory()), end; i != end; ++i)
+		for (const auto& searchPath : searchPaths)
 		{
-			auto demoExtensions = Mod::GetGameInterface()->GetDemoExtensions();
-
-			if (!std::filesystem::is_directory(i->path()) 
-				&& i->path().has_extension() 
-				&& i->path().string().find(DEMO_TEMP_DIR_NAME) == std::string::npos
-				&& std::find(demoExtensions.begin(), demoExtensions.end(), i->path().extension().string()) != demoExtensions.end())
+			for (std::filesystem::recursive_directory_iterator i(searchPath), end; i != end; ++i)
 			{
-				discoveredDemoPaths.push_back(i->path());
+				auto demoExtensions = Mod::GetGameInterface()->GetDemoExtensions();
+
+				if (!std::filesystem::is_directory(i->path())
+					&& i->path().has_extension()
+					&& i->path().string().find(DEMO_TEMP_DIR_NAME) == std::string::npos
+					&& std::find(demoExtensions.begin(), demoExtensions.end(), i->path().extension().string()) != demoExtensions.end())
+				{
+					discoveredDemoPaths.push_back(i->path());
+					foundDemoDirectories.emplace(i->path().parent_path());
+				}
 			}
 		}
 
@@ -31,6 +37,7 @@ namespace IWXMVM::UI
 
 	void DemoLoader::Initialize()
 	{
+		searchPaths = { PathUtils::GetCurrentGameDirectory() };
 	}
 
 	void DemoLoader::Render()
@@ -62,19 +69,19 @@ namespace IWXMVM::UI
 				return;
 			}
 
-			for (const auto& fullDemoPath : discoveredDemoPaths)
-			{
-				auto relativeDemoPath = fullDemoPath.string().substr(PathUtils::GetCurrentGameDirectory().size() + 1);
-
-				if (ImGui::Button(std::format("Load##{0}", relativeDemoPath).c_str(), ImVec2(60, 20)))
+			ImGui::DemoFileTree(searchPaths, foundDemoDirectories, discoveredDemoPaths, [](const auto& fullDemoPath)
 				{
-					Mod::GetGameInterface()->PlayDemo(fullDemoPath);
-				}
-
-				ImGui::SameLine();
-
-				ImGui::Text("%s", relativeDemoPath.c_str());
-			}
+					auto relativeDemoPath = fullDemoPath.filename().string();
+			
+					if (ImGui::Button(std::format("Load##{0}", relativeDemoPath).c_str(), ImVec2(60, 20)))
+					{
+						Mod::GetGameInterface()->PlayDemo(fullDemoPath);
+					}
+			
+					ImGui::SameLine();
+			
+					ImGui::Text("%s", relativeDemoPath.c_str());
+				});
 		}
 
 		ImGui::End();
