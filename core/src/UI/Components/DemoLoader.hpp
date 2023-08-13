@@ -34,7 +34,7 @@ namespace IWXMVM::UI
 		void FindAllDemos();
 		void RenderDemosInDirectory(const DemoDirectory& directory);
 		void SkipDirectories(const DemoDirectory& directory);
-		void RenderDirectory(const DemoDirectory& directory);
+		void RenderDirectory(const DemoDirectory& directory, bool isSearchPath);
 
 		std::vector<std::size_t> searchPaths;
 		std::vector<DemoDirectory> demoDirectories;

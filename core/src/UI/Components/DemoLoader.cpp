@@ -110,14 +110,16 @@ namespace IWXMVM::UI
 		}
 	}
 
-	void DemoLoader::RenderDirectory(const DemoDirectory& directory)
+	void DemoLoader::RenderDirectory(const DemoDirectory& directory, bool isSearchPath)
 	{
-		if (ImGui::TreeNode(directory.dirPath.string().c_str() + directory.dirPath.string().find_last_of('\\') + 1))
+		const char* directoryLabel = isSearchPath ? directory.dirPath.string().c_str() : directory.dirPath.string().c_str() + directory.dirPath.string().find_last_of('\\') + 1;
+
+		if (ImGui::TreeNode(directoryLabel))
 		{
 			for (std::size_t i = 0; i < directory.subdirsCount; i++)
 			{
 				demoDirectoriesIterator--;
-				RenderDirectory(demoDirectories[demoDirectoriesIterator]);
+				RenderDirectory(demoDirectories[demoDirectoriesIterator], false);
 			}
 
 			RenderDemosInDirectory(directory);
@@ -160,8 +162,8 @@ namespace IWXMVM::UI
 
 			for (const auto& searchPath : searchPaths)
 			{
-				demoDirectoriesIterator = demoDirectories[searchPath].directoriesVecIdx;
-				RenderDirectory(demoDirectories[searchPath]);
+				demoDirectoriesIterator = searchPath;
+				RenderDirectory(demoDirectories[demoDirectoriesIterator], true);
 			}
 		}
 
