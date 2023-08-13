@@ -171,35 +171,4 @@ namespace ImGui
 	{
 		return TimescaleSliderInternal(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags);
 	}
-
-	void DemoFileTree(const std::vector<std::filesystem::path>& searchPaths, const std::set<std::filesystem::path>& subDirectories, const std::vector<std::filesystem::path>& demoPaths, std::function<void(const std::filesystem::path&)> renderFileDisplay)
-	{
-		for (const auto& searchPath : searchPaths)
-		{
-			if (ImGui::TreeNode(searchPath.string().c_str()))
-			{
-				for (const auto& directory : subDirectories)
-				{
-					if (!directory.string().starts_with(searchPath.string()))
-						continue;
-
-					auto directoryLabel = directory.string().substr(searchPath.string().size() + 1);
-					if (ImGui::TreeNode(directoryLabel.c_str()))
-					{
-						for (const auto& demoPath : demoPaths)
-						{
-							if (demoPath.parent_path() == directory)
-							{
-								renderFileDisplay(demoPath);
-							}
-						}
-
-						ImGui::TreePop();
-					}
-				}
-
-				ImGui::TreePop();
-			}
-		}
-	}
 }

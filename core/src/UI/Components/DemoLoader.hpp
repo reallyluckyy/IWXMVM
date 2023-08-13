@@ -19,12 +19,21 @@ namespace IWXMVM::UI
 		void Release() final;
 
 	private:
-		void Initialize() final;
-		void FindAllDemos();
+		struct DemoDirectory {
+			std::filesystem::path dirPath;
+			std::size_t demoPathsVecIdx = 0;
+			std::size_t demoCount = 0;
+		};
 
-		std::vector<std::filesystem::path> searchPaths;
-		std::set<std::filesystem::path> foundDemoDirectories;
-		std::vector<std::filesystem::path> discoveredDemoPaths;
+		void Initialize() final;
+		bool CheckFileForDemo(const std::filesystem::path& file, std::string_view demoExtension);
+		void SearchDir(const std::filesystem::path& dir);
+		void FindAllDemos();
+		void RenderDemosInDirectory(const DemoDirectory& directory);
+
+		std::vector<DemoDirectory> searchPaths;
+		std::vector<DemoDirectory> demoDirectories;
+		std::vector<std::filesystem::path> demoPaths;
 		bool initiallyLoadedDemos = false;
 		std::atomic<bool> isScanningDemoPaths;
 	};
