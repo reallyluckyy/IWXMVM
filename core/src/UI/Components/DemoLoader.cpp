@@ -17,20 +17,13 @@ namespace IWXMVM::UI
 		return false;
 	}
 
-	void DemoLoader::SearchDir(const std::filesystem::path& dir)
+	void DemoLoader::SearchDir(const std::filesystem::path& dir, std::size_t searchPathIdx)
 	{
-		DemoDirectory demoDir = { .demoPathsVecIdx = demoPaths.size() };
-
+		DemoDirectory demoDir = { .demoPathsVecIdx = demoPaths.size(), .searchPathIdx = searchPathIdx };
+		
 		for (std::filesystem::directory_iterator i(dir), end; i != end; ++i)
 		{
-			if (i->is_directory())
-			{
-				if (i->path().filename().string().compare(Mod::GetGameInterface()->GetTempDemoDirName()) != 0)
-				{
-					SearchDir(i->path());
-				}
-			}
-			else if (CheckFileForDemo(i->path(), Mod::GetGameInterface()->GetDemoExtension()))
+			if (CheckFileForDemo(i->path(), Mod::GetGameInterface()->GetDemoExtension()))
 			{
 				demoDir.demoCount++;
 			}
@@ -41,6 +34,15 @@ namespace IWXMVM::UI
 			demoDir.dirPath = dir;
 			demoDirectories.push_back(demoDir);
 		}
+
+		for (std::filesystem::directory_iterator i(dir), end; i != end; ++i)
+		{
+			if (i->is_directory() && i->path().filename().string().compare(Mod::GetGameInterface()->GetTempDemoDirName()) != 0)
+			{
+				SearchDir(i->path(), searchPathIdx);
+			}
+		}
+		
 	}
 
 	void DemoLoader::FindAllDemos()
@@ -50,22 +52,29 @@ namespace IWXMVM::UI
 		demoPaths.clear();
 		demoDirectories.clear();
 
+		std::size_t searchPathIdx = 0;
 		for (auto& searchPath : searchPaths)
 		{
+			searchPath.searchPathIdx = searchPathIdx;
 			searchPath.demoCount = 0;
 			searchPath.demoPathsVecIdx = demoPaths.size();
 
 			for (std::filesystem::directory_iterator i(searchPath.dirPath), end; i != end; ++i)
 			{
-				if (i->is_directory())
-				{
-					SearchDir(i->path());
-				}
-				else if (CheckFileForDemo(i->path(), Mod::GetGameInterface()->GetDemoExtension()))
+				if (CheckFileForDemo(i->path(), Mod::GetGameInterface()->GetDemoExtension()))
 				{
 					searchPath.demoCount++;
 				}
 			}
+			for (std::filesystem::directory_iterator i(searchPath.dirPath), end; i != end; ++i)
+			{
+				if (i->is_directory())
+				{
+					SearchDir(i->path(), searchPathIdx);
+				}
+			}
+
+			searchPathIdx++;
 		}
 
 		isScanningDemoPaths.store(false);
@@ -128,6 +137,9 @@ namespace IWXMVM::UI
 				{
 					for (const auto& directory : demoDirectories)
 					{
+						if (directory.searchPathIdx != searchPath.searchPathIdx)
+							continue;
+
 						auto directoryLabel = directory.dirPath.string().substr(searchPath.dirPath.string().size() + 1);
 						if (ImGui::TreeNode(directoryLabel.c_str()))
 						{

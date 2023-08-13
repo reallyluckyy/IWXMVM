@@ -23,11 +23,12 @@ namespace IWXMVM::UI
 			std::filesystem::path dirPath;
 			std::size_t demoPathsVecIdx = 0;
 			std::size_t demoCount = 0;
+			std::size_t searchPathIdx = 0;
 		};
 
 		void Initialize() final;
 		bool CheckFileForDemo(const std::filesystem::path& file, std::string_view demoExtension);
-		void SearchDir(const std::filesystem::path& dir);
+		void SearchDir(const std::filesystem::path& dir, std::size_t searchPathIdx);
 		void FindAllDemos();
 		void RenderDemosInDirectory(const DemoDirectory& directory);
 
