@@ -87,18 +87,26 @@ namespace IWXMVM::UI
 
 	void DemoLoader::RenderDemosInDirectory(const DemoDirectory& directory)
 	{
-		for (auto i = directory.demoPathsVecIdx; i < directory.demoPathsVecIdx + directory.demoCount; ++i)
+		ImGuiListClipper clipper;
+		clipper.Begin(directory.demoCount);
+		
+		while (clipper.Step())
 		{
-			auto demoName = demoPaths[i].filename().string();
-
-			if (ImGui::Button(std::format("Load##{0}", demoName).c_str(), ImVec2(60, 20)))
+			for (auto i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
 			{
-				Mod::GetGameInterface()->PlayDemo(demoPaths[i]);
+				auto idx = i + directory.demoPathsVecIdx;
+
+				auto demoName = demoPaths[idx].filename().string();
+
+				if (ImGui::Button(std::format("Load##{0}", demoName).c_str(), ImVec2(60, 20)))
+				{
+					Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+				}
+
+				ImGui::SameLine();
+
+				ImGui::Text("%s", demoName.c_str());
 			}
-
-			ImGui::SameLine();
-
-			ImGui::Text("%s", demoName.c_str());
 		}
 	}
 
