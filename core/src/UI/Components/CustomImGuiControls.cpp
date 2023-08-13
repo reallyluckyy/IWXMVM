@@ -35,7 +35,7 @@ namespace ImGui
 		if (format == NULL)
 			format = DataTypeGetInfo(data_type)->PrintFmt;
 
-		const bool hovered = ItemHoverable(frame_bb, id);
+		const bool hovered = ItemHoverable(frame_bb, id, ImGuiItemFlags_None);
 
 		// Draw frame
 		const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
@@ -106,17 +106,17 @@ namespace ImGui
 			format = DataTypeGetInfo(data_type)->PrintFmt;
 
 		// Tabbing or CTRL-clicking on Slider turns it into an input box
-		const bool hovered = ItemHoverable(frame_bb, id);
+		const bool hovered = ItemHoverable(frame_bb, id, ImGuiItemFlags_None);
 		bool temp_input_is_active = temp_input_allowed && TempInputIsActive(id);
 		if (!temp_input_is_active) {
 			const bool input_requested_by_tabbing = temp_input_allowed && (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
 			const bool clicked = (hovered && g.IO.MouseClicked[0]);
-			if (input_requested_by_tabbing || clicked || g.NavActivateId == id || g.NavActivateInputId == id) {
+			if (input_requested_by_tabbing || clicked || g.NavActivateId == id) {
 				SetActiveID(id, window);
 				SetFocusID(id, window);
 				FocusWindow(window);
 				g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
-				if (temp_input_allowed && (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || g.NavActivateInputId == id))
+				if (temp_input_allowed && (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl)))
 					temp_input_is_active = true;
 			}
 		}
