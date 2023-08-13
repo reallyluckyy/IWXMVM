@@ -17,64 +17,56 @@ namespace IWXMVM::UI
 		return false;
 	}
 
-	void DemoLoader::SearchDir(const std::filesystem::path& dir, std::size_t searchPathIdx)
+	bool DemoLoader::SearchDir(const std::filesystem::path& dir)
 	{
-		DemoDirectory demoDir = { .demoPathsVecIdx = demoPaths.size(), .searchPathIdx = searchPathIdx };
-		
+		DemoDirectory demoDir = { .dirPath = dir, .demoPathsVecIdx = demoPaths.size() };
+		bool isDirectoryRelevant = false;
+
 		for (std::filesystem::directory_iterator i(dir), end; i != end; ++i)
 		{
 			if (CheckFileForDemo(i->path(), Mod::GetGameInterface()->GetDemoExtension()))
 			{
 				demoDir.demoCount++;
+				isDirectoryRelevant = true;
 			}
-		}
-
-		if (demoDir.demoCount > 0)
-		{
-			demoDir.dirPath = dir;
-			demoDirectories.push_back(demoDir);
 		}
 
 		for (std::filesystem::directory_iterator i(dir), end; i != end; ++i)
 		{
 			if (i->is_directory() && i->path().filename().string().compare(Mod::GetGameInterface()->GetTempDemoDirName()) != 0)
 			{
-				SearchDir(i->path(), searchPathIdx);
+				if (SearchDir(i->path()))
+				{
+					demoDir.subdirsCount++;
+					isDirectoryRelevant = true;
+				}
 			}
 		}
-		
+
+		if (isDirectoryRelevant)
+		{
+			demoDir.directoriesVecIdx = demoDirectories.size();
+			demoDirectories.push_back(demoDir);
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	void DemoLoader::FindAllDemos()
 	{
 		isScanningDemoPaths.store(true);
 
+		searchPaths.clear();
 		demoPaths.clear();
 		demoDirectories.clear();
 
-		std::size_t searchPathIdx = 0;
-		for (auto& searchPath : searchPaths)
+		if (SearchDir(PathUtils::GetCurrentGameDirectory()))
 		{
-			searchPath.searchPathIdx = searchPathIdx;
-			searchPath.demoCount = 0;
-			searchPath.demoPathsVecIdx = demoPaths.size();
-
-			for (std::filesystem::directory_iterator i(searchPath.dirPath), end; i != end; ++i)
-			{
-				if (CheckFileForDemo(i->path(), Mod::GetGameInterface()->GetDemoExtension()))
-				{
-					searchPath.demoCount++;
-				}
-			}
-			for (std::filesystem::directory_iterator i(searchPath.dirPath), end; i != end; ++i)
-			{
-				if (i->is_directory())
-				{
-					SearchDir(i->path(), searchPathIdx);
-				}
-			}
-
-			searchPathIdx++;
+			searchPaths.push_back(demoDirectories.size() - 1);
 		}
 
 		isScanningDemoPaths.store(false);
@@ -82,7 +74,6 @@ namespace IWXMVM::UI
 
 	void DemoLoader::Initialize()
 	{
-		searchPaths = { { .dirPath = PathUtils::GetCurrentGameDirectory() } };
 	}
 
 	void DemoLoader::RenderDemosInDirectory(const DemoDirectory& directory)
@@ -92,7 +83,7 @@ namespace IWXMVM::UI
 		
 		while (clipper.Step())
 		{
-			for (auto i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+			for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
 			{
 				auto idx = i + directory.demoPathsVecIdx;
 
@@ -107,6 +98,34 @@ namespace IWXMVM::UI
 
 				ImGui::Text("%s", demoName.c_str());
 			}
+		}
+	}
+
+	void DemoLoader::SkipDirectories(const DemoDirectory& directory)
+	{
+		for (std::size_t i = 0; i < directory.subdirsCount; i++)
+		{
+			demoDirectoriesIterator--;
+			SkipDirectories(demoDirectories[demoDirectoriesIterator]);
+		}
+	}
+
+	void DemoLoader::RenderDirectory(const DemoDirectory& directory)
+	{
+		if (ImGui::TreeNode(directory.dirPath.string().c_str() + directory.dirPath.string().find_last_of('\\') + 1))
+		{
+			for (std::size_t i = 0; i < directory.subdirsCount; i++)
+			{
+				demoDirectoriesIterator--;
+				RenderDirectory(demoDirectories[demoDirectoriesIterator]);
+			}
+
+			RenderDemosInDirectory(directory);
+			ImGui::TreePop();
+		}
+		else
+		{
+			SkipDirectories(directory);
 		}
 	}
 
@@ -141,29 +160,8 @@ namespace IWXMVM::UI
 
 			for (const auto& searchPath : searchPaths)
 			{
-				if (ImGui::TreeNode(searchPath.dirPath.string().c_str()))
-				{
-					for (const auto& directory : demoDirectories)
-					{
-						if (directory.searchPathIdx != searchPath.searchPathIdx)
-							continue;
-
-						auto directoryLabel = directory.dirPath.string().substr(searchPath.dirPath.string().size() + 1);
-						if (ImGui::TreeNode(directoryLabel.c_str()))
-						{
-							RenderDemosInDirectory(directory);
-
-							ImGui::TreePop();
-						}
-					}
-
-					if (searchPath.demoCount > 0)
-					{
-						RenderDemosInDirectory(searchPath);
-					}
-
-					ImGui::TreePop();
-				}
+				demoDirectoriesIterator = demoDirectories[searchPath].directoriesVecIdx;
+				RenderDirectory(demoDirectories[searchPath]);
 			}
 		}
 
