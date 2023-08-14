@@ -21,24 +21,27 @@ namespace IWXMVM::UI
 	private:
 		struct DemoDirectory
 		{
-			std::filesystem::path dirPath;
-			std::size_t demoPathsVecIdx = 0;
-			std::size_t demoCount = 0;
-			std::size_t directoriesVecIdx = 0;
-			std::size_t subdirsCount = 0;
+			std::filesystem::path path;								// Path
+			std::pair<std::size_t, std::size_t> subdirectories;		// Pair of indices representing the [first, second) interval of directories in the 'demoDirectories' vector
+			std::pair<std::size_t, std::size_t> demos;				// Pair of indices representing the [first, second) interval of demos in the 'demoPaths' vector
+			const std::size_t idx;									// Index in the 'demoDirectories' vector
+			const std::optional<std::size_t> parentIdx;				// Parent directory's index in the 'demoDirectories' vector. Search paths will contain a nullopt value
+			bool relevant;											// Does this directory ever reach a demo down the line?
 		};
 
 		void Initialize() final;
-		bool CheckFileForDemo(const std::filesystem::path& file, std::string_view demoExtension);
-		bool SearchDir(const std::filesystem::path& dir);
+		void AddPathsToSearch(const std::vector<std::filesystem::path>& dirs);
+		void SearchDir(std::size_t dirIdx); // Recursive search function
+		void Search();
+		void SpreadDirsRelevancy();
 		void FindAllDemos();
-		void RenderDemosInDirectory(const DemoDirectory& directory);
-		void SkipDirectories(const DemoDirectory& directory);
-		void RenderDirectory(const DemoDirectory& directory, bool isSearchPath);
 
-		std::vector<std::size_t> searchPaths;
+		void RenderDemos(const std::pair<std::size_t, std::size_t>& demos);
+		void RenderDir(const DemoDirectory& dir); // Recursive render function
+		void RenderSearchPaths();
+
+		std::pair<std::size_t, std::size_t> searchPaths; // Pair of indices representing the [first, second) interval of search paths in the 'demoDirectories' vector
 		std::vector<DemoDirectory> demoDirectories;
-		std::size_t demoDirectoriesIterator = 0;
 		std::vector<std::filesystem::path> demoPaths;
 		bool initiallyLoadedDemos = false;
 		std::atomic<bool> isScanningDemoPaths;
