@@ -23,6 +23,7 @@
 #include <d3dx9tex.h>
 
 #include <Windows.h>
+#include <psapi.h>
 
 #include "Logger.hpp"
 
