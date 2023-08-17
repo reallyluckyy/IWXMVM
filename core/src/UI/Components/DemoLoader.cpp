@@ -188,27 +188,24 @@ namespace IWXMVM::UI
 		}
 	}
 
-	void DemoLoader::SpreadDirsRelevancy()
+	void DemoLoader::MarkDirsRelevancy()
 	{
-		auto idx = demoDirectories.size();
-
-		for (auto it = demoDirectories.rbegin(); it != demoDirectories.rend(); it++)
-		{
-			auto vecIdx = --idx;
-
-			if (demoDirectories[vecIdx].relevant)
-			{
-				while (demoDirectories[vecIdx].parentIdx.has_value())
-				{
-					vecIdx = demoDirectories[vecIdx].parentIdx.value();
-					if (demoDirectories[vecIdx].relevant)
-					{
-						break;
-					}
-					demoDirectories[vecIdx].relevant = true;
-				}
-			}
-		}
+	    for (auto it = demoDirectories.rbegin(); it != demoDirectories.rend(); it++)
+	    {
+	        std::size_t vecIdx = std::abs(it - demoDirectories.rend() + 1);
+	        if (demoDirectories[vecIdx].relevant)
+	        {
+	            while (demoDirectories[vecIdx].parentIdx.has_value())
+	            {
+	                vecIdx = demoDirectories[vecIdx].parentIdx.value();
+	                if (demoDirectories[vecIdx].relevant)
+	                {
+	                    break;
+	                }
+	                demoDirectories[vecIdx].relevant = true;
+	            }
+	        }
+	    }
 	}
 
 	void DemoLoader::FindAllDemos()
@@ -222,7 +219,7 @@ namespace IWXMVM::UI
 		Search();
 
 		// 'demoDirectories' and 'demoPaths' are complete here, but we still need to find out the relevancy of each directory
-		SpreadDirsRelevancy();
+		MarkDirsRelevancy();
 
 		isScanningDemoPaths.store(false);
 	}
