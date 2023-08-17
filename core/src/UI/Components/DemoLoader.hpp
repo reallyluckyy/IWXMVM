@@ -24,8 +24,8 @@ namespace IWXMVM::UI
 			std::filesystem::path path;								// Path
 			std::pair<std::size_t, std::size_t> subdirectories;		// Pair of indices representing the [first, second) interval of directories in the 'demoDirectories' vector
 			std::pair<std::size_t, std::size_t> demos;				// Pair of indices representing the [first, second) interval of demos in the 'demoPaths' vector
-			const std::size_t idx;									// Index in the 'demoDirectories' vector
-			const std::optional<std::size_t> parentIdx;				// Parent directory's index in the 'demoDirectories' vector. Search paths will contain a nullopt value
+			std::size_t idx;									// Index in the 'demoDirectories' vector
+			std::optional<std::size_t> parentIdx;				// Parent directory's index in the 'demoDirectories' vector. Search paths will contain a nullopt value
 			bool relevant;											// Does this directory ever reach a demo down the line?
 		};
 
