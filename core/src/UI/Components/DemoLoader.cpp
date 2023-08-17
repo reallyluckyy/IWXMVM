@@ -78,7 +78,7 @@ namespace IWXMVM::UI
 	{
 		std::sort(demos.begin(), demos.end(), [&](const auto& lhs, const auto& rhs) {
 			const std::size_t extLength = Mod::GetGameInterface()->GetDemoExtension().length();
-			const std::size_t dirLength = demos.begin()->parent_path().native().length();
+			const std::size_t dirLength = demos.front().parent_path().native().length();
 			const std::size_t lhsLength = lhs.native().length();
 			const std::size_t rhsLength = rhs.native().length();
 	
@@ -91,6 +91,28 @@ namespace IWXMVM::UI
 	
 			using StringView = std::wstring_view;
 			return CompareNaturally<false>(StringView{ lhsFileNamePtr, lhsSvLength }, StringView{ rhsFileNamePtr, rhsSvLength });
+		});
+	}
+	
+	void SortDemoDirectories(const auto directories, auto GetPath)
+	{
+		std::sort(directories.begin(), directories.end(), [&](const auto& lhs, const auto& rhs) {
+			const auto& lhsPath = GetPath(lhs);
+			const auto& rhsPath = GetPath(rhs);
+	
+			const std::size_t parentDirLength = GetPath(directories.front()).parent_path().native().length();
+			const std::size_t lhsLength = lhsPath.native().length();
+			const std::size_t rhsLength = rhsPath.native().length();
+	
+			assert(lhsLength > parentDirLength + 1 && rhsLength > parentDirLength + 1);
+	
+			const auto* lhsDirPtr = lhsPath.c_str() + parentDirLength + 1;
+			const auto* rhsDirNamePtr = rhsPath.c_str() + parentDirLength + 1;
+			const std::size_t lhsSvLength = lhsLength - parentDirLength - 1;
+			const std::size_t rhsSvLength = rhsLength - parentDirLength - 1;
+	
+			using StringView = std::wstring_view;
+			return CompareNaturally<false>(StringView{ lhsDirPtr, lhsSvLength }, StringView{ rhsDirNamePtr, rhsSvLength });
 		});
 	}
 
@@ -142,6 +164,10 @@ namespace IWXMVM::UI
 		}
 
 		SortDemoPaths(std::span{ (demoPaths.begin() + demosStartIdx), demoPaths.end() });
+		SortDemoDirectories(
+			std::span{ (demoDirectories.begin() + subdirsStartIdx), demoDirectories.end() },
+			[](const DemoDirectory& data) -> const std::filesystem::path& { return data.path; }
+		);
 		
 		demoDirectories[dirIdx].demos = std::make_pair(demosStartIdx, demoPaths.size());
 		if (demoDirectories[dirIdx].demos.first != demoDirectories[dirIdx].demos.second)
