@@ -96,8 +96,9 @@ namespace IWXMVM
 			uint32_t endTick;
 		};
 
+		std::string_view GetTempDemoDirName() const { return { DEMO_TEMP_DIR_NAME }; }
 		virtual DemoInfo GetDemoInfo() = 0;
-		virtual std::vector<std::string> GetDemoExtensions() = 0;
+		virtual std::string_view GetDemoExtension() = 0;
 
 		virtual void PlayHardlinkDemo() = 0;
 
