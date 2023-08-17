@@ -45,8 +45,10 @@ namespace IWXMVM::UI
 		ImGui::Text("%s", Mod::GetGameInterface()->GetDemoInfo().name.c_str());
 
 		auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-		ImGui::SameLine(panelSize.x / 4);
-		ImGui::DemoProgressBar(&demoInfo.currentTick, demoInfo.endTick, ImVec2(panelSize.x / 2, panelSize.y / 3.4f), std::format("{0}", demoInfo.currentTick).c_str());
+		if (demoInfo.endTick > 0) {
+			ImGui::SameLine(panelSize.x / 4);
+			ImGui::DemoProgressBar(&demoInfo.currentTick, demoInfo.endTick, ImVec2(panelSize.x / 2, panelSize.y / 3.4f), std::format("{0}", demoInfo.currentTick).c_str());
+		}
 
 		// Right side 
 
