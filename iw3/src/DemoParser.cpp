@@ -38,17 +38,10 @@ namespace IWXMVM::IW3::DemoParser
 
 	void Run()
 	{
-		std::string str = static_cast<std::string>(Mod::GetGameInterface()->GetDemoInfo().name);
-		str += (str.ends_with(".dm_1")) ? "" : ".dm_1";
-
-		std::string path = Structures::GetFilePath(std::move(str));
-
-		std::ifstream file(path, std::ios::binary);
-		if (!file.is_open()) 
-		{
-			throw std::exception("failed to open demo file");
-			return;
-		}
+		std::ifstream file(Mod::GetGameInterface()->GetDemoHardlinkPath(), std::ios::binary);
+		if (!file.is_open()) {
+ 			throw std::exception("failed to open demo file");
+ 		}
 
 		std::vector<clientArchiveData_t> archives;
 		

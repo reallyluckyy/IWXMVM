@@ -67,42 +67,16 @@ namespace IWXMVM::IW3
 			return { ".dm_1" };
 		}
 
-		void PlayDemo(std::filesystem::path demoPath) final
+		std::filesystem::path GetDemoDirectory() final
 		{
-			try 
-			{
-				LOG_INFO("Playing demo {0}", demoPath.string());
+			return std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos";
+		}
 
-				if (!std::filesystem::exists(demoPath) || !std::filesystem::is_regular_file(demoPath))
-					return;
-
-				auto tempDemoDir = std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos" / DEMO_TEMP_DIR_NAME;
-				if (!std::filesystem::exists(tempDemoDir))
-				{
-					std::filesystem::create_directories(tempDemoDir);
-				}
-
-				auto targetDemoFilePath = tempDemoDir / demoPath.filename();
-				if (demoPath != targetDemoFilePath)
-				{
-					if (std::filesystem::exists(targetDemoFilePath) && std::filesystem::is_regular_file(targetDemoFilePath)) {
-						std::filesystem::remove(targetDemoFilePath);
-					}
-					LOG_DEBUG("Copying demo file from {0} to {1}", demoPath.string(), targetDemoFilePath.string());
-					std::filesystem::copy_file(demoPath, targetDemoFilePath);
-				}
-
-				Structures::Cbuf_AddText(
-					std::format("demo \"{0}/{1}\"", 
-						DEMO_TEMP_DIR_NAME,
-						demoPath.filename().string()
-					)
-				);
-			}
-			catch (std::filesystem::filesystem_error& e) 
-			{
-				LOG_ERROR("Failed to copy demo file {0}: {1}", demoPath.string(), e.what());
-			}
+		void PlayHardlinkDemo()
+		{
+			Structures::Cbuf_AddText(
+				std::format(R"(demo {0})", DEMO_HARDLINK_FILE_NAME)
+			);
 		}
 
 

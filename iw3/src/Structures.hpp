@@ -12,7 +12,6 @@ namespace IWXMVM::IW3::Structures
 		void* function;
 	};
 
-
 	enum netadrtype_t
 	{
 		NA_BOT = 0x0,
