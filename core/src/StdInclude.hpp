@@ -10,6 +10,7 @@
 #include <fstream>
 #include <functional>
 #include <map>
+#include <memory>
 #include <numeric>
 #include <span>
 #include <string>
