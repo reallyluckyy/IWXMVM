@@ -62,7 +62,7 @@ namespace IWXMVM::IW3
 			return demoInfo;
 		}
 
-		std::vector<std::string> GetDemoExtensions() final 
+		std::string_view GetDemoExtension() final 
 		{
 			return { ".dm_1" };
 		}

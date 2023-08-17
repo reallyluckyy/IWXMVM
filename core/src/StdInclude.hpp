@@ -21,6 +21,7 @@
 #include "Logger.hpp"
 
 #pragma warning(push, 0)
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "backends/imgui_impl_dx9.h"
 #include "backends/imgui_impl_win32.h"
