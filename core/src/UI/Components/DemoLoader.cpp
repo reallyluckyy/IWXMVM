@@ -132,8 +132,7 @@ namespace IWXMVM::UI
 			if (std::filesystem::exists(dir))
 			{
 				DemoDirectory searchPath = {
-					.path = dir,
-					.idx = demoDirectories.size(),
+					.path = dir
 				};
 				demoDirectories.push_back(searchPath);
 			}
@@ -152,8 +151,7 @@ namespace IWXMVM::UI
 			{
 				DemoDirectory subdir = {
 					.path = entry.path(),
-					.idx = demoDirectories.size(),
-					.parentIdx = demoDirectories[dirIdx].idx
+					.parentIdx = dirIdx
 				};
 				demoDirectories.push_back(subdir);
 			}
@@ -192,9 +190,12 @@ namespace IWXMVM::UI
 
 	void DemoLoader::SpreadDirsRelevancy()
 	{
+		auto idx = demoDirectories.size();
+
 		for (auto it = demoDirectories.rbegin(); it != demoDirectories.rend(); it++)
 		{
-			auto vecIdx = it->idx;
+			auto vecIdx = --idx;
+
 			if (demoDirectories[vecIdx].relevant)
 			{
 				while (demoDirectories[vecIdx].parentIdx.has_value())
