@@ -24,7 +24,7 @@ namespace IWXMVM::UI
 				return std::towupper(c);
 		};
 	
-		auto StringToUint = [](const auto* str, auto* output, auto* endPtr = nullptr)
+		auto StringToUint = [](const auto* str, auto* output, std::size_t* endPtr = nullptr)
 		{
 			try
 			{
@@ -41,8 +41,8 @@ namespace IWXMVM::UI
 		{
 			if (IsDigit(*lhsItr) && IsDigit(*rhsItr)) 
 			{
-				std::size_t lhsNum = 0;
-				std::size_t rhsNum = 0;
+				std::uint64_t lhsNum = 0;
+				std::uint64_t rhsNum = 0;
 				std::size_t lhsDigitCount = 0;
 				std::size_t rhsDigitCount = 0;
 	
