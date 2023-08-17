@@ -7,6 +7,93 @@
 
 namespace IWXMVM::UI
 {
+	template <bool caseSensitive, typename T>
+		requires std::is_same_v<T, std::string_view> || std::is_same_v<T, std::wstring_view>
+	bool CompareNaturally(const T lhs, const T rhs)
+	{
+		auto IsDigit = [](auto c) 
+		{
+			return std::iswdigit(c);
+		};
+	
+		auto ToUpper = [](auto c) 
+		{
+			if constexpr (caseSensitive) 
+				return c;
+			else 
+				return std::towupper(c);
+		};
+	
+		auto StringToUint = [](const auto* str, auto* output, auto* endPtr = nullptr)
+		{
+			try
+			{
+				*output = std::stoull(str, endPtr);
+				return true;
+			}
+			catch (...)
+			{
+				return false;
+			}
+		};
+	
+		for (auto lhsItr = lhs.begin(), rhsItr = rhs.begin(); lhsItr != lhs.end() && rhsItr != rhs.end();)
+		{
+			if (IsDigit(*lhsItr) && IsDigit(*rhsItr)) 
+			{
+				std::size_t lhsNum = 0;
+				std::size_t rhsNum = 0;
+				std::size_t lhsDigitCount = 0;
+				std::size_t rhsDigitCount = 0;
+	
+				// when sorting a container, move the 'unparsable' string_view to end of container if string-to-uint throws an exception
+				if (!StringToUint(std::addressof(*lhsItr), &lhsNum, &lhsDigitCount)) 
+					return false;
+				if (!StringToUint(std::addressof(*rhsItr), &rhsNum, &rhsDigitCount))
+					return true;
+	
+				if (lhsNum != rhsNum) 
+					return lhsNum < rhsNum;
+	
+				assert(lhsDigitCount == std::distance(lhsItr, std::find_if_not(lhsItr, lhs.end(), IsDigit)));
+				assert(rhsDigitCount == std::distance(rhsItr, std::find_if_not(rhsItr, rhs.end(), IsDigit)));
+	
+				lhsItr += lhsDigitCount;
+				rhsItr += rhsDigitCount;
+			} 
+			else 
+			{
+				if (ToUpper(*lhsItr) != ToUpper(*rhsItr)) 
+					return *lhsItr < *rhsItr;
+	
+				++lhsItr;
+				++rhsItr;
+			}
+		}
+	
+		return lhs.length() < rhs.length();
+	}
+	
+	void SortDemoPaths(const auto demos)
+	{
+		std::sort(demos.begin(), demos.end(), [&](const auto& lhs, const auto& rhs) {
+			const std::size_t extLength = Mod::GetGameInterface()->GetDemoExtension().length();
+			const std::size_t dirLength = demos.begin()->parent_path().native().length();
+			const std::size_t lhsLength = lhs.native().length();
+			const std::size_t rhsLength = rhs.native().length();
+	
+			assert(lhsLength > dirLength + extLength + 1 && rhsLength > dirLength + extLength + 1);
+	
+			const auto* lhsFileNamePtr = lhs.c_str() + dirLength + 1;
+			const auto* rhsFileNamePtr = rhs.c_str() + dirLength + 1;
+			const std::size_t lhsSvLength = lhsLength - dirLength - extLength - 1;
+			const std::size_t rhsSvLength = rhsLength - dirLength - extLength - 1;
+	
+			using StringView = std::wstring_view;
+			return CompareNaturally<false>(StringView{ lhsFileNamePtr, lhsSvLength }, StringView{ rhsFileNamePtr, rhsSvLength });
+		});
+	}
+
 	void DemoLoader::Initialize()
 	{
 	}
@@ -54,6 +141,8 @@ namespace IWXMVM::UI
 			}
 		}
 
+		SortDemoPaths(std::span{ (demoPaths.begin() + demosStartIdx), demoPaths.end() });
+		
 		demoDirectories[dirIdx].demos = std::make_pair(demosStartIdx, demoPaths.size());
 		if (demoDirectories[dirIdx].demos.first != demoDirectories[dirIdx].demos.second)
 		{
