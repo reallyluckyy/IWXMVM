@@ -32,7 +32,7 @@ namespace IWXMVM::UI
 		void AddPathsToSearch(const std::vector<std::filesystem::path>& dirs);
 		void SearchDir(std::size_t dirIdx); // Recursive search function
 		void Search();
-		void SpreadDirsRelevancy();
+		void MarkDirsRelevancy();
 		void FindAllDemos();
 
 		void RenderDemos(const std::pair<std::size_t, std::size_t>& demos);
