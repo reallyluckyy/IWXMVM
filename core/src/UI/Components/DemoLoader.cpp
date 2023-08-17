@@ -55,8 +55,7 @@ namespace IWXMVM::UI
 		}
 
 		demoDirectories[dirIdx].demos = std::make_pair(demosStartIdx, demoPaths.size());
-		if (demoDirectories[dirIdx].demos.first != demoDirectories[dirIdx].demos.second
-			&& demoDirectories[dirIdx].path.filename().compare(Mod::GetGameInterface()->GetTempDemoDirName()) != 0)
+		if (demoDirectories[dirIdx].demos.first != demoDirectories[dirIdx].demos.second)
 		{
 			demoDirectories[dirIdx].relevant = true;
 		}

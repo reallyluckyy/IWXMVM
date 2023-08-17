@@ -85,7 +85,7 @@ namespace IWXMVM
 		}
 
 		virtual std::filesystem::path GetDemoDirectory() = 0;
-		std::filesystem::path GetDemoHardlinkPath() { return (GetDemoDirectory() / DEMO_HARDLINK_FILE_NAME).replace_extension(GetDemoExtensions()[0]); }
+		std::filesystem::path GetDemoHardlinkPath() { return (GetDemoDirectory() / DEMO_HARDLINK_FILE_NAME).replace_extension(GetDemoExtension()); }
 
 		struct DemoInfo
 		{
@@ -96,7 +96,6 @@ namespace IWXMVM
 			uint32_t endTick;
 		};
 
-		std::string_view GetTempDemoDirName() const { return { DEMO_TEMP_DIR_NAME }; }
 		virtual DemoInfo GetDemoInfo() = 0;
 		virtual std::string_view GetDemoExtension() = 0;
 
@@ -115,11 +114,11 @@ namespace IWXMVM
 				if (!std::filesystem::exists(demoDirectory))
 					std::filesystem::create_directories(demoDirectory);
 
-				const auto demoSymlink = GetDemoHardlinkPath();
-				if (std::filesystem::exists(demoSymlink) && std::filesystem::is_symlink(demoSymlink))
-					std::filesystem::remove(demoSymlink);
+				const auto demoLinkFile = GetDemoHardlinkPath();
+				if (std::filesystem::exists(demoLinkFile) && std::filesystem::is_regular_file(demoLinkFile))
+					std::filesystem::remove(demoLinkFile);
 
-				std::filesystem::create_hard_link(demoPath, demoSymlink);
+				std::filesystem::create_hard_link(demoPath, demoLinkFile);
 
 				PlayHardlinkDemo();
 			}
