@@ -93,6 +93,9 @@ namespace IWXMVM::IW3::DemoParser
 		}
 		else
 		{
+			demoStartTick = 0;
+			demoEndTick = 0;
+			
 			LOG_ERROR("Could not determine demo length due to lack of 256 client archives (found {0})", archives.size());
 		}
 	}
