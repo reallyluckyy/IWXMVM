@@ -7,6 +7,115 @@
 
 namespace IWXMVM::UI
 {
+	template <bool caseSensitive, typename T>
+		requires std::is_same_v<T, std::string_view> || std::is_same_v<T, std::wstring_view>
+	bool CompareNaturally(const T lhs, const T rhs)
+	{
+		auto IsDigit = [](auto c) 
+		{
+			return std::iswdigit(c);
+		};
+	
+		auto ToUpper = [](auto c) 
+		{
+			if constexpr (caseSensitive) 
+				return c;
+			else 
+				return std::towupper(c);
+		};
+	
+		auto StringToUint = [](const auto* str, auto* output, std::size_t* endPtr = nullptr)
+		{
+			try
+			{
+				*output = std::stoull(str, endPtr);
+				return true;
+			}
+			catch (...)
+			{
+				return false;
+			}
+		};
+	
+		for (auto lhsItr = lhs.begin(), rhsItr = rhs.begin(); lhsItr != lhs.end() && rhsItr != rhs.end();)
+		{
+			if (IsDigit(*lhsItr) && IsDigit(*rhsItr)) 
+			{
+				std::uint64_t lhsNum = 0;
+				std::uint64_t rhsNum = 0;
+				std::size_t lhsDigitCount = 0;
+				std::size_t rhsDigitCount = 0;
+	
+				// when sorting a container, move the 'unparsable' string_view to end of container if string-to-uint throws an exception
+				if (!StringToUint(std::addressof(*lhsItr), &lhsNum, &lhsDigitCount)) 
+					return false;
+				if (!StringToUint(std::addressof(*rhsItr), &rhsNum, &rhsDigitCount))
+					return true;
+	
+				if (lhsNum != rhsNum) 
+					return lhsNum < rhsNum;
+	
+				assert(lhsDigitCount == std::distance(lhsItr, std::find_if_not(lhsItr, lhs.end(), IsDigit)));
+				assert(rhsDigitCount == std::distance(rhsItr, std::find_if_not(rhsItr, rhs.end(), IsDigit)));
+	
+				lhsItr += lhsDigitCount;
+				rhsItr += rhsDigitCount;
+			} 
+			else 
+			{
+				if (ToUpper(*lhsItr) != ToUpper(*rhsItr)) 
+					return *lhsItr < *rhsItr;
+	
+				++lhsItr;
+				++rhsItr;
+			}
+		}
+	
+		return lhs.length() < rhs.length();
+	}
+	
+	void SortDemoPaths(const auto demos)
+	{
+		std::sort(demos.begin(), demos.end(), [&](const auto& lhs, const auto& rhs) {
+			const std::size_t extLength = Mod::GetGameInterface()->GetDemoExtension().length();
+			const std::size_t dirLength = demos.front().parent_path().native().length();
+			const std::size_t lhsLength = lhs.native().length();
+			const std::size_t rhsLength = rhs.native().length();
+	
+			assert(lhsLength > dirLength + extLength + 1 && rhsLength > dirLength + extLength + 1);
+	
+			const auto* lhsFileNamePtr = lhs.c_str() + dirLength + 1;
+			const auto* rhsFileNamePtr = rhs.c_str() + dirLength + 1;
+			const std::size_t lhsSvLength = lhsLength - dirLength - extLength - 1;
+			const std::size_t rhsSvLength = rhsLength - dirLength - extLength - 1;
+	
+			using StringView = std::wstring_view;
+			return CompareNaturally<false>(StringView{ lhsFileNamePtr, lhsSvLength }, StringView{ rhsFileNamePtr, rhsSvLength });
+		});
+	}
+	
+	void SortDemoDirectories(const auto directories, auto GetPath)
+	{
+		std::sort(directories.begin(), directories.end(), [&](const auto& lhs, const auto& rhs) {
+			const auto& lhsPath = GetPath(lhs);
+			const auto& rhsPath = GetPath(rhs);
+	
+			const std::size_t parentDirLength = GetPath(directories.front()).parent_path().native().length();
+			const std::size_t lhsLength = lhsPath.native().length();
+			const std::size_t rhsLength = rhsPath.native().length();
+	
+			assert(lhsLength > parentDirLength + 1 && rhsLength > parentDirLength + 1);
+	
+			const auto* lhsDirPtr = lhsPath.c_str() + parentDirLength + 1;
+			const auto* rhsDirNamePtr = rhsPath.c_str() + parentDirLength + 1;
+			const std::size_t lhsSvLength = lhsLength - parentDirLength - 1;
+			const std::size_t rhsSvLength = rhsLength - parentDirLength - 1;
+	
+			using StringView = std::wstring_view;
+			return CompareNaturally<false>(StringView{ lhsDirPtr, lhsSvLength }, StringView{ rhsDirNamePtr, rhsSvLength });
+		});
+	}
+
 	void DemoLoader::Initialize()
 	{
 	}
@@ -23,8 +132,7 @@ namespace IWXMVM::UI
 			if (std::filesystem::exists(dir))
 			{
 				DemoDirectory searchPath = {
-					.path = dir,
-					.idx = demoDirectories.size(),
+					.path = dir
 				};
 				demoDirectories.push_back(searchPath);
 			}
@@ -43,8 +151,7 @@ namespace IWXMVM::UI
 			{
 				DemoDirectory subdir = {
 					.path = entry.path(),
-					.idx = demoDirectories.size(),
-					.parentIdx = demoDirectories[dirIdx].idx
+					.parentIdx = dirIdx
 				};
 				demoDirectories.push_back(subdir);
 			}
@@ -54,6 +161,12 @@ namespace IWXMVM::UI
 			}
 		}
 
+		SortDemoPaths(std::span{ (demoPaths.begin() + demosStartIdx), demoPaths.end() });
+		SortDemoDirectories(
+			std::span{ (demoDirectories.begin() + subdirsStartIdx), demoDirectories.end() },
+			[](const DemoDirectory& data) -> const std::filesystem::path& { return data.path; }
+		);
+		
 		demoDirectories[dirIdx].demos = std::make_pair(demosStartIdx, demoPaths.size());
 		if (demoDirectories[dirIdx].demos.first != demoDirectories[dirIdx].demos.second)
 		{
@@ -75,24 +188,24 @@ namespace IWXMVM::UI
 		}
 	}
 
-	void DemoLoader::SpreadDirsRelevancy()
+	void DemoLoader::MarkDirsRelevancy()
 	{
-		for (auto it = demoDirectories.rbegin(); it != demoDirectories.rend(); it++)
-		{
-			auto vecIdx = it->idx;
-			if (demoDirectories[vecIdx].relevant)
-			{
-				while (demoDirectories[vecIdx].parentIdx.has_value())
-				{
-					vecIdx = demoDirectories[vecIdx].parentIdx.value();
-					if (demoDirectories[vecIdx].relevant)
-					{
-						break;
-					}
-					demoDirectories[vecIdx].relevant = true;
-				}
-			}
-		}
+	    for (auto it = demoDirectories.rbegin(); it != demoDirectories.rend(); it++)
+	    {
+	        std::size_t vecIdx = std::abs(it - demoDirectories.rend() + 1);
+	        if (demoDirectories[vecIdx].relevant)
+	        {
+	            while (demoDirectories[vecIdx].parentIdx.has_value())
+	            {
+	                vecIdx = demoDirectories[vecIdx].parentIdx.value();
+	                if (demoDirectories[vecIdx].relevant)
+	                {
+	                    break;
+	                }
+	                demoDirectories[vecIdx].relevant = true;
+	            }
+	        }
+	    }
 	}
 
 	void DemoLoader::FindAllDemos()
@@ -106,7 +219,7 @@ namespace IWXMVM::UI
 		Search();
 
 		// 'demoDirectories' and 'demoPaths' are complete here, but we still need to find out the relevancy of each directory
-		SpreadDirsRelevancy();
+		MarkDirsRelevancy();
 
 		isScanningDemoPaths.store(false);
 	}

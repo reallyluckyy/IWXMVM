@@ -1,22 +1,30 @@
 #pragma once
 
+#include <algorithm>
+#include <array>
 #include <atomic>
-#include <cstdio>
 #include <cstdint>
-#include <string>
-#include <map>
-#include <set>
-#include <numeric>
-#include <vector>
-#include <functional>
-#include <fstream>
+#include <cstdio>
+#include <cwctype>
 #include <filesystem>
+#include <fstream>
+#include <functional>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include <d3d9.h>
 #pragma comment(lib, "d3d9.lib")
 #include <d3dx9.h>
 #pragma comment(lib, "d3dx9.lib")
+#include <d3dx9tex.h>
+
 #include <Windows.h>
+#include <psapi.h>
 
 #include "Logger.hpp"
 
@@ -26,5 +34,3 @@
 #include "backends/imgui_impl_dx9.h"
 #include "backends/imgui_impl_win32.h"
 #pragma warning(pop)
-
-#include <d3dx9tex.h>
