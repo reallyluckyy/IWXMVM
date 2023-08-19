@@ -115,11 +115,14 @@
     <ClCompile Include="src\Components\Camera.cpp" />
     <ClCompile Include="src\Components\CameraManager.cpp" />
     <ClCompile Include="src\D3D9Helper.cpp" />
+    <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\ResourceData.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Resources.cpp" />
+    <ClCompile Include="src\Types\Vector2.cpp" />
+    <ClCompile Include="src\Types\Vector3.cpp" />
     <ClCompile Include="src\UI\Components\Background.cpp" />
     <ClCompile Include="src\UI\Components\CaptureMenu.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
@@ -142,7 +145,9 @@
     <ClCompile Include="src\Utilities\PathUtils.cpp" />
     <ClCompile Include="src\Utilities\MathUtils.cpp" />
     <ClInclude Include="src\Components\CameraManager.hpp" />
-    <ClInclude Include="src\Types.hpp" />
+    <ClInclude Include="src\Input.hpp" />
+    <ClInclude Include="src\Types\Vector2.hpp" />
+    <ClInclude Include="src\Types\Vector3.hpp" />
     <ClInclude Include="src\Utilities\MathUtils.hpp" />
     <ClCompile Include="src\WindowsConsole.cpp" />
   </ItemGroup>

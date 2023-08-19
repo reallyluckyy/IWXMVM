@@ -27,7 +27,9 @@
 #include <psapi.h>
 
 #include "Logger.hpp"
-#include "Types.hpp"
+
+#include "Types/Vector2.hpp"
+#include "Types/Vector3.hpp"
 
 #pragma warning(push, 0)
 #define IMGUI_DEFINE_MATH_OPERATORS

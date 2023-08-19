@@ -2,6 +2,7 @@
 #include "CameraManager.hpp"
 
 #include "../Events.hpp"
+#include "../Input.hpp"
 #include "Mod.hpp"
 
 namespace IWXMVM::Components
@@ -37,26 +38,50 @@ namespace IWXMVM::Components
 		return cameraModes;
 	}
 
+	void UpdateFreecamMovement(Camera& activeCamera)
+	{
+		//if (!Input::GetFocusedWindow() == GameView)
+		//	return;
+
+		// TODO: make this configurable
+		constexpr float FREECAM_SPEED = 200;
+		constexpr float MOUSE_SPEED = 0.1f;
+
+		auto cameraSpeed = FREECAM_SPEED * Input::GetDeltaTime();
+
+		if (Input::KeyHeld(ImGuiKey_W))
+		{
+			activeCamera.GetPosition() += activeCamera.GetForwardVector() * cameraSpeed;
+		}
+
+		if (Input::KeyHeld(ImGuiKey_S))
+		{
+			activeCamera.GetPosition() -= activeCamera.GetForwardVector() * cameraSpeed;
+		}
+
+		if (Input::KeyHeld(ImGuiKey_A))
+		{
+			activeCamera.GetPosition() += activeCamera.GetRightVector() * cameraSpeed;
+		}
+
+		if (Input::KeyHeld(ImGuiKey_D))
+		{
+			activeCamera.GetPosition() -= activeCamera.GetRightVector() * cameraSpeed;
+		}
+
+		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
+		activeCamera.GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
+
+		if (Input::KeyHeld(ImGuiKey_Space))
+			activeCamera.GetPosition()[2] += cameraSpeed;
+	}
+
 	void CameraManager::UpdateCameraFrame()
 	{
 		auto& activeCamera = GetActiveCamera();
-		// TODO: move to input system
-		if (GetActiveCamera().GetMode() == Camera::Mode::Free)
+		if (activeCamera.GetMode() == Camera::Mode::Free)
 		{
-			if (GetAsyncKeyState(0x57)) // W
-				activeCamera.GetPosition()[0] += 1;
-
-			if (GetAsyncKeyState(0x53)) // S
-				activeCamera.GetPosition()[0] -= 1;
-
-			if (GetAsyncKeyState(0x41)) // A
-				activeCamera.GetRotation()[1] -= 1;
-
-			if (GetAsyncKeyState(0x44)) // D
-				activeCamera.GetRotation()[1] += 1;
-
-			if (GetAsyncKeyState(VK_SPACE)) // SPACE
-				activeCamera.GetPosition()[2] += 1;
+			UpdateFreecamMovement(activeCamera);
 		}
 	}
 

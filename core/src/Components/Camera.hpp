@@ -19,8 +19,8 @@ namespace IWXMVM::Components
 
 	private:
 		Mode mode;
-		vec3_t position;
-		vec3_t rotation;
+		Vector3 position;
+		Vector3 rotation;
 		float fov;
 
 
@@ -28,9 +28,11 @@ namespace IWXMVM::Components
 		Camera(Mode mode) : mode(mode), fov(90), position(), rotation() {}
 
 		Mode GetMode() { return mode; }
-		vec3_t& GetPosition() { return position; }
-		vec3_t& GetRotation() { return rotation; }
+		Vector3& GetPosition() { return position; }
+		Vector3& GetRotation() { return rotation; }
 		float& GetFov() { return fov; }
+		Vector3 GetForwardVector();
+		Vector3 GetRightVector();
 
 		bool IsModControlledCameraMode();
 	};
