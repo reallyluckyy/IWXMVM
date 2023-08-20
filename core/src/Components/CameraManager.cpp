@@ -38,10 +38,12 @@ namespace IWXMVM::Components
 		return cameraModes;
 	}
 
-	void UpdateFreecamMovement(Camera& activeCamera)
+	void CameraManager::UpdateFreecamMovement()
 	{
 		//if (!Input::GetFocusedWindow() == GameView)
 		//	return;
+
+		auto& activeCamera = GetActiveCamera();
 
 		// TODO: make this configurable
 		constexpr float FREECAM_SPEED = 200;
@@ -76,12 +78,75 @@ namespace IWXMVM::Components
 			activeCamera.GetPosition()[2] += cameraSpeed;
 	}
 
+	void CameraManager::UpdateOrbitCameraMovement()
+	{
+		auto& activeCamera = GetActiveCamera();
+
+		constexpr float SPEED = 0.1f;
+		constexpr float ROTATION_MULTIPLIER = 2.0f;
+		constexpr float MOVE_MULTIPLIER = 3.0f;
+
+		auto cameraSpeed = SPEED;
+
+		// bump camera out of origin if it's at the origin
+		if (activeCamera.GetPosition() == orbitCameraOrigin)
+		{
+			activeCamera.GetPosition() = orbitCameraOrigin + Vector3::One;
+		}
+
+		if (Input::KeyDown(ImGuiKey_F4))
+		{
+			orbitCameraOrigin = Vector3::Zero;
+			activeCamera.GetPosition() = Vector3::One;
+		}
+
+		if (Input::MouseButtonHeld(ImGuiMouseButton_Middle))
+		{
+			auto horizontalDelta = -Input::GetMouseDelta()[0] * cameraSpeed * ROTATION_MULTIPLIER;
+			// TODO: welp
+			activeCamera.GetPosition() -= orbitCameraOrigin;
+			activeCamera.GetPosition().RotateAroundAxis(Vector3::Up, MathUtils::DegreesToRadians(horizontalDelta));
+			activeCamera.GetPosition() += orbitCameraOrigin;
+
+			auto verticalDelta = Input::GetMouseDelta()[1] * cameraSpeed * ROTATION_MULTIPLIER;
+			activeCamera.GetPosition() -= orbitCameraOrigin;
+			activeCamera.GetPosition().RotateAroundAxis(Vector3::Cross(Vector3::Up, activeCamera.GetForwardVector()), MathUtils::DegreesToRadians(verticalDelta));
+			activeCamera.GetPosition() += orbitCameraOrigin;
+		}
+
+		if (Input::MouseButtonHeld(ImGuiMouseButton_Right))
+		{
+			Vector3 forward2D = activeCamera.GetForwardVector().Normalized();
+			forward2D.z = 0;
+			orbitCameraOrigin += forward2D * Input::GetMouseDelta()[1] * cameraSpeed * MOVE_MULTIPLIER;
+			activeCamera.GetPosition() += forward2D * Input::GetMouseDelta()[1] * cameraSpeed * MOVE_MULTIPLIER;
+
+			Vector3 right2D = activeCamera.GetRightVector().Normalized();
+			right2D.z = 0;
+			orbitCameraOrigin += right2D * Input::GetMouseDelta()[0] * cameraSpeed * MOVE_MULTIPLIER;
+			activeCamera.GetPosition() += right2D * Input::GetMouseDelta()[0] * cameraSpeed * MOVE_MULTIPLIER;
+		}
+
+
+		activeCamera.SetForwardVector(orbitCameraOrigin - activeCamera.GetPosition());
+
+		auto proximityDelta = Input::KeyHeld(ImGuiKey_S) ? cameraSpeed * Input::GetDeltaTime() * 50 : 0;
+		proximityDelta -= Input::KeyHeld(ImGuiKey_W) ? cameraSpeed * Input::GetDeltaTime() * 50 : 0;
+
+		activeCamera.GetPosition() += (activeCamera.GetPosition() - orbitCameraOrigin).Normalized() * proximityDelta * 100;
+	}
+
+
 	void CameraManager::UpdateCameraFrame()
 	{
 		auto& activeCamera = GetActiveCamera();
 		if (activeCamera.GetMode() == Camera::Mode::Free)
 		{
-			UpdateFreecamMovement(activeCamera);
+			UpdateFreecamMovement();
+		}
+		else if (activeCamera.GetMode() == Camera::Mode::Orbit)
+		{
+			UpdateOrbitCameraMovement();
 		}
 	}
 
@@ -115,7 +180,7 @@ namespace IWXMVM::Components
 
 	void CameraManager::SetActiveCamera(Camera::Mode mode)
 	{
-		for (int i = 0; i < cameras.size(); i++)
+		for (size_t i = 0; i < cameras.size(); i++)
 		{
 			if (cameras[i].GetMode() == mode)
 			{

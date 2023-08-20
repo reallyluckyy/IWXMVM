@@ -16,6 +16,9 @@ namespace IWXMVM::Components
 		std::vector<Camera::Mode> GetCameraModes();
 
 	private:
+		void UpdateFreecamMovement();
+		void UpdateOrbitCameraMovement();
+
 		void UpdateCameraFrame();
 
 		std::vector<Camera> cameras = []() {
@@ -30,5 +33,7 @@ namespace IWXMVM::Components
 		}();
 
 		int activeCameraIndex = 0;
+
+		Vector3 orbitCameraOrigin;
 	};
 }

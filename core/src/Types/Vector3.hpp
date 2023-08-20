@@ -1,5 +1,4 @@
 #pragma once
-#include "Utilities/MathUtils.hpp"
 
 namespace IWXMVM
 {
@@ -91,12 +90,36 @@ namespace IWXMVM
 
 		Vector3& operator*=(float scalar)
 		{
-			x *= scalar;	
+			x *= scalar;
+			y *= scalar;
+			z *= scalar;
+			return *this;
 		}
 
 		Vector3& operator/=(float scalar)
 		{
 			x /= scalar;
+			y /= scalar;
+			z /= scalar;
+			return *this;
+		}
+
+		bool operator==(const Vector3& other) const
+		{
+			return x == other.x && y == other.y && z == other.z;
+		}
+
+		Vector3 Normalized() const
+		{
+			float length = Length();
+			if (length == 0.0f)
+				return Vector3::Zero;
+			return Vector3(x / length, y / length, z / length);
+		}
+
+		float Length() const
+		{
+			return std::sqrtf(x * x + y * y + z * z);
 		}
 
 		static Vector3 Cross(const Vector3& a, const Vector3& b)
@@ -108,15 +131,15 @@ namespace IWXMVM
 			);
 		}
 
-		static Vector3 FromAngles(float pitch, float yaw, float roll)
+		void RotateAroundAxis(const Vector3& axis, float angle)
 		{
-			auto p = MathUtils::DegreesToRadians(pitch);
-			auto y = MathUtils::DegreesToRadians(yaw);
-			return Vector3(
-				std::cos(y) * std::cos(p),
-				std::sin(y) * std::cos(p),
-				-std::sin(p)
-			);
+			float cosAngle = std::cosf(angle);
+			float sinAngle = std::sinf(angle);
+			float oneMinusCosAngle = 1.0f - cosAngle;
+
+			this->x = (axis.x * axis.x * oneMinusCosAngle + cosAngle) * this->x + (axis.x * axis.y * oneMinusCosAngle - axis.z * sinAngle) * this->y + (axis.x * axis.z * oneMinusCosAngle + axis.y * sinAngle) * this->z;
+			this->y = (axis.y * axis.x * oneMinusCosAngle + axis.z * sinAngle) * this->x + (axis.y * axis.y * oneMinusCosAngle + cosAngle) * this->y + (axis.y * axis.z * oneMinusCosAngle - axis.x * sinAngle) * this->z;
+			this->z = (axis.z * axis.x * oneMinusCosAngle - axis.y * sinAngle) * this->x + (axis.z * axis.y * oneMinusCosAngle + axis.x * sinAngle) * this->y + (axis.z * axis.z * oneMinusCosAngle + cosAngle) * this->z;
 		}
 	};
 }

@@ -32,6 +32,7 @@ namespace IWXMVM::Components
 		Vector3& GetRotation() { return rotation; }
 		float& GetFov() { return fov; }
 		Vector3 GetForwardVector();
+		void SetForwardVector(Vector3 forward);
 		Vector3 GetRightVector();
 
 		bool IsModControlledCameraMode();

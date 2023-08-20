@@ -12,7 +12,12 @@ namespace IWXMVM::Components
 
 	Vector3 Camera::GetForwardVector() 
 	{
-		return Vector3::FromAngles(this->rotation[0], this->rotation[1], this->rotation[2]);
+		return MathUtils::ForwardVectorFromAngles(this->rotation[0], this->rotation[1], this->rotation[2]);
+	}
+
+	void Camera::SetForwardVector(Vector3 forward)
+	{
+		this->rotation = MathUtils::AnglesFromForwardVector(forward);
 	}
 
 	Vector3 Camera::GetRightVector()
