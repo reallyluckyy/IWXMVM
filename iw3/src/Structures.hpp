@@ -561,4 +561,6 @@ namespace IWXMVM::IW3::Structures
 	std::string GetFilePath(const std::string demoName);
 
 	void Cbuf_AddText(std::string command);
+
+	void Cvar_SetBoolByName(const char* cvar, bool val);
 }
