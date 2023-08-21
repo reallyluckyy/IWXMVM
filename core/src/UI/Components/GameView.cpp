@@ -101,7 +101,7 @@ namespace IWXMVM::UI
 		//Window Centering
 		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
 
-		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
+		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 		ImGui::Text("View:");
 		ImGui::SameLine();

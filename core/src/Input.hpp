@@ -1,15 +1,23 @@
 #pragma once
 #include "StdInclude.hpp"
 
-namespace IWXMVM::Input
+namespace IWXMVM
 {
-	bool KeyDown(ImGuiKey key);
-	bool KeyUp(ImGuiKey key);
-	bool KeyHeld(ImGuiKey key);
-	bool MouseButtonHeld(ImGuiMouseButton mouseButton);
+	class Input 
+	{	
+	public:
+		static bool KeyDown(ImGuiKey key);
+		static bool KeyUp(ImGuiKey key);
+		static bool KeyHeld(ImGuiKey key);
+		static bool MouseButtonHeld(ImGuiMouseButton mouseButton);
 
-	Vector2 GetMouseDelta();
-	float GetScrollDelta();
+		static Vector2 GetMouseDelta();
+		static float GetScrollDelta();
+		static void UpdateState(ImGuiIO& io);
 
-	float GetDeltaTime();
+		static float GetDeltaTime();
+
+	private:
+		static inline float mouseWheelDelta;
+	};
 }

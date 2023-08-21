@@ -1,41 +1,45 @@
 #include "StdInclude.hpp"
 #include "Input.hpp"
 
-namespace IWXMVM::Input
+namespace IWXMVM
 {
-	bool KeyDown(ImGuiKey key)
+	bool Input::KeyDown(ImGuiKey key)
 	{
 		return ImGui::IsKeyPressed(key);
 	}
 
-	bool KeyUp(ImGuiKey key)
+	bool Input::KeyUp(ImGuiKey key)
 	{
 		return ImGui::IsKeyReleased(key);
 	}
 
-	bool KeyHeld(ImGuiKey key)
+	bool Input::KeyHeld(ImGuiKey key)
 	{
 		return ImGui::IsKeyDown(key);
 	}
 
-	bool MouseButtonHeld(ImGuiMouseButton mouseButton)
+	bool Input::MouseButtonHeld(ImGuiMouseButton mouseButton)
 	{
 		return ImGui::IsMouseDown(mouseButton);
 	}
 
-	Vector2 GetMouseDelta()
+	Vector2 Input::GetMouseDelta()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		return Vector2(io.MouseDelta.x, io.MouseDelta.y);
 	}
 
-	float GetScrollDelta()
+	float Input::GetScrollDelta()
 	{
-		ImGuiIO& io = ImGui::GetIO();
-		return io.MouseWheel;
+		return mouseWheelDelta;
 	}
 
-	float GetDeltaTime()
+	void Input::UpdateState(ImGuiIO& io)
+	{
+		mouseWheelDelta = io.MouseWheel;
+	}
+
+	float Input::GetDeltaTime()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		return io.DeltaTime;

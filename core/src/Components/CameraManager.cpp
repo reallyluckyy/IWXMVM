@@ -82,11 +82,10 @@ namespace IWXMVM::Components
 	{
 		auto& activeCamera = GetActiveCamera();
 
-		constexpr float SPEED = 0.1f;
-		constexpr float ROTATION_MULTIPLIER = 2.0f;
-		constexpr float MOVE_MULTIPLIER = 3.0f;
-
-		auto cameraSpeed = SPEED;
+		constexpr float BASE_SPEED = 0.1f;
+		constexpr float ROTATION_SPEED = BASE_SPEED * 2.0f;
+		constexpr float TRANSLATION_SPEED = BASE_SPEED * 3.0f;
+		constexpr float ZOOM_SPEED = BASE_SPEED * 2.0f;
 
 		// bump camera out of origin if it's at the origin
 		if (activeCamera.GetPosition() == orbitCameraOrigin)
@@ -102,13 +101,12 @@ namespace IWXMVM::Components
 
 		if (Input::MouseButtonHeld(ImGuiMouseButton_Middle))
 		{
-			auto horizontalDelta = -Input::GetMouseDelta()[0] * cameraSpeed * ROTATION_MULTIPLIER;
-			// TODO: welp
+			auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
 			activeCamera.GetPosition() -= orbitCameraOrigin;
 			activeCamera.GetPosition().RotateAroundAxis(Vector3::Up, MathUtils::DegreesToRadians(horizontalDelta));
 			activeCamera.GetPosition() += orbitCameraOrigin;
 
-			auto verticalDelta = Input::GetMouseDelta()[1] * cameraSpeed * ROTATION_MULTIPLIER;
+			auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
 			activeCamera.GetPosition() -= orbitCameraOrigin;
 			activeCamera.GetPosition().RotateAroundAxis(Vector3::Cross(Vector3::Up, activeCamera.GetForwardVector()), MathUtils::DegreesToRadians(verticalDelta));
 			activeCamera.GetPosition() += orbitCameraOrigin;
@@ -118,20 +116,19 @@ namespace IWXMVM::Components
 		{
 			Vector3 forward2D = activeCamera.GetForwardVector().Normalized();
 			forward2D.z = 0;
-			orbitCameraOrigin += forward2D * Input::GetMouseDelta()[1] * cameraSpeed * MOVE_MULTIPLIER;
-			activeCamera.GetPosition() += forward2D * Input::GetMouseDelta()[1] * cameraSpeed * MOVE_MULTIPLIER;
+			orbitCameraOrigin += forward2D * Input::GetMouseDelta()[1] * TRANSLATION_SPEED;
+			activeCamera.GetPosition() += forward2D * Input::GetMouseDelta()[1] * TRANSLATION_SPEED;
 
 			Vector3 right2D = activeCamera.GetRightVector().Normalized();
 			right2D.z = 0;
-			orbitCameraOrigin += right2D * Input::GetMouseDelta()[0] * cameraSpeed * MOVE_MULTIPLIER;
-			activeCamera.GetPosition() += right2D * Input::GetMouseDelta()[0] * cameraSpeed * MOVE_MULTIPLIER;
+			orbitCameraOrigin += right2D * Input::GetMouseDelta()[0] * TRANSLATION_SPEED;
+			activeCamera.GetPosition() += right2D * Input::GetMouseDelta()[0] * TRANSLATION_SPEED;
 		}
 
 
 		activeCamera.SetForwardVector(orbitCameraOrigin - activeCamera.GetPosition());
 
-		auto proximityDelta = Input::KeyHeld(ImGuiKey_S) ? cameraSpeed * Input::GetDeltaTime() * 50 : 0;
-		proximityDelta -= Input::KeyHeld(ImGuiKey_W) ? cameraSpeed * Input::GetDeltaTime() * 50 : 0;
+		auto proximityDelta = -Input::GetScrollDelta() * ZOOM_SPEED;
 
 		activeCamera.GetPosition() += (activeCamera.GetPosition() - orbitCameraOrigin).Normalized() * proximityDelta * 100;
 	}
