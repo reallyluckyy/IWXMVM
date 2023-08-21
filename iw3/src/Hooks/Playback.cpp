@@ -24,11 +24,15 @@ namespace IWXMVM::IW3::Hooks::Playback
 		const std::size_t onesCount = 1000 / (callCountPerSecond / 1000.0);
 		const std::size_t zerosCount = pattern.size() - onesCount;
 
-		for (std::size_t i = 0, zeros = 1, ones = 1; i < pattern.size(); ++i) {
-			if (ones * zerosCount < zeros * onesCount) {
+		for (std::size_t i = 0, zeros = 1, ones = 1; i < pattern.size(); ++i) 
+		{
+			if (ones * zerosCount < zeros * onesCount) 
+			{
 				++ones;
 				pattern[i] = 1;
-			} else {
+			} 
+			else 
+			{
 				++zeros;
 				pattern[i] = 0;
 			}
@@ -40,7 +44,8 @@ namespace IWXMVM::IW3::Hooks::Playback
 	void SV_Frame_Internal(std::int32_t& msec)
 	{
 		// always return 0 msec when pausing demo playback
-		if (Mod::GetGameInterface()->IsDemoPlaybackPaused()) {
+		if (Mod::GetGameInterface()->IsDemoPlaybackPaused()) 
+		{
 			msec = 0;
 			return;
 		}
@@ -63,7 +68,8 @@ namespace IWXMVM::IW3::Hooks::Playback
 		// below we're going to generate a pattern of interleaved 0s and 1s based on (imgui) frame times
 		// we generate a new pattern each second, or whenever timescale or com_maxfps values changes
 
-		if (lastTimeScale != timescale.value().value->floating_point || lastMaxFps != com_maxfps.value().value->int32) {
+		if (lastTimeScale != timescale.value().value->floating_point || lastMaxFps != com_maxfps.value().value->int32) 
+		{
 			// this branch ensures that any change to the timescale or max fps immediately changes the pattern
 			float frameRate;
 
@@ -71,7 +77,8 @@ namespace IWXMVM::IW3::Hooks::Playback
 				frameRate = std::min(ImGui::GetIO().Framerate, static_cast<float>(com_maxfps.value().value->int32));
 			else if (lastMaxFps < com_maxfps.value().value->int32) // max fps was increased, imgui fps is potentially too low
 				frameRate = std::max(ImGui::GetIO().Framerate, static_cast<float>(com_maxfps.value().value->int32));
-			else {
+			else 
+			{
 				assert(lastTimeScale != timescale.value().value->floating_point);
 				frameRate = static_cast<float>(com_maxfps.value().value->int32);
 			}
@@ -81,7 +88,8 @@ namespace IWXMVM::IW3::Hooks::Playback
 			patternIndex = 0;
 
 			GeneratePattern(pattern, frameRate, timescale.value().value->floating_point);
-		} else if (patternIndex % 1000 == 0)
+		} 
+		else if (patternIndex % 1000 == 0)
 			GeneratePattern(pattern, ImGui::GetIO().Framerate, timescale.value().value->floating_point);
 
 		// advance (1ms) or pause(0ms) based on the pattern
