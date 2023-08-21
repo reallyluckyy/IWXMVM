@@ -79,4 +79,18 @@ namespace IWXMVM::IW3::Structures
 			call Cbuf_AddText_Address
 		}
 	}
+
+	void Cvar_SetBoolByName(const char* cvar, bool val)
+	{
+		static constexpr std::uintptr_t address = 0x5492CB;
+	
+		_asm
+		{
+			pushad
+			mov eax, cvar
+			push val
+			call address
+			popad
+		}
+	}
 }
