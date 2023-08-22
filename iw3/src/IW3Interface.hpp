@@ -23,7 +23,7 @@ namespace IWXMVM::IW3
 		void SetupEventListeners() final
 		{
 			Events::RegisterListener(EventType::OnDemoLoad, DemoParser::Run);
-			Events::RegisterListener(EventType::OnDemoLoad, []() { Structures::Cvar_SetBoolByName("sv_cheats", true); });
+			Events::RegisterListener(EventType::OnDemoLoad, []() { Structures::FindDvar("sv_cheats")->current.enabled = true; });
 		}
 
 		uintptr_t GetWndProc() final
