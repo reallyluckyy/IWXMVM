@@ -85,7 +85,14 @@ namespace IWXMVM::Components
 		constexpr float BASE_SPEED = 0.1f;
 		constexpr float ROTATION_SPEED = BASE_SPEED * 2.0f;
 		constexpr float TRANSLATION_SPEED = BASE_SPEED * 3.0f;
-		constexpr float ZOOM_SPEED = BASE_SPEED * 2.0f;
+		constexpr float ZOOM_SPEED = BASE_SPEED * 8.0f;
+		constexpr float HEIGHT_CEILING = 250.0f;
+		constexpr float HEIGHT_MULTIPLIER = 1.5f;
+		constexpr float SCROLL_LOWER_BOUNDARY = -0.001;
+		constexpr float SCROLL_UPPER_BOUNDARY = 0.001;
+
+		static double scrollDelta = 0.0;
+		scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
 
 		// bump camera out of origin if it's at the origin
 		if (activeCamera.GetPosition() == orbitCameraOrigin)
@@ -95,6 +102,8 @@ namespace IWXMVM::Components
 
 		if (Input::KeyDown(ImGuiKey_F4))
 		{
+			scrollDelta = 0.0;
+
 			orbitCameraOrigin = Vector3::Zero;
 			activeCamera.GetPosition() = Vector3::One;
 		}
@@ -114,23 +123,31 @@ namespace IWXMVM::Components
 
 		if (Input::MouseButtonHeld(ImGuiMouseButton_Right))
 		{
+			// use the height value to move faster around at higher altitude 
+			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (activeCamera.GetPosition()[2] / HEIGHT_CEILING) * TRANSLATION_SPEED;
+
 			Vector3 forward2D = activeCamera.GetForwardVector().Normalized();
 			forward2D.z = 0;
-			orbitCameraOrigin += forward2D * Input::GetMouseDelta()[1] * TRANSLATION_SPEED;
-			activeCamera.GetPosition() += forward2D * Input::GetMouseDelta()[1] * TRANSLATION_SPEED;
+			orbitCameraOrigin += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
+			activeCamera.GetPosition() += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
 
 			Vector3 right2D = activeCamera.GetRightVector().Normalized();
 			right2D.z = 0;
-			orbitCameraOrigin += right2D * Input::GetMouseDelta()[0] * TRANSLATION_SPEED;
-			activeCamera.GetPosition() += right2D * Input::GetMouseDelta()[0] * TRANSLATION_SPEED;
+			orbitCameraOrigin += right2D * Input::GetMouseDelta()[0] * translationSpeed;
+			activeCamera.GetPosition() += right2D * Input::GetMouseDelta()[0] * translationSpeed;
 		}
-
 
 		activeCamera.SetForwardVector(orbitCameraOrigin - activeCamera.GetPosition());
 
-		auto proximityDelta = -Input::GetScrollDelta() * ZOOM_SPEED;
-
-		activeCamera.GetPosition() += (activeCamera.GetPosition() - orbitCameraOrigin).Normalized() * proximityDelta * 100;
+		if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
+		{
+			activeCamera.GetPosition() += (activeCamera.GetPosition() - orbitCameraOrigin).Normalized() * (0.025 * scrollDelta) * 100;
+			scrollDelta *= 0.975;
+		} 
+		else if (scrollDelta != 0.0) 
+		{
+			scrollDelta = 0.0;
+		}
 	}
 
 
