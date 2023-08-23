@@ -122,6 +122,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 		HookManager::CreateHook(0x4A56F0, (uintptr_t)FX_SetupCamera_Hook, &FX_SetupCamera_Trampoline);
 		
 		// TODO: CG_CalcFov
+		// TODO: bypass connection interrupted (CI) image / message by placing a return statement at 0x42F930 
 
 		// ignore writes to camera angles (this fixes things like the player knifing affecting the freecam)
 		HookManager::CreateHook(0x434070, (uintptr_t)CG_DObjGetWorldTagMatrix_Hook, &CG_DObjGetWorldTagMatrix_Trampoline);
@@ -134,6 +135,9 @@ namespace IWXMVM::IW3::Hooks::Camera
 
 		Structures::FindDvar("cg_thirdperson")->current.enabled = (isFreeCamera) ? 1 : 0;
 		Structures::FindDvar("cg_draw2d")->current.enabled = (isFreeCamera) ? 0 : 1;
+		Structures::FindDvar("cg_drawShellshock")->current.enabled = (isFreeCamera) ? 0 : 1;
+
+		// TODO: hide / show killcam 'YOU' marker by placing / removing an absolute jump at 0x444B6B 
 
 		Structures::FindDvar("r_lodBiasRigid")->current.value = -40000;
 		Structures::FindDvar("r_lodBiasSkinned")->current.value = -40000;
