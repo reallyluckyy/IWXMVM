@@ -51,8 +51,10 @@ namespace IWXMVM::Components
 		constexpr float HEIGHT_CEILING = 250.0f;
 		constexpr float HEIGHT_MULTIPLIER = 0.75f;
 	
+		const auto speedModifier = Input::KeyHeld(ImGuiKey_LeftShift) ? 1.5f : 1.0f;
+
 		const auto cameraHeightSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
-		const auto cameraMovementSpeed = cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(activeCamera.GetPosition()[2]) / HEIGHT_CEILING);
+		const auto cameraMovementSpeed = cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(activeCamera.GetPosition()[2]) / HEIGHT_CEILING) * speedModifier;
 	
 		if (Input::KeyHeld(ImGuiKey_W))
 		{
