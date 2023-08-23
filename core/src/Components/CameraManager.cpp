@@ -136,6 +136,10 @@ namespace IWXMVM::Components
 
 	void CameraManager::UpdateCameraFrame()
 	{
+		if (Mod::GetGameInterface()->GetGameState() == GameInterface::GameState::MainMenu) {
+			return;
+		}
+		
 		auto& activeCamera = GetActiveCamera();
 		if (activeCamera.GetMode() == Camera::Mode::Free)
 		{
