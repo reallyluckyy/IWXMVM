@@ -42,46 +42,52 @@ namespace IWXMVM::Components
 	{
 		//if (!Input::GetFocusedWindow() == GameView)
 		//	return;
-
+	
 		auto& activeCamera = GetActiveCamera();
-
+	
 		// TODO: make this configurable
 		constexpr float FREECAM_SPEED = 200;
 		constexpr float MOUSE_SPEED = 0.1f;
-
-		auto cameraSpeed = FREECAM_SPEED * Input::GetDeltaTime();
-
+		constexpr float HEIGHT_CEILING = 250.0f;
+		constexpr float HEIGHT_MULTIPLIER = 0.75f;
+	
+		const auto cameraHeightSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
+		const auto cameraMovementSpeed = cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(activeCamera.GetPosition()[2]) / HEIGHT_CEILING);
+	
 		if (Input::KeyHeld(ImGuiKey_W))
 		{
-			activeCamera.GetPosition() += activeCamera.GetForwardVector() * cameraSpeed;
+			activeCamera.GetPosition() += activeCamera.GetForwardVector() * cameraMovementSpeed;
 		}
-
+	
 		if (Input::KeyHeld(ImGuiKey_S))
 		{
-			activeCamera.GetPosition() -= activeCamera.GetForwardVector() * cameraSpeed;
+			activeCamera.GetPosition() -= activeCamera.GetForwardVector() * cameraMovementSpeed;
 		}
-
+	
 		if (Input::KeyHeld(ImGuiKey_A))
 		{
-			activeCamera.GetPosition() += activeCamera.GetRightVector() * cameraSpeed;
+			activeCamera.GetPosition() += activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
-
+	
 		if (Input::KeyHeld(ImGuiKey_D))
 		{
-			activeCamera.GetPosition() -= activeCamera.GetRightVector() * cameraSpeed;
+			activeCamera.GetPosition() -= activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
-
+	
 		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
 		activeCamera.GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
-
+	
 		if (Input::KeyHeld(ImGuiKey_Space))
-			activeCamera.GetPosition()[2] += cameraSpeed;
+			activeCamera.GetPosition()[2] += cameraHeightSpeed;
+	
+		if (Input::KeyHeld(ImGuiKey_LeftAlt))
+			activeCamera.GetPosition()[2] -= cameraHeightSpeed;
 	}
 
 	void CameraManager::UpdateOrbitCameraMovement()
 	{
 		auto& activeCamera = GetActiveCamera();
-
+	
 		constexpr float BASE_SPEED = 0.1f;
 		constexpr float ROTATION_SPEED = BASE_SPEED * 2.0f;
 		constexpr float TRANSLATION_SPEED = BASE_SPEED * 3.0f;
@@ -114,7 +120,7 @@ namespace IWXMVM::Components
 			activeCamera.GetPosition() -= orbitCameraOrigin;
 			activeCamera.GetPosition().RotateAroundAxis(Vector3::Up, MathUtils::DegreesToRadians(horizontalDelta));
 			activeCamera.GetPosition() += orbitCameraOrigin;
-
+			
 			auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
 			activeCamera.GetPosition() -= orbitCameraOrigin;
 			activeCamera.GetPosition().RotateAroundAxis(Vector3::Cross(Vector3::Up, activeCamera.GetForwardVector()), MathUtils::DegreesToRadians(verticalDelta));
@@ -124,7 +130,7 @@ namespace IWXMVM::Components
 		if (Input::MouseButtonHeld(ImGuiMouseButton_Right))
 		{
 			// use the height value to move faster around at higher altitude 
-			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (activeCamera.GetPosition()[2] / HEIGHT_CEILING) * TRANSLATION_SPEED;
+			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (std::abs(activeCamera.GetPosition()[2]) / HEIGHT_CEILING) * TRANSLATION_SPEED;
 
 			Vector3 forward2D = activeCamera.GetForwardVector().Normalized();
 			forward2D.z = 0;
@@ -138,7 +144,7 @@ namespace IWXMVM::Components
 		}
 
 		activeCamera.SetForwardVector(orbitCameraOrigin - activeCamera.GetPosition());
-
+		
 		if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
 		{
 			activeCamera.GetPosition() += (activeCamera.GetPosition() - orbitCameraOrigin).Normalized() * (0.025 * scrollDelta) * 100;
@@ -149,7 +155,6 @@ namespace IWXMVM::Components
 			scrollDelta = 0.0;
 		}
 	}
-
 
 	void CameraManager::UpdateCameraFrame()
 	{
