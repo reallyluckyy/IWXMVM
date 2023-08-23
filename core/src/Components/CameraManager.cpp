@@ -88,8 +88,8 @@ namespace IWXMVM::Components
 		constexpr float ZOOM_SPEED = BASE_SPEED * 8.0f;
 		constexpr float HEIGHT_CEILING = 250.0f;
 		constexpr float HEIGHT_MULTIPLIER = 1.5f;
-		constexpr float SCROLL_LOWER_BOUNDARY = -0.001;
-		constexpr float SCROLL_UPPER_BOUNDARY = 0.001;
+		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
+		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
 
 		static double scrollDelta = 0.0;
 		scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
