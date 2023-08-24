@@ -10,6 +10,7 @@
 #include "Components/GameView.hpp"
 #include "Components/DemoLoader.hpp"
 #include "Components/CaptureMenu.hpp"
+#include "Components/ConfigMenu.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -26,6 +27,7 @@ namespace IWXMVM::UI::UIManager
 		vec.emplace_back(std::make_unique<ControlBar>());
 		vec.emplace_back(std::make_unique<DemoLoader>());
 		vec.emplace_back(std::make_unique<CaptureMenu>());
+		vec.emplace_back(std::make_unique<ConfigMenu>());
 
 		return vec;
 	}();
