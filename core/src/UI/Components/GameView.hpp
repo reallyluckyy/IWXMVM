@@ -6,15 +6,6 @@ namespace IWXMVM::UI
 	class GameView : public UIComponent
 	{
 	public:
-		GameView()
-		{
-			Initialize();
-		}
-		~GameView()
-		{
-			Release();
-		}
-
 		void Render() final;
 		void Release() final;
 

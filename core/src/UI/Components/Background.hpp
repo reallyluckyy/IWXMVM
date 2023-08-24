@@ -6,15 +6,6 @@ namespace IWXMVM::UI
 	class Background : public UIComponent
 	{
 	public:
-		Background()
-		{
-			Initialize();
-		}
-		~Background()
-		{
-			Release();
-		}
-
 		void Render() final;
 		void Release() final;
 

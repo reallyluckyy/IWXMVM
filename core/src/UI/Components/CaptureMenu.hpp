@@ -6,15 +6,6 @@ namespace IWXMVM::UI
 	class CaptureMenu : public UIComponent
 	{
 	public:
-		CaptureMenu()
-		{
-			Initialize();
-		}
-		~CaptureMenu()
-		{
-			Release();
-		}
-
 		void Render() final;
 		void Release() final;
 

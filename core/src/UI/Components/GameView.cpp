@@ -2,6 +2,7 @@
 #include "GameView.hpp"
 
 #include "Mod.hpp"
+#include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
 
 
@@ -52,91 +53,72 @@ namespace IWXMVM::UI
 		return true;
 	}
 
-	ImVec2 ClampImage(ImVec2 window, float frame_height) //Clamp for texture/image
+	ImVec2 ClampImage(ImVec2 window) // Clamp for texture/image
 	{
-		float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y; // Clamp ratio to refDef's width/height.
+		float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y;
 
 		if (window.x / window.y > aspectRatio) {
 			// If too wide, adjust width
 			window.x = window.y * aspectRatio;
-		}
-		else if (window.x / window.y < aspectRatio) {
+		} else if (window.x / window.y < aspectRatio) {
 			// If too tall, adjust height
 			window.y = window.x / aspectRatio;
 		}
 
-		return ImVec2(window.x, window.y - frame_height);
-	}
-
-	void ImGuiAspectRatioClamp(ImGuiSizeCallbackData* data) //Clamp for the actual ImGui window (because resizing handle gets fucked)
-	{
-		float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y;
-		float currentRatio = data->DesiredSize.x / data->DesiredSize.y;
-
-		if (currentRatio > aspectRatio) {
-			// the window is too wide, adjust height
-			data->DesiredSize.y = data->DesiredSize.x / aspectRatio;
-		}
-		else {
-			// the window is too tall, adjust width
-			data->DesiredSize.x = data->DesiredSize.y * aspectRatio;
-		}
+		return ImVec2(window.x, window.y);
 	}
 
     void GameView::Initialize()
     {
-		// since this is executed inside the constructor, it's too early to use the interface pointer!
+		auto scaleFactor = 0.8f;
 
-		/*if (!CreateTexture(PathUtils::GetWindowSize(Mod::GetGameInterface()->GetWindowHandle())))
-		{
-			throw std::exception("Failed to create texture for game view");
-		}*/
+		SetPosition(0, UIManager::uiComponents[UIManager::ComponentIdx::MENUBAR]->GetSize().y);
+		SetSize(ImGui::GetIO().DisplaySize.x * scaleFactor, ImGui::GetIO().DisplaySize.y * scaleFactor);
+		LOG_DEBUG("Initializing GameView. size.x: {}; size.y: {}", GetSize().x, GetSize().y);
     }
 
 	void GameView::Render()
 	{
-		//Window Centering
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
+		ImGui::SetNextWindowPos(GetPosition());
+		ImGui::SetNextWindowSize(GetSize());
 
-		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
-
-		ImGui::Text("View:");
-		ImGui::SameLine();
-		const char* cameraComboItems[] = { "First Person Camera", "Free Camera", "Dolly Camera", "Bone Camera" };
-		static int currentCameraComboItem = 0;
-		ImGui::SetNextItemWidth(200);
-		ImGui::Combo("##gameViewCameraCombo", &currentCameraComboItem, cameraComboItems, IM_ARRAYSIZE(cameraComboItems));
-
-		if (currentCameraComboItem == 0)
+		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar;
+		if (ImGui::Begin("GameView", NULL, flags))
 		{
-			ImGui::SameLine();
-			ImGui::Text("Player:");
+			auto currentPos = ImGui::GetWindowPos();
+			auto currentSize = ImGui::GetWindowSize();
 
-			ImGui::SameLine();
-			const char* playerCameraComboItems[] = { "Player 1", "Player 2", "Player 3", "Player 4" };
-			static int currentPlayerCameraComboItem = 0;
-			ImGui::SetNextItemWidth(200);
-			ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems, IM_ARRAYSIZE(playerCameraComboItems));
+			if (currentSize.x != GetSize().x && currentPos.x == GetPosition().x)
+			{
+				// right side resizing
+				SetSizeX(currentSize.x);
+			}
+			if (currentSize.y != GetSize().y && currentPos.y == GetPosition().y)
+			{
+				// bottom side resizing
+				SetSizeY(currentSize.y);
+			}
+
+			auto viewportSize = ImGui::GetContentRegionMax();
+
+			auto newTextureSize = ClampImage(viewportSize);
+			if (textureSize.x != newTextureSize.x || textureSize.y != newTextureSize.y)
+			{
+				textureSize = newTextureSize;
+				CreateTexture(texture, textureSize);
+			}
+
+			if (!CaptureBackBuffer(texture))
+			{
+				throw std::exception("Failed to capture game view");
+			}
+
+			ImGui::SetCursorPosX((viewportSize.x - textureSize.x) / 2.0f);
+			ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f);
+			ImGui::Image((void*)texture, textureSize); //Resizes image to clamp aspect ratio
+
+			ImGui::End();
 		}
-
-		auto viewportSize = ImGui::GetContentRegionMax();
-
-		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y)
-		{
-			textureSize = viewportSize;
-			CreateTexture(texture, viewportSize);
-		}
-
-		if (!CaptureBackBuffer(texture))
-		{
-			throw std::exception("Failed to capture game view");
-		}
-
-		ImGui::Image((void*)texture, ClampImage(viewportSize, ImGui::GetFrameHeight() * 2)); //Resizes image to clamp aspect ratio
-
-		ImGui::ShowDemoWindow();
-
-		ImGui::End();
 	}
 
 	void GameView::Release()

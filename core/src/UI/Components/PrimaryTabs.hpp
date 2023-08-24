@@ -3,13 +3,18 @@
 
 namespace IWXMVM::UI
 {
-	class ControlBar : public UIComponent
+	enum class Tab {
+		CFG,
+		DEMOS,
+		CAPTURE,
+		DEBUG,
+	};
+
+	class PrimaryTabs : public UIComponent
 	{
 	public:
+		void Initialize() final;
 		void Render() final;
 		void Release() final;
-
-	private:
-		void Initialize() final;
 	};
 }

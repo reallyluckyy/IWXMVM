@@ -133,6 +133,7 @@
     <ClCompile Include="src\UI\Components\DemoLoader.cpp" />
     <ClCompile Include="src\UI\Components\GameView.cpp" />
     <ClCompile Include="src\UI\Components\MenuBar.cpp" />
+    <ClCompile Include="src\UI\Components\PrimaryTabs.cpp" />
     <ClCompile Include="src\UI\UIImage.cpp" />
     <ClCompile Include="src\UI\UIManager.cpp" />
     <ClCompile Include="src\Utilities\HookManager.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="src\UI\Components\DemoLoader.hpp" />
     <ClInclude Include="src\UI\Components\GameView.hpp" />
     <ClInclude Include="src\UI\Components\MenuBar.hpp" />
+    <ClInclude Include="src\UI\Components\PrimaryTabs.hpp" />
     <ClInclude Include="src\UI\UIComponent.hpp" />
     <ClInclude Include="src\UI\UIImage.hpp" />
     <ClInclude Include="src\Utilities\HookManager.hpp" />

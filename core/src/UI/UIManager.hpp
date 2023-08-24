@@ -4,32 +4,44 @@
 #include "UIComponent.hpp"
 
 #include "Components/Background.hpp"
+#include "Components/CaptureMenu.hpp"
 #include "Components/ControlBar.hpp"
 #include "Components/DebugPanel.hpp"
-#include "Components/MenuBar.hpp"
-#include "Components/GameView.hpp"
 #include "Components/DemoLoader.hpp"
-#include "Components/CaptureMenu.hpp"
+#include "Components/GameView.hpp"
+#include "Components/MenuBar.hpp"
+#include "Components/PrimaryTabs.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace IWXMVM::UI::UIManager
 {
-	inline std::vector<std::unique_ptr<UIComponent>> uiComponents = []() {
-		std::vector<std::unique_ptr<UIComponent>> vec;
+	enum ComponentIdx {
+		BACKGROUND = 0,
+		MENUBAR,
+		GAMEVIEW,
+		PRIMARYTABS,
+		DEMOLOADER,
+		CAPTUREMENU,
+		CONTROLBAR,
+		DEBUGPANEL,
+		COUNT,
+	};
 
-		// background should probably always come first
-		vec.emplace_back(std::make_unique<Background>());
-		vec.emplace_back(std::make_unique<GameView>());
-		vec.emplace_back(std::make_unique<DebugPanel>());
-		vec.emplace_back(std::make_unique<MenuBar>());
-		vec.emplace_back(std::make_unique<ControlBar>());
-		vec.emplace_back(std::make_unique<DemoLoader>());
-		vec.emplace_back(std::make_unique<CaptureMenu>());
+	inline std::array<std::unique_ptr<UIComponent>, ComponentIdx::COUNT> uiComponents = {
+		std::make_unique<Background>(),
+		std::make_unique<MenuBar>(),
+		std::make_unique<GameView>(),
+		std::make_unique<PrimaryTabs>(),
+		std::make_unique<DemoLoader>(),
+		std::make_unique<CaptureMenu>(),
+		std::make_unique<ControlBar>(),
+		std::make_unique<DebugPanel>(),
+	};
 
-		return vec;
-	}();
+	inline Tab selectedTab = Tab::DEBUG;
 
+	inline std::atomic<bool> hideOverlay = false;
 	inline std::atomic<bool> ejectRequested = false;
 	inline bool isInitialized = false;
 	inline std::atomic<bool> needsRestart = false;

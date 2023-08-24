@@ -6,15 +6,6 @@ namespace IWXMVM::UI
 	class MenuBar : public UIComponent
 	{
 	public:
-		MenuBar()
-		{
-			Initialize();
-		}
-		~MenuBar()
-		{
-			Release();
-		}
-
 		void Render() final;
 		void Release() final;
 

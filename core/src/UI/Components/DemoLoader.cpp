@@ -2,8 +2,8 @@
 #include "DemoLoader.hpp"
 
 #include "Mod.hpp"
+#include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
-#include "CustomImGuiControls.hpp"
 
 namespace IWXMVM::UI
 {
@@ -114,10 +114,6 @@ namespace IWXMVM::UI
 			using StringView = std::wstring_view;
 			return CompareNaturally<false>(StringView{ lhsDirPtr, lhsSvLength }, StringView{ rhsDirNamePtr, rhsSvLength });
 		});
-	}
-
-	void DemoLoader::Initialize()
-	{
 	}
 
 	bool IsFileDemo(const std::filesystem::path& file)
@@ -236,7 +232,7 @@ namespace IWXMVM::UI
 				auto idx = i + demos.first;
 				auto demoName = demoPaths[idx].filename().string();
 
-				if (ImGui::Button(std::format("Load##{0}", demoName).c_str(), ImVec2(60, 20)))
+				if (ImGui::Button(std::format("Load##{0}", demoName).c_str(), ImVec2(ImGui::GetFontSize() * 3.7f, ImGui::GetFontSize() * 1.3f)))
 				{
 					Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
 				}
@@ -294,40 +290,53 @@ namespace IWXMVM::UI
 		}
 	}
 
+	void DemoLoader::Initialize()
+	{
+		isScanningDemoPaths.store(true);
+		std::thread([&] { FindAllDemos(); }).detach();
+	}
+
 	void DemoLoader::Render()
 	{
-		if (!initiallyLoadedDemos) 
-		{
-			// would be cool to be able to do this in Initialize() at some point
-			// but with the current set up we still dont have access to Mod::GetGameInterface() at that time
-			isScanningDemoPaths.store(true);
-			std::thread([&] { FindAllDemos(); }).detach();
-			initiallyLoadedDemos = true;
-		}
+		if (UIManager::selectedTab != Tab::DEMOS)
+			return;
 
-		ImGui::Begin("Demos", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
+		SetPosition(
+			UIManager::uiComponents[UIManager::GAMEVIEW]->GetSize().x,
+			UIManager::uiComponents[UIManager::PRIMARYTABS]->GetPosition().y + UIManager::uiComponents[UIManager::PRIMARYTABS]->GetSize().y
+		);
+		SetSize(
+			ImGui::GetIO().DisplaySize.x - GetPosition().x,
+			UIManager::uiComponents[UIManager::GAMEVIEW]->GetSize().y - UIManager::uiComponents[UIManager::PRIMARYTABS]->GetSize().y
+		);
 
-		if (isScanningDemoPaths.load())
+		ImGui::SetNextWindowPos(GetPosition());
+		ImGui::SetNextWindowSize(GetSize());
+
+		ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
+		if (ImGui::Begin("Demos", nullptr, flags))
 		{
-			ImGui::Text("Searching for demo files...");
-		}
-		else
-		{
-			ImGui::Text("%d demos found!", demoPaths.size());
-			ImGui::SameLine();
-			if (ImGui::Button("Refresh", ImVec2(100, 20)))
+			if (isScanningDemoPaths.load())
 			{
-				isScanningDemoPaths.store(true);
-				std::thread([&] { FindAllDemos(); }).detach();
-				ImGui::End();
-				return;
+				ImGui::Text("Searching for demo files...");
+			} else
+			{
+				ImGui::Text("%d demos found!", demoPaths.size());
+				ImGui::SameLine();
+				if (ImGui::Button("Refresh", ImVec2(ImGui::GetFontSize() * 3.7f, ImGui::GetFontSize() * 1.3f)))
+				{
+					isScanningDemoPaths.store(true);
+					std::thread([&] { FindAllDemos(); }).detach();
+					ImGui::End();
+					return;
+				}
+
+				// Search paths will always be rendered, even if empty
+				RenderSearchPaths();
 			}
 
-			// Search paths will always be rendered, even if empty
-			RenderSearchPaths();
+			ImGui::End();
 		}
-
-		ImGui::End();
 	}
 
 	void DemoLoader::Release()
