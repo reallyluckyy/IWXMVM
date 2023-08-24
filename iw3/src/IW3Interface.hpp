@@ -131,5 +131,10 @@ namespace IWXMVM::IW3
 
 			return dvar;
 		}
+
+		void ExecCommand(std::string command) final
+		{
+			Structures::Cbuf_AddText(command);
+		}
 	};
 }
