@@ -132,6 +132,7 @@ namespace IWXMVM
 		virtual bool IsDemoPlaybackPaused() = 0;
 
 		virtual std::optional<Dvar> GetDvar(const std::string name) = 0;
+		virtual void ExecCommand(std::string) = 0;
 
 	private:
 		Game game;
