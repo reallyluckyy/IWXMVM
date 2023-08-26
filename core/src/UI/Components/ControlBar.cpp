@@ -11,7 +11,7 @@ namespace IWXMVM::UI
 {
 	float playbackSpeed;
 
-	std::optional<Dvar> timescale;
+	std::optional<Types::Dvar> timescale;
 
 	void ControlBar::Initialize()
 	{
@@ -23,7 +23,7 @@ namespace IWXMVM::UI
 
 	void ControlBar::Render()
 	{
-		if (Mod::GetGameInterface()->GetGameState() != GameInterface::GameState::InDemo)
+		if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
 			return;
 
 		if (!timescale.has_value())

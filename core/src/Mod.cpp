@@ -37,13 +37,13 @@ namespace IWXMVM
 			Logger::Initialize();
 
 			LOG_INFO("Loading IWXMVM {}", IWXMVM_VERSION);
-			LOG_INFO("Game: {}", gameInterface->GetGameName());
+			LOG_INFO("Game: {}", Types::ToString(gameInterface->GetGame()));
 			LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
 
 			//MemoryUtils::UnprotectModule();
 
 			LOG_DEBUG("Installing game hooks...");
-			gameInterface->HookD3D();
+			D3D9::Initialize();
 			gameInterface->InstallHooks();
 			gameInterface->SetupEventListeners();
 
