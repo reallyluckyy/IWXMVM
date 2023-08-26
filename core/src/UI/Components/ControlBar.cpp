@@ -10,7 +10,7 @@ namespace IWXMVM::UI
 {
 	float playbackSpeed;
 
-	std::optional<Dvar> timescale;
+	std::optional<Types::Dvar> timescale;
 
 	void ControlBar::Initialize()
 	{

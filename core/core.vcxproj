@@ -145,6 +145,7 @@
     <ClInclude Include="src\Components\CameraManager.hpp" />
     <ClInclude Include="src\Input.hpp" />
     <ClInclude Include="src\Types\DemoInfo.hpp" />
+    <ClInclude Include="src\Types\Dvar.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />

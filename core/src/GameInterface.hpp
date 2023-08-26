@@ -7,24 +7,11 @@
 #include "Types/Game.hpp"
 #include "Types/DemoInfo.hpp"
 #include "Types/MouseMode.hpp"
+#include "Types/Dvar.hpp"
 
 namespace IWXMVM
 {
 	const auto DEMO_TEMP_DIRECTORY = "IWXTMP";
-
-	struct Dvar
-	{
-		std::string name;
-		union Value
-		{
-			float floating_point;
-			uint32_t uint32;
-			int32_t int32;
-			float vector[4];
-			const char* string;
-			uint8_t color[4];
-		}* value;
-	};
 
 	class GameInterface
 	{
@@ -55,7 +42,7 @@ namespace IWXMVM
 		virtual bool IsDemoPlaybackPaused() = 0;
 
 		// perhaps dvars shouldnt be exposed to core at all?
-		virtual std::optional<Dvar> GetDvar(const std::string name) = 0;
+		virtual std::optional<Types::Dvar> GetDvar(const std::string name) = 0;
 
 	private:
 		Types::Game game;

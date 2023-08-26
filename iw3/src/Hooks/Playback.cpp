@@ -50,13 +50,13 @@ namespace IWXMVM::IW3::Hooks::Playback
 			return;
 		}
 
-		const std::optional<Dvar> timescale = Mod::GetGameInterface()->GetDvar("timescale");
+		const std::optional<Types::Dvar> timescale = Mod::GetGameInterface()->GetDvar("timescale");
 
 		// we can use the original msec value when its value is greater than 1, and/or when timescale is equal or greater than 1.0
 		if (msec > 1 || !timescale.has_value() || timescale.value().value->floating_point >= 1.0f)
 			return;
 
-		const std::optional<Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
+		const std::optional<Types::Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
 		if (!com_maxfps.has_value())
 			return;
 
