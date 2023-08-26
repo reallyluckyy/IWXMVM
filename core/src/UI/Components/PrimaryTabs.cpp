@@ -43,6 +43,16 @@ namespace IWXMVM::UI
 		}
 	}
 
+	// Only show icon if button is too small
+	std::string ClipText(std::string text, ImVec2 buttonSize)
+	{
+		if (buttonSize.x < buttonSize.y * 2)
+		{
+			return text.find("  ") != std::string::npos ? text.substr(0, text.find(" ")) : text;
+		}
+		return text;
+	}
+
 	void PrimaryTabs::Render()
 	{
 		SetPosition(
@@ -70,27 +80,27 @@ namespace IWXMVM::UI
 
 			auto totalXMargin = xMargin * (Tab::Count + 1);
 			auto totalYMargin = yMargin * 2;
-			auto size = ImVec2((GetSize().x - totalXMargin) / (float)Tab::Count, GetSize().y - totalYMargin);
+			auto buttonSize = ImVec2((GetSize().x - totalXMargin) / (float)Tab::Count, GetSize().y - totalYMargin);
 
 			ImGui::SetCursorPosY(yMargin);
 
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
-			if (ImGui::Button(ICON_FA_FILE "  DEMOS", size))
+			if (ImGui::Button(ClipText(ICON_FA_FILE "  DEMOS", buttonSize).c_str(), buttonSize))
 				UIManager::selectedTab = Tab::Demos;
 
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
-			if (ImGui::Button(ICON_FA_VIDEO "  CAMERA", size))
+			if (ImGui::Button(ClipText(ICON_FA_VIDEO "  CAMERA", buttonSize).c_str(), buttonSize))
 				UIManager::selectedTab = Tab::Camera;
 			
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
-			if (ImGui::Button(ICON_FA_SLIDERS "  VISUALS", size))
+			if (ImGui::Button(ClipText(ICON_FA_SLIDERS "  VISUALS", buttonSize).c_str(), buttonSize))
 				UIManager::selectedTab = Tab::Visuals;
 
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
-			if (ImGui::Button(ICON_FA_CIRCLE "  RECORD", size))
+			if (ImGui::Button(ClipText(ICON_FA_CIRCLE "  RECORD", buttonSize).c_str(), buttonSize))
 				UIManager::selectedTab = Tab::Record;
 		}
 
