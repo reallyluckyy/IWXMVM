@@ -137,7 +137,8 @@ namespace IWXMVM::IW3::Hooks::Camera
 		Structures::FindDvar("cg_draw2d")->current.enabled = (isFreeCamera) ? 0 : 1;
 		Structures::FindDvar("cg_drawShellshock")->current.enabled = (isFreeCamera) ? 0 : 1;
 
-		// TODO: hide / show killcam 'YOU' marker by placing / removing an absolute jump at 0x444B6B 
+		// TODO: hide / show killcam 'YOU' marker by placing / removing an absolute jump at 0x444B6B
+		// TODO: hide / show class menu when watching demos and using free / orbit camera by placing / removing an absolute jump at 0x474E20
 
 		Structures::FindDvar("r_lodBiasRigid")->current.value = -40000;
 		Structures::FindDvar("r_lodBiasSkinned")->current.value = -40000;
