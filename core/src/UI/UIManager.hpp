@@ -28,6 +28,7 @@ namespace IWXMVM::UI::UIManager
 			CaptureMenu,
 			ControlBar,
 			DebugPanel,
+
 			Count,
 		};
 	}

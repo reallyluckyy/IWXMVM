@@ -124,6 +124,8 @@ namespace IWXMVM::UI
 		ImGui::SetNextWindowPos(GetPosition());
 		ImGui::SetNextWindowSize(GetSize());
 
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar;
 		ImGui::Begin("GameView", NULL, flags);
 
@@ -150,8 +152,6 @@ namespace IWXMVM::UI
 				SetSizeY(currentSize.y);
 			}
 
-			auto viewportSize = ImGui::GetContentRegionMax();
-
 			auto newTextureSize = ClampImage(viewportSize);
 			if (textureSize.x != newTextureSize.x || textureSize.y != newTextureSize.y)
 			{
@@ -166,10 +166,12 @@ namespace IWXMVM::UI
 
 			ImGui::SetCursorPosX((viewportSize.x - textureSize.x) / 2.0f);
 			ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f);
-			ImGui::Image((void*)texture, textureSize); //Resizes image to clamp aspect ratio
-
-			ImGui::End();
+			ImGui::Image((void*)texture, textureSize);
 		}
+
+		ImGui::End();
+
+		ImGui::PopStyleVar();
 	}
 
 	void GameView::Release()

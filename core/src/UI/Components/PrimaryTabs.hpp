@@ -3,11 +3,13 @@
 
 namespace IWXMVM::UI
 {
-	enum class Tab {
+	enum Tab {
 		Demos,
 		Visuals,
 		Camera,
-		Record
+		Record,
+
+		Count,
 	};
 
 	class PrimaryTabs : public UIComponent

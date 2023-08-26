@@ -57,26 +57,46 @@ namespace IWXMVM::UI
 		ImGui::SetNextWindowPos(GetPosition());
 		ImGui::SetNextWindowSize(GetSize());
 
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, 0);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
+
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar;
 		if (ImGui::Begin("PrimaryTabs", nullptr, flags))
 		{
-			auto buttonMargin = GetSize() / 64;
-			auto size = ImVec2(GetSize().x / 4 - buttonMargin.x, GetSize().y - buttonMargin.y * 20);
+			// Change these
+			auto xMargin = GetSize().y / 9;
+			auto yMargin = xMargin;
 
+			auto totalXMargin = xMargin * (Tab::Count + 1);
+			auto totalYMargin = yMargin * 2;
+			auto size = ImVec2((GetSize().x - totalXMargin) / (float)Tab::Count, GetSize().y - totalYMargin);
+
+			ImGui::SetCursorPosY(yMargin);
+
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
 			if (ImGui::Button(ICON_FA_FILE "  DEMOS", size))
 				UIManager::selectedTab = Tab::Demos;
+
 			ImGui::SameLine();
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
 			if (ImGui::Button(ICON_FA_VIDEO "  CAMERA", size))
 				UIManager::selectedTab = Tab::Camera;
+			
 			ImGui::SameLine();
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
 			if (ImGui::Button(ICON_FA_SLIDERS "  VISUALS", size))
 				UIManager::selectedTab = Tab::Visuals;
+
 			ImGui::SameLine();
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
 			if (ImGui::Button(ICON_FA_CIRCLE "  RECORD", size))
 				UIManager::selectedTab = Tab::Record;
-
-			ImGui::End();
 		}
+
+		ImGui::End();
+
+		ImGui::PopStyleVar(3);
 
 		RenderSelectedTab();
 	}
