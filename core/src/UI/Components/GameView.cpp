@@ -129,12 +129,15 @@ namespace IWXMVM::UI
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar;
 		ImGui::Begin("GameView", NULL, flags);
 
+		auto topBarHeight = 0.0f;
 		if (Mod::GetGameInterface()->GetGameState() == GameInterface::GameState::InDemo)
 		{
 			DrawTopBar();
+			topBarHeight = ImGui::GetItemRectSize().y;
 		}
 
 		auto viewportSize = ImGui::GetContentRegionMax();
+		viewportSize.y -= topBarHeight;
 
 		auto currentPos = ImGui::GetWindowPos();
 		auto currentSize = ImGui::GetWindowSize();
@@ -163,7 +166,7 @@ namespace IWXMVM::UI
 		}
 
 		ImGui::SetCursorPosX((viewportSize.x - textureSize.x) / 2.0f);
-		ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f);
+		ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f + topBarHeight);
 		ImGui::Image((void*)texture, textureSize);
 
 		ImGui::End();
