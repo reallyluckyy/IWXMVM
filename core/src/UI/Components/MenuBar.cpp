@@ -18,7 +18,7 @@ namespace IWXMVM::UI
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Preferences")) {}
-                if (ImGui::MenuItem("Edit Controls")) {}
+                if (ImGui::MenuItem("Controls")) {}
                 if (ImGui::MenuItem("Exit")) {}
                 ImGui::EndMenu();
             }

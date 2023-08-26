@@ -304,7 +304,8 @@ namespace IWXMVM::UI
 			if (isScanningDemoPaths.load())
 			{
 				ImGui::Text("Searching for demo files...");
-			} else
+			} 
+			else
 			{
 				ImGui::Text("%d demos found!", demoPaths.size());
 				ImGui::SameLine();
