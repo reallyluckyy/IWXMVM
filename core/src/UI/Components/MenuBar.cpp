@@ -31,7 +31,7 @@ namespace IWXMVM::UI
             }
 
             auto windowSize = ImGui::GetIO().DisplaySize;
-            std::string iwxmvmText = std::format("IWXMVM {0} | {1}", IWXMVM_VERSION, Mod::GetGameInterface()->GetGameName());
+            std::string iwxmvmText = std::format("IWXMVM {0} | {1}", IWXMVM_VERSION, Types::ToString(Mod::GetGameInterface()->GetGame()));
             ImGui::SetCursorPosX(windowSize.x - ImGui::CalcTextSize(iwxmvmText.c_str()).x - ImGui::CalcTextSize(" ").x);
             ImGui::Text(iwxmvmText.c_str());
 
