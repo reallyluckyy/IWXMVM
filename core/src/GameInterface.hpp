@@ -1,7 +1,7 @@
 #pragma once
 #include "StdInclude.hpp"
 
-#include "D3D9Helper.hpp"
+#include "D3D9.hpp"
 #include "Components/Camera.hpp"
 #include "Types/GameState.hpp"
 #include "Types/Game.hpp"
@@ -22,10 +22,6 @@ namespace IWXMVM
 
 		Types::Game GetGame() const { return game; }
 
-		HWND GetWindowHandle() const { return D3D9Helper::FindWindowHandle(); }
-		IDirect3DDevice9* GetD3D9Device() const { return D3D9Helper::GetDevicePtr(); }
-
-		void HookD3D() const { D3D9Helper::Initialize(); }
 		virtual void InstallHooks() = 0;
 		virtual void SetupEventListeners() = 0;
 

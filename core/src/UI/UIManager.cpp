@@ -19,7 +19,7 @@ namespace IWXMVM::UI::UIManager
 		std::lock_guard<std::mutex> guard{ mtx };
 		LOG_DEBUG("Shutting down ImGui");
 
-		SetWindowLongPtr(Mod::GetGameInterface()->GetWindowHandle(), GWLP_WNDPROC, (LONG_PTR)GameWndProc);
+		SetWindowLongPtr(D3D9::FindWindowHandle(), GWLP_WNDPROC, (LONG_PTR)GameWndProc);
 		Mod::GetGameInterface()->SetMouseMode(Types::MouseMode::Passthrough);
 
 		for (const auto& component : uiComponents) 
@@ -55,7 +55,7 @@ namespace IWXMVM::UI::UIManager
 		if (!isInitialized || needsRestart.load()) {
 			// This handles initialization when the D3D9 device pointer is the same after a UI restart
 			if (initRequested) {
-				Initialize(Mod::GetGameInterface()->GetD3D9Device());
+				Initialize(D3D9::GetDevice());
 				initRequested = false;
 				return;
 			}
@@ -144,7 +144,7 @@ namespace IWXMVM::UI::UIManager
 
 			ImGui::StyleColorsDark();
 
-			HWND hwnd = Mod::GetGameInterface()->GetWindowHandle();
+			HWND hwnd = D3D9::FindWindowHandle();
 			LOG_DEBUG("Initializing ImGui_ImplWin32 with HWND {0:x}", (uint32_t)hwnd);
 			ImGui_ImplWin32_Init(hwnd);
 

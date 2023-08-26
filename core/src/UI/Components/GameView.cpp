@@ -12,7 +12,7 @@ namespace IWXMVM::UI
 		if (texture != NULL)
 			texture->Release();
 
-		auto device = Mod::GetGameInterface()->GetD3D9Device();
+		auto device = D3D9::GetDevice();
 
 		auto result = D3DXCreateTexture(device, size.x, size.y, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &texture);
 		if (FAILED(result))
@@ -23,7 +23,7 @@ namespace IWXMVM::UI
 
 	bool CaptureBackBuffer(IDirect3DTexture9* texture)
 	{
-		auto device = Mod::GetGameInterface()->GetD3D9Device();
+		auto device = D3D9::GetDevice();
 
 		IDirect3DSurface9* RenderTarget = NULL;
 		auto result = device->GetRenderTarget(0, &RenderTarget);

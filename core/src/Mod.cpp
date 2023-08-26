@@ -43,7 +43,7 @@ namespace IWXMVM
 			//MemoryUtils::UnprotectModule();
 
 			LOG_DEBUG("Installing game hooks...");
-			gameInterface->HookD3D();
+			D3D9::Initialize();
 			gameInterface->InstallHooks();
 			gameInterface->SetupEventListeners();
 

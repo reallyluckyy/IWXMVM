@@ -1,5 +1,5 @@
 #include "StdInclude.hpp"
-#include "D3D9Helper.hpp"
+#include "D3D9.hpp"
 
 #include "MinHook.h"
 
@@ -9,7 +9,7 @@
 
 #include "UI/UIManager.hpp"
 
-namespace IWXMVM::D3D9Helper
+namespace IWXMVM::D3D9
 {
 	HWND gameWindowHandle = nullptr;
 	void* vTable[119];
@@ -89,7 +89,7 @@ namespace IWXMVM::D3D9Helper
 
 	void CreateDummyDevice()
 	{
-		HWND hwnd = Mod::GetGameInterface()->GetWindowHandle();
+		HWND hwnd = D3D9::FindWindowHandle();
 		if (!hwnd) {
 			throw std::runtime_error("Failed to find HWND");
 		}
@@ -186,7 +186,7 @@ namespace IWXMVM::D3D9Helper
 		return gameWindowHandle;
 	}
 
-	IDirect3DDevice9* GetDevicePtr()
+	IDirect3DDevice9* GetDevice()
 	{
 		return device;
 	}

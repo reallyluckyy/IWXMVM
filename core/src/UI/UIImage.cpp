@@ -25,7 +25,7 @@ namespace IWXMVM::UI
         UIImage image;
 
         PDIRECT3DTEXTURE9 texture;
-        const HRESULT hresult = D3DXCreateTextureFromFileA(Mod::GetGameInterface()->GetD3D9Device(), path.c_str(), &texture);
+        const HRESULT hresult = D3DXCreateTextureFromFileA(D3D9::GetDevice(), path.c_str(), &texture);
         if (hresult != S_OK)
             throw std::exception("failed to load image");
 
@@ -50,7 +50,7 @@ namespace IWXMVM::UI
         UIImage image;
 
         PDIRECT3DTEXTURE9 texture;
-        const HRESULT hresult = D3DXCreateTextureFromFileInMemory(Mod::GetGameInterface()->GetD3D9Device(), data, size, &texture);
+        const HRESULT hresult = D3DXCreateTextureFromFileInMemory(D3D9::GetDevice(), data, size, &texture);
         if (hresult != S_OK)
             throw std::exception("failed to load image");
 
