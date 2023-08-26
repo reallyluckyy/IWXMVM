@@ -3,6 +3,7 @@
 
 #include "Hooks/Commands.hpp"
 #include "Hooks/Playback.hpp"
+#include "Hooks/Camera.hpp"
 
 
 namespace IWXMVM::IW3::Hooks
@@ -11,5 +12,6 @@ namespace IWXMVM::IW3::Hooks
 	{
 		Hooks::Playback::Install();
 		Hooks::Commands::Install();
+		Hooks::Camera::Install();
 	}
 }

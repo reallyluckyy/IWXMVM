@@ -62,7 +62,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\core\third-party/imgui;$(SolutionDir)core\src;$(SolutionDir)\core\third-party/spdlog/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\core\third-party/imgui;$(SolutionDir)core\src;$(SolutionDir)\core\third-party/spdlog/include/;$(SolutionDir)\core\third-party/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -84,7 +84,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\core\third-party/imgui;$(SolutionDir)core\src;$(SolutionDir)\core\third-party/spdlog/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\core\third-party/imgui;$(SolutionDir)core\src;$(SolutionDir)\core\third-party/spdlog/include/;$(SolutionDir)\core\third-party/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -109,6 +109,7 @@
     <ClCompile Include="src\Entrypoint.cpp" />
     <ClCompile Include="src\Hooks.cpp" />
     <ClCompile Include="src\Hooks\Commands.cpp" />
+    <ClCompile Include="src\Hooks\Camera.cpp" />
     <ClCompile Include="src\Hooks\Playback.cpp" />
     <ClCompile Include="src\IW3Interface.hpp" />
     <ClCompile Include="src\StdInclude.cpp">
@@ -121,6 +122,7 @@
     <ClInclude Include="src\DemoParser.hpp" />
     <ClInclude Include="src\Hooks.hpp" />
     <ClInclude Include="src\Hooks\Commands.hpp" />
+    <ClInclude Include="src\Hooks\Camera.hpp" />
     <ClInclude Include="src\Hooks\Playback.hpp" />
     <ClInclude Include="src\Structures.hpp" />
   </ItemGroup>

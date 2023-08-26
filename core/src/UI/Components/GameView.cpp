@@ -93,21 +93,34 @@ namespace IWXMVM::UI
 		}*/
     }
 
-	void GameView::Render()
+	void DrawTopBar() 
 	{
-		//Window Centering
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
-
-		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar);
+		auto cameraManager = Mod::GetCameraManager();
+		auto& currentCamera = cameraManager->GetActiveCamera();
 
 		ImGui::Text("View:");
 		ImGui::SameLine();
-		const char* cameraComboItems[] = { "First Person Camera", "Free Camera", "Dolly Camera", "Bone Camera" };
-		static int currentCameraComboItem = 0;
 		ImGui::SetNextItemWidth(200);
-		ImGui::Combo("##gameViewCameraCombo", &currentCameraComboItem, cameraComboItems, IM_ARRAYSIZE(cameraComboItems));
 
-		if (currentCameraComboItem == 0)
+		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager->GetCameraModeLabel(currentCamera.GetMode()).data()))
+		{
+			for (auto cameraMode : cameraManager->GetCameraModes())
+			{
+				bool isSelected = currentCamera.GetMode() == cameraMode;
+				if (ImGui::Selectable(cameraManager->GetCameraModeLabel(cameraMode).data(), currentCamera.GetMode() == cameraMode))
+				{
+					cameraManager->SetActiveCamera(cameraMode);
+				}
+
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		if (currentCamera.GetMode() == Components::Camera::Mode::FirstPerson)
 		{
 			ImGui::SameLine();
 			ImGui::Text("Player:");
@@ -117,6 +130,19 @@ namespace IWXMVM::UI
 			static int currentPlayerCameraComboItem = 0;
 			ImGui::SetNextItemWidth(200);
 			ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems, IM_ARRAYSIZE(playerCameraComboItems));
+		}
+	}
+
+	void GameView::Render()
+	{
+		//Window Centering
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
+
+		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+		if (Mod::GetGameInterface()->GetGameState() == GameInterface::GameState::InDemo)
+		{
+			DrawTopBar();
 		}
 
 		auto viewportSize = ImGui::GetContentRegionMax();

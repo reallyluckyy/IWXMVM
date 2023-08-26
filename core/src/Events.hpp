@@ -5,7 +5,8 @@ namespace IWXMVM
 	enum class EventType
 	{
 		OnFrame,
-		OnDemoLoad
+		OnDemoLoad,
+		OnCameraChanged,
 	};
 
 	namespace Events
