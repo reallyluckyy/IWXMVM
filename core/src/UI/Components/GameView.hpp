@@ -11,6 +11,7 @@ namespace IWXMVM::UI
 
 	private:
 		void Initialize() final;
+		void DrawTopBar();
 
 		IDirect3DTexture9* texture = NULL;
 		ImVec2 textureSize = ImVec2(0, 0);
