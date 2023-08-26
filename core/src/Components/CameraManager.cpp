@@ -4,6 +4,7 @@
 #include "../Events.hpp"
 #include "../Input.hpp"
 #include "Mod.hpp"
+#include "Utilities/MathUtils.hpp"
 
 namespace IWXMVM::Components
 {
@@ -44,6 +45,7 @@ namespace IWXMVM::Components
 		//	return;
 	
 		auto& activeCamera = GetActiveCamera();
+		auto& cameraPosition = activeCamera.GetPosition();
 	
 		// TODO: make this configurable
 		constexpr float FREECAM_SPEED = 200;
@@ -54,41 +56,42 @@ namespace IWXMVM::Components
 		const auto speedModifier = Input::KeyHeld(ImGuiKey_LeftShift) ? 1.5f : 1.0f;
 
 		const auto cameraHeightSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
-		const auto cameraMovementSpeed = cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(activeCamera.GetPosition()[2]) / HEIGHT_CEILING) * speedModifier;
+		const auto cameraMovementSpeed = cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING) * speedModifier;
 	
 		if (Input::KeyHeld(ImGuiKey_W))
 		{
-			activeCamera.GetPosition() += activeCamera.GetForwardVector() * cameraMovementSpeed;
+			cameraPosition += activeCamera.GetForwardVector() * cameraMovementSpeed;
 		}
 	
 		if (Input::KeyHeld(ImGuiKey_S))
 		{
-			activeCamera.GetPosition() -= activeCamera.GetForwardVector() * cameraMovementSpeed;
+			cameraPosition -= activeCamera.GetForwardVector() * cameraMovementSpeed;
 		}
 	
 		if (Input::KeyHeld(ImGuiKey_A))
 		{
-			activeCamera.GetPosition() += activeCamera.GetRightVector() * cameraMovementSpeed;
+			cameraPosition += activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
 	
 		if (Input::KeyHeld(ImGuiKey_D))
 		{
-			activeCamera.GetPosition() -= activeCamera.GetRightVector() * cameraMovementSpeed;
+			cameraPosition -= activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
 	
 		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
 		activeCamera.GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
 	
 		if (Input::KeyHeld(ImGuiKey_Space))
-			activeCamera.GetPosition()[2] += cameraHeightSpeed;
+			cameraPosition[2] += cameraHeightSpeed;
 	
 		if (Input::KeyHeld(ImGuiKey_LeftAlt))
-			activeCamera.GetPosition()[2] -= cameraHeightSpeed;
+			cameraPosition[2] -= cameraHeightSpeed;
 	}
 
 	void CameraManager::UpdateOrbitCameraMovement()
 	{
 		auto& activeCamera = GetActiveCamera();
+		auto& cameraPosition = activeCamera.GetPosition();
 	
 		constexpr float BASE_SPEED = 0.1f;
 		constexpr float ROTATION_SPEED = BASE_SPEED * 2.0f;
@@ -98,58 +101,67 @@ namespace IWXMVM::Components
 		constexpr float HEIGHT_MULTIPLIER = 1.5f;
 		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
 		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
+		constexpr float MIN_ORBIT_DIST = 10;
 
 		static double scrollDelta = 0.0;
 		scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
 
 		// bump camera out of origin if it's at the origin
-		if (activeCamera.GetPosition() == orbitCameraOrigin)
+		if (cameraPosition == orbitCameraOrigin)
 		{
-			activeCamera.GetPosition() = orbitCameraOrigin + Vector3::One;
+			cameraPosition = orbitCameraOrigin + glm::vector3::one;
 		}
 
 		if (Input::KeyDown(ImGuiKey_F4))
 		{
 			scrollDelta = 0.0;
 
-			orbitCameraOrigin = Vector3::Zero;
-			activeCamera.GetPosition() = Vector3::One;
+			orbitCameraOrigin = glm::vector3::zero;
+			cameraPosition = glm::vector3::one;
 		}
 
 		if (Input::MouseButtonHeld(ImGuiMouseButton_Middle))
 		{
 			auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
-			activeCamera.GetPosition() -= orbitCameraOrigin;
-			activeCamera.GetPosition().RotateAroundAxis(Vector3::Up, MathUtils::DegreesToRadians(horizontalDelta));
-			activeCamera.GetPosition() += orbitCameraOrigin;
+			cameraPosition -= orbitCameraOrigin;
+			cameraPosition = glm::rotateZ(cameraPosition, MathUtils::DegreesToRadians(horizontalDelta));
+			cameraPosition += orbitCameraOrigin;
 			
 			auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
-			activeCamera.GetPosition() -= orbitCameraOrigin;
-			activeCamera.GetPosition().RotateAroundAxis(Vector3::Cross(Vector3::Up, activeCamera.GetForwardVector()), MathUtils::DegreesToRadians(verticalDelta));
-			activeCamera.GetPosition() += orbitCameraOrigin;
+			cameraPosition -= orbitCameraOrigin;
+			cameraPosition = glm::rotate(cameraPosition, MathUtils::DegreesToRadians(verticalDelta), glm::cross(glm::vector3::up, activeCamera.GetForwardVector()));
+			cameraPosition += orbitCameraOrigin;
 		}
 
 		if (Input::MouseButtonHeld(ImGuiMouseButton_Right))
 		{
 			// use the height value to move faster around at higher altitude 
-			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (std::abs(activeCamera.GetPosition()[2]) / HEIGHT_CEILING) * TRANSLATION_SPEED;
+			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING) * TRANSLATION_SPEED;
 
-			Vector3 forward2D = activeCamera.GetForwardVector().Normalized();
+			glm::vec3 forward2D = glm::normalize(activeCamera.GetForwardVector());
 			forward2D.z = 0;
 			orbitCameraOrigin += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
-			activeCamera.GetPosition() += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
+			cameraPosition += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
 
-			Vector3 right2D = activeCamera.GetRightVector().Normalized();
+			glm::vec3 right2D = glm::normalize(activeCamera.GetRightVector());
 			right2D.z = 0;
 			orbitCameraOrigin += right2D * Input::GetMouseDelta()[0] * translationSpeed;
-			activeCamera.GetPosition() += right2D * Input::GetMouseDelta()[0] * translationSpeed;
+			cameraPosition += right2D * Input::GetMouseDelta()[0] * translationSpeed;
 		}
 
-		activeCamera.SetForwardVector(orbitCameraOrigin - activeCamera.GetPosition());
+		activeCamera.SetForwardVector(orbitCameraOrigin - cameraPosition);
 		
 		if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
 		{
-			activeCamera.GetPosition() += (activeCamera.GetPosition() - orbitCameraOrigin).Normalized() * (0.025 * scrollDelta) * 100;
+			auto desiredPosition = cameraPosition + glm::normalize(cameraPosition - orbitCameraOrigin) * (0.025 * scrollDelta) * 100;
+			if (glm::distance(desiredPosition, orbitCameraOrigin) > MIN_ORBIT_DIST)
+			{
+				cameraPosition = desiredPosition;
+			}
+			else 
+			{
+				cameraPosition = orbitCameraOrigin + glm::normalize(cameraPosition - orbitCameraOrigin) * MIN_ORBIT_DIST;
+			}
 			scrollDelta *= 0.975;
 		} 
 		else if (scrollDelta != 0.0) 

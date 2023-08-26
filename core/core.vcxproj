@@ -62,7 +62,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -90,7 +90,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -121,8 +121,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Resources.cpp" />
-    <ClCompile Include="src\Types\Vector2.cpp" />
-    <ClCompile Include="src\Types\Vector3.cpp" />
     <ClCompile Include="src\UI\Components\Background.cpp" />
     <ClCompile Include="src\UI\Components\CaptureMenu.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
@@ -146,8 +144,7 @@
     <ClCompile Include="src\Utilities\MathUtils.cpp" />
     <ClInclude Include="src\Components\CameraManager.hpp" />
     <ClInclude Include="src\Input.hpp" />
-    <ClInclude Include="src\Types\Vector2.hpp" />
-    <ClInclude Include="src\Types\Vector3.hpp" />
+    <ClInclude Include="src\Utilities\GLMExtensions.hpp" />
     <ClInclude Include="src\Utilities\MathUtils.hpp" />
     <ClCompile Include="src\WindowsConsole.cpp" />
   </ItemGroup>

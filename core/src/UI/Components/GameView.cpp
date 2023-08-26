@@ -93,15 +93,10 @@ namespace IWXMVM::UI
 		}*/
     }
 
-	void GameView::Render()
+	void DrawTopBar() 
 	{
 		auto cameraManager = Mod::GetCameraManager();
 		auto& currentCamera = cameraManager->GetActiveCamera();
-
-		//Window Centering
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
-
-		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 		ImGui::Text("View:");
 		ImGui::SameLine();
@@ -135,6 +130,19 @@ namespace IWXMVM::UI
 			static int currentPlayerCameraComboItem = 0;
 			ImGui::SetNextItemWidth(200);
 			ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems, IM_ARRAYSIZE(playerCameraComboItems));
+		}
+	}
+
+	void GameView::Render()
+	{
+		//Window Centering
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), ImGuiAspectRatioClamp);
+
+		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+		if (Mod::GetGameInterface()->GetGameState() == GameInterface::GameState::InDemo)
+		{
+			DrawTopBar();
 		}
 
 		auto viewportSize = ImGui::GetContentRegionMax();

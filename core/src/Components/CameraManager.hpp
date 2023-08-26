@@ -34,6 +34,6 @@ namespace IWXMVM::Components
 
 		int activeCameraIndex = 0;
 
-		Vector3 orbitCameraOrigin;
+		glm::vec3 orbitCameraOrigin;
 	};
 }

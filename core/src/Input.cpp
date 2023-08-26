@@ -23,10 +23,10 @@ namespace IWXMVM
 		return ImGui::IsMouseDown(mouseButton);
 	}
 
-	Vector2 Input::GetMouseDelta()
+	glm::vec2 Input::GetMouseDelta()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		return Vector2(io.MouseDelta.x, io.MouseDelta.y);
+		return glm::vec2(io.MouseDelta.x, io.MouseDelta.y);
 	}
 
 	float Input::GetScrollDelta()

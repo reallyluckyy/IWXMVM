@@ -2,6 +2,7 @@
 #include "Camera.hpp"
 
 #include "Utilities/MathUtils.hpp"
+#include "glm/vec3.hpp"
 
 namespace IWXMVM::Components
 {
@@ -10,18 +11,18 @@ namespace IWXMVM::Components
 		return mode != Mode::FirstPerson && mode != Mode::ThirdPerson;
 	}
 
-	Vector3 Camera::GetForwardVector() 
+	glm::vec3 Camera::GetForwardVector() 
 	{
 		return MathUtils::ForwardVectorFromAngles(this->rotation[0], this->rotation[1], this->rotation[2]);
 	}
 
-	void Camera::SetForwardVector(Vector3 forward)
+	void Camera::SetForwardVector(glm::vec3 forward)
 	{
 		this->rotation = MathUtils::AnglesFromForwardVector(forward);
 	}
 
-	Vector3 Camera::GetRightVector()
+	glm::vec3 Camera::GetRightVector()
 	{
-		return Vector3::Cross(GetForwardVector(), Vector3::Up) * -1;
+		return glm::cross(GetForwardVector(), glm::vector3::up) * -1;
 	}
 }

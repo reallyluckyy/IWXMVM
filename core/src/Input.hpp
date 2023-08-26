@@ -11,7 +11,7 @@ namespace IWXMVM
 		static bool KeyHeld(ImGuiKey key);
 		static bool MouseButtonHeld(ImGuiMouseButton mouseButton);
 
-		static Vector2 GetMouseDelta();
+		static glm::vec2 GetMouseDelta();
 		static float GetScrollDelta();
 		static void UpdateState(ImGuiIO& io);
 

@@ -28,8 +28,13 @@
 
 #include "Logger.hpp"
 
-#include "Types/Vector2.hpp"
-#include "Types/Vector3.hpp"
+#include "glm/glm.hpp"
+#include "glm/ext.hpp"
+#include "glm/gtx/euler_angles.hpp"
+#include "glm/gtx/scalar_multiplication.hpp"
+#include "glm/gtx/vector_angle.hpp"
+#include "glm/gtx/rotate_vector.hpp"
+#include "Utilities/GLMExtensions.hpp"
 
 #pragma warning(push, 0)
 #define IMGUI_DEFINE_MATH_OPERATORS
