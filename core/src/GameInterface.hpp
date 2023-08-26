@@ -33,6 +33,7 @@ namespace IWXMVM
 		virtual std::string_view GetDemoExtension() = 0;
 
 		virtual void PlayDemo(std::filesystem::path demoPath) = 0;
+		virtual void Disconnect() = 0;
 
 		virtual void ToggleDemoPlaybackState() = 0;
 		virtual bool IsDemoPlaybackPaused() = 0;

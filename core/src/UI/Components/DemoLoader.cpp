@@ -4,6 +4,7 @@
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "Resources.hpp"
 
 namespace IWXMVM::UI
 {
@@ -238,9 +239,19 @@ namespace IWXMVM::UI
 				auto idx = i + demos.first;
 				auto demoName = demoPaths[idx].filename().string();
 
-				if (ImGui::Button(std::format("Load##{0}", demoName).c_str(), ImVec2(ImGui::GetFontSize() * 3.7f, ImGui::GetFontSize() * 1.3f)))
+				if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo && Mod::GetGameInterface()->GetDemoInfo().name == demoName)
 				{
-					Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+					if (ImGui::Button(std::format(ICON_FA_STOP " STOP##{0}", demoName).c_str(), ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+					{
+						Mod::GetGameInterface()->Disconnect();
+					}
+				}
+				else
+				{
+					if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(), ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+					{
+						Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+					}
 				}
 
 				ImGui::SameLine();

@@ -56,8 +56,9 @@ namespace IWXMVM::IW3
 		{
 			Types::DemoInfo demoInfo;
 			demoInfo.name = Structures::GetClientStatic()->servername;
+			demoInfo.name = demoInfo.name.starts_with(DEMO_TEMP_DIRECTORY) ? demoInfo.name.substr(strlen(DEMO_TEMP_DIRECTORY) + 1) : demoInfo.name;
 
-			std::string str = static_cast<std::string>(demoInfo.name);
+			std::string str = static_cast<std::string>(Structures::GetClientStatic()->servername);
 			str += (str.ends_with(".dm_1")) ? "" : ".dm_1";
 			demoInfo.path = Structures::GetFilePath(std::move(str));
 
@@ -101,6 +102,11 @@ namespace IWXMVM::IW3
 			{
 				LOG_ERROR("Failed to play demo file {0}: {1}", demoPath.string(), e.what());
 			}
+		}
+
+		void Disconnect() 
+		{
+			Structures::Cbuf_AddText("disconnect");
 		}
 
 
