@@ -136,38 +136,35 @@ namespace IWXMVM::UI
 
 		auto viewportSize = ImGui::GetContentRegionMax();
 
-		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y)
+		auto currentPos = ImGui::GetWindowPos();
+		auto currentSize = ImGui::GetWindowSize();
+
+		if (currentSize.x != GetSize().x && currentPos.x == GetPosition().x)
 		{
-			auto currentPos = ImGui::GetWindowPos();
-			auto currentSize = ImGui::GetWindowSize();
-
-			if (currentSize.x != GetSize().x && currentPos.x == GetPosition().x)
-			{
-				// right side resizing
-				SetSizeX(currentSize.x);
-			}
-			if (currentSize.y != GetSize().y && currentPos.y == GetPosition().y)
-			{
-				// bottom side resizing
-				SetSizeY(currentSize.y);
-			}
-
-			auto newTextureSize = ClampImage(viewportSize);
-			if (textureSize.x != newTextureSize.x || textureSize.y != newTextureSize.y)
-			{
-				textureSize = newTextureSize;
-				CreateTexture(texture, textureSize);
-			}
-
-			if (!CaptureBackBuffer(texture))
-			{
-				throw std::exception("Failed to capture game view");
-			}
-
-			ImGui::SetCursorPosX((viewportSize.x - textureSize.x) / 2.0f);
-			ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f);
-			ImGui::Image((void*)texture, textureSize);
+			// right side resizing
+			SetSizeX(currentSize.x);
 		}
+		if (currentSize.y != GetSize().y && currentPos.y == GetPosition().y)
+		{
+			// bottom side resizing
+			SetSizeY(currentSize.y);
+		}
+
+		auto newTextureSize = ClampImage(viewportSize);
+		if (textureSize.x != newTextureSize.x || textureSize.y != newTextureSize.y)
+		{
+			textureSize = newTextureSize;
+			CreateTexture(texture, textureSize);
+		}
+
+		if (!CaptureBackBuffer(texture))
+		{
+			throw std::exception("Failed to capture game view");
+		}
+
+		ImGui::SetCursorPosX((viewportSize.x - textureSize.x) / 2.0f);
+		ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f);
+		ImGui::Image((void*)texture, textureSize);
 
 		ImGui::End();
 
