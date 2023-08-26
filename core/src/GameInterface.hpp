@@ -5,7 +5,7 @@
 
 namespace IWXMVM
 {
-	const auto DEMO_HARDLINK_FILE_NAME = "IWXMVM_DEMO_LINK";
+	const auto DEMO_TEMP_DIRECTORY = "IWXTMP";
 
 	struct Dvar
 	{
@@ -85,9 +85,6 @@ namespace IWXMVM
 			}
 		}
 
-		virtual std::filesystem::path GetDemoDirectory() = 0;
-		std::filesystem::path GetDemoHardlinkPath() { return (GetDemoDirectory() / DEMO_HARDLINK_FILE_NAME).replace_extension(GetDemoExtension()); }
-
 		struct DemoInfo
 		{
 			std::string name;
@@ -100,34 +97,7 @@ namespace IWXMVM
 		virtual DemoInfo GetDemoInfo() = 0;
 		virtual std::string_view GetDemoExtension() = 0;
 
-		virtual void PlayHardlinkDemo() = 0;
-
-		void PlayDemo(std::filesystem::path demoPath)
-		{
-			try
-			{
-				LOG_INFO("Playing demo {0}", demoPath.string());
-
-				if (!std::filesystem::exists(demoPath) || !std::filesystem::is_regular_file(demoPath))
-					return;
-
-				const auto demoDirectory = GetDemoDirectory();
-				if (!std::filesystem::exists(demoDirectory))
-					std::filesystem::create_directories(demoDirectory);
-
-				const auto demoLinkFile = GetDemoHardlinkPath();
-				if (std::filesystem::exists(demoLinkFile) && std::filesystem::is_regular_file(demoLinkFile))
-					std::filesystem::remove(demoLinkFile);
-
-				std::filesystem::create_hard_link(demoPath, demoLinkFile);
-
-				PlayHardlinkDemo();
-			}
-			catch (std::filesystem::filesystem_error& e)
-			{
-				LOG_ERROR("Failed to create hard link for demo file {0}: {1}", demoPath.string(), e.what());
-			}
-		}
+		virtual void PlayDemo(std::filesystem::path demoPath) = 0;
 
 		virtual void ToggleDemoPlaybackState() = 0;
 		virtual bool IsDemoPlaybackPaused() = 0;

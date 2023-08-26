@@ -72,16 +72,35 @@ namespace IWXMVM::IW3
 			return { ".dm_1" };
 		}
 
-		std::filesystem::path GetDemoDirectory() final
+		void PlayDemo(std::filesystem::path demoPath) final
 		{
-			return std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos";
-		}
+			const auto demoDirectory = std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos";
 
-		void PlayHardlinkDemo()
-		{
-			Structures::Cbuf_AddText(
-				std::format(R"(demo {0})", DEMO_HARDLINK_FILE_NAME)
-			);
+			try
+			{
+				LOG_INFO("Playing demo {0}", demoPath.string());
+
+				if (!std::filesystem::exists(demoPath) || !std::filesystem::is_regular_file(demoPath))
+					return;
+
+				const auto tempDemoDirectory = demoDirectory / DEMO_TEMP_DIRECTORY;
+				if (!std::filesystem::exists(tempDemoDirectory))
+					std::filesystem::create_directories(tempDemoDirectory);
+
+				const auto targetPath = tempDemoDirectory / demoPath.filename();
+				if (std::filesystem::exists(targetPath) && std::filesystem::is_regular_file(targetPath))
+					std::filesystem::remove(targetPath);
+
+				std::filesystem::copy(demoPath, targetPath);
+
+				Structures::Cbuf_AddText(
+					std::format(R"(demo {0})", demoPath.filename().string())
+				);
+			}
+			catch (std::filesystem::filesystem_error& e)
+			{
+				LOG_ERROR("Failed to play demo file {0}: {1}", demoPath.string(), e.what());
+			}
 		}
 
 

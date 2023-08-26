@@ -142,6 +142,12 @@ namespace IWXMVM::UI
 
 	void DemoLoader::SearchDir(std::size_t dirIdx)
 	{
+		if (demoDirectories[dirIdx].path.string().find(DEMO_TEMP_DIRECTORY) != std::string::npos)
+		{
+			demoDirectories[dirIdx].relevant = false;
+			return;
+		}
+
 		auto subdirsStartIdx = demoDirectories.size();
 		auto demosStartIdx = demoPaths.size();
 
