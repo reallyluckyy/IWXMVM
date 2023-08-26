@@ -58,7 +58,7 @@ namespace IWXMVM::UI
 		ImGui::SetNextWindowSize(GetSize());
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, 0);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0, 0 });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar;
