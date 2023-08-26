@@ -6,6 +6,7 @@
 #include "Hooks.hpp"
 #include "Events.hpp"
 #include "DemoParser.hpp"
+#include "Hooks/Camera.hpp"
 
 namespace IWXMVM::IW3
 {
@@ -23,7 +24,10 @@ namespace IWXMVM::IW3
 		void SetupEventListeners() final
 		{
 			Events::RegisterListener(EventType::OnDemoLoad, DemoParser::Run);
-			Events::RegisterListener(EventType::OnDemoLoad, []() { Structures::FindDvar("sv_cheats")->current.enabled = true; });
+
+			Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
+			
+      Events::RegisterListener(EventType::OnDemoLoad, []() { Structures::FindDvar("sv_cheats")->current.enabled = true; });
 		}
 
 		uintptr_t GetWndProc() final

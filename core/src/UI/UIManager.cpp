@@ -6,6 +6,7 @@
 #include "Mod.hpp"
 #include "Events.hpp"
 #include "Resources.hpp"
+#include "Input.hpp"
 
 namespace IWXMVM::UI::UIManager
 {
@@ -63,6 +64,8 @@ namespace IWXMVM::UI::UIManager
 			ImGui_ImplDX9_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
+      
+			Input::UpdateState(ImGui::GetIO());
 
 			if (!uiComponentsInitialized)
 			{

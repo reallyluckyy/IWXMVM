@@ -10,3 +10,6 @@
 [submodule "core/third-party/minhook"]
 	path = core/third-party/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
+[submodule "core/third-party/glm"]
+	path = core/third-party/glm
+	url = https://github.com/g-truc/glm.git

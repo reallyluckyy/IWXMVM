@@ -77,13 +77,62 @@ namespace IWXMVM::UI
 		LOG_DEBUG("Initializing GameView. size.x: {}; size.y: {}", GetSize().x, GetSize().y);
     }
 
+	void DrawTopBar() 
+	{
+		auto cameraManager = Mod::GetCameraManager();
+		auto& currentCamera = cameraManager->GetActiveCamera();
+
+		ImGui::Text("View:");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(200);
+
+		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager->GetCameraModeLabel(currentCamera.GetMode()).data()))
+		{
+			for (auto cameraMode : cameraManager->GetCameraModes())
+			{
+				bool isSelected = currentCamera.GetMode() == cameraMode;
+				if (ImGui::Selectable(cameraManager->GetCameraModeLabel(cameraMode).data(), currentCamera.GetMode() == cameraMode))
+				{
+					cameraManager->SetActiveCamera(cameraMode);
+				}
+
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		if (currentCamera.GetMode() == Components::Camera::Mode::FirstPerson)
+		{
+			ImGui::SameLine();
+			ImGui::Text("Player:");
+
+			ImGui::SameLine();
+			const char* playerCameraComboItems[] = { "Player 1", "Player 2", "Player 3", "Player 4" };
+			static int currentPlayerCameraComboItem = 0;
+			ImGui::SetNextItemWidth(200);
+			ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems, IM_ARRAYSIZE(playerCameraComboItems));
+		}
+	}
+
 	void GameView::Render()
 	{
 		ImGui::SetNextWindowPos(GetPosition());
 		ImGui::SetNextWindowSize(GetSize());
 
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar;
-		if (ImGui::Begin("GameView", NULL, flags))
+		ImGui::Begin("GameView", NULL, flags);
+
+		if (Mod::GetGameInterface()->GetGameState() == GameInterface::GameState::InDemo)
+		{
+		  DrawTopBar();
+		}
+
+		auto viewportSize = ImGui::GetContentRegionMax();
+
+		if (textureSize.x != viewportSize.x || textureSize.y != viewportSize.y)
 		{
 			auto currentPos = ImGui::GetWindowPos();
 			auto currentSize = ImGui::GetWindowSize();

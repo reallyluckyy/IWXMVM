@@ -62,7 +62,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -90,7 +90,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -112,7 +112,10 @@
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Components\Camera.cpp" />
+    <ClCompile Include="src\Components\CameraManager.cpp" />
     <ClCompile Include="src\D3D9Helper.cpp" />
+    <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\ResourceData.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -139,9 +142,15 @@
     <ClCompile Include="src\Utilities\HookManager.cpp" />
     <ClCompile Include="src\Utilities\MemoryUtils.cpp" />
     <ClCompile Include="src\Utilities\PathUtils.cpp" />
+    <ClCompile Include="src\Utilities\MathUtils.cpp" />
+    <ClInclude Include="src\Components\CameraManager.hpp" />
+    <ClInclude Include="src\Input.hpp" />
+    <ClInclude Include="src\Utilities\GLMExtensions.hpp" />
+    <ClInclude Include="src\Utilities\MathUtils.hpp" />
     <ClCompile Include="src\WindowsConsole.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Components\Camera.hpp" />
     <ClInclude Include="src\D3D9Helper.hpp" />
     <ClInclude Include="src\Resources.hpp" />
     <ClInclude Include="src\UI\Components\Background.hpp" />
