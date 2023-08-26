@@ -116,16 +116,16 @@ namespace IWXMVM::IW3
 			return isPlaybackPaused;
 		}
 
-		std::optional<Dvar> GetDvar(const std::string name) final
+		std::optional<Types::Dvar> GetDvar(const std::string name) final
 		{
 			const auto iw3Dvar = Structures::FindDvar(name);
 
 			if (!iw3Dvar)
 				return std::nullopt;
 
-			Dvar dvar;
+			Types::Dvar dvar;
 			dvar.name = iw3Dvar->name;
-			dvar.value = (Dvar::Value*)&iw3Dvar->current;
+			dvar.value = (Types::Dvar::Value*)&iw3Dvar->current;
 
 			return dvar;
 		}
