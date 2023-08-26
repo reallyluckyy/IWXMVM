@@ -48,6 +48,9 @@ namespace IWXMVM::UI::UIManager
 	inline Tab selectedTab = Tab::Demos;
 
 	inline std::atomic<bool> hideOverlay = false;
+	inline std::atomic<bool> showImGuiDemo = false;
+	inline std::atomic<bool> showDebugPanel = false;
+
 	inline std::atomic<bool> ejectRequested = false;
 	inline bool isInitialized = false;
 	inline std::atomic<bool> needsRestart = false;

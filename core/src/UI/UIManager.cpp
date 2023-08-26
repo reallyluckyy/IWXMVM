@@ -74,9 +74,19 @@ namespace IWXMVM::UI::UIManager
 					component->Initialize();
 			}
 
-			if (ImGui::IsKeyPressed(ImGuiKey_F1))
+			if (Input::KeyDown(ImGuiKey_F1))
 			{
 				hideOverlay.store(!hideOverlay.load());
+			}
+
+			if (Input::KeyDown(ImGuiKey_F2))
+			{
+				showImGuiDemo.store(!showImGuiDemo.load());
+			}
+
+			if (Input::KeyDown(ImGuiKey_F3))
+			{
+				showDebugPanel.store(!showDebugPanel.load());
 			}
 
 			if (!hideOverlay.load())
@@ -84,12 +94,19 @@ namespace IWXMVM::UI::UIManager
 				uiComponents[UIManager::Component::Background]->Render();
 				uiComponents[UIManager::Component::MenuBar]->Render();
 				uiComponents[UIManager::Component::GameView]->Render();
-				uiComponents[UIManager::Component::DebugPanel]->Render();
 				uiComponents[UIManager::Component::PrimaryTabs]->Render();
 				uiComponents[UIManager::Component::ControlBar]->Render();
 			}
 
-			ImGui::ShowDemoWindow();
+			if (showImGuiDemo.load())
+			{
+				ImGui::ShowDemoWindow();
+			}
+
+			if (showDebugPanel.load())
+			{
+				uiComponents[UIManager::Component::DebugPanel]->Render();
+			}
 
 			ImGui::EndFrame();
 			ImGui::Render();

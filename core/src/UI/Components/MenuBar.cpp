@@ -4,6 +4,7 @@
 #include "Version.hpp"
 #include "Mod.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "UI/UIManager.hpp"
 
 namespace IWXMVM::UI
 {
@@ -15,11 +16,33 @@ namespace IWXMVM::UI
 
     void MenuBar::Render()
     {
-        if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
+        if (ImGui::BeginMainMenuBar()) 
+        {
+            if (ImGui::BeginMenu("File")) 
+            {
                 if (ImGui::MenuItem("Preferences")) {}
                 if (ImGui::MenuItem("Controls")) {}
                 if (ImGui::MenuItem("Exit")) {}
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Debug")) 
+            {
+                if (ImGui::MenuItem("Toggle IWXMVM UI", "F1")) 
+                {
+                    UIManager::hideOverlay = !UIManager::hideOverlay;
+                }
+
+                if (ImGui::MenuItem("Toggle ImGui Demo", "F2")) 
+                {
+                    UIManager::showImGuiDemo = !UIManager::showImGuiDemo;
+                }
+
+                if (ImGui::MenuItem("Toggle Debug Panel", "F3")) 
+                {
+                    UIManager::showDebugPanel = !UIManager::showDebugPanel;
+                }
+
                 ImGui::EndMenu();
             }
 
