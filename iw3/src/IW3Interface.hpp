@@ -24,7 +24,10 @@ namespace IWXMVM::IW3
 		void SetupEventListeners() final
 		{
 			Events::RegisterListener(EventType::OnDemoLoad, DemoParser::Run);
+
 			Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
+			
+      Events::RegisterListener(EventType::OnDemoLoad, []() { Structures::FindDvar("sv_cheats")->current.enabled = true; });
 		}
 
 		uintptr_t GetWndProc() final
