@@ -298,21 +298,6 @@ namespace IWXMVM::UI
 
 	void DemoLoader::Render()
 	{
-		if (UIManager::selectedTab != Tab::DEMOS)
-			return;
-
-		SetPosition(
-			UIManager::uiComponents[UIManager::GAMEVIEW]->GetSize().x,
-			UIManager::uiComponents[UIManager::PRIMARYTABS]->GetPosition().y + UIManager::uiComponents[UIManager::PRIMARYTABS]->GetSize().y
-		);
-		SetSize(
-			ImGui::GetIO().DisplaySize.x - GetPosition().x,
-			UIManager::uiComponents[UIManager::GAMEVIEW]->GetSize().y - UIManager::uiComponents[UIManager::PRIMARYTABS]->GetSize().y
-		);
-
-		ImGui::SetNextWindowPos(GetPosition());
-		ImGui::SetNextWindowSize(GetSize());
-
 		ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Demos", nullptr, flags))
 		{

@@ -80,8 +80,16 @@ namespace IWXMVM::UI::UIManager
 			}
 
 			if (!hideOverlay.load())
-				for (const auto& component : uiComponents)
-					component->Render();
+			{
+				uiComponents[UIManager::Component::Background]->Render();
+				uiComponents[UIManager::Component::MenuBar]->Render();
+				uiComponents[UIManager::Component::GameView]->Render();
+				uiComponents[UIManager::Component::DebugPanel]->Render();
+				uiComponents[UIManager::Component::PrimaryTabs]->Render();
+				uiComponents[UIManager::Component::ControlBar]->Render();
+			}
+
+			ImGui::ShowDemoWindow();
 
 			ImGui::EndFrame();
 			ImGui::Render();
@@ -123,7 +131,7 @@ namespace IWXMVM::UI::UIManager
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.FramePadding = { fontSize * 0.28f, fontSize * 0.28f };
-		style.WindowPadding = {};
+		style.WindowPadding = {16, 16};
 		style.Colors[ImGuiCol_FrameBg] = ImVec4(0.01f, 0.01f, 0.01f, 0.54f);
 		style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.25f, 0.25f, 0.25f, 0.40f);
 		style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.25f, 0.49f, 0.94f, 1.00f);
@@ -133,6 +141,10 @@ namespace IWXMVM::UI::UIManager
 	}
 
 	INCBIN_EXTERN(IBMPLEX_FONT);
+	INCBIN_EXTERN(TASA_ORBITER_FONT);
+	INCBIN_EXTERN(RUBIK_FONT);
+	INCBIN_EXTERN(WORK_SANS_FONT);
+	INCBIN_EXTERN(FA_ICONS_FONT);
 	void Initialize(IDirect3DDevice9* device)
 	{
 		try
@@ -173,7 +185,28 @@ namespace IWXMVM::UI::UIManager
 			io.IniFilename = NULL;
 			// io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 			io.Fonts->ClearFonts();
-			io.Fonts->AddFontFromMemoryTTF((void*)IBMPLEX_FONT_data, IBMPLEX_FONT_size, fontSize);
+
+			auto RegisterFont = [&](const char* name, const uint8_t* data, size_t size, float fontSize) {
+				ImFontConfig fontConfig;
+				fontConfig.SizePixels = fontSize;
+				strcpy_s(fontConfig.Name, name);
+				io.Fonts->AddFontFromMemoryTTF((void*)data, size, fontSize, &fontConfig);
+				LOG_DEBUG("Registered font {0} with size {1}", name, fontSize);
+
+				auto iconFontSize = fontSize * 2.0f / 3.0f;
+				static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+				ImFontConfig icons_config;
+				icons_config.MergeMode = true;
+				icons_config.PixelSnapH = true;
+				icons_config.GlyphMinAdvanceX = iconFontSize;
+				io.Fonts->AddFontFromMemoryTTF((void*)FA_ICONS_FONT_data, FA_ICONS_FONT_size, iconFontSize, &icons_config, icons_ranges);
+			};
+
+			RegisterFont("WorkSansRegular", WORK_SANS_FONT_data, WORK_SANS_FONT_size, fontSize);
+			RegisterFont("IBMPlexSans", IBMPLEX_FONT_data, IBMPLEX_FONT_size, fontSize);
+			RegisterFont("TASAOrbiterDisplay", TASA_ORBITER_FONT_data, TASA_ORBITER_FONT_size, fontSize);
+			RegisterFont("RubikRegular", RUBIK_FONT_data, RUBIK_FONT_size, fontSize);
+			
 			SetImGuiStyle(fontSize);
 
 			Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Capture);

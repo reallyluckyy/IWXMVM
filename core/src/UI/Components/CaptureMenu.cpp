@@ -12,21 +12,6 @@ namespace IWXMVM::UI
 
 	void CaptureMenu::Render()
 	{
-		if (UIManager::selectedTab != Tab::CAPTURE)
-			return;
-
-		SetPosition(
-			UIManager::uiComponents[UIManager::GAMEVIEW]->GetSize().x,
-			UIManager::uiComponents[UIManager::PRIMARYTABS]->GetPosition().y + UIManager::uiComponents[UIManager::PRIMARYTABS]->GetSize().y
-		);
-		SetSize(
-			ImGui::GetIO().DisplaySize.x - GetPosition().x,
-			UIManager::uiComponents[UIManager::GAMEVIEW]->GetSize().y - UIManager::uiComponents[UIManager::PRIMARYTABS]->GetSize().y
-		);
-
-		ImGui::SetNextWindowPos(GetPosition());
-		ImGui::SetNextWindowSize(GetSize());
-
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Capture", NULL, flags))
 		{

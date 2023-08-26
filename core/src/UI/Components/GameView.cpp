@@ -57,10 +57,12 @@ namespace IWXMVM::UI
 	{
 		float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y;
 
-		if (window.x / window.y > aspectRatio) {
+		if (window.x / window.y > aspectRatio) 
+		{
 			// If too wide, adjust width
 			window.x = window.y * aspectRatio;
-		} else if (window.x / window.y < aspectRatio) {
+		} else if (window.x / window.y < aspectRatio) 
+		{
 			// If too tall, adjust height
 			window.y = window.x / aspectRatio;
 		}
@@ -72,7 +74,7 @@ namespace IWXMVM::UI
     {
 		auto scaleFactor = 0.8f;
 
-		SetPosition(0, UIManager::uiComponents[UIManager::ComponentIdx::MENUBAR]->GetSize().y);
+		SetPosition(0, UIManager::uiComponents[UIManager::Component::MenuBar]->GetSize().y);
 		SetSize(ImGui::GetIO().DisplaySize.x * scaleFactor, ImGui::GetIO().DisplaySize.y * scaleFactor);
 		LOG_DEBUG("Initializing GameView. size.x: {}; size.y: {}", GetSize().x, GetSize().y);
     }
@@ -127,7 +129,7 @@ namespace IWXMVM::UI
 
 		if (Mod::GetGameInterface()->GetGameState() == GameInterface::GameState::InDemo)
 		{
-		  DrawTopBar();
+			DrawTopBar();
 		}
 
 		auto viewportSize = ImGui::GetContentRegionMax();
@@ -172,7 +174,8 @@ namespace IWXMVM::UI
 
 	void GameView::Release()
 	{
-		if (texture != NULL) {
+		if (texture != NULL) 
+		{
 			textureSize = ImVec2(0, 0);
 
 			texture->Release();

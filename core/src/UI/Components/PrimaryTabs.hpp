@@ -4,10 +4,10 @@
 namespace IWXMVM::UI
 {
 	enum class Tab {
-		CFG,
-		DEMOS,
-		CAPTURE,
-		DEBUG,
+		Demos,
+		Visuals,
+		Camera,
+		Record
 	};
 
 	class PrimaryTabs : public UIComponent
@@ -16,5 +16,7 @@ namespace IWXMVM::UI
 		void Initialize() final;
 		void Render() final;
 		void Release() final;
+	private:
+		void RenderSelectedTab();
 	};
 }

@@ -16,8 +16,10 @@ namespace IWXMVM::UI
     void MenuBar::Render()
     {
         if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("Dollycam")) {
-                if (ImGui::MenuItem("Example", "CTRL+D")) {}
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("Preferences")) {}
+                if (ImGui::MenuItem("Edit Controls")) {}
+                if (ImGui::MenuItem("Exit")) {}
                 ImGui::EndMenu();
             }
 
@@ -29,9 +31,7 @@ namespace IWXMVM::UI
             }
 
             auto windowSize = ImGui::GetIO().DisplaySize;
-            std::string iwxmvmText("IWXMVM");
-            iwxmvmText += " ";
-            iwxmvmText += IWXMVM_VERSION;
+            std::string iwxmvmText = std::format("IWXMVM {0} | {1}", IWXMVM_VERSION, Mod::GetGameInterface()->GetGameName());
             ImGui::SetCursorPosX(windowSize.x - ImGui::CalcTextSize(iwxmvmText.c_str()).x - ImGui::CalcTextSize(" ").x);
             ImGui::Text(iwxmvmText.c_str());
 

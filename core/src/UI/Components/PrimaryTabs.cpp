@@ -12,20 +12,46 @@ namespace IWXMVM::UI
 
 	}
 
-	INCBIN_EXTERN(CFG_ICON);
-	INCBIN_EXTERN(DEMOS_ICON);
-	INCBIN_EXTERN(CAPTURE_ICON);
-	INCBIN_EXTERN(DEBUG_ICON);
+	void PrimaryTabs::RenderSelectedTab()
+	{
+		ImGui::SetNextWindowPos(
+			ImVec2(
+				UIManager::uiComponents[UIManager::Component::GameView]->GetSize().x,
+				UIManager::uiComponents[UIManager::Component::PrimaryTabs]->GetPosition().y + UIManager::uiComponents[UIManager::Component::PrimaryTabs]->GetSize().y
+			)
+		);
+		ImGui::SetNextWindowSize(
+			ImVec2(
+				ImGui::GetIO().DisplaySize.x - GetPosition().x,
+				UIManager::uiComponents[UIManager::Component::GameView]->GetSize().y - UIManager::uiComponents[UIManager::Component::PrimaryTabs]->GetSize().y
+			)
+		);
+
+		switch (UIManager::selectedTab)
+		{
+			case Tab::Demos:
+				UIManager::uiComponents[UIManager::Component::DemoLoader]->Render();
+				break;
+			case Tab::Visuals:
+				break;
+			case Tab::Camera:
+				break;
+			case Tab::Record:
+				UIManager::uiComponents[UIManager::Component::CaptureMenu]->Render();
+				break;
+
+		}
+	}
 
 	void PrimaryTabs::Render()
 	{
 		SetPosition(
-			UIManager::uiComponents[UIManager::GAMEVIEW]->GetSize().x,
-			UIManager::uiComponents[UIManager::MENUBAR]->GetSize().y
+			UIManager::uiComponents[UIManager::Component::GameView]->GetSize().x,
+			UIManager::uiComponents[UIManager::Component::MenuBar]->GetSize().y
 		);
 		SetSize(
 			ImGui::GetIO().DisplaySize.x - GetPosition().x,
-			ImGui::GetFrameHeight() * 3.6f
+			ImGui::GetFrameHeight() * 2.4f
 		);
 
 		ImGui::SetNextWindowPos(GetPosition());
@@ -34,32 +60,25 @@ namespace IWXMVM::UI
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar;
 		if (ImGui::Begin("PrimaryTabs", nullptr, flags))
 		{
-			auto size = GetSize();
+			auto buttonMargin = GetSize() / 64;
+			auto size = ImVec2(GetSize().x / 4 - buttonMargin.x, GetSize().y - buttonMargin.y * 20);
 
-			auto cfgIcon = UIImage::FromResource(CFG_ICON_data, CFG_ICON_size);
-			if (ImGui::ImageButton(cfgIcon.GetTextureID(), ImVec2(size.y, size.y), ImVec2(-0.3, -0.3), ImVec2(1.3, 1.3), 0, ImVec4(0.054901f, 0.054901f, 0.054901f, 1)))
-				UIManager::selectedTab = Tab::CFG;
-
-			auto demosIcon = UIImage::FromResource(DEMOS_ICON_data, DEMOS_ICON_size);
-			ImGui::SetCursorPosX(size.x / 4 + size.x / 8 - size.y / 2);
-			ImGui::SetCursorPosY(0);
-			if (ImGui::ImageButton(demosIcon.GetTextureID(), ImVec2(size.y, size.y), ImVec2(-0.3, -0.3), ImVec2(1.3, 1.3), 0, ImVec4(0.054901f, 0.054901f, 0.054901f, 1)))
-				UIManager::selectedTab = Tab::DEMOS;
-
-			auto captureIcon = UIImage::FromResource(CAPTURE_ICON_data, CAPTURE_ICON_size);
-			ImGui::SetCursorPosX(size.x / 4 * 2 + size.x / 8 - size.y / 2);
-			ImGui::SetCursorPosY(0);
-			if (ImGui::ImageButton(captureIcon.GetTextureID(), ImVec2(size.y, size.y), ImVec2(-0.3, -0.3), ImVec2(1.3, 1.3), 0, ImVec4(0.054901f, 0.054901f, 0.054901f, 1)))
-				UIManager::selectedTab = Tab::CAPTURE;
-
-			auto debugIcon = UIImage::FromResource(DEBUG_ICON_data, DEBUG_ICON_size);
-			ImGui::SetCursorPosX(size.x - size.y);
-			ImGui::SetCursorPosY(0);
-			if (ImGui::ImageButton(debugIcon.GetTextureID(), ImVec2(size.y, size.y), ImVec2(-0.3, -0.3), ImVec2(1.3, 1.3), 0, ImVec4(0.054901f, 0.054901f, 0.054901f, 1)))
-				UIManager::selectedTab = Tab::DEBUG;
+			if (ImGui::Button(ICON_FA_FILE "  DEMOS", size))
+				UIManager::selectedTab = Tab::Demos;
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_VIDEO "  CAMERA", size))
+				UIManager::selectedTab = Tab::Camera;
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_SLIDERS "  VISUALS", size))
+				UIManager::selectedTab = Tab::Visuals;
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_CIRCLE "  RECORD", size))
+				UIManager::selectedTab = Tab::Record;
 
 			ImGui::End();
 		}
+
+		RenderSelectedTab();
 	}
 
 	void PrimaryTabs::Release()

@@ -16,19 +16,24 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace IWXMVM::UI::UIManager
 {
-	enum ComponentIdx {
-		BACKGROUND = 0,
-		MENUBAR,
-		GAMEVIEW,
-		PRIMARYTABS,
-		DEMOLOADER,
-		CAPTUREMENU,
-		CONTROLBAR,
-		DEBUGPANEL,
-		COUNT,
-	};
+	namespace Component 
+	{
+		enum Component 
+		{
+			Background = 0,
+			MenuBar,
+			GameView,
+			PrimaryTabs,
+			DemoLoader,
+			CaptureMenu,
+			ControlBar,
+			DebugPanel,
+			Count,
+		};
+	}
 
-	inline std::array<std::unique_ptr<UIComponent>, ComponentIdx::COUNT> uiComponents = {
+	inline std::array<std::unique_ptr<UIComponent>, Component::Count> uiComponents = 
+	{
 		std::make_unique<Background>(),
 		std::make_unique<MenuBar>(),
 		std::make_unique<GameView>(),
@@ -39,7 +44,7 @@ namespace IWXMVM::UI::UIManager
 		std::make_unique<DebugPanel>(),
 	};
 
-	inline Tab selectedTab = Tab::DEBUG;
+	inline Tab selectedTab = Tab::Demos;
 
 	inline std::atomic<bool> hideOverlay = false;
 	inline std::atomic<bool> ejectRequested = false;
