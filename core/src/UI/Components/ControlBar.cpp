@@ -22,7 +22,7 @@ namespace IWXMVM::UI
 
 	void ControlBar::Render()
 	{
-		if (Mod::GetGameInterface()->GetGameState() != GameInterface::GameState::InDemo)
+		if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
 			return;
 
 		if (!timescale.has_value())

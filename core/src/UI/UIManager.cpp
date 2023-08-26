@@ -20,7 +20,7 @@ namespace IWXMVM::UI::UIManager
 		LOG_DEBUG("Shutting down ImGui");
 
 		SetWindowLongPtr(Mod::GetGameInterface()->GetWindowHandle(), GWLP_WNDPROC, (LONG_PTR)GameWndProc);
-		Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Passthrough);
+		Mod::GetGameInterface()->SetMouseMode(Types::MouseMode::Passthrough);
 
 		for (const auto& component : uiComponents) 
 		{
@@ -168,7 +168,7 @@ namespace IWXMVM::UI::UIManager
 
 			SetImGuiStyle();
 
-			Mod::GetGameInterface()->SetMouseMode(GameInterface::MouseMode::Capture);
+			Mod::GetGameInterface()->SetMouseMode(Types::MouseMode::Capture);
 			isInitialized = true;
 			needsRestart.store(false);
 

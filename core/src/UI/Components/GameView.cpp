@@ -140,7 +140,7 @@ namespace IWXMVM::UI
 
 		ImGui::Begin("GameView", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
-		if (Mod::GetGameInterface()->GetGameState() == GameInterface::GameState::InDemo)
+		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo)
 		{
 			DrawTopBar();
 		}

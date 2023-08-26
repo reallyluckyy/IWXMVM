@@ -1,7 +1,12 @@
 #pragma once
 #include "StdInclude.hpp"
+
 #include "D3D9Helper.hpp"
 #include "Components/Camera.hpp"
+#include "Types/GameState.hpp"
+#include "Types/Game.hpp"
+#include "Types/DemoInfo.hpp"
+#include "Types/MouseMode.hpp"
 
 namespace IWXMVM
 {
@@ -25,39 +30,10 @@ namespace IWXMVM
 	{
 	public:
 
-		enum class Game
-		{
-			None, IW3
-		};
-
-		enum class GameState
-		{
-			MainMenu,
-			InGame,
-			InDemo
-		};
-
-		enum class MouseMode
-		{
-			Capture, Passthrough
-		};
-
-		GameInterface(const Game game) : game(game) {}
+		GameInterface(const Types::Game game) : game(game) {}
 		virtual ~GameInterface() = default;
 
-		Game GetGame() const { return game; }
-
-		std::string GetGameName() const
-		{
-			switch (game)
-			{
-			case Game::IW3:
-				return "IW3";
-			case Game::None:
-			default:
-				return "Unknown Game";
-			}
-		}
+		Types::Game GetGame() const { return game; }
 
 		HWND GetWindowHandle() const { return D3D9Helper::FindWindowHandle(); }
 		IDirect3DDevice9* GetD3D9Device() const { return D3D9Helper::GetDevicePtr(); }
@@ -67,34 +43,10 @@ namespace IWXMVM
 		virtual void SetupEventListeners() = 0;
 
 		virtual uintptr_t GetWndProc() = 0;
-		virtual void SetMouseMode(MouseMode mode) = 0;
-		virtual GameState GetGameState() = 0;
+		virtual void SetMouseMode(Types::MouseMode mode) = 0;
+		virtual Types::GameState GetGameState() = 0;
 
-		std::string GetGameStateString()
-		{
-			switch (GetGameState())
-			{
-			case GameState::MainMenu:
-				return "Main Menu";
-			case GameState::InDemo:
-				return "Playing Demo";
-			case GameState::InGame:
-				return "In Game";
-			default:
-				return "Unknown Game";
-			}
-		}
-
-		struct DemoInfo
-		{
-			std::string name;
-			std::string path;
-
-			uint32_t currentTick;
-			uint32_t endTick;
-		};
-
-		virtual DemoInfo GetDemoInfo() = 0;
+		virtual Types::DemoInfo GetDemoInfo() = 0;
 		virtual std::string_view GetDemoExtension() = 0;
 
 		virtual void PlayDemo(std::filesystem::path demoPath) = 0;
@@ -106,6 +58,6 @@ namespace IWXMVM
 		virtual std::optional<Dvar> GetDvar(const std::string name) = 0;
 
 	private:
-		Game game;
+		Types::Game game;
 	};
 }

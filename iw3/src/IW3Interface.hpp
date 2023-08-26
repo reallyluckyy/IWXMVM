@@ -14,7 +14,7 @@ namespace IWXMVM::IW3
 	{
 	public:
 
-		IW3Interface() : GameInterface(Game::IW3) {}
+		IW3Interface() : GameInterface(Types::Game::IW3) {}
 
 		void InstallHooks() final
 		{
@@ -35,26 +35,26 @@ namespace IWXMVM::IW3
 			return (uintptr_t)0x57BB20;
 		}
 
-		void SetMouseMode(MouseMode mode) final
+		void SetMouseMode(Types::MouseMode mode) final
 		{
-			Structures::GetMouseVars()->mouseInitialized = (mode == MouseMode::Capture) ? false : true;
+			Structures::GetMouseVars()->mouseInitialized = (mode == Types::MouseMode::Capture) ? false : true;
 		}
 
-		GameState GetGameState() final
+		Types::GameState GetGameState() final
 		{
 			if (!Structures::FindDvar("cl_ingame")->current.enabled)
-				return GameState::MainMenu;
+				return Types::GameState::MainMenu;
 
 			if (Structures::GetClientConnection()->demoplaying)
-				return GameState::InDemo;
+				return Types::GameState::InDemo;
 
-			return GameState::InGame;
+			return Types::GameState::InGame;
 		}
 
 		// TODO: cache this
-		DemoInfo GetDemoInfo() final
+		Types::DemoInfo GetDemoInfo() final
 		{
-			DemoInfo demoInfo;
+			Types::DemoInfo demoInfo;
 			demoInfo.name = Structures::GetClientStatic()->servername;
 
 			std::string str = static_cast<std::string>(demoInfo.name);
