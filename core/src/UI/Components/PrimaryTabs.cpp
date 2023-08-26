@@ -43,14 +43,32 @@ namespace IWXMVM::UI
 		}
 	}
 
-	// Only show icon if button is too small
-	std::string ClipText(std::string text, ImVec2 buttonSize)
+	void RenderTabButton(std::string text, ImVec2 size, Tab tab) 
 	{
-		if (buttonSize.x < buttonSize.y * 2)
+		// Only show icon if button is too small
+		if (size.x < size.y * 2)
 		{
-			return text.find("  ") != std::string::npos ? text.substr(0, text.find(" ")) : text;
+			text = text.find("  ") != std::string::npos ? text.substr(0, text.find(" ")) : text;
 		}
-		return text;
+
+		if (UIManager::selectedTab == tab)
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+			if (ImGui::Button(text.c_str(), size))
+			{
+				UIManager::selectedTab = tab;
+			}
+
+			ImGui::PopStyleColor();
+		}
+		else 
+		{
+			if (ImGui::Button(text.c_str(), size))
+			{
+				UIManager::selectedTab = tab;
+			}
+		}
 	}
 
 	void PrimaryTabs::Render()
@@ -85,23 +103,19 @@ namespace IWXMVM::UI
 			ImGui::SetCursorPosY(yMargin);
 
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
-			if (ImGui::Button(ClipText(ICON_FA_FILE "  DEMOS", buttonSize).c_str(), buttonSize))
-				UIManager::selectedTab = Tab::Demos;
+			RenderTabButton(ICON_FA_FILE "  DEMOS", buttonSize, Tab::Demos);
 
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
-			if (ImGui::Button(ClipText(ICON_FA_VIDEO "  CAMERA", buttonSize).c_str(), buttonSize))
-				UIManager::selectedTab = Tab::Camera;
+			RenderTabButton(ICON_FA_VIDEO "  CAMERA", buttonSize, Tab::Camera);
 			
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
-			if (ImGui::Button(ClipText(ICON_FA_SLIDERS "  VISUALS", buttonSize).c_str(), buttonSize))
-				UIManager::selectedTab = Tab::Visuals;
+			RenderTabButton(ICON_FA_SLIDERS "  VISUALS", buttonSize, Tab::Visuals);
 
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
-			if (ImGui::Button(ClipText(ICON_FA_CIRCLE "  RECORD", buttonSize).c_str(), buttonSize))
-				UIManager::selectedTab = Tab::Record;
+			RenderTabButton(ICON_FA_CIRCLE "  RECORD", buttonSize, Tab::Record);
 		}
 
 		ImGui::End();
