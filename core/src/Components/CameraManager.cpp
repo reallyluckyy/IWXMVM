@@ -53,10 +53,11 @@ namespace IWXMVM::Components
 		constexpr float HEIGHT_CEILING = 250.0f;
 		constexpr float HEIGHT_MULTIPLIER = 0.75f;
 	
-		const auto speedModifier = Input::KeyHeld(ImGuiKey_LeftShift) ? 1.5f : 1.0f;
+		auto speedModifier = Input::KeyHeld(ImGuiKey_LeftShift) ? 0.1f : 1.0f;
+		speedModifier *= Input::KeyHeld(ImGuiKey_LeftCtrl) ? 3.0f : 1.0f;
 
 		const auto cameraHeightSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
-		const auto cameraMovementSpeed = cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING) * speedModifier;
+		const auto cameraMovementSpeed = speedModifier * cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING);
 	
 		if (Input::KeyHeld(ImGuiKey_W))
 		{
@@ -77,14 +78,23 @@ namespace IWXMVM::Components
 		{
 			cameraPosition -= activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
+
+		if (Input::KeyHeld(ImGuiKey_LeftAlt))
+		{
+			activeCamera.GetRotation()[2] += Input::GetScrollDelta();
+		}
+		else
+		{
+			activeCamera.GetFov() -= Input::GetScrollDelta();
+		}
 	
 		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
 		activeCamera.GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
 	
-		if (Input::KeyHeld(ImGuiKey_Space))
+		if (Input::KeyHeld(ImGuiKey_E))
 			cameraPosition[2] += cameraHeightSpeed;
 	
-		if (Input::KeyHeld(ImGuiKey_LeftAlt))
+		if (Input::KeyHeld(ImGuiKey_Q))
 			cameraPosition[2] -= cameraHeightSpeed;
 	}
 
