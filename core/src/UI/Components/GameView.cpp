@@ -88,9 +88,7 @@ namespace IWXMVM::UI
 
 		ImGui::SetCursorPos(ImVec2(PADDING, PADDING));
 
-		ImGui::Text("View:");
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth(200);
+		ImGui::SetNextItemWidth(300);
 
 		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager->GetCameraModeLabel(currentCamera.GetMode()).data()))
 		{
@@ -113,9 +111,7 @@ namespace IWXMVM::UI
 		if (currentCamera.GetMode() == Components::Camera::Mode::FirstPerson)
 		{
 			ImGui::SameLine();
-			ImGui::Text("Player:");
 
-			ImGui::SameLine();
 			const char* playerCameraComboItems[] = { "Player 1", "Player 2", "Player 3", "Player 4" };
 			static int currentPlayerCameraComboItem = 0;
 			ImGui::SetNextItemWidth(200);

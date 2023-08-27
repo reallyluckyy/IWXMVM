@@ -318,6 +318,8 @@ namespace IWXMVM::UI
 		ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Demos", nullptr, flags))
 		{
+			ImGui::AlignTextToFramePadding();
+
 			if (isScanningDemoPaths.load())
 			{
 				ImGui::Text("Searching for demo files...");
@@ -326,7 +328,28 @@ namespace IWXMVM::UI
 			{
 				ImGui::Text("%d demos found!", demoPaths.size());
 				ImGui::SameLine();
-				if (ImGui::Button("Refresh", ImVec2(ImGui::GetFontSize() * 3.7f, ImGui::GetFontSize() * 1.3f)))
+
+				auto addPathButtonLabel = std::string(ICON_FA_FOLDER_OPEN " Add path");
+				auto refreshButtonLabel = std::string(ICON_FA_ROTATE_RIGHT " Refresh");
+				auto buttonSize = ImVec2(ImGui::GetFontSize() * 6.0f, ImGui::GetFontSize() * 1.75f);
+
+				if (ImGui::GetWindowWidth() < buttonSize.x * 4)
+				{
+					buttonSize = ImVec2(buttonSize.y, buttonSize.y);
+					addPathButtonLabel = addPathButtonLabel.substr(0, addPathButtonLabel.find(" "));
+					refreshButtonLabel = refreshButtonLabel.substr(0, refreshButtonLabel.find(" "));
+				}
+
+				ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttonSize.x * 2 - ImGui::GetStyle().ItemSpacing.x - ImGui::GetStyle().WindowPadding.x);
+
+				if (ImGui::Button(addPathButtonLabel.c_str(), buttonSize))
+				{
+					// TODO: Implement
+				}
+
+				ImGui::SameLine();
+
+				if (ImGui::Button(refreshButtonLabel.c_str(), buttonSize))
 				{
 					isScanningDemoPaths.store(true);
 					std::thread([&] { FindAllDemos(); }).detach();
