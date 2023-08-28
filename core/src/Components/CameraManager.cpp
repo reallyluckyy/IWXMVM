@@ -54,12 +54,8 @@ namespace IWXMVM::Components
 		constexpr float HEIGHT_MULTIPLIER = 0.75f;
 		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
 		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
+		const float SMOOTHING_FACTOR = glm::clamp(1.0f - 15.0f * Input::GetDeltaTime(), 0.0f, 1.0f);
 
-		float SMOOTHING_FACTOR = 1.0f - 15.0f * Input::GetDeltaTime();
-		if (SMOOTHING_FACTOR < 0.0f)
-		{
-			SMOOTHING_FACTOR = 0.0f;
-		}
 		static double scrollDelta = 0.0;
 
 		auto speedModifier = Input::KeyHeld(ImGuiKey_LeftShift) ? 0.1f : 1.0f;
@@ -133,12 +129,7 @@ namespace IWXMVM::Components
 		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
 		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
 		constexpr float MIN_ORBIT_DIST = 10;
-
-		float SMOOTHING_FACTOR = 1.0f - 6.0f * Input::GetDeltaTime();
-		if (SMOOTHING_FACTOR < 0.0f)
-		{
-			SMOOTHING_FACTOR = 0.0f;
-		}
+		const float SMOOTHING_FACTOR = glm::clamp(1.0f - 10.0f * Input::GetDeltaTime(), 0.0f, 1.0f);
 
 		static double scrollDelta = 0.0;
 		scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
