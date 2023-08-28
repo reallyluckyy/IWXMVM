@@ -54,16 +54,19 @@ namespace IWXMVM::Components
 		constexpr float HEIGHT_MULTIPLIER = 0.75f;
 		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
 		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
-		const float SMOOTHING_FACTOR = 1.0f - 15.0f * Input::GetDeltaTime();
-	
+
+		float SMOOTHING_FACTOR = 1.0f - 15.0f * Input::GetDeltaTime();
+		if (SMOOTHING_FACTOR < 0.0f)
+		{
+			SMOOTHING_FACTOR = 0.0f;
+		}
+		static double scrollDelta = 0.0;
+
 		auto speedModifier = Input::KeyHeld(ImGuiKey_LeftShift) ? 0.1f : 1.0f;
 		speedModifier *= Input::KeyHeld(ImGuiKey_LeftCtrl) ? 3.0f : 1.0f;
 
 		const auto cameraHeightSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
 		const auto cameraMovementSpeed = speedModifier * cameraHeightSpeed + Input::GetDeltaTime() * HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING);
-
-		static double scrollDelta = 0.0;
-		scrollDelta -= Input::GetScrollDelta();
 
 		if (Input::KeyHeld(ImGuiKey_W))
 		{
@@ -91,6 +94,8 @@ namespace IWXMVM::Components
 		}
 		else
 		{
+			scrollDelta -= Input::GetScrollDelta();
+
 			if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
 			{
 				activeCamera.GetFov() -= scrollDelta * Input::GetDeltaTime() * 32.0f;
@@ -128,7 +133,12 @@ namespace IWXMVM::Components
 		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
 		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
 		constexpr float MIN_ORBIT_DIST = 10;
-		const float SMOOTHING_FACTOR = 1.0f - 6.0f * Input::GetDeltaTime();
+
+		float SMOOTHING_FACTOR = 1.0f - 6.0f * Input::GetDeltaTime();
+		if (SMOOTHING_FACTOR < 0.0f)
+		{
+			SMOOTHING_FACTOR = 0.0f;
+		}
 
 		static double scrollDelta = 0.0;
 		scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
