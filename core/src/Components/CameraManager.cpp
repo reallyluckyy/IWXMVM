@@ -112,6 +112,7 @@ namespace IWXMVM::Components
 		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
 		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
 		constexpr float MIN_ORBIT_DIST = 10;
+		const float SMOOTHING_FACTOR = 1.0f - 6.0f * Input::GetDeltaTime();
 
 		static double scrollDelta = 0.0;
 		scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
@@ -163,7 +164,7 @@ namespace IWXMVM::Components
 		
 		if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
 		{
-			auto desiredPosition = cameraPosition + glm::normalize(cameraPosition - orbitCameraOrigin) * (0.025 * scrollDelta) * 100;
+			auto desiredPosition = cameraPosition + glm::normalize(cameraPosition - orbitCameraOrigin) * ((1.0f - SMOOTHING_FACTOR) * scrollDelta) * 100;
 			if (glm::distance(desiredPosition, orbitCameraOrigin) > MIN_ORBIT_DIST)
 			{
 				cameraPosition = desiredPosition;
@@ -172,7 +173,7 @@ namespace IWXMVM::Components
 			{
 				cameraPosition = orbitCameraOrigin + glm::normalize(cameraPosition - orbitCameraOrigin) * MIN_ORBIT_DIST;
 			}
-			scrollDelta *= 0.975;
+			scrollDelta *= SMOOTHING_FACTOR;
 		} 
 		else if (scrollDelta != 0.0) 
 		{
