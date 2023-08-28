@@ -48,7 +48,7 @@ namespace IWXMVM::Components
 		auto& cameraPosition = activeCamera.GetPosition();
 	
 		// TODO: make this configurable
-		constexpr float FREECAM_SPEED = 200;
+		constexpr float FREECAM_SPEED = 300;
 		constexpr float MOUSE_SPEED = 0.1f;
 		constexpr float HEIGHT_CEILING = 250.0f;
 		constexpr float HEIGHT_MULTIPLIER = 0.75f;
@@ -57,7 +57,7 @@ namespace IWXMVM::Components
 		speedModifier *= Input::KeyHeld(ImGuiKey_LeftCtrl) ? 3.0f : 1.0f;
 
 		const auto cameraHeightSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
-		const auto cameraMovementSpeed = speedModifier * cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING);
+		const auto cameraMovementSpeed = speedModifier * cameraHeightSpeed + Input::GetDeltaTime() * HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING);
 	
 		if (Input::KeyHeld(ImGuiKey_W))
 		{
