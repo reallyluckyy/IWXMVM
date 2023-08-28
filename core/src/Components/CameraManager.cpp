@@ -104,6 +104,8 @@ namespace IWXMVM::Components
 	
 		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
 		activeCamera.GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
+
+		activeCamera.GetRotation()[0] = glm::clamp(activeCamera.GetRotation()[0], -89.9f, 89.9f);
 	
 		if (Input::KeyHeld(ImGuiKey_E))
 			cameraPosition[2] += cameraHeightSpeed;
