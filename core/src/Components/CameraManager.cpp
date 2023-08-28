@@ -134,12 +134,12 @@ namespace IWXMVM::Components
 		{
 			auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
 			cameraPosition -= orbitCameraOrigin;
-			cameraPosition = glm::rotateZ(cameraPosition, MathUtils::DegreesToRadians(horizontalDelta));
+			cameraPosition = glm::rotateZ(cameraPosition, glm::radians(horizontalDelta));
 			cameraPosition += orbitCameraOrigin;
 			
 			auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
 			cameraPosition -= orbitCameraOrigin;
-			cameraPosition = glm::rotate(cameraPosition, MathUtils::DegreesToRadians(verticalDelta), glm::cross(glm::vector3::up, activeCamera.GetForwardVector()));
+			cameraPosition = glm::rotate(cameraPosition, glm::radians(verticalDelta), glm::cross(glm::vector3::up, activeCamera.GetForwardVector()));
 			cameraPosition += orbitCameraOrigin;
 		}
 
