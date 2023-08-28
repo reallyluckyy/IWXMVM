@@ -52,13 +52,19 @@ namespace IWXMVM::Components
 		constexpr float MOUSE_SPEED = 0.1f;
 		constexpr float HEIGHT_CEILING = 250.0f;
 		constexpr float HEIGHT_MULTIPLIER = 0.75f;
+		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
+		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
+		const float SMOOTHING_FACTOR = 1.0f - 15.0f * Input::GetDeltaTime();
 	
 		auto speedModifier = Input::KeyHeld(ImGuiKey_LeftShift) ? 0.1f : 1.0f;
 		speedModifier *= Input::KeyHeld(ImGuiKey_LeftCtrl) ? 3.0f : 1.0f;
 
 		const auto cameraHeightSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
 		const auto cameraMovementSpeed = speedModifier * cameraHeightSpeed + Input::GetDeltaTime() * HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING);
-	
+
+		static double scrollDelta = 0.0;
+		scrollDelta -= Input::GetScrollDelta();
+
 		if (Input::KeyHeld(ImGuiKey_W))
 		{
 			cameraPosition += activeCamera.GetForwardVector() * cameraMovementSpeed;
@@ -85,7 +91,15 @@ namespace IWXMVM::Components
 		}
 		else
 		{
-			activeCamera.GetFov() -= Input::GetScrollDelta();
+			if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
+			{
+				activeCamera.GetFov() -= scrollDelta * Input::GetDeltaTime() * 32.0f;
+				scrollDelta *= SMOOTHING_FACTOR;
+			}
+			else if (scrollDelta != 0.0)
+			{
+				scrollDelta = 0.0;
+			}
 		}
 	
 		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
