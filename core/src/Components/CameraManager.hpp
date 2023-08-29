@@ -3,9 +3,19 @@
 
 namespace IWXMVM::Components
 {
-	class CameraManager {
+	class CameraManager 
+    {
 
 	public:
+        static CameraManager& Get()
+        {
+            static CameraManager instance;
+            return instance;
+        }
+
+        CameraManager(CameraManager const&) = delete;
+        void operator=(CameraManager const&) = delete;
+
 		void Initialize();
 
 		Camera& GetActiveCamera() { return cameras[activeCameraIndex]; }
@@ -16,6 +26,8 @@ namespace IWXMVM::Components
 		std::vector<Camera::Mode> GetCameraModes();
 
 	private:
+        CameraManager() {}
+
 		void UpdateFreecamMovement();
 		void UpdateOrbitCameraMovement();
 
@@ -34,6 +46,6 @@ namespace IWXMVM::Components
 
 		int activeCameraIndex = 0;
 
-		glm::vec3 orbitCameraOrigin;
+		glm::vec3 orbitCameraOrigin {};
 	};
 }

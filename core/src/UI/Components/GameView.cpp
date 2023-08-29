@@ -81,8 +81,8 @@ namespace IWXMVM::UI
 
 	void GameView::DrawTopBar() 
 	{
-		auto cameraManager = Mod::GetCameraManager();
-		auto& currentCamera = cameraManager->GetActiveCamera();
+		auto& cameraManager = Components::CameraManager::Get();
+		auto& currentCamera = cameraManager.GetActiveCamera();
 
 		const auto PADDING = 10;
 
@@ -90,14 +90,14 @@ namespace IWXMVM::UI
 
 		ImGui::SetNextItemWidth(300);
 
-		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager->GetCameraModeLabel(currentCamera.GetMode()).data()))
+		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager.GetCameraModeLabel(currentCamera.GetMode()).data()))
 		{
-			for (auto cameraMode : cameraManager->GetCameraModes())
+			for (auto cameraMode : cameraManager.GetCameraModes())
 			{
 				bool isSelected = currentCamera.GetMode() == cameraMode;
-				if (ImGui::Selectable(cameraManager->GetCameraModeLabel(cameraMode).data(), currentCamera.GetMode() == cameraMode))
+				if (ImGui::Selectable(cameraManager.GetCameraModeLabel(cameraMode).data(), currentCamera.GetMode() == cameraMode))
 				{
-					cameraManager->SetActiveCamera(cameraMode);
+					cameraManager.SetActiveCamera(cameraMode);
 				}
 
 				if (isSelected)
