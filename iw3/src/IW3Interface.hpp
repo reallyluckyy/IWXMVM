@@ -95,7 +95,7 @@ namespace IWXMVM::IW3
 				std::filesystem::copy(demoPath, targetPath);
 
 				Structures::Cbuf_AddText(
-					std::format(R"(demo {0}/{1})", DEMO_TEMP_DIRECTORY, targetPath.filename().string())
+					std::format(R"(demo "{0}/{1}")", DEMO_TEMP_DIRECTORY, targetPath.filename().string())
 				);
 			}
 			catch (std::filesystem::filesystem_error& e)
