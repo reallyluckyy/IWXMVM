@@ -23,6 +23,6 @@ namespace IWXMVM::Components
 
 	glm::vec3 Camera::GetRightVector()
 	{
-		return glm::cross(GetForwardVector(), glm::vector3::up) * -1;
+		return glm::normalize(glm::cross(GetForwardVector(), glm::vector3::up) * -1);
 	}
 }

@@ -48,17 +48,22 @@ namespace IWXMVM::Components
 		auto& cameraPosition = activeCamera.GetPosition();
 	
 		// TODO: make this configurable
-		constexpr float FREECAM_SPEED = 200;
+		constexpr float FREECAM_SPEED = 300;
 		constexpr float MOUSE_SPEED = 0.1f;
 		constexpr float HEIGHT_CEILING = 250.0f;
 		constexpr float HEIGHT_MULTIPLIER = 0.75f;
-	
+		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
+		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
+		const float SMOOTHING_FACTOR = glm::clamp(1.0f - 15.0f * Input::GetDeltaTime(), 0.0f, 1.0f);
+
+		static double scrollDelta = 0.0;
+
 		auto speedModifier = Input::KeyHeld(ImGuiKey_LeftShift) ? 0.1f : 1.0f;
 		speedModifier *= Input::KeyHeld(ImGuiKey_LeftCtrl) ? 3.0f : 1.0f;
 
 		const auto cameraHeightSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
-		const auto cameraMovementSpeed = speedModifier * cameraHeightSpeed + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING);
-	
+		const auto cameraMovementSpeed = speedModifier * cameraHeightSpeed + Input::GetDeltaTime() * HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING);
+
 		if (Input::KeyHeld(ImGuiKey_W))
 		{
 			cameraPosition += activeCamera.GetForwardVector() * cameraMovementSpeed;
@@ -85,11 +90,24 @@ namespace IWXMVM::Components
 		}
 		else
 		{
-			activeCamera.GetFov() -= Input::GetScrollDelta();
+			scrollDelta -= Input::GetScrollDelta();
+
+			if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
+			{
+				activeCamera.GetFov() += scrollDelta * Input::GetDeltaTime() * 32.0f;
+				activeCamera.GetFov() = glm::clamp(activeCamera.GetFov(), 1.0f, 179.0f);
+				scrollDelta *= SMOOTHING_FACTOR;
+			}
+			else if (scrollDelta != 0.0)
+			{
+				scrollDelta = 0.0;
+			}
 		}
 	
 		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
 		activeCamera.GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
+
+		activeCamera.GetRotation()[0] = glm::clamp(activeCamera.GetRotation()[0], -89.9f, 89.9f);
 	
 		if (Input::KeyHeld(ImGuiKey_E))
 			cameraPosition[2] += cameraHeightSpeed;
@@ -112,6 +130,7 @@ namespace IWXMVM::Components
 		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
 		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
 		constexpr float MIN_ORBIT_DIST = 10;
+		const float SMOOTHING_FACTOR = glm::clamp(1.0f - 10.0f * Input::GetDeltaTime(), 0.0f, 1.0f);
 
 		static double scrollDelta = 0.0;
 		scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
@@ -134,12 +153,12 @@ namespace IWXMVM::Components
 		{
 			auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
 			cameraPosition -= orbitCameraOrigin;
-			cameraPosition = glm::rotateZ(cameraPosition, MathUtils::DegreesToRadians(horizontalDelta));
+			cameraPosition = glm::rotateZ(cameraPosition, glm::radians(horizontalDelta));
 			cameraPosition += orbitCameraOrigin;
 			
 			auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
 			cameraPosition -= orbitCameraOrigin;
-			cameraPosition = glm::rotate(cameraPosition, MathUtils::DegreesToRadians(verticalDelta), glm::cross(glm::vector3::up, activeCamera.GetForwardVector()));
+			cameraPosition = glm::rotate(cameraPosition, glm::radians(verticalDelta), glm::cross(glm::vector3::up, activeCamera.GetForwardVector()));
 			cameraPosition += orbitCameraOrigin;
 		}
 
@@ -163,7 +182,7 @@ namespace IWXMVM::Components
 		
 		if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
 		{
-			auto desiredPosition = cameraPosition + glm::normalize(cameraPosition - orbitCameraOrigin) * (0.025 * scrollDelta) * 100;
+			auto desiredPosition = cameraPosition + glm::normalize(cameraPosition - orbitCameraOrigin) * ((1.0f - SMOOTHING_FACTOR) * scrollDelta) * 100;
 			if (glm::distance(desiredPosition, orbitCameraOrigin) > MIN_ORBIT_DIST)
 			{
 				cameraPosition = desiredPosition;
@@ -172,7 +191,7 @@ namespace IWXMVM::Components
 			{
 				cameraPosition = orbitCameraOrigin + glm::normalize(cameraPosition - orbitCameraOrigin) * MIN_ORBIT_DIST;
 			}
-			scrollDelta *= 0.975;
+			scrollDelta *= SMOOTHING_FACTOR;
 		} 
 		else if (scrollDelta != 0.0) 
 		{

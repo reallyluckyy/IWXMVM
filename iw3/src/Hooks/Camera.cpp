@@ -25,7 +25,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 		refdef->Origin[1] = camera.GetPosition()[1];
 		refdef->Origin[2] = camera.GetPosition()[2];
 
-		refdef->FOV[0] = std::tan(MathUtils::DegreesToRadians(camera.GetFov()) * 0.5f);
+		refdef->FOV[0] = std::tan(glm::radians(camera.GetFov()) * 0.5f);
 		refdef->FOV[1] = refdef->FOV[0] * ((float)refdef->ScreenHeight / (float)refdef->ScreenWidth);
 	}
 
