@@ -2,8 +2,9 @@
 #include "DemoLoader.hpp"
 
 #include "Mod.hpp"
+#include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
-#include "CustomImGuiControls.hpp"
+#include "Resources.hpp"
 
 namespace IWXMVM::UI
 {
@@ -114,10 +115,6 @@ namespace IWXMVM::UI
 			using StringView = std::wstring_view;
 			return CompareNaturally<false>(StringView{ lhsDirPtr, lhsSvLength }, StringView{ rhsDirNamePtr, rhsSvLength });
 		});
-	}
-
-	void DemoLoader::Initialize()
-	{
 	}
 
 	bool IsFileDemo(const std::filesystem::path& file)
@@ -242,9 +239,19 @@ namespace IWXMVM::UI
 				auto idx = i + demos.first;
 				auto demoName = demoPaths[idx].filename().string();
 
-				if (ImGui::Button(std::format("Load##{0}", demoName).c_str(), ImVec2(60, 20)))
+				if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo && Mod::GetGameInterface()->GetDemoInfo().name == demoName)
 				{
-					Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+					if (ImGui::Button(std::format(ICON_FA_STOP " STOP##{0}", demoName).c_str(), ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+					{
+						Mod::GetGameInterface()->Disconnect();
+					}
+				}
+				else
+				{
+					if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(), ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+					{
+						Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+					}
 				}
 
 				ImGui::SameLine();
@@ -300,40 +307,62 @@ namespace IWXMVM::UI
 		}
 	}
 
+	void DemoLoader::Initialize()
+	{
+		isScanningDemoPaths.store(true);
+		std::thread([&] { FindAllDemos(); }).detach();
+	}
+
 	void DemoLoader::Render()
 	{
-		if (!initiallyLoadedDemos) 
+		ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
+		if (ImGui::Begin("Demos", nullptr, flags))
 		{
-			// would be cool to be able to do this in Initialize() at some point
-			// but with the current set up we still dont have access to Mod::GetGameInterface() at that time
-			isScanningDemoPaths.store(true);
-			std::thread([&] { FindAllDemos(); }).detach();
-			initiallyLoadedDemos = true;
-		}
+			ImGui::AlignTextToFramePadding();
 
-		ImGui::Begin("Demos", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
-
-		if (isScanningDemoPaths.load())
-		{
-			ImGui::Text("Searching for demo files...");
-		}
-		else
-		{
-			ImGui::Text("%d demos found!", demoPaths.size());
-			ImGui::SameLine();
-			if (ImGui::Button("Refresh", ImVec2(100, 20)))
+			if (isScanningDemoPaths.load())
 			{
-				isScanningDemoPaths.store(true);
-				std::thread([&] { FindAllDemos(); }).detach();
-				ImGui::End();
-				return;
+				ImGui::Text("Searching for demo files...");
+			} 
+			else
+			{
+				ImGui::Text("%d demos found!", demoPaths.size());
+				ImGui::SameLine();
+
+				auto addPathButtonLabel = std::string(ICON_FA_FOLDER_OPEN " Add path");
+				auto refreshButtonLabel = std::string(ICON_FA_ROTATE_RIGHT " Refresh");
+				auto buttonSize = ImVec2(ImGui::GetFontSize() * 6.0f, ImGui::GetFontSize() * 1.75f);
+
+				if (ImGui::GetWindowWidth() < buttonSize.x * 4)
+				{
+					buttonSize = ImVec2(buttonSize.y, buttonSize.y);
+					addPathButtonLabel = addPathButtonLabel.substr(0, addPathButtonLabel.find(" "));
+					refreshButtonLabel = refreshButtonLabel.substr(0, refreshButtonLabel.find(" "));
+				}
+
+				ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttonSize.x * 2 - ImGui::GetStyle().ItemSpacing.x - ImGui::GetStyle().WindowPadding.x);
+
+				if (ImGui::Button(addPathButtonLabel.c_str(), buttonSize))
+				{
+					// TODO: Implement
+				}
+
+				ImGui::SameLine();
+
+				if (ImGui::Button(refreshButtonLabel.c_str(), buttonSize))
+				{
+					isScanningDemoPaths.store(true);
+					std::thread([&] { FindAllDemos(); }).detach();
+					ImGui::End();
+					return;
+				}
+
+				// Search paths will always be rendered, even if empty
+				RenderSearchPaths();
 			}
 
-			// Search paths will always be rendered, even if empty
-			RenderSearchPaths();
+			ImGui::End();
 		}
-
-		ImGui::End();
 	}
 
 	void DemoLoader::Release()

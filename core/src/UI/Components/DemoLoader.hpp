@@ -6,15 +6,6 @@ namespace IWXMVM::UI
 	class DemoLoader : public UIComponent
 	{
 	public:
-		DemoLoader()
-		{
-			Initialize();
-		}
-		~DemoLoader()
-		{
-			Release();
-		}
-
 		void Render() final;
 		void Release() final;
 
@@ -42,7 +33,6 @@ namespace IWXMVM::UI
 		std::pair<std::size_t, std::size_t> searchPaths; // Pair of indices representing the [first, second) interval of search paths in the 'demoDirectories' vector
 		std::vector<DemoDirectory> demoDirectories;
 		std::vector<std::filesystem::path> demoPaths;
-		bool initiallyLoadedDemos = false;
 		std::atomic<bool> isScanningDemoPaths;
 	};
 }

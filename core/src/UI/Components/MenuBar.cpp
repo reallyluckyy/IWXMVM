@@ -4,35 +4,59 @@
 #include "Version.hpp"
 #include "Mod.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "UI/UIManager.hpp"
 
 namespace IWXMVM::UI
 {
-
     void MenuBar::Initialize()
-    {}
+    {
+        SetPosition(0, 0);
+        SetSize(ImGui::GetIO().DisplaySize.x, ImGui::GetFrameHeight());
+    }
 
     void MenuBar::Render()
     {
-        if (ImGui::BeginMainMenuBar())
+        if (ImGui::BeginMainMenuBar()) 
         {
-            if (ImGui::BeginMenu("Dollycam"))
+            if (ImGui::BeginMenu("File")) 
             {
-                if (ImGui::MenuItem("Example", "CTRL+D")) {}
+                if (ImGui::MenuItem("Preferences")) {}
+                if (ImGui::MenuItem("Controls")) {}
+                if (ImGui::MenuItem("Exit")) {}
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("About"))
+            if (ImGui::BeginMenu("Debug")) 
             {
+                if (ImGui::MenuItem("Toggle IWXMVM UI", "F1")) 
+                {
+                    UIManager::hideOverlay = !UIManager::hideOverlay;
+                }
+
+                if (ImGui::MenuItem("Toggle ImGui Demo", "F2")) 
+                {
+                    UIManager::showImGuiDemo = !UIManager::showImGuiDemo;
+                }
+
+                if (ImGui::MenuItem("Toggle Debug Panel", "F3")) 
+                {
+                    UIManager::showDebugPanel = !UIManager::showDebugPanel;
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("About")) {
                 if (ImGui::MenuItem("Credits", "")) {}
                 ImGui::Separator();
                 if (ImGui::MenuItem("Open Debug Panel", "CTRL+D")) {}
-                if (ImGui::MenuItem("Hide overlay", "CTRL-0")) {}
                 ImGui::EndMenu();
             }
 
             auto windowSize = ImGui::GetIO().DisplaySize;
-            ImGui::SetCursorPosX(windowSize.x - 100);
-            ImGui::Text("IWXMVM %s", IWXMVM_VERSION);
+            std::string iwxmvmText = std::format("IWXMVM {0} | {1}", IWXMVM_VERSION, Types::ToString(Mod::GetGameInterface()->GetGame()));
+            ImGui::SetCursorPosX(windowSize.x - ImGui::CalcTextSize(iwxmvmText.c_str()).x - ImGui::CalcTextSize(" ").x);
+            ImGui::Text(iwxmvmText.c_str());
 
             ImGui::EndMainMenuBar();
         }

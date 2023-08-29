@@ -2,3 +2,4 @@
 */bin/
 *.vcxproj.user
 *.vcxproj.filters
+/core/src/ResourceData.cpp
