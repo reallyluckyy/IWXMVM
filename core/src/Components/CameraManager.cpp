@@ -94,7 +94,7 @@ namespace IWXMVM::Components
 
 			if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
 			{
-				activeCamera.GetFov() -= scrollDelta * Input::GetDeltaTime() * 32.0f;
+				activeCamera.GetFov() += scrollDelta * Input::GetDeltaTime() * 32.0f;
 				scrollDelta *= SMOOTHING_FACTOR;
 			}
 			else if (scrollDelta != 0.0)
