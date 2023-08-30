@@ -119,11 +119,13 @@
     <ClCompile Include="src\Structures.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Addresses.hpp" />
     <ClInclude Include="src\DemoParser.hpp" />
     <ClInclude Include="src\Hooks.hpp" />
     <ClInclude Include="src\Hooks\Commands.hpp" />
     <ClInclude Include="src\Hooks\Camera.hpp" />
     <ClInclude Include="src\Hooks\Playback.hpp" />
+    <ClInclude Include="src\Signatures.hpp" />
     <ClInclude Include="src\Structures.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
