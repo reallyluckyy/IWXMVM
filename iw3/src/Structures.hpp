@@ -556,9 +556,9 @@ namespace IWXMVM::IW3::Structures
 	clientActive_t* GetClientActive();
 	WinMouseVars_t* GetMouseVars();
 
-	dvar_s* FindDvar(const std::string name);
+	dvar_s* FindDvar(const std::string_view name);
 
-	std::string GetFilePath(const std::string demoName);
+	std::string GetFilePath(const std::string_view demoName);
 
 	void Cbuf_AddText(std::string command);
 }

@@ -10,7 +10,7 @@ namespace IWXMVM::Types
 	};
 
 
-	static inline std::string ToString(GameState state)
+	static inline std::string_view ToString(GameState state)
 	{
 		switch (state)
 		{
