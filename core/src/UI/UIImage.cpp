@@ -15,9 +15,10 @@ namespace IWXMVM::UI
         return texture;
     }
 
+	/*
     std::unordered_map<std::string, UIImage> fileImageCache;
 
-	UIImage UIImage::FromFile(const std::string path)
+    UIImage UIImage::FromFile(const std::string path)
 	{
         if (fileImageCache.contains(path))
             return fileImageCache[path];
@@ -39,6 +40,7 @@ namespace IWXMVM::UI
 
         return image;
 	}
+    */
 
     std::unordered_map<uint8_t*, UIImage> resourceImageCache;
 

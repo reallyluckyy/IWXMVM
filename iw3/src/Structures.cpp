@@ -30,9 +30,9 @@ namespace IWXMVM::IW3::Structures
 		return (WinMouseVars_t*)0xCC147C4;
 	}
 
-	dvar_s* FindDvar(const std::string name)
+	dvar_s* FindDvar(const std::string_view name)
 	{
-		const char* _name = name.c_str();
+		const char* _name = name.data();
 
 		typedef dvar_s* (__cdecl* Dvar_FindVar_t)();
 		Dvar_FindVar_t Dvar_FindVar_Internal = (Dvar_FindVar_t)0x56B5D0;
@@ -41,7 +41,7 @@ namespace IWXMVM::IW3::Structures
 		return Dvar_FindVar_Internal();
 	}
 
-	std::string GetFilePath(const std::string demoName)
+	std::string GetFilePath(const std::string_view demoName)
 	{
 		auto searchpath = (searchpath_s*)0xD5EC4DC;
 		while(searchpath->next)

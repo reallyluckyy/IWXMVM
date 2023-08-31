@@ -122,7 +122,7 @@ namespace IWXMVM::IW3
 			return isPlaybackPaused;
 		}
 
-		std::optional<Types::Dvar> GetDvar(const std::string name) final
+		std::optional<Types::Dvar> GetDvar(const std::string_view name) final
 		{
 			const auto iw3Dvar = Structures::FindDvar(name);
 

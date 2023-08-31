@@ -39,7 +39,7 @@ namespace IWXMVM
 		virtual bool IsDemoPlaybackPaused() = 0;
 
 		// perhaps dvars shouldnt be exposed to core at all?
-		virtual std::optional<Types::Dvar> GetDvar(const std::string name) = 0;
+		virtual std::optional<Types::Dvar> GetDvar(const std::string_view name) = 0;
 
 	private:
 		Types::Game game;

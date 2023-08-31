@@ -8,7 +8,7 @@ namespace IWXMVM::Types
 	};
 
 
-	static inline std::string ToString(Game game)
+	static inline std::string_view ToString(Game game)
 	{
 		switch (game)
 		{

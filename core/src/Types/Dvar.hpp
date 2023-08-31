@@ -4,7 +4,7 @@ namespace IWXMVM::Types
 {
 	struct Dvar
 	{
-		std::string name;
+		std::string_view name;
 		union Value
 		{
 			float floating_point;
