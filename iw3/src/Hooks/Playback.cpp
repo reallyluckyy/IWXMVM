@@ -80,7 +80,7 @@ namespace IWXMVM::IW3::Hooks::Playback
 			else 
 			{
 				assert(lastTimeScale != timescale.value().value->floating_point);
-				frameRate = static_cast<float>(com_maxfps.value().value->int32);
+				frameRate = ImGui::GetIO().Framerate;
 			}
 
 			lastTimeScale = timescale.value().value->floating_point;
