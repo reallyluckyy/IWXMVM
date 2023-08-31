@@ -215,7 +215,7 @@ namespace IWXMVM::Signatures
                 _address = _signature.Scan(Mod::GetGameInterface()->GetModuleHandles());
             else 
             {
-                auto modules = Mod::GetGameInterface()->GetModuleHandles();
+                const auto modules = Mod::GetGameInterface()->GetModuleHandles();
                 std::reverse(std::begin(modules), std::end(modules));
 
                 _address = _signature.Scan(modules);
