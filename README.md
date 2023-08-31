@@ -1,7 +1,7 @@
 <div align="center">
   <br>
   <a href="https://github.com/reallyluckyy/IWXMVM">
-    <img src="https://github.com/reallyluckyy/IWXMVM/assets/7430330/9463f12e-f919-49b9-b6ce-94037df9a181" width="50%">
+    <img src="https://github.com/reallyluckyy/IWXMVM/assets/7430330/410c388a-6d1a-4175-a21d-e2ac9ef1cc93" width="100%">
   </a>
   <br><br>
 </div>
