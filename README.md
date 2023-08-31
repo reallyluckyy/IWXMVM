@@ -1,5 +1,14 @@
-# IWXMVM
+<div align="center">
+  <a href="https://github.com/reallyluckyy/IWXMVM">
+    <img src="https://github.com/reallyluckyy/IWXMVM/assets/7430330/7a0a6869-f194-4252-8986-3dcbf548a4ce" width="50%">
+  </a>
+  <br><br>
+</div>
 
+## About
+An in-development editing mod for multiple Call of Duty games.
+
+![iwxmvmscreenshot](https://github.com/reallyluckyy/IWXMVM/assets/7430330/9680c479-1ed3-4690-9c29-b99f4b1b392b)
 
 ## Requirements
 - Visual Studio 2022
