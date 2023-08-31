@@ -123,16 +123,9 @@ namespace IWXMVM::IW3
 			return isPlaybackPaused;
 		}
 
-		IW3Addresses addresses;
-
-		void SearchGameAddresses(std::vector<HMODULE> moduleHandles) final
+		void InitializeGameAddresses() final
 		{
-			addresses = IW3Addresses(moduleHandles);
-		}
-
-		const IW3Addresses& GetGameAddresses()
-		{
-			return addresses;
+			GetGameAddresses();
 		}
 
 		static HMODULE GetCoD4xModuleHandle()
@@ -153,12 +146,16 @@ namespace IWXMVM::IW3
 			return static_cast<HMODULE>(moduleData.lpBaseOfDll);
 		}
 
-		std::vector<HMODULE> GetModuleHandles() final
+		std::span<HMODULE> GetModuleHandles() final
 		{
-			if (const HMODULE moduleCoD4X = GetCoD4xModuleHandle(); moduleCoD4X != 0)
-				return std::vector<HMODULE>{ ::GetModuleHandle(nullptr), moduleCoD4X };
-			else
-				return std::vector<HMODULE>{ ::GetModuleHandle(nullptr) };
+			static std::vector<HMODULE> modules = []() {
+				if (const HMODULE moduleCoD4X = GetCoD4xModuleHandle(); moduleCoD4X != 0)
+					return std::vector<HMODULE>{ ::GetModuleHandle(nullptr), moduleCoD4X };
+				else
+					return std::vector<HMODULE>{ ::GetModuleHandle(nullptr) };
+			}();
+
+			return std::span{ modules };
 		}
 
 		std::optional<Types::Dvar> GetDvar(const std::string_view name) final

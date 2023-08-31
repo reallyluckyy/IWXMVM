@@ -41,7 +41,7 @@ namespace IWXMVM
 			LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
 
 			LOG_DEBUG("Scanning signatures...");
-			gameInterface->SearchGameAddresses(gameInterface->GetModuleHandles());
+			gameInterface->InitializeGameAddresses();
 
 			LOG_DEBUG("Installing game hooks...");
 			D3D9::Initialize();

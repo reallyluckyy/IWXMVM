@@ -1,5 +1,6 @@
 #pragma once
 #include "StdInclude.hpp"
+#include "Mod.hpp"
 
 namespace IWXMVM::Signatures
 {
@@ -154,9 +155,9 @@ namespace IWXMVM::Signatures
     using callable_t = decltype([](){});
 
     template <std::size_t size, typename Callable = callable_t>
-    struct Signature
+    struct SignatureImpl
     {
-        constexpr Signature(const char(&str)[size], GameAddressType type, std::intptr_t offset = 0, Callable callable = callable_t{}) noexcept :
+        constexpr SignatureImpl(const char(&str)[size], GameAddressType type, std::intptr_t offset = 0, Callable callable = callable_t{}) noexcept :
             _string(std::to_array(str)),
             _bytes(ConvertStringToBytes<size>(str)),
             _frontMaskCount(GetFrontMaskCount(_bytes)),
@@ -203,5 +204,35 @@ namespace IWXMVM::Signatures
         std::size_t _frontMaskCount{};
         std::intptr_t _offset{};
         Callable _callable;
+    };
+
+    template <auto intSignature, bool reverseModuleOrder = false>
+    struct Signature
+    {
+        constexpr Signature() 
+        {
+            if constexpr (!reverseModuleOrder)
+                _address = _signature.Scan(Mod::GetGameInterface()->GetModuleHandles());
+            else 
+            {
+                auto modules = Mod::GetGameInterface()->GetModuleHandles();
+                std::reverse(std::begin(modules), std::end(modules));
+
+                _address = _signature.Scan(modules);
+            }
+        }
+
+        static constexpr auto _signature = intSignature;
+        std::uintptr_t _address{};
+
+        std::uintptr_t operator()() const
+        {
+            return GetAddress();
+        }
+
+        std::uintptr_t GetAddress() const
+        {
+            return _address;
+        }
     };
 }
