@@ -40,7 +40,8 @@ namespace IWXMVM
 			LOG_INFO("Game: {}", Types::ToString(gameInterface->GetGame()));
 			LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
 
-			//MemoryUtils::UnprotectModule();
+			LOG_DEBUG("Scanning signatures...");
+			gameInterface->InitializeGameAddresses();
 
 			LOG_DEBUG("Installing game hooks...");
 			D3D9::Initialize();

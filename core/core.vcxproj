@@ -178,6 +178,7 @@
     <ClInclude Include="src\UI\UIManager.hpp" />
     <ClInclude Include="src\Utilities\MemoryUtils.hpp" />
     <ClInclude Include="src\Utilities\PathUtils.hpp" />
+    <ClInclude Include="src\Utilities\Signatures.hpp" />
     <ClInclude Include="src\Version.hpp" />
     <ClInclude Include="src\WindowsConsole.hpp" />
   </ItemGroup>

@@ -7,6 +7,7 @@
 #include "Events.hpp"
 #include "DemoParser.hpp"
 #include "Hooks/Camera.hpp"
+#include "Addresses.hpp"
 
 namespace IWXMVM::IW3
 {
@@ -120,6 +121,41 @@ namespace IWXMVM::IW3
 		bool IsDemoPlaybackPaused() final
 		{
 			return isPlaybackPaused;
+		}
+
+		void InitializeGameAddresses() final
+		{
+			GetGameAddresses();
+		}
+
+		static HMODULE GetCoD4xModuleHandle()
+		{
+			std::string moduleName = "cod4x_021.dll";
+			MODULEINFO moduleData{};
+
+			for (std::size_t i = 0; i < 1000; ++i) 
+			{
+				if (!::GetModuleInformation(::GetCurrentProcess(), ::GetModuleHandle(moduleName.c_str()), &moduleData, sizeof(moduleData)) || moduleData.lpBaseOfDll) 
+				{
+					break;
+				}
+
+				moduleName = "cod4x_" + std::format("{:03}", i) + ".dll";
+			}
+
+			return static_cast<HMODULE>(moduleData.lpBaseOfDll);
+		}
+
+		std::span<HMODULE> GetModuleHandles() final
+		{
+			static std::vector<HMODULE> modules = []() {
+				if (const HMODULE moduleCoD4X = GetCoD4xModuleHandle(); moduleCoD4X != 0)
+					return std::vector<HMODULE>{ ::GetModuleHandle(nullptr), moduleCoD4X };
+				else
+					return std::vector<HMODULE>{ ::GetModuleHandle(nullptr) };
+			}();
+
+			return std::span{ modules };
 		}
 
 		std::optional<Types::Dvar> GetDvar(const std::string_view name) final
