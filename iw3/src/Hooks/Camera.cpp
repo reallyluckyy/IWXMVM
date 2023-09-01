@@ -5,6 +5,7 @@
 #include "Utilities/MathUtils.hpp"
 #include "../Structures.hpp"
 #include "Mod.hpp"
+#include "../Addresses.hpp"
 
 namespace IWXMVM::IW3::Hooks::Camera
 {
@@ -52,7 +53,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 		angles[2] = camera.GetRotation()[2];
 	}
 
-	uintptr_t AnglesToAxis_Address = 0x5635C0;
+	uintptr_t AnglesToAxis_Address;
 	void __declspec(naked) AnglesToAxis_Hook()
 	{
 		static float* angles;
@@ -112,20 +113,21 @@ namespace IWXMVM::IW3::Hooks::Camera
 	void Install()
 	{
 		// rewrite the camera position and fov
-		HookManager::CreateHook(0x5FA900, (uintptr_t)R_SetViewParmsForScene_Hook, &R_SetViewParmsForScene_Trampoline);
+		HookManager::CreateHook(GetGameAddresses().R_SetViewParmsForScene(), (uintptr_t)R_SetViewParmsForScene_Hook, &R_SetViewParmsForScene_Trampoline);
 
 		// rewrite the camera angles
-		HookManager::WriteCall(0x451C8D, (uintptr_t)AnglesToAxis_Hook);
-		HookManager::WriteCall(0x44FD8C, (uintptr_t)AnglesToAxis_Hook);
+		AnglesToAxis_Address = GetGameAddresses().AnglesToAxis();
+		HookManager::WriteCall(GetGameAddresses().CG_CalcViewValues(), (uintptr_t)AnglesToAxis_Hook);
+		HookManager::WriteCall(GetGameAddresses().CG_OffsetThirdPersonView(), (uintptr_t)AnglesToAxis_Hook);
 
 		// update position of world-space effects (such as smoke) with our new position
-		HookManager::CreateHook(0x4A56F0, (uintptr_t)FX_SetupCamera_Hook, &FX_SetupCamera_Trampoline);
+		HookManager::CreateHook(GetGameAddresses().FX_SetupCamera(), (uintptr_t)FX_SetupCamera_Hook, &FX_SetupCamera_Trampoline);
 		
 		// TODO: CG_CalcFov
 		// TODO: bypass connection interrupted (CI) image / message by placing a return statement at 0x42F930 
 
 		// ignore writes to camera angles (this fixes things like the player knifing affecting the freecam)
-		HookManager::CreateHook(0x434070, (uintptr_t)CG_DObjGetWorldTagMatrix_Hook, &CG_DObjGetWorldTagMatrix_Trampoline);
+		HookManager::CreateHook(GetGameAddresses().CG_DObjGetWorldTagMatrix(), (uintptr_t)CG_DObjGetWorldTagMatrix_Hook, &CG_DObjGetWorldTagMatrix_Trampoline);
 	}
 
 	void OnCameraChanged()
@@ -139,8 +141,8 @@ namespace IWXMVM::IW3::Hooks::Camera
 
 		// TODO: hide / show killcam 'YOU' marker by placing / removing an absolute jump at 0x444B6B
 		// TODO: hide / show class menu when watching demos and using free / orbit camera by placing / removing an absolute jump at 0x474E20
-
-		Structures::FindDvar("r_lodBiasRigid")->current.value = -40000;
-		Structures::FindDvar("r_lodBiasSkinned")->current.value = -40000;
+		constexpr int32_t LODBIAS = -40000;
+		Structures::FindDvar("r_lodBiasRigid")->current.value = LODBIAS;
+		Structures::FindDvar("r_lodBiasSkinned")->current.value = LODBIAS;
 	}
 }
