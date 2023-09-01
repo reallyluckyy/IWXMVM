@@ -93,7 +93,7 @@ namespace IWXMVM::UI
 				ToggleDebugPanel();
 			}
 
-			if (!hideOverlay.load())
+			if (!hideOverlay)
 			{
 				GetUIComponent(Component::Background)->Render();
 				GetUIComponent(Component::MenuBar)->Render();
@@ -102,12 +102,12 @@ namespace IWXMVM::UI
 				GetUIComponent(Component::ControlBar)->Render();
 			}
 
-			if (showImGuiDemo.load())
+			if (showImGuiDemo)
 			{
 				ImGui::ShowDemoWindow();
 			}
 
-			if (showDebugPanel.load())
+			if (showDebugPanel)
 			{
 				GetUIComponent(Component::DebugPanel)->Render();
 			}
