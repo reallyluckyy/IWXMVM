@@ -13,3 +13,6 @@
 [submodule "core/third-party/glm"]
 	path = core/third-party/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "core/third-party/IconFontCppHeaders"]
+	path = core/third-party/IconFontCppHeaders
+	url = https://github.com/juliettef/IconFontCppHeaders
