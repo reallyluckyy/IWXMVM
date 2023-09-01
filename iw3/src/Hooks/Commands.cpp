@@ -54,7 +54,8 @@ namespace IWXMVM::IW3::Hooks::Commands
 
 		~FunctionStorage()
 		{
-			if (hooked) {
+			if (hooked) 
+			{
 				Unhook();
 			}
 		}

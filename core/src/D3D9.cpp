@@ -29,9 +29,9 @@ namespace IWXMVM::D3D9
 		};
 		static std::array<std::uintptr_t, std::size(overlayNames)> returnAddresses{};
 
-		for (std::size_t i = 0; i < returnAddresses.size(); ++i) 
+		for (std::size_t i = 0; i < returnAddresses.size(); ++i)
 		{
-			if (!returnAddresses[i]) 
+			if (!returnAddresses[i])
 			{
 				MEMORY_BASIC_INFORMATION mbi;
 				::VirtualQuery(reinterpret_cast<LPCVOID>(returnAddress), &mbi, sizeof(MEMORY_BASIC_INFORMATION));
@@ -39,13 +39,13 @@ namespace IWXMVM::D3D9
 				char module[1024];
 				::GetModuleFileName(static_cast<HMODULE>(mbi.AllocationBase), module, sizeof(module));
 
-				if (std::string_view{ module }.find(overlayNames[i]) != std::string_view::npos) 
+				if (std::string_view{ module }.find(overlayNames[i]) != std::string_view::npos)
 				{
 					returnAddresses[i] = returnAddress;
 					return true;
 				}
-			} 
-			else if (returnAddresses[i] == returnAddress) 
+			}
+			else if (returnAddresses[i] == returnAddress)
 			{
 				return true;
 			}
@@ -57,12 +57,14 @@ namespace IWXMVM::D3D9
 	HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
 	{
 		const std::uintptr_t returnAddress = reinterpret_cast<std::uintptr_t>(_ReturnAddress());
-		if (CheckForOverlays(returnAddress)) {
+		if (CheckForOverlays(returnAddress)) 
+		{
 			return EndScene(pDevice);
 		}
-		
+
 		// If the device pointer did not change, it's most likely a premature call to EndScene and will crash
-		if (!UI::UIManager::Get().IsInitialized() || UI::UIManager::Get().NeedsRestart().load() && device != pDevice) {
+		if (!UI::UIManager::Get().IsInitialized() || UI::UIManager::Get().NeedsRestart().load() && device != pDevice)
+		{
 			device = pDevice;
 			UI::UIManager::Get().Initialize(pDevice);
 		}
@@ -90,12 +92,14 @@ namespace IWXMVM::D3D9
 	void CreateDummyDevice()
 	{
 		HWND hwnd = D3D9::FindWindowHandle();
-		if (!hwnd) {
+		if (!hwnd) 
+		{
 			throw std::runtime_error("Failed to find HWND");
 		}
 
 		IDirect3D9* d3dObj = Direct3DCreate9(D3D_SDK_VERSION);
-		if (!d3dObj) {
+		if (!d3dObj) 
+		{
 			throw std::runtime_error("Failed to create D3D object");
 		}
 
@@ -117,7 +121,8 @@ namespace IWXMVM::D3D9
 		);
 
 		// Try again in case it's fullscreen
-		if (FAILED(result) || !dummyDevice) {
+		if (FAILED(result) || !dummyDevice) 
+		{
 			d3d_params.Windowed = false;
 			result = d3dObj->CreateDevice(
 				D3DADAPTER_DEFAULT,
@@ -130,7 +135,8 @@ namespace IWXMVM::D3D9
 		}
 
 		// Fail again -> death
-		if (FAILED(result) || !dummyDevice) {
+		if (FAILED(result) || !dummyDevice) 
+		{
 			d3dObj->Release();
 			throw std::runtime_error("Failed to create dummy D3D device");
 		}
@@ -146,7 +152,8 @@ namespace IWXMVM::D3D9
 	void Hook()
 	{
 		// TODO: move minhook initialization somewhere else
-		if (MH_Initialize() != MH_OK) {
+		if (MH_Initialize() != MH_OK) 
+		{
 			throw std::runtime_error("Failed to initialize MinHook");
 		}
 
@@ -168,7 +175,8 @@ namespace IWXMVM::D3D9
 
 		// It's possible the console window will be found instead of the game one
 		// So we need to check against GetConsoleWindow()
-		if (lpdwPID == lParam && hwnd != GetConsoleWindow()) {
+		if (lpdwPID == lParam && hwnd != GetConsoleWindow()) 
+		{
 			gameWindowHandle = hwnd;
 			return FALSE;
 		}
@@ -178,7 +186,8 @@ namespace IWXMVM::D3D9
 
 	HWND FindWindowHandle()
 	{
-		if (EnumWindows(CheckWindowPID, (LPARAM)GetCurrentProcessId())) {
+		if (EnumWindows(CheckWindowPID, (LPARAM)GetCurrentProcessId())) 
+		{
 			LOG_CRITICAL("Failed to find the game window");
 			return nullptr;
 		}

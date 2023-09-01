@@ -119,9 +119,9 @@ namespace IWXMVM::UI
 		Tab selectedTab = Tab::Demos;
 		bool isInitialized = false;
 
-		std::atomic<bool> hideOverlay = false;
-		std::atomic<bool> showImGuiDemo = false;
-		std::atomic<bool> showDebugPanel = false;
+		bool hideOverlay = false;
+		bool showImGuiDemo = false;
+		bool showDebugPanel = false;
 
 		std::atomic<bool> needsRestart = false;
 

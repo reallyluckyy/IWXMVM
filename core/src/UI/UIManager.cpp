@@ -217,7 +217,8 @@ namespace IWXMVM::UI
 			// io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 			io.Fonts->ClearFonts();
 
-			auto RegisterFont = [&](const char* name, const uint8_t* data, size_t size, float fontSize) {
+			auto RegisterFont = [&](const char* name, const uint8_t* data, size_t size, float fontSize) 
+			{
 				ImFontConfig fontConfig;
 				fontConfig.SizePixels = fontSize;
 				strcpy_s(fontConfig.Name, name);
