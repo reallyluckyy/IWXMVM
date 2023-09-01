@@ -4,17 +4,17 @@
 namespace IWXMVM::Components
 {
 	class CameraManager 
-    {
+	{
 
 	public:
-        static CameraManager& Get()
-        {
-            static CameraManager instance;
-            return instance;
-        }
+		static CameraManager& Get()
+		{
+			static CameraManager instance;
+			return instance;
+		}
 
-        CameraManager(CameraManager const&) = delete;
-        void operator=(CameraManager const&) = delete;
+		CameraManager(CameraManager const&) = delete;
+		void operator=(CameraManager const&) = delete;
 
 		void Initialize();
 
@@ -26,7 +26,7 @@ namespace IWXMVM::Components
 		std::vector<Camera::Mode> GetCameraModes();
 
 	private:
-        CameraManager() {}
+		CameraManager() {}
 
 		void UpdateFreecamMovement();
 		void UpdateOrbitCameraMovement();
