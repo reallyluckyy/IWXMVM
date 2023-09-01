@@ -39,7 +39,8 @@ namespace IWXMVM::IW3::DemoParser
 	void Run()
 	{
 		std::ifstream file(Mod::GetGameInterface()->GetDemoInfo().path, std::ios::binary);
-		if (!file.is_open()) {
+		if (!file.is_open()) 
+		{
  			throw std::exception("failed to open demo file");
  		}
 

@@ -12,9 +12,7 @@
 namespace IWXMVM
 {
 	GameInterface* Mod::internalGameInterface = nullptr;
-	Components::CameraManager* Mod::internalCameraManager = nullptr;
-
-	Components::CameraManager cameraManager = Components::CameraManager();
+	std::atomic<bool> Mod::ejectRequested = false;
 
 	HMODULE GetCurrentModule()
 	{
@@ -26,12 +24,16 @@ namespace IWXMVM
 		return static_cast<HMODULE>(mbi.AllocationBase);
 	}
 
+	void Mod::RequestEject()
+	{
+		ejectRequested.store(true);
+	}
+
 	void Mod::Initialize(GameInterface* gameInterface)
 	{
 		try 
 		{
 			internalGameInterface = gameInterface;
-			internalCameraManager = &cameraManager;
 
 			WindowsConsole::Open();
 			Logger::Initialize();
@@ -49,18 +51,18 @@ namespace IWXMVM
 			gameInterface->SetupEventListeners();
 
 			// Initialize Components
-			cameraManager.Initialize();
+			Components::CameraManager::Get().Initialize();
 			
 			// TODO: ...
 
 			LOG_INFO("Initialized IWXMVM!");
-
-			while (!UI::UIManager::ejectRequested.load())
+			
+			while (!ejectRequested.load())
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 			HookManager::Unhook();
 			LOG_DEBUG("Unhooked");
-			UI::UIManager::ShutdownImGui();
+			UI::UIManager::Get().ShutdownImGui();
 			LOG_DEBUG("ImGui successfully shutdown");
 
 			WindowsConsole::Close();
