@@ -30,17 +30,17 @@ namespace IWXMVM::UI
             {
                 if (ImGui::MenuItem("Toggle IWXMVM UI", "F1")) 
                 {
-                    UIManager::hideOverlay = !UIManager::hideOverlay;
+                    UIManager::Get().ToggleOverlay();
                 }
 
                 if (ImGui::MenuItem("Toggle ImGui Demo", "F2")) 
                 {
-                    UIManager::showImGuiDemo = !UIManager::showImGuiDemo;
+                    UIManager::Get().ToggleImGuiDemo();
                 }
 
                 if (ImGui::MenuItem("Toggle Debug Panel", "F3")) 
                 {
-                    UIManager::showDebugPanel = !UIManager::showDebugPanel;
+                    UIManager::Get().ToggleDebugPanel();
                 }
 
                 ImGui::EndMenu();

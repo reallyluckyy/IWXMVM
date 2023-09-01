@@ -14,11 +14,11 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-namespace IWXMVM::UI::UIManager
+namespace IWXMVM::UI
 {
-	namespace Component 
+	namespace Component
 	{
-		enum Component 
+		enum Component
 		{
 			Background = 0,
 			MenuBar,
@@ -33,31 +33,98 @@ namespace IWXMVM::UI::UIManager
 		};
 	}
 
-	inline std::array<std::unique_ptr<UIComponent>, Component::Count> uiComponents = 
+	class UIManager
 	{
-		std::make_unique<Background>(),
-		std::make_unique<MenuBar>(),
-		std::make_unique<GameView>(),
-		std::make_unique<PrimaryTabs>(),
-		std::make_unique<DemoLoader>(),
-		std::make_unique<CaptureMenu>(),
-		std::make_unique<ControlBar>(),
-		std::make_unique<DebugPanel>(),
+
+	public:
+		static UIManager& Get()
+		{
+			static UIManager instance;
+			return instance;
+		}
+
+		UIManager(UIManager const&) = delete;
+		void operator=(UIManager const&) = delete;
+
+		void Initialize(IDirect3DDevice9* device);
+		void ShutdownImGui();
+		bool RestartImGui();
+		void RunImGuiFrame();
+
+		bool IsInitialized() const
+		{
+			return isInitialized;
+		}
+
+		std::atomic<bool> const& NeedsRestart() const
+		{
+			return needsRestart;
+		}
+
+		WNDPROC GetOriginalGameWndProc() const
+		{
+			return originalGameWndProc;
+		}
+
+		std::unique_ptr<UIComponent> const& GetUIComponent(Component::Component component) const
+		{
+			return uiComponents[component];
+		}
+
+		std::array<std::unique_ptr<UIComponent>, Component::Count> const& GetUIComponents() const
+		{
+			return uiComponents;
+		}
+
+		void SelectTab(Tab tab)
+		{
+			selectedTab = tab;
+		}
+
+		Tab GetSelectedTab() const
+		{
+			return selectedTab;
+		}
+
+		void ToggleOverlay()
+		{
+			hideOverlay = !hideOverlay;
+		}
+
+		void ToggleImGuiDemo()
+		{
+			showImGuiDemo = !showImGuiDemo;
+		}
+
+		void ToggleDebugPanel()
+		{
+			showDebugPanel = !showDebugPanel;
+		}
+
+	private:
+		UIManager() {}
+
+		std::array<std::unique_ptr<UIComponent>, Component::Count> uiComponents =
+		{
+			std::make_unique<Background>(),
+			std::make_unique<MenuBar>(),
+			std::make_unique<GameView>(),
+			std::make_unique<PrimaryTabs>(),
+			std::make_unique<DemoLoader>(),
+			std::make_unique<CaptureMenu>(),
+			std::make_unique<ControlBar>(),
+			std::make_unique<DebugPanel>(),
+		};
+
+		Tab selectedTab = Tab::Demos;
+		bool isInitialized = false;
+
+		std::atomic<bool> hideOverlay = false;
+		std::atomic<bool> showImGuiDemo = false;
+		std::atomic<bool> showDebugPanel = false;
+
+		std::atomic<bool> needsRestart = false;
+
+		WNDPROC originalGameWndProc = nullptr;
 	};
-
-	inline Tab selectedTab = Tab::Demos;
-
-	inline std::atomic<bool> hideOverlay = false;
-	inline std::atomic<bool> showImGuiDemo = false;
-	inline std::atomic<bool> showDebugPanel = false;
-
-	inline std::atomic<bool> ejectRequested = false;
-	inline bool isInitialized = false;
-	inline std::atomic<bool> needsRestart = false;
-
-	inline WNDPROC GameWndProc = nullptr;
-
-	void Initialize(IDirect3DDevice9* device);
-	void ShutdownImGui();
-	bool RestartImGui();
 }

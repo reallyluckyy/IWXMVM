@@ -62,9 +62,9 @@ namespace IWXMVM::D3D9
 		}
 		
 		// If the device pointer did not change, it's most likely a premature call to EndScene and will crash
-		if (!UI::UIManager::isInitialized || UI::UIManager::needsRestart.load() && device != pDevice) {
+		if (!UI::UIManager::Get().IsInitialized() || UI::UIManager::Get().NeedsRestart().load() && device != pDevice) {
 			device = pDevice;
-			UI::UIManager::Initialize(pDevice);
+			UI::UIManager::Get().Initialize(pDevice);
 		}
 
 		// In the case in which the device pointer actually did not change, the UI will be reinitialized inside OnFrame
@@ -75,7 +75,7 @@ namespace IWXMVM::D3D9
 
 	HRESULT __stdcall Reset_Hook(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
 	{
-		for (const auto& component : UI::UIManager::uiComponents)
+		for (const auto& component : UI::UIManager::Get().GetUIComponents())
 		{
 			component->Release();
 		}

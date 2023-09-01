@@ -10,7 +10,11 @@ namespace IWXMVM
 		static void Initialize(GameInterface* gameInterface);
 
 		static GameInterface* GetGameInterface() { return internalGameInterface; }
+
+		static void RequestEject();
 	private:
 		static GameInterface* internalGameInterface;
+
+		static std::atomic<bool> ejectRequested;
 	};
 }

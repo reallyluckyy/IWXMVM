@@ -12,6 +12,7 @@
 namespace IWXMVM
 {
 	GameInterface* Mod::internalGameInterface = nullptr;
+	std::atomic<bool> Mod::ejectRequested = false;
 
 	HMODULE GetCurrentModule()
 	{
@@ -21,6 +22,11 @@ namespace IWXMVM
 		::VirtualQuery(&dummy, &mbi, sizeof(mbi));
 
 		return static_cast<HMODULE>(mbi.AllocationBase);
+	}
+
+	void Mod::RequestEject()
+	{
+		ejectRequested.store(true);
 	}
 
 	void Mod::Initialize(GameInterface* gameInterface)
@@ -49,13 +55,13 @@ namespace IWXMVM
 			// TODO: ...
 
 			LOG_INFO("Initialized IWXMVM!");
-
-			while (!UI::UIManager::ejectRequested.load())
+			
+			while (!ejectRequested.load())
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 			HookManager::Unhook();
 			LOG_DEBUG("Unhooked");
-			UI::UIManager::ShutdownImGui();
+			UI::UIManager::Get().ShutdownImGui();
 			LOG_DEBUG("ImGui successfully shutdown");
 
 			WindowsConsole::Close();

@@ -200,7 +200,7 @@ namespace IWXMVM::IW3::Hooks::Commands
 		if (oldFunction == nullptr)
 			return;
 
-		if (UI::UIManager::RestartImGui())
+		if (UI::UIManager::Get().RestartImGui())
 			reinterpret_cast<void(*)()>(oldFunction)();
 	}
 

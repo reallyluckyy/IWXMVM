@@ -23,7 +23,7 @@ namespace IWXMVM::UI
 			auto& camera = Components::CameraManager::Get().GetActiveCamera();
 			ImGui::Text("Camera: %f %f %f", camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 			if (ImGui::Button("Eject"))
-				UIManager::ejectRequested.store(true);
+				Mod::RequestEject();
 			ImGui::End();
 		}
 	}

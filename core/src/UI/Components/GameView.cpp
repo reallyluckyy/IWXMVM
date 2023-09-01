@@ -74,7 +74,7 @@ namespace IWXMVM::UI
     {
 		auto scaleFactor = 0.8f;
 
-		SetPosition(0, UIManager::uiComponents[UIManager::Component::MenuBar]->GetSize().y);
+		SetPosition(0, UIManager::Get().GetUIComponent(UI::Component::MenuBar)->GetSize().y);
 		SetSize(ImGui::GetIO().DisplaySize.x * scaleFactor, ImGui::GetIO().DisplaySize.y * scaleFactor);
 		LOG_DEBUG("Initializing GameView. size.x: {}; size.y: {}", GetSize().x, GetSize().y);
     }
