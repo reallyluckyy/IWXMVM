@@ -146,7 +146,7 @@ namespace IWXMVM::IW3
 			return static_cast<HMODULE>(moduleData.lpBaseOfDll);
 		}
 
-		std::span<HMODULE> GetModuleHandles() final
+		std::optional<std::span<HMODULE>> GetModuleHandles(Types::ModuleType type = Types::ModuleType::BaseModule) final
 		{
 			static std::vector<HMODULE> modules = []() {
 				if (const HMODULE moduleCoD4X = GetCoD4xModuleHandle(); moduleCoD4X != 0)
@@ -155,7 +155,17 @@ namespace IWXMVM::IW3
 					return std::vector<HMODULE>{ ::GetModuleHandle(nullptr) };
 			}();
 
-			return std::span{ modules };
+			assert(modules.size() >= 1);
+
+			if (type == Types::ModuleType::BaseModule)
+				return std::span{ &modules[0], 1};
+			else 
+			{
+				if (modules.size() > 1)
+					return std::span{ &modules[1], modules.size() - 1 };
+				else 
+					return std::nullopt;
+			}
 		}
 
 		std::optional<Types::Dvar> GetDvar(const std::string_view name) final

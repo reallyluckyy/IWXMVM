@@ -206,23 +206,13 @@ namespace IWXMVM::Signatures
         Callable _callable;
     };
 
-    template <auto intSignature, bool reverseModuleOrder = false>
+    template <auto intSignature, Types::ModuleType type = Types::ModuleType::BaseModule>
     struct Signature
     {
         constexpr Signature() 
         {
-            if constexpr (!reverseModuleOrder)
-                _address = _signature.Scan(Mod::GetGameInterface()->GetModuleHandles());
-            else 
-            {
-                const auto modules = Mod::GetGameInterface()->GetModuleHandles();
-
-                if (modules.size() > 1)
-                {
-                    std::reverse(std::begin(modules), std::end(modules));
-                    _address = _signature.Scan(modules);
-                }
-            }
+            if (const auto modules = Mod::GetGameInterface()->GetModuleHandles(type); modules.has_value())
+                _address = _signature.Scan(modules.value());
         }
 
         static constexpr auto _signature = intSignature;

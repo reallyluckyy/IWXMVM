@@ -29,8 +29,10 @@ namespace IWXMVM
 		virtual void SetMouseMode(Types::MouseMode mode) = 0;
 		virtual Types::GameState GetGameState() = 0;
 
-		virtual std::span<HMODULE> GetModuleHandles() 
+		virtual std::optional<std::span<HMODULE>> GetModuleHandles(Types::ModuleType type = Types::ModuleType::BaseModule)
 		{
+			assert(type != Types::ModuleType::SecondaryModules);
+
 			static std::vector<HMODULE> modules{ ::GetModuleHandle(nullptr) };
 			return std::span{ modules };
 		}
