@@ -108,10 +108,12 @@ namespace ImGui
 		// Tabbing or CTRL-clicking on Slider turns it into an input box
 		const bool hovered = ItemHoverable(frame_bb, id, ImGuiItemFlags_None);
 		bool temp_input_is_active = temp_input_allowed && TempInputIsActive(id);
-		if (!temp_input_is_active) {
+		if (!temp_input_is_active) 
+		{
 			const bool input_requested_by_tabbing = temp_input_allowed && (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
 			const bool clicked = (hovered && g.IO.MouseClicked[0]);
-			if (input_requested_by_tabbing || clicked || g.NavActivateId == id) {
+			if (input_requested_by_tabbing || clicked || g.NavActivateId == id) 
+			{
 				SetActiveID(id, window);
 				SetFocusID(id, window);
 				FocusWindow(window);
@@ -121,7 +123,8 @@ namespace ImGui
 			}
 		}
 
-		if (temp_input_is_active) {
+		if (temp_input_is_active) 
+		{
 			// Only clamp CTRL+Click input when ImGuiSliderFlags_AlwaysClamp is set
 			const bool is_clamp_input = (flags & ImGuiSliderFlags_AlwaysClamp) != 0;
 			return TempInputScalar(frame_bb, id, label, data_type, p_data, format, is_clamp_input ? p_min : NULL, is_clamp_input ? p_max : NULL);
@@ -135,14 +138,17 @@ namespace ImGui
 		// Slider behavior
 		ImRect grab_bb;
 		const bool value_changed = SliderBehavior(frame_bb, id, data_type, p_data, p_min, p_max, format, flags, &grab_bb);
-		if (value_changed) {
+		if (value_changed) 
+		{
 			MarkItemEdited(id);
 
 			static constexpr double rounding = 0.00000001;
 			float* ptr = static_cast<float*>(p_data);
 
-			for (std::size_t i = 1; i < timescaleSteps.size(); ++i) {
-				if (*ptr > timescaleSteps[i - 1] + rounding && *ptr < timescaleSteps[i] - rounding) {
+			for (std::size_t i = 1; i < timescaleSteps.size(); ++i) 
+			{
+				if (*ptr > timescaleSteps[i - 1] + rounding && *ptr < timescaleSteps[i] - rounding) 
+				{
 					*ptr = (float)timescaleSteps[i - 1];
 					break;
 				}

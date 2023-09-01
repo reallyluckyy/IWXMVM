@@ -206,7 +206,8 @@ namespace IWXMVM::Components
 
 	void CameraManager::UpdateCameraFrame()
 	{
-		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu) {
+		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu) 
+		{
 			return;
 		}
 		
