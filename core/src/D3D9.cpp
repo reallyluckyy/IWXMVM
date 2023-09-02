@@ -58,16 +58,12 @@ namespace IWXMVM::D3D9
 
 	HRESULT __stdcall CreateDevice_Hook(IDirect3D9* pInterface, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface)
 	{
-		LOG_DEBUG("CreateDevice called");
+		LOG_DEBUG("CreateDevice called with hwnd {}", pPresentationParameters->hDeviceWindow);
 
 		UI::UIManager::Get().ShutdownImGui();
 
-		LOG_DEBUG("hFocusWindow: {}; other: {}", (std::uintptr_t)hFocusWindow, (std::uintptr_t)pPresentationParameters->hDeviceWindow);
-
 		HRESULT hr = CreateDevice(pInterface, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 		device = *ppReturnedDeviceInterface;
-
-		LOG_DEBUG("hFocusWindow: {}; other: {}", (std::uintptr_t)hFocusWindow, (std::uintptr_t)pPresentationParameters->hDeviceWindow);
 
 		UI::UIManager::Get().Initialize(device, pPresentationParameters->hDeviceWindow);
 
