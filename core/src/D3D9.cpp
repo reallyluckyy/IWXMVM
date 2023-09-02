@@ -58,7 +58,7 @@ namespace IWXMVM::D3D9
 
 	HRESULT __stdcall CreateDevice_Hook(IDirect3D9* pInterface, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface)
 	{
-		LOG_DEBUG("CreateDevice called with hwnd {}", pPresentationParameters->hDeviceWindow);
+		LOG_DEBUG("CreateDevice called with hwnd {}", (std::uintptr_t)pPresentationParameters->hDeviceWindow);
 
 		UI::UIManager::Get().ShutdownImGui();
 
