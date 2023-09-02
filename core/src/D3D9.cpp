@@ -12,13 +12,16 @@
 namespace IWXMVM::D3D9
 {
 	HWND gameWindowHandle = nullptr;
-	void* vTable[119];
+	void* d3d9DeviceVTable[119];
+	void* d3d9VTable[17];
 	IDirect3DDevice9* device = nullptr;
 
 	typedef HRESULT(__stdcall* EndScene_t)(IDirect3DDevice9* pDevice);
 	EndScene_t EndScene;
 	typedef HRESULT(__stdcall* Reset_t)(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
 	Reset_t Reset;
+	typedef HRESULT(__stdcall* CreateDevice_t)(IDirect3D9* pInterface, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface);
+	CreateDevice_t CreateDevice;
 
 	bool CheckForOverlays(std::uintptr_t returnAddress)
 	{
@@ -44,8 +47,7 @@ namespace IWXMVM::D3D9
 					returnAddresses[i] = returnAddress;
 					return true;
 				}
-			}
-			else if (returnAddresses[i] == returnAddress)
+			} else if (returnAddresses[i] == returnAddress)
 			{
 				return true;
 			}
@@ -54,22 +56,37 @@ namespace IWXMVM::D3D9
 		return false;
 	}
 
+	HRESULT __stdcall CreateDevice_Hook(IDirect3D9* pInterface, UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface)
+	{
+		LOG_DEBUG("CreateDevice called");
+
+		UI::UIManager::Get().ShutdownImGui();
+
+		LOG_DEBUG("hFocusWindow: {}; other: {}", (std::uintptr_t)hFocusWindow, (std::uintptr_t)pPresentationParameters->hDeviceWindow);
+
+		HRESULT hr = CreateDevice(pInterface, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+		device = *ppReturnedDeviceInterface;
+
+		LOG_DEBUG("hFocusWindow: {}; other: {}", (std::uintptr_t)hFocusWindow, (std::uintptr_t)pPresentationParameters->hDeviceWindow);
+
+		UI::UIManager::Get().Initialize(device, pPresentationParameters->hDeviceWindow);
+
+		return hr;
+	}
+
 	HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
 	{
 		const std::uintptr_t returnAddress = reinterpret_cast<std::uintptr_t>(_ReturnAddress());
-		if (CheckForOverlays(returnAddress)) 
-		{
+		if (CheckForOverlays(returnAddress)) {
 			return EndScene(pDevice);
 		}
 
-		// If the device pointer did not change, it's most likely a premature call to EndScene and will crash
-		if (!UI::UIManager::Get().IsInitialized() || UI::UIManager::Get().NeedsRestart().load() && device != pDevice)
+		if (!UI::UIManager::Get().IsInitialized())
 		{
 			device = pDevice;
 			UI::UIManager::Get().Initialize(pDevice);
 		}
 
-		// In the case in which the device pointer actually did not change, the UI will be reinitialized inside OnFrame
 		Events::Invoke(EventType::OnFrame);
 
 		return EndScene(pDevice);
@@ -92,14 +109,12 @@ namespace IWXMVM::D3D9
 	void CreateDummyDevice()
 	{
 		HWND hwnd = D3D9::FindWindowHandle();
-		if (!hwnd) 
-		{
+		if (!hwnd) {
 			throw std::runtime_error("Failed to find HWND");
 		}
 
 		IDirect3D9* d3dObj = Direct3DCreate9(D3D_SDK_VERSION);
-		if (!d3dObj) 
-		{
+		if (!d3dObj) {
 			throw std::runtime_error("Failed to create D3D object");
 		}
 
@@ -121,8 +136,7 @@ namespace IWXMVM::D3D9
 		);
 
 		// Try again in case it's fullscreen
-		if (FAILED(result) || !dummyDevice) 
-		{
+		if (FAILED(result) || !dummyDevice) {
 			d3d_params.Windowed = false;
 			result = d3dObj->CreateDevice(
 				D3DADAPTER_DEFAULT,
@@ -135,13 +149,13 @@ namespace IWXMVM::D3D9
 		}
 
 		// Fail again -> death
-		if (FAILED(result) || !dummyDevice) 
-		{
+		if (FAILED(result) || !dummyDevice) {
 			d3dObj->Release();
 			throw std::runtime_error("Failed to create dummy D3D device");
 		}
 
-		memcpy(vTable, *(void**)dummyDevice, 119 * sizeof(void*));
+		memcpy(d3d9DeviceVTable, *(void**)dummyDevice, 119 * sizeof(void*));
+		memcpy(d3d9VTable, *(void**)d3dObj, 17 * sizeof(void*));
 
 		LOG_DEBUG("Created dummy D3D device");
 
@@ -152,13 +166,13 @@ namespace IWXMVM::D3D9
 	void Hook()
 	{
 		// TODO: move minhook initialization somewhere else
-		if (MH_Initialize() != MH_OK) 
-		{
+		if (MH_Initialize() != MH_OK) {
 			throw std::runtime_error("Failed to initialize MinHook");
 		}
 
-		HookManager::CreateHook((std::uintptr_t)vTable[16], (std::uintptr_t)Reset_Hook, (std::uintptr_t*)&Reset);
-		HookManager::CreateHook((std::uintptr_t)vTable[42], (std::uintptr_t)EndScene_Hook, (std::uintptr_t*)&EndScene);
+		HookManager::CreateHook((std::uintptr_t)d3d9VTable[16], (std::uintptr_t)CreateDevice_Hook, (std::uintptr_t*)&CreateDevice);
+		HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[16], (std::uintptr_t)Reset_Hook, (std::uintptr_t*)&Reset);
+		HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[42], (std::uintptr_t)EndScene_Hook, (std::uintptr_t*)&EndScene);
 	}
 
 	void Initialize()
@@ -175,8 +189,7 @@ namespace IWXMVM::D3D9
 
 		// It's possible the console window will be found instead of the game one
 		// So we need to check against GetConsoleWindow()
-		if (lpdwPID == lParam && hwnd != GetConsoleWindow()) 
-		{
+		if (lpdwPID == lParam && hwnd != GetConsoleWindow()) {
 			gameWindowHandle = hwnd;
 			return FALSE;
 		}
@@ -186,8 +199,7 @@ namespace IWXMVM::D3D9
 
 	HWND FindWindowHandle()
 	{
-		if (EnumWindows(CheckWindowPID, (LPARAM)GetCurrentProcessId())) 
-		{
+		if (EnumWindows(CheckWindowPID, (LPARAM)GetCurrentProcessId())) {
 			LOG_CRITICAL("Failed to find the game window");
 			return nullptr;
 		}

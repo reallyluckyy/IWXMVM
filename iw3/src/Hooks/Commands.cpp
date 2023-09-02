@@ -195,18 +195,7 @@ namespace IWXMVM::IW3::Hooks::Commands
 		//Events::Invoke(EventType::OnDemoLoad); 
 	}
 
-	void CL_Vid_Restart_Hook()
-	{
-		auto* oldFunction = FindOriginalFunction(CL_Vid_Restart_Hook);
-		if (oldFunction == nullptr)
-			return;
-
-		if (UI::UIManager::Get().RestartImGui())
-			reinterpret_cast<void(*)()>(oldFunction)();
-	}
-
 	std::vector<FunctionStorage> CmdHooks{
-		{ "vid_restart",	FunctionStorage::CommandType::ServerCommand,	CL_Vid_Restart_Hook },
 		{ "demo",		FunctionStorage::CommandType::ServerCommand,	CL_PlayDemo_Hook },
 		{ "replayDemo",		FunctionStorage::CommandType::Command,		CL_ReplayDemo_Hook }
 	};

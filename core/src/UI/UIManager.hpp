@@ -46,19 +46,13 @@ namespace IWXMVM::UI
 		UIManager(UIManager const&) = delete;
 		void operator=(UIManager const&) = delete;
 
-		void Initialize(IDirect3DDevice9* device);
+		void Initialize(IDirect3DDevice9* device, HWND hwnd = nullptr);
 		void ShutdownImGui();
-		bool RestartImGui();
 		void RunImGuiFrame();
 
 		bool IsInitialized() const
 		{
 			return isInitialized;
-		}
-
-		std::atomic<bool> const& NeedsRestart() const
-		{
-			return needsRestart;
 		}
 
 		WNDPROC GetOriginalGameWndProc() const
@@ -122,8 +116,6 @@ namespace IWXMVM::UI
 		bool hideOverlay = false;
 		bool showImGuiDemo = false;
 		bool showDebugPanel = false;
-
-		std::atomic<bool> needsRestart = false;
 
 		WNDPROC originalGameWndProc = nullptr;
 	};
