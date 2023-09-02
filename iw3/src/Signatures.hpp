@@ -17,6 +17,11 @@ namespace IWXMVM::IW3::Signatures
 
 	inline auto DereferenceAddress = [](std::uintptr_t address)
 	{
+		return *reinterpret_cast<std::uintptr_t*>(address);
+	};
+
+	inline auto DereferenceCallOffset = [](std::uintptr_t address)
+	{
 		return *reinterpret_cast<std::uintptr_t*>(address + 1) + 5;
 	};
 
@@ -25,7 +30,7 @@ namespace IWXMVM::IW3::Signatures
 		const std::uintptr_t orgAddress = address;
 
 		while (IsAbsoluteJumpOrCall(address))
-			address += DereferenceAddress(address);
+			address += DereferenceCallOffset(address);
 
 		return (address == orgAddress) ? 0 : address;
 	};
@@ -51,7 +56,13 @@ namespace IWXMVM::IW3::Signatures
 		Sig("83 EC ?? D9 46 ?? D9 1D ?? ?? ?? ?? D9 46 ?? D9 1D",											GAType::Code, -6)> FX_SetupCamera;
 		Sig("8B F8 6A 00 57 E8 ?? ?? ?? ?? D9 46 ?? D9 9F",													GAType::Code, -7)> R_SetViewParmsForScene;
 		Sig("8B C6 59 C3 56 E8 ?? ?? ?? ?? 83 C4 04 ?? ?? ?? ?? ?? CC",										GAType::Code, 13)> SV_Frame;
-
+		Sig("BA ?? ?? ?? ?? E8 ?? ?? ?? ?? 80 3D",															GAType::Data, 1, DereferenceAddress)> clientConnection;
+		Sig("68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 68 ?? ?? ?? ?? C1 E6 04",								GAType::Data, 1, DereferenceAddress)> clientStatic;
+		Sig("05 ?? ?? ?? ?? B9 01 00 00 00 01 88 B8 56 02 00", 												GAType::Data, 1, DereferenceAddress)> clientActive;
+		Sig("68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 68 F0 E7 0F 00",										GAType::Data, 1, DereferenceAddress) > clientGlobalsStatic;
+		Sig("BA ?? ?? ?? ?? E8 ?? ?? ?? ?? D9 03", 															GAType::Data, 1, DereferenceAddress)> clientGlobals;
+		Sig("89 1D ?? ?? ?? ?? 5E 5F", 																		GAType::Data, 2, DereferenceAddress)> mouseVars;
+		
 		// cod4x
 		using MType = Types::ModuleType;
 		Sig("00 00 E8 ?? ?? ?? ?? 29 C4 C7 04 24 01 00 00 00 E8",											GAType::Code, -7), MType::SecondaryModules> CL_SystemInfoChangedCoD4X;

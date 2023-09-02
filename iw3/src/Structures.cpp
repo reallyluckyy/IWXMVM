@@ -1,38 +1,40 @@
 #include "StdInclude.hpp"
 #include "Structures.hpp"
 
+#include "Addresses.hpp"
+
 // TODO: We might have to split this up into several files
 
 namespace IWXMVM::IW3::Structures
 {
 	clientConnection_t* GetClientConnection()
 	{
-		return (clientConnection_t*)0x8F4CE0;
+		return (clientConnection_t*)IW3::GetGameAddresses().clientConnection();
 	}
 
 	clientStatic_t* GetClientStatic()
 	{
-		return (clientStatic_t*)0x956D80;
+		return (clientStatic_t*)IW3::GetGameAddresses().clientStatic();
 	}
 
 	clientActive_t* GetClientActive()
 	{
-		return (clientActive_t*)0xC5F930;
+		return (clientActive_t*)IW3::GetGameAddresses().clientActive();
 	}
 
 	cgs_t* GetClientGlobalsStatic()
 	{
-		return (cgs_t*)0x74A908;
+		return (cgs_t*)IW3::GetGameAddresses().clientGlobalsStatic();
 	}
 
 	cg_s* GetClientGlobals()
 	{
-		return (cg_s*)0x74E338;
+		return (cg_s*)IW3::GetGameAddresses().clientGlobals();
 	}
 
 	WinMouseVars_t* GetMouseVars()
 	{
-		return (WinMouseVars_t*)0xCC147C4;
+		return (WinMouseVars_t*)IW3::GetGameAddresses().mouseVars();
 	}
 
 	dvar_s* FindDvar(const std::string_view name)
