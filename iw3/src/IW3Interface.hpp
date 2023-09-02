@@ -158,11 +158,11 @@ namespace IWXMVM::IW3
 			assert(modules.size() >= 1);
 
 			if (type == Types::ModuleType::BaseModule)
-				return std::span{ &modules[0], 1};
+				return std::span{ modules.begin(), modules.begin() + 1 };
 			else 
 			{
 				if (modules.size() > 1)
-					return std::span{ &modules[1], modules.size() - 1 };
+					return std::span{ modules.begin() + 1, modules.end() };
 				else 
 					return std::nullopt;
 			}
