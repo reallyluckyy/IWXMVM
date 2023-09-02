@@ -4,6 +4,40 @@
 
 namespace IWXMVM::Signatures
 {
+    namespace Lambdas
+    {
+        inline auto IsAbsoluteJumpOrCall = [](std::uintptr_t address)
+        {
+            static constexpr std::uint8_t JUMP_OPCODE = 0xE9;
+            static constexpr std::uint8_t CALL_OPCODE = 0xE8;
+
+            if (*reinterpret_cast<std::uint8_t*>(address) == JUMP_OPCODE || *reinterpret_cast<std::uint8_t*>(address) == CALL_OPCODE)
+                return true;
+            else
+                return false;
+        };
+
+        inline auto DereferenceAddress = [](std::uintptr_t address)
+        {
+            return *reinterpret_cast<std::uintptr_t*>(address);
+        };
+
+        inline auto DereferenceCallOffset = [](std::uintptr_t address)
+        {
+            return *reinterpret_cast<std::uintptr_t*>(address + 1) + 5;
+        };
+
+        inline auto FollowCodeFlow = [](std::uintptr_t address)
+        {
+            const std::uintptr_t orgAddress = address;
+
+            while (IsAbsoluteJumpOrCall(address))
+                address += DereferenceCallOffset(address);
+
+            return (address == orgAddress) ? 0 : address;
+        };
+    }
+
     inline constexpr std::uint16_t maskValue = UINT8_MAX + 1;
 
     enum struct GameAddressType : std::uint8_t
