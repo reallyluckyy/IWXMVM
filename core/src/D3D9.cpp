@@ -60,9 +60,14 @@ namespace IWXMVM::D3D9
 	{
 		LOG_DEBUG("CreateDevice called with hwnd {}", (std::uintptr_t)pPresentationParameters->hDeviceWindow);
 
+		HRESULT hr = CreateDevice(pInterface, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
+		if (hr != D3D_OK)
+		{
+			return hr;
+		}
+
 		UI::UIManager::Get().ShutdownImGui();
 
-		HRESULT hr = CreateDevice(pInterface, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 		device = *ppReturnedDeviceInterface;
 
 		UI::UIManager::Get().Initialize(device, pPresentationParameters->hDeviceWindow);
