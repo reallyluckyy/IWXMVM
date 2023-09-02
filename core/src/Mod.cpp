@@ -4,6 +4,7 @@
 #include "GameInterface.hpp"
 #include "Version.hpp"
 #include "WindowsConsole.hpp"
+#include "Input.hpp"
 #include "Utilities/HookManager.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Utilities/MemoryUtils.hpp"

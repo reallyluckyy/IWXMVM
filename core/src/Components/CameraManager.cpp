@@ -43,10 +43,10 @@ namespace IWXMVM::Components
 	{
 		//if (!Input::GetFocusedWindow() == GameView)
 		//	return;
-	
+
 		auto& activeCamera = GetActiveCamera();
 		auto& cameraPosition = activeCamera.GetPosition();
-	
+
 		// TODO: make this configurable
 		constexpr float FREECAM_SPEED = 300;
 		constexpr float MOUSE_SPEED = 0.1f;
@@ -63,22 +63,22 @@ namespace IWXMVM::Components
 		const auto cameraMovementSpeed = cameraBaseSpeed * speedModifier;
 		const auto cameraHeightSpeed = cameraMovementSpeed;
 
-		if (Input::KeyHeld(ImGuiKey_W))
+		if (Input::BindHeld("freeCameraForward"))
 		{
 			cameraPosition += activeCamera.GetForwardVector() * cameraMovementSpeed;
 		}
-	
-		if (Input::KeyHeld(ImGuiKey_S))
+
+		if (Input::BindHeld("freeCameraBackward"))
 		{
 			cameraPosition -= activeCamera.GetForwardVector() * cameraMovementSpeed;
 		}
-	
-		if (Input::KeyHeld(ImGuiKey_A))
+
+		if (Input::BindHeld("freeCameraLeft"))
 		{
 			cameraPosition += activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
-	
-		if (Input::KeyHeld(ImGuiKey_D))
+
+		if (Input::BindHeld("freeCameraRight"))
 		{
 			cameraPosition -= activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
@@ -103,21 +103,21 @@ namespace IWXMVM::Components
 			}
 		}
 
-		if (Input::MouseButtonHeld(ImGuiMouseButton_Middle)) 
+		if (Input::BindHeld("freeCameraReset"))
 		{
 			activeCamera.GetRotation() = {};
 			activeCamera.GetFov() = 90.0f;
 		}
-	
+
 		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
 		activeCamera.GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
 
 		activeCamera.GetRotation()[0] = glm::clamp(activeCamera.GetRotation()[0], -89.9f, 89.9f);
-	
-		if (Input::KeyHeld(ImGuiKey_E))
+
+		if (Input::BindHeld("freeCameraUp"))
 			cameraPosition[2] += cameraHeightSpeed;
-	
-		if (Input::KeyHeld(ImGuiKey_Q))
+
+		if (Input::BindHeld("freeCameraDown"))
 			cameraPosition[2] -= cameraHeightSpeed;
 	}
 
@@ -125,7 +125,7 @@ namespace IWXMVM::Components
 	{
 		auto& activeCamera = GetActiveCamera();
 		auto& cameraPosition = activeCamera.GetPosition();
-	
+
 		constexpr float BASE_SPEED = 0.1f;
 		constexpr float ROTATION_SPEED = BASE_SPEED * 1.5f;
 		constexpr float TRANSLATION_SPEED = BASE_SPEED * 3.0f;
@@ -146,7 +146,7 @@ namespace IWXMVM::Components
 			cameraPosition = orbitCameraOrigin + glm::vector3::one;
 		}
 
-		if (Input::KeyDown(ImGuiKey_F4))
+		if (Input::BindHeld("orbitCameraReset"))
 		{
 			scrollDelta = 0.0;
 
@@ -154,20 +154,20 @@ namespace IWXMVM::Components
 			cameraPosition = glm::vector3::one;
 		}
 
-		if (Input::MouseButtonHeld(ImGuiMouseButton_Middle))
+		if (Input::BindHeld("orbitCameraRotate"))
 		{
 			auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
 			cameraPosition -= orbitCameraOrigin;
 			cameraPosition = glm::rotateZ(cameraPosition, glm::radians(horizontalDelta));
 			cameraPosition += orbitCameraOrigin;
-			
+
 			auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
 			cameraPosition -= orbitCameraOrigin;
 			cameraPosition = glm::rotate(cameraPosition, glm::radians(verticalDelta), glm::cross(glm::vector3::up, activeCamera.GetForwardVector()));
 			cameraPosition += orbitCameraOrigin;
 		}
 
-		if (Input::MouseButtonHeld(ImGuiMouseButton_Right))
+		if (Input::BindHeld("orbitCameraMove"))
 		{
 			// use the height value to move faster around at higher altitude 
 			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING) * TRANSLATION_SPEED;
@@ -184,7 +184,7 @@ namespace IWXMVM::Components
 		}
 
 		activeCamera.SetForwardVector(orbitCameraOrigin - cameraPosition);
-		
+
 		if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
 		{
 			auto desiredPosition = cameraPosition + glm::normalize(cameraPosition - orbitCameraOrigin) * ((1.0f - SMOOTHING_FACTOR) * scrollDelta) * 100;
@@ -192,13 +192,13 @@ namespace IWXMVM::Components
 			{
 				cameraPosition = desiredPosition;
 			}
-			else 
+			else
 			{
 				cameraPosition = orbitCameraOrigin + glm::normalize(cameraPosition - orbitCameraOrigin) * MIN_ORBIT_DIST;
 			}
 			scrollDelta *= SMOOTHING_FACTOR;
-		} 
-		else if (scrollDelta != 0.0) 
+		}
+		else if (scrollDelta != 0.0)
 		{
 			scrollDelta = 0.0;
 		}
@@ -206,11 +206,11 @@ namespace IWXMVM::Components
 
 	void CameraManager::UpdateCameraFrame()
 	{
-		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu) 
+		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu)
 		{
 			return;
 		}
-		
+
 		auto& activeCamera = GetActiveCamera();
 		if (activeCamera.GetMode() == Camera::Mode::Free)
 		{
