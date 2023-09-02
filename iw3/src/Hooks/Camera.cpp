@@ -12,7 +12,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 
 	void R_SetViewParmsForScene() 
 	{
-		auto& camera = Mod::GetCameraManager()->GetActiveCamera();
+		auto& camera = Components::CameraManager::Get().GetActiveCamera();
 
 		if (!camera.IsModControlledCameraMode())
 		{
@@ -43,7 +43,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 
 	void AnglesToAxis(float* angles) 
 	{
-		auto& camera = Mod::GetCameraManager()->GetActiveCamera();
+		auto& camera = Components::CameraManager::Get().GetActiveCamera();
 
 		if (!camera.IsModControlledCameraMode())
 			return;
@@ -69,7 +69,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 
 	void FX_SetupCamera() 
 	{
-		auto& camera = Mod::GetCameraManager()->GetActiveCamera();
+		auto& camera = Components::CameraManager::Get().GetActiveCamera();
 
 		if (!camera.IsModControlledCameraMode())
 			return;
@@ -101,7 +101,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 		__asm pushad
 
 		{
-			if (Mod::GetCameraManager()->GetActiveCamera().IsModControlledCameraMode())
+			if (Components::CameraManager::Get().GetActiveCamera().IsModControlledCameraMode())
 				tempEDI = dummyViewAxis;
 		}
 
@@ -132,7 +132,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 
 	void OnCameraChanged()
 	{
-		auto& camera = Mod::GetCameraManager()->GetActiveCamera();
+		auto& camera = Components::CameraManager::Get().GetActiveCamera();
 		auto isFreeCamera = camera.IsModControlledCameraMode();
 
 		Structures::FindDvar("cg_thirdperson")->current.enabled = (isFreeCamera) ? 1 : 0;

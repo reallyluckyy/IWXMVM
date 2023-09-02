@@ -34,7 +34,7 @@ namespace IWXMVM::UI
 
 		SetPosition(
 			0,
-			UIManager::uiComponents[UIManager::Component::MenuBar]->GetSize().y + UIManager::uiComponents[UIManager::Component::GameView]->GetSize().y
+			UIManager::Get().GetUIComponent(UI::Component::MenuBar)->GetSize().y + UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().y
 		);
 		SetSize(
 			ImGui::GetIO().DisplaySize.x,

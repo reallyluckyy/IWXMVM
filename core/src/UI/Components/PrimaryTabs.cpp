@@ -16,28 +16,28 @@ namespace IWXMVM::UI
 	{
 		ImGui::SetNextWindowPos(
 			ImVec2(
-				UIManager::uiComponents[UIManager::Component::GameView]->GetSize().x,
-				UIManager::uiComponents[UIManager::Component::PrimaryTabs]->GetPosition().y + UIManager::uiComponents[UIManager::Component::PrimaryTabs]->GetSize().y
+				UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().x,
+				UIManager::Get().GetUIComponent(UI::Component::PrimaryTabs)->GetPosition().y + UIManager::Get().GetUIComponent(UI::Component::PrimaryTabs)->GetSize().y
 			)
 		);
 		ImGui::SetNextWindowSize(
 			ImVec2(
 				ImGui::GetIO().DisplaySize.x - GetPosition().x,
-				UIManager::uiComponents[UIManager::Component::GameView]->GetSize().y - UIManager::uiComponents[UIManager::Component::PrimaryTabs]->GetSize().y
+				UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().y - UIManager::Get().GetUIComponent(UI::Component::PrimaryTabs)->GetSize().y
 			)
 		);
 
-		switch (UIManager::selectedTab)
+		switch (UIManager::Get().GetSelectedTab())
 		{
 			case Tab::Demos:
-				UIManager::uiComponents[UIManager::Component::DemoLoader]->Render();
+				UIManager::Get().GetUIComponent(UI::Component::DemoLoader)->Render();
 				break;
 			case Tab::Visuals:
 				break;
 			case Tab::Camera:
 				break;
 			case Tab::Record:
-				UIManager::uiComponents[UIManager::Component::CaptureMenu]->Render();
+				UIManager::Get().GetUIComponent(UI::Component::CaptureMenu)->Render();
 				break;
 
 		}
@@ -51,13 +51,13 @@ namespace IWXMVM::UI
 			text = text.find("  ") != std::string::npos ? text.substr(0, text.find(" ")) : text;
 		}
 
-		if (UIManager::selectedTab == tab)
+		if (UIManager::Get().GetSelectedTab() == tab)
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
 			if (ImGui::Button(text.c_str(), size))
 			{
-				UIManager::selectedTab = tab;
+				UIManager::Get().SelectTab(tab);
 			}
 
 			ImGui::PopStyleColor();
@@ -66,7 +66,7 @@ namespace IWXMVM::UI
 		{
 			if (ImGui::Button(text.c_str(), size))
 			{
-				UIManager::selectedTab = tab;
+				UIManager::Get().SelectTab(tab);
 			}
 		}
 	}
@@ -74,8 +74,8 @@ namespace IWXMVM::UI
 	void PrimaryTabs::Render()
 	{
 		SetPosition(
-			UIManager::uiComponents[UIManager::Component::GameView]->GetSize().x,
-			UIManager::uiComponents[UIManager::Component::MenuBar]->GetSize().y
+			UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().x,
+			UIManager::Get().GetUIComponent(UI::Component::MenuBar)->GetSize().y
 		);
 		SetSize(
 			ImGui::GetIO().DisplaySize.x - GetPosition().x,
