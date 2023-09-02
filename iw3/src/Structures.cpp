@@ -15,14 +15,19 @@ namespace IWXMVM::IW3::Structures
 		return (clientStatic_t*)0x956D80;
 	}
 
-	refdef_t* GetRefDef()
-	{
-		return (refdef_t*)0x797600;
-	}
-
 	clientActive_t* GetClientActive()
 	{
 		return (clientActive_t*)0xC5F930;
+	}
+
+	cgs_t* GetClientGlobalsStatic()
+	{
+		return (cgs_t*)0x74A908;
+	}
+
+	cg_s* GetClientGlobals()
+	{
+		return (cg_s*)0x74E338;
 	}
 
 	WinMouseVars_t* GetMouseVars()

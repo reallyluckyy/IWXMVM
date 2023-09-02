@@ -90,6 +90,12 @@ namespace IWXMVM::IW3::Structures
 		int quit;
 		int hunkUsersStarted;
 		char servername[256];
+		int rendererStarted;
+		int soundStarted;
+		int uiStarted;
+		int frametime;
+		int realtime;
+		int realFrametime;
 		// ...
 	};
 
@@ -206,84 +212,12 @@ namespace IWXMVM::IW3::Structures
 		int icon;
 	};
 
-	enum he_type_t
-	{
-		HE_TYPE_FREE = 0x0,
-		HE_TYPE_TEXT = 0x1,
-		HE_TYPE_VALUE = 0x2,
-		HE_TYPE_PLAYERNAME = 0x3,
-		HE_TYPE_MAPNAME = 0x4,
-		HE_TYPE_GAMETYPE = 0x5,
-		HE_TYPE_MATERIAL = 0x6,
-		HE_TYPE_TIMER_DOWN = 0x7,
-		HE_TYPE_TIMER_UP = 0x8,
-		HE_TYPE_TENTHS_TIMER_DOWN = 0x9,
-		HE_TYPE_TENTHS_TIMER_UP = 0xA,
-		HE_TYPE_CLOCK_DOWN = 0xB,
-		HE_TYPE_CLOCK_UP = 0xC,
-		HE_TYPE_WAYPOINT = 0xD,
-		HE_TYPE_COUNT = 0xE,
-	};
-
-	struct $C96EA5EC2ACBB9C0BF22693F316ACC67
-	{
-		char r;
-		char g;
-		char b;
-		char a;
-	};
-
-	union hudelem_color_t
-	{
-		$C96EA5EC2ACBB9C0BF22693F316ACC67 s0;
-		int rgba;
-	};
-
 	struct hudelem_s
 	{
-		he_type_t type;
-		float x;
-		float y;
-		float z;
-		int targetEntNum;
-		float fontScale;
-		int font;
-		int alignOrg;
-		int alignScreen;
-		hudelem_color_t color;
-		hudelem_color_t fromColor;
-		int fadeStartTime;
-		int fadeTime;
-		int label;
-		int width;
-		int height;
-		int materialIndex;
-		int offscreenMaterialIdx;
-		int fromWidth;
-		int fromHeight;
-		int scaleStartTime;
-		int scaleTime;
-		float fromX;
-		float fromY;
-		int fromAlignOrg;
-		int fromAlignScreen;
-		int moveStartTime;
-		int moveTime;
-		int time;
-		int duration;
-		float value;
-		int text;
-		float sort;
-		hudelem_color_t glowColor;
-		int fxBirthTime;
-		int fxLetterTime;
-		int fxDecayStartTime;
-		int fxDecayDuration;
-		int soundID;
-		int flags;
+		std::byte content[0xA0];
 	};
 
-	struct $15067B6A14D88D7E1E730369692C3A81
+	struct hudelements_s
 	{
 		hudelem_s current[31];
 		hudelem_s archival[31];
@@ -403,19 +337,22 @@ namespace IWXMVM::IW3::Structures
 		char weaponmodels[128];
 		int deltaTime;
 		int killCamEntity;
-		$15067B6A14D88D7E1E730369692C3A81 hud;
+		hudelements_s hud;
 	};
 
-	struct refdef_t
+	struct refdef_s
 	{
-		int ScreenX; //0x0000
-		int ScreenY; //0x0004
-		int ScreenWidth; //0x0008
-		int ScreenHeight; //0x000C
-		float FOV[2]; //0x0010
-		float Origin[3]; //0x0018
-		float ViewAxis[3]; //0x0024
-		float ViewOffset[3]; //0x0048
+		unsigned int x;
+		unsigned int y;
+		unsigned int width;
+		unsigned int height;
+		float tanHalfFovX;
+		float tanHalfFovY;
+		float vieworg[3];
+		float viewaxis[3][3];
+		float viewOffset[3];
+		int time;
+		// ...
 	};
 
 	struct clSnapshot_t
@@ -435,6 +372,310 @@ namespace IWXMVM::IW3::Structures
 		int serverCommandNum;
 	};
 
+	struct gameState_t
+	{
+		int stringOffsets[2442];
+		char stringData[131072];
+		int dataCount;
+	};
+
+	enum StanceState
+	{
+		CL_STANCE_STAND = 0x0,
+		CL_STANCE_CROUCH = 0x1,
+		CL_STANCE_PRONE = 0x2,
+	};
+
+	struct __declspec(align(2)) usercmd_s
+	{
+		int serverTime;
+		int buttons;
+		int angles[3];
+		char weapon;
+		char offHandIndex;
+		char forwardmove;
+		char rightmove;
+		float meleeChargeYaw;
+		char meleeChargeDist;
+		char selectedLocation[2];
+	};
+
+	struct ClientArchiveData
+	{
+		int serverTime;
+		float origin[3];
+		float velocity[3];
+		int bobCycle;
+		int movementDir;
+		float viewangles[3];
+	};
+
+	struct outPacket_t
+	{
+		int p_cmdNumber;
+		int p_serverTime;
+		int p_realtime;
+	};
+
+	enum entityType_t
+	{
+		ET_GENERAL = 0x0,
+		ET_PLAYER = 0x1,
+		ET_PLAYER_CORPSE = 0x2,
+		ET_ITEM = 0x3,
+		ET_MISSILE = 0x4,
+		ET_INVISIBLE = 0x5,
+		ET_SCRIPTMOVER = 0x6,
+		ET_SOUND_BLEND = 0x7,
+		ET_FX = 0x8,
+		ET_LOOP_FX = 0x9,
+		ET_PRIMARY_LIGHT = 0xA,
+		ET_MG42 = 0xB,
+		ET_HELICOPTER = 0xC,
+		ET_PLANE = 0xD,
+		ET_VEHICLE = 0xE,
+		ET_VEHICLE_COLLMAP = 0xF,
+		ET_VEHICLE_CORPSE = 0x10,
+		ET_EVENTS = 0x11,
+	};
+
+	/* 255 */
+	enum trType_t
+	{
+		TR_STATIONARY = 0x0,
+		TR_INTERPOLATE = 0x1,
+		TR_LINEAR = 0x2,
+		TR_LINEAR_STOP = 0x3,
+		TR_SINE = 0x4,
+		TR_GRAVITY = 0x5,
+		TR_ACCELERATE = 0x6,
+		TR_DECELERATE = 0x7,
+		TR_PHYSICS = 0x8,
+		TR_FIRST_RAGDOLL = 0x9,
+		TR_RAGDOLL = 0x9,
+		TR_RAGDOLL_GRAVITY = 0xA,
+		TR_RAGDOLL_INTERPOLATE = 0xB,
+		TR_LAST_RAGDOLL = 0xB,
+	};
+
+	/* 723 */
+	struct trajectory_t
+	{
+		trType_t trType;
+		int trTime;
+		int trDuration;
+		float trBase[3];
+		float trDelta[3];
+	};
+
+	/* 1003 */
+	struct LerpEntityStateTurret
+	{
+		float gunAngles[3];
+	};
+
+	/* 1001 */
+	struct LerpEntityStateLoopFx
+	{
+		float cullDist;
+		int period;
+	};
+
+	/* 1009 */
+	struct LerpEntityStatePrimaryLight
+	{
+		char colorAndExp[4];
+		float intensity;
+		float radius;
+		float cosHalfFovOuter;
+		float cosHalfFovInner;
+	};
+
+	/* 931 */
+	struct LerpEntityStatePlayer
+	{
+		float leanf;
+		int movementDir;
+	};
+
+	/* 926 */
+	struct LerpEntityStateVehicle
+	{
+		float bodyPitch;
+		float bodyRoll;
+		float steerYaw;
+		int materialTime;
+		float gunPitch;
+		float gunYaw;
+		int teamAndOwnerIndex;
+	};
+
+	/* 1011 */
+	struct LerpEntityStateMissile
+	{
+		int launchTime;
+	};
+
+	/* 1012 */
+	struct LerpEntityStateSoundBlend
+	{
+		float lerp;
+	};
+
+	/* 1008 */
+	struct LerpEntityStateBulletHit
+	{
+		float start[3];
+	};
+
+	/* 924 */
+	struct LerpEntityStateEarthquake
+	{
+		float scale;
+		float radius;
+		int duration;
+	};
+
+	/* 1002 */
+	struct LerpEntityStateCustomExplode
+	{
+		int startTime;
+	};
+
+	/* 1007 */
+	struct LerpEntityStateExplosion
+	{
+		float innerRadius;
+		float magnitude;
+	};
+
+	/* 1019 */
+	struct LerpEntityStateExplosionJolt
+	{
+		float innerRadius;
+		float impulse[3];
+	};
+
+	/* 929 */
+	struct LerpEntityStatePhysicsJitter
+	{
+		float innerRadius;
+		float minDisplacement;
+		float maxDisplacement;
+	};
+
+	/* 1004 */
+	struct LerpEntityStateAnonymous
+	{
+		int data[7];
+	};
+
+	/* 1133 */
+	union LerpEntityStateTypeUnion
+	{
+		LerpEntityStateTurret turret;
+		LerpEntityStateLoopFx loopFx;
+		LerpEntityStatePrimaryLight primaryLight;
+		LerpEntityStatePlayer player;
+		LerpEntityStateVehicle vehicle;
+		LerpEntityStateMissile missile;
+		LerpEntityStateSoundBlend soundBlend;
+		LerpEntityStateBulletHit bulletHit;
+		LerpEntityStateEarthquake earthquake;
+		LerpEntityStateCustomExplode customExplode;
+		LerpEntityStateExplosion explosion;
+		LerpEntityStateExplosionJolt explosionJolt;
+		LerpEntityStatePhysicsJitter physicsJitter;
+		LerpEntityStateAnonymous anonymous;
+	};
+
+	/* 1140 */
+	struct LerpEntityState
+	{
+		int eFlags;
+		trajectory_t pos;
+		trajectory_t apos;
+		LerpEntityStateTypeUnion u;
+	};
+
+	union $C889CF518587CB2833BFE41358FA5E4A
+	{
+		int brushmodel;
+		int item;
+		int xmodel;
+		int primaryLight;
+	};
+
+	union $0AC61FC53F35A99FE97BBC85FAE448D4
+	{
+		int scale;
+		int eventParm2;
+		int helicopterStage;
+	};
+
+	/* 1143 */
+	union $F73F8AB0498479EECE844017F4CFA302
+	{
+		int hintString;
+		int vehicleXModel;
+	};
+
+	struct entityState_s
+	{
+		int number;
+		entityType_t eType;
+		LerpEntityState lerp;
+		int time2;
+		int otherEntityNum;
+		int attackerEntityNum;
+		int groundEntityNum;
+		int loopSound;
+		int surfType;
+		$C889CF518587CB2833BFE41358FA5E4A index;
+		int clientNum;
+		int iHeadIcon;
+		int iHeadIconTeam;
+		int solid;
+		unsigned int eventParm;
+		int eventSequence;
+		int events[4];
+		int eventParms[4];
+		int weapon;
+		int weaponModel;
+		int legsAnim;
+		int torsoAnim;
+		$0AC61FC53F35A99FE97BBC85FAE448D4 un1;
+		$F73F8AB0498479EECE844017F4CFA302 un2;
+		float fTorsoPitch;
+		float fWaistPitch;
+		unsigned int partBits[4];
+	};
+
+	enum team_t
+	{
+		TEAM_FREE = 0x0,
+		TEAM_AXIS = 0x1,
+		TEAM_ALLIES = 0x2,
+		TEAM_SPECTATOR = 0x3,
+		TEAM_NUM_TEAMS = 0x4,
+	};
+
+	struct clientState_s
+	{
+		int clientIndex;
+		team_t team;
+		int modelindex;
+		int attachModelIndex[6];
+		int attachTagIndex[6];
+		char name[16];
+		float maxSprintTimeMultiplier;
+		int rank;
+		int prestige;
+		int perks;
+		int attachedVehEntNum;
+		int attachedVehSlotIndex;
+	};
+
 	struct clientActive_t
 	{
 		bool usingAds;
@@ -448,6 +689,140 @@ namespace IWXMVM::IW3::Structures
 		int oldSnapServerTime;
 		int extrapolatedSnapshot;
 		int newSnapshots;
+		gameState_t gameState;
+		char mapname[64];
+		int parseEntitiesNum;
+		int parseClientsNum;
+		int mouseDx[2];
+		int mouseDy[2];
+		int mouseIndex;
+		bool stanceHeld;
+		StanceState stance;
+		StanceState stancePosition;
+		int stanceTime;
+		int cgameUserCmdWeapon;
+		int cgameUserCmdOffHandIndex;
+		float cgameFOVSensitivityScale;
+		float cgameMaxPitchSpeed;
+		float cgameMaxYawSpeed;
+		float cgameKickAngles[3];
+		float cgameOrigin[3];
+		float cgameVelocity[3];
+		float cgameViewangles[3];
+		int cgameBobCycle;
+		int cgameMovementDir;
+		int cgameExtraButtons;
+		int cgamePredictedDataServerTime;
+		float viewangles[3];
+		int serverId;
+		int skelTimeStamp;
+		volatile int skelMemPos;
+		char skelMemory[262144];
+		char* skelMemoryStart;
+		bool allowedAllocSkel;
+		__declspec(align(4)) usercmd_s cmds[128];
+		int cmdNumber;
+		ClientArchiveData clientArchive[256];
+		int clientArchiveIndex;
+		outPacket_t outPackets[32];
+		clSnapshot_t snapshots[32];
+		entityState_s entityBaselines[1024];
+		entityState_s parseEntities[2048];
+		clientState_s parseClients[2048];
+		int corruptedTranslationFile;
+		char translationVersion[256];
+		float vehicleViewYaw;
+		float vehicleViewPitch;
+	};
+
+	struct cgs_t
+	{
+		int viewX;
+		int viewY;
+		int viewWidth;
+		int viewHeight;
+		float viewAspect;
+		int serverCommandSequence;
+		int processedSnapshotNum;
+	};
+
+	enum DemoType
+	{
+		DEMO_TYPE_NONE = 0x0,
+		DEMO_TYPE_CLIENT = 0x1,
+		DEMO_TYPE_SERVER = 0x2,
+	};
+
+	enum CubemapShot
+	{
+		CUBEMAPSHOT_NONE = 0x0,
+		CUBEMAPSHOT_RIGHT = 0x1,
+		CUBEMAPSHOT_LEFT = 0x2,
+		CUBEMAPSHOT_BACK = 0x3,
+		CUBEMAPSHOT_FRONT = 0x4,
+		CUBEMAPSHOT_UP = 0x5,
+		CUBEMAPSHOT_DOWN = 0x6,
+		CUBEMAPSHOT_COUNT = 0x7,
+	};
+
+	struct snapshot_s
+	{
+		int snapFlags;
+		int ping;
+		int serverTime;
+		playerState_s ps;
+		int numEntities;
+		int numClients;
+		entityState_s entities[512];
+		clientState_s clients[64];
+		int serverCommandSequence;
+	};
+
+	struct playerEntity_t
+	{
+		float fLastWeaponPosFrac;
+		int bPositionToADS;
+		float vPositionLastOrg[3];
+		float fLastIdleFactor;
+		float vLastMoveOrg[3];
+		float vLastMoveAng[3];
+	};
+
+	struct centity_s
+	{
+		std::byte content[0x1DC];
+	};
+
+	struct cg_s
+	{
+		int clientNum;
+		int localClientNum;
+		DemoType demoType;
+		CubemapShot cubemapShot;
+		int cubemapSize;
+		int renderScreen;
+		int latestSnapshotNum;
+		int latestSnapshotTime;
+		snapshot_s* snap;
+		snapshot_s* nextSnap;
+		snapshot_s activeSnapshots[2];
+		float frameInterpolation;
+		int frametime;
+		int time;
+		int oldTime;
+		int physicsTime;
+		int mapRestart;
+		int renderingThirdPerson;
+		playerState_s predictedPlayerState;
+		centity_s predictedPlayerEntity;
+		playerEntity_t playerEntity;
+		int predictedErrorTime;
+		float predictedError[3];
+		float landChange;
+		int landTime;
+		float heightToCeiling;
+		refdef_s refdef;
+		// since refdef is incomplete, this is incomplete here too
 		// ...
 	};
 
@@ -550,10 +925,11 @@ namespace IWXMVM::IW3::Structures
 		bool mouseInitialized;
 	};
 
-	refdef_t* GetRefDef();
 	clientConnection_t* GetClientConnection();
 	clientStatic_t* GetClientStatic();
 	clientActive_t* GetClientActive();
+	cgs_t* GetClientGlobalsStatic();
+	cg_s* GetClientGlobals();
 	WinMouseVars_t* GetMouseVars();
 
 	dvar_s* FindDvar(const std::string_view name);
