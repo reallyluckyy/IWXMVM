@@ -127,12 +127,14 @@ namespace IWXMVM::Signatures
     {
         for (const auto handle : moduleHandles) 
         {
-            IMAGE_DOS_HEADER* dosHeader = (IMAGE_DOS_HEADER*)handle;
-            IMAGE_NT_HEADERS* ntHeader = (IMAGE_NT_HEADERS*)((std::uint8_t*)dosHeader + dosHeader->e_lfanew);
-            auto textSectionStart = (uintptr_t)ntHeader->OptionalHeader.ImageBase + ntHeader->OptionalHeader.BaseOfCode;
-            auto textSectionSize = (uintptr_t)ntHeader->OptionalHeader.SizeOfCode;
+            MODULEINFO process{};
 
-            for (std::uintptr_t i = textSectionStart; i < textSectionStart + textSectionSize; ++i)
+            if (!::GetModuleInformation(::GetCurrentProcess(), handle, &process, sizeof(process)) || !process.lpBaseOfDll)
+                return 0;
+
+            const std::uintptr_t endOfDll = reinterpret_cast<std::uintptr_t>(process.lpBaseOfDll) + process.SizeOfImage;
+
+            for (std::uintptr_t i = reinterpret_cast<std::uintptr_t>(process.lpBaseOfDll); i < endOfDll; ++i) 
             {
                 std::size_t j = signature._frontMaskCount;
 
