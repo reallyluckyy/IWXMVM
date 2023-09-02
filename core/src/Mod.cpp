@@ -52,12 +52,15 @@ namespace IWXMVM
 			gameInterface->SetupEventListeners();
 
 			// Initialize Components
+			Input::LoadConfig("config.cfg");
 			Components::CameraManager::Get().Initialize();
 			
 			// TODO: ...
 
 			LOG_INFO("Initialized IWXMVM!");
-			
+
+			Input::SaveConfig("config.cfg");
+
 			while (!ejectRequested.load())
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
