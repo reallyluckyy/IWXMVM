@@ -2,6 +2,12 @@
 
 namespace IWXMVM::Types
 {
+	enum struct ModuleType
+	{
+		BaseModule,
+		SecondaryModules
+	};
+
 	struct Dvar
 	{
 		std::string_view name;
