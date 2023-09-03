@@ -33,7 +33,7 @@ namespace IWXMVM::IW3
 
 		uintptr_t GetWndProc() final
 		{
-			return (uintptr_t)0x57BB20;
+			return (uintptr_t)GetGameAddresses().MainWndProc();
 		}
 
 		void SetMouseMode(Types::MouseMode mode) final

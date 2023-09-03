@@ -22,7 +22,7 @@ namespace IWXMVM::IW3::Signatures
 		Sig("8D 74 24 ?? D9 5C 24 ?? ?? ?? ?? ?? ?? 5F 5E 5B 8B E5 5D C3",									GAType::Code, 8)> CG_OffsetThirdPersonView; // second call to AnglesToAxis we need to replace
 		Sig("53 55 56 8B F0 05 ?? ?? ?? ?? 8B C8 57 8B",													GAType::Code, -8)> CL_SystemInfoChanged;
 		Sig("81 EC ?? ?? 00 00 A1 ?? ?? ?? ?? 53 33 DB 39",													GAType::Code, -6)> CL_Vid_Restart_f;
-		Sig("85 C0 74 ?? 8B FE E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? D9 41 ?? D8 4C 24 0C D9 5E 0C 5F 5E C3",	GAType::Code, -5, Lambda::FollowCodeFlow)> Dvar_FindMalleable;
+		Sig("85 C0 74 ?? 8B FE E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? D9 41 ?? D8 4C 24 0C D9 5E 0C 5F 5E C3",	GAType::Code, -5, Lambda::FollowCodeFlow)> Dvar_FindMalleableVar;
 		Sig("83 EC ?? D9 46 ?? D9 1D ?? ?? ?? ?? D9 46 ?? D9 1D",											GAType::Code, -6)> FX_SetupCamera;
 		Sig("8B F8 6A 00 57 E8 ?? ?? ?? ?? D9 46 ?? D9 9F",													GAType::Code, -7)> R_SetViewParmsForScene;
 		Sig("8B C6 59 C3 56 E8 ?? ?? ?? ?? 83 C4 04 ?? ?? ?? ?? ?? CC",										GAType::Code, 13)> SV_Frame;
@@ -32,7 +32,9 @@ namespace IWXMVM::IW3::Signatures
 		Sig("68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 0C 68 F0 E7 0F 00",										GAType::Data, 1, Lambda::DereferenceAddress) > clientGlobalsStatic;
 		Sig("BA ?? ?? ?? ?? E8 ?? ?? ?? ?? D9 03", 															GAType::Data, 1, Lambda::DereferenceAddress)> clientGlobals;
 		Sig("89 1D ?? ?? ?? ?? 5E 5F", 																		GAType::Data, 2, Lambda::DereferenceAddress)> mouseVars;
-		
+		Sig("8B 1D ?? ?? ?? ?? 85 DB 74 E0", 																GAType::Data, 2)> fs_searchpaths;
+		Sig("F8 83 EC 3C 53 56 57", 																		GAType::Code, -5)> MainWndProc;
+
 		// cod4x
 		using MType = Types::ModuleType;
 		Sig("00 00 E8 ?? ?? ?? ?? 29 C4 C7 04 24 01 00 00 00 E8",											GAType::Code, -7), MType::SecondaryModules> CL_SystemInfoChangedCoD4X;

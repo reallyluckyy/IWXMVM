@@ -3,7 +3,7 @@
 
 #include "Utilities/HookManager.hpp"
 #include "Mod.hpp"
-
+#include "../Addresses.hpp"
 
 namespace IWXMVM::IW3::Hooks::Playback 
 {
@@ -133,6 +133,6 @@ namespace IWXMVM::IW3::Hooks::Playback
 
 	void Install() 
 	{
-		HookManager::CreateHook(0x53366E, (std::uintptr_t)SV_Frame_Hook, nullptr);
+		HookManager::CreateHook(GetGameAddresses().SV_Frame(), (std::uintptr_t)SV_Frame_Hook, nullptr);
 	}
 }

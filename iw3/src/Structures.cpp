@@ -9,32 +9,32 @@ namespace IWXMVM::IW3::Structures
 {
 	clientConnection_t* GetClientConnection()
 	{
-		return (clientConnection_t*)IW3::GetGameAddresses().clientConnection();
+		return (clientConnection_t*)GetGameAddresses().clientConnection();
 	}
 
 	clientStatic_t* GetClientStatic()
 	{
-		return (clientStatic_t*)IW3::GetGameAddresses().clientStatic();
+		return (clientStatic_t*)GetGameAddresses().clientStatic();
 	}
 
 	clientActive_t* GetClientActive()
 	{
-		return (clientActive_t*)IW3::GetGameAddresses().clientActive();
+		return (clientActive_t*)GetGameAddresses().clientActive();
 	}
 
 	cgs_t* GetClientGlobalsStatic()
 	{
-		return (cgs_t*)IW3::GetGameAddresses().clientGlobalsStatic();
+		return (cgs_t*)GetGameAddresses().clientGlobalsStatic();
 	}
 
 	cg_s* GetClientGlobals()
 	{
-		return (cg_s*)IW3::GetGameAddresses().clientGlobals();
+		return (cg_s*)GetGameAddresses().clientGlobals();
 	}
 
 	WinMouseVars_t* GetMouseVars()
 	{
-		return (WinMouseVars_t*)IW3::GetGameAddresses().mouseVars();
+		return (WinMouseVars_t*)GetGameAddresses().mouseVars();
 	}
 
 	dvar_s* FindDvar(const std::string_view name)
@@ -42,7 +42,7 @@ namespace IWXMVM::IW3::Structures
 		const char* _name = name.data();
 
 		typedef dvar_s* (__cdecl* Dvar_FindVar_t)();
-		Dvar_FindVar_t Dvar_FindVar_Internal = (Dvar_FindVar_t)0x56B5D0;
+		Dvar_FindVar_t Dvar_FindVar_Internal = (Dvar_FindVar_t)GetGameAddresses().Dvar_FindMalleableVar();
 
 		__asm mov edi, _name
 		return Dvar_FindVar_Internal();
@@ -50,7 +50,7 @@ namespace IWXMVM::IW3::Structures
 
 	std::string GetFilePath(const std::string_view demoName)
 	{
-		auto searchpath = (searchpath_s*)0xD5EC4DC;
+		auto searchpath = (searchpath_s*)GetGameAddresses().fs_searchpaths();
 		while(searchpath->next)
 		{
 			searchpath = searchpath->next;
@@ -77,7 +77,7 @@ namespace IWXMVM::IW3::Structures
 		command.append("\n");
 
 		const char* commandString = command.c_str();
-		const auto Cbuf_AddText_Address = 0x4F8D90;
+		const auto Cbuf_AddText_Address = GetGameAddresses().Cbuf_AddText();
 
 		__asm
 		{
