@@ -10,13 +10,8 @@
 
 namespace IWXMVM::UI
 {
-	bool initRequested = false;
-	std::mutex mtx;
-
 	void UIManager::ShutdownImGui()
 	{
-		// ensuring synchronization with the render thread so that ImGui is not shutdown while rendering a frame
-		std::lock_guard<std::mutex> guard{ mtx };
 		LOG_DEBUG("Shutting down ImGui");
 
 		SetWindowLongPtr(D3D9::FindWindowHandle(), GWLP_WNDPROC, (LONG_PTR)originalGameWndProc);
@@ -32,37 +27,8 @@ namespace IWXMVM::UI
 		ImGui::DestroyContext();
 	}
 
-	bool UIManager::RestartImGui()
-	{
-		ShutdownImGui();
-		needsRestart.store(true);
-
-		return true;
-	}
-
-	bool uiComponentsInitialized = false;
 	void UIManager::RunImGuiFrame()
 	{
-		// ensuring synchronization with the main thread so that ImGui is not shutdown while rendering a frame
-		std::lock_guard<std::mutex> guard { mtx };
-
-		if (!IsInitialized() || NeedsRestart())
-		{
-			// This handles initialization when the D3D9 device pointer is the same after a UI restart
-			if (initRequested)
-			{
-				UIManager::Get().Initialize(D3D9::GetDevice());
-				initRequested = false;
-				return;
-			}
-			initRequested = true;
-			return;
-		}
-		else
-		{
-			initRequested = false;
-		}
-
 		try
 		{
 			ImGui_ImplDX9_NewFrame();
@@ -71,11 +37,12 @@ namespace IWXMVM::UI
 
 			Input::UpdateState(ImGui::GetIO());
 
+			static bool uiComponentsInitialized = false;
 			if (!uiComponentsInitialized)
 			{
-				uiComponentsInitialized = true;
 				for (const auto& component : GetUIComponents())
 					component->Initialize();
+				uiComponentsInitialized = true;
 			}
 
 			if (Input::KeyDown(ImGuiKey_F1))
@@ -169,27 +136,19 @@ namespace IWXMVM::UI
 	INCBIN_EXTERN(RUBIK_FONT);
 	INCBIN_EXTERN(WORK_SANS_FONT);
 	INCBIN_EXTERN(FA_ICONS_FONT);
-	void UIManager::Initialize(IDirect3DDevice9* device)
+	void UIManager::Initialize(IDirect3DDevice9* device, HWND hwnd)
 	{
 		try
 		{
+			LOG_DEBUG("Initializing ImGui...");
+
 			// to avoid registering events after restarting ImGui
 			if (!isInitialized)
 			{
-				LOG_DEBUG("Initializing ImGui...");
 				LOG_DEBUG("Registering OnFrame listener");
 				Events::RegisterListener(EventType::OnFrame, [&]() {
 					RunImGuiFrame();
 				});
-			}
-			else if (needsRestart.load())
-			{
-				LOG_DEBUG("Reinitializing ImGui...");
-			}
-			else
-			{
-				throw std::logic_error("UIManager::Initialize called but UI is running");
-				return;
 			}
 
 			LOG_DEBUG("Creating ImGui context");
@@ -198,16 +157,19 @@ namespace IWXMVM::UI
 
 			ImGui::StyleColorsDark();
 
-			HWND hwnd = D3D9::FindWindowHandle();
-			LOG_DEBUG("Initializing ImGui_ImplWin32 with HWND {0:x}", (uint32_t)hwnd);
+			if (hwnd == nullptr)
+			{
+				hwnd = D3D9::FindWindowHandle();
+			}
+			LOG_DEBUG("Initializing ImGui_ImplWin32 with HWND {0:x}", (std::uintptr_t)hwnd);
 			ImGui_ImplWin32_Init(hwnd);
 
-			LOG_DEBUG("Initializing ImGui_ImplDX9 with D3D9 Device {0:x}", (uintptr_t)device);
+			LOG_DEBUG("Initializing ImGui_ImplDX9 with D3D9 Device {0:x}", (std::uintptr_t)device);
 			ImGui_ImplDX9_Init(device);
 
 			// TODO: byte size is game dependent
 			LOG_DEBUG("Hooking WndProc at {0:x}", Mod::GetGameInterface()->GetWndProc());
-			originalGameWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)ImGuiWndProc);
+			originalGameWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (std::uintptr_t)ImGuiWndProc);
 
 			auto windowSize = GetWindowSize(hwnd);
 			auto fontSize = std::floor(windowSize.x / 106.0f);
@@ -243,7 +205,6 @@ namespace IWXMVM::UI
 
 			Mod::GetGameInterface()->SetMouseMode(Types::MouseMode::Capture);
 			isInitialized = true;
-			needsRestart.store(false);
 
 			LOG_INFO("Initialized UI");
 		}
