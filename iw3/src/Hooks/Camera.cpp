@@ -21,13 +21,13 @@ namespace IWXMVM::IW3::Hooks::Camera
 			return;
 		}
 
-		auto refdef = Structures::GetRefDef();
-		refdef->Origin[0] = camera.GetPosition()[0];
-		refdef->Origin[1] = camera.GetPosition()[1];
-		refdef->Origin[2] = camera.GetPosition()[2];
+		auto& refdef = Structures::GetClientGlobals()->refdef;
+		refdef.vieworg[0] = camera.GetPosition()[0];
+		refdef.vieworg[1] = camera.GetPosition()[1];
+		refdef.vieworg[2] = camera.GetPosition()[2];
 
-		refdef->FOV[0] = std::tan(glm::radians(camera.GetFov()) * 0.5f);
-		refdef->FOV[1] = refdef->FOV[0] * ((float)refdef->ScreenHeight / (float)refdef->ScreenWidth);
+		refdef.tanHalfFovX = std::tan(glm::radians(camera.GetFov()) * 0.5f);
+		refdef.tanHalfFovY = refdef.tanHalfFovX * ((float)refdef.height / (float)refdef.width);
 	}
 
 	uintptr_t R_SetViewParmsForScene_Trampoline;
@@ -74,10 +74,11 @@ namespace IWXMVM::IW3::Hooks::Camera
 		if (!camera.IsModControlledCameraMode())
 			return;
 
-		auto refdef = Structures::GetRefDef();
-		refdef->Origin[0] = camera.GetPosition()[0];
-		refdef->Origin[1] = camera.GetPosition()[1];
-		refdef->Origin[2] = camera.GetPosition()[2];
+
+		auto& refdef = Structures::GetClientGlobals()->refdef;
+		refdef.vieworg[0] = camera.GetPosition()[0];
+		refdef.vieworg[1] = camera.GetPosition()[1];
+		refdef.vieworg[2] = camera.GetPosition()[2];
 	}
 
 	uintptr_t FX_SetupCamera_Trampoline;
