@@ -182,6 +182,7 @@ namespace IWXMVM::UI
 			auto RegisterFont = [&](const char* name, const uint8_t* data, size_t size, float fontSize) 
 			{
 				ImFontConfig fontConfig;
+				fontConfig.FontDataOwnedByAtlas = false;
 				fontConfig.SizePixels = fontSize;
 				strcpy_s(fontConfig.Name, name);
 				io.Fonts->AddFontFromMemoryTTF((void*)data, size, fontSize, &fontConfig);
@@ -190,6 +191,7 @@ namespace IWXMVM::UI
 				auto iconFontSize = fontSize * 2.0f / 3.0f;
 				static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
 				ImFontConfig icons_config;
+				icons_config.FontDataOwnedByAtlas = false;
 				icons_config.MergeMode = true;
 				icons_config.PixelSnapH = true;
 				icons_config.GlyphMinAdvanceX = iconFontSize;
