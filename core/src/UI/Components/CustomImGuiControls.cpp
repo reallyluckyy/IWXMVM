@@ -130,7 +130,7 @@ namespace ImGui
 		};
 
 		// TimescaleSliderInternal is a copy of SliderScalar with the intended behavior of being a slider with fixed steps
-		// the only addition to SliderScalar is the above lambda, which gets executed to clamp it if the slider value has changed 
+		// the only change to SliderScalar is the above lambda and its execution, to clamp the slider value if it has changed 
 		return ImGui::TimescaleSliderInternal(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags, ClampValue);
 	}
 }
