@@ -54,23 +54,34 @@ namespace IWXMVM::UI
 
 			auto image = UIImage::FromResource(Mod::GetGameInterface()->IsDemoPlaybackPaused() ? IMG_PLAY_BUTTON_data : IMG_PAUSE_BUTTON_data,
 				Mod::GetGameInterface()->IsDemoPlaybackPaused() ? IMG_PLAY_BUTTON_size : IMG_PAUSE_BUTTON_size);
+
 			if (ImGui::ImageButton(image.GetTextureID(), pauseButtonSize, ImVec2(0, 0), ImVec2(1, 1), 1))
-			{
 				Mod::GetGameInterface()->ToggleDemoPlaybackState();
-			}
 
 			const auto playbackSpeedSliderWidth = GetSize().x / 8;
 
 			ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
 			ImGui::SameLine();
-			ImGui::TimescaleSlider("##", &timescale.value().value->floating_point, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
+			ImGui::TimescaleSlider("##1", &timescale.value().value->floating_point, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
 			auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
 			auto progressBarX = PADDING + pauseButtonSize.x + playbackSpeedSliderWidth + PADDING * 3;
 			auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - PADDING;
+			
 			ImGui::SameLine(progressBarX);
-			ImGui::DemoProgressBar(&demoInfo.currentTick, demoInfo.endTick, ImVec2(progressBarWidth, GetSize().y / 3.4f), std::format("{0}", demoInfo.currentTick).c_str());
+			static std::int32_t tickValue{};
 
+			if (!ImGui::SliderInt("##2", &tickValue, 0, demoInfo.endTick, "%d", ImGuiSliderFlags_NoInput))
+				tickValue = demoInfo.currentTick;
+			else 
+				Mod::GetGameInterface()->SetModifiedTick(tickValue - demoInfo.currentTick);
+
+			ImGui::SameLine(progressBarX);
+			ImGui::DemoProgressBarLines(demoInfo.currentTick, demoInfo.endTick);
+			
+			ImGui::SameLine();
+			ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());
+			
 			ImGui::End();
 		}
 	}
