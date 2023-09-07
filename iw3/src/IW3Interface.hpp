@@ -184,12 +184,12 @@ namespace IWXMVM::IW3
 
 		std::atomic<std::int32_t> tick;
 
-		std::atomic<std::int32_t>& GetModifiedTick() final
+		std::atomic<std::int32_t>& GetTickDelta() final
 		{
 			return tick;
 		}
 
-		void SetModifiedTick(std::int32_t value) final
+		void SetTickDelta(std::int32_t value) final
 		{
 			if (value > 0)
 				Structures::GetClientStatic()->realtime += value;
