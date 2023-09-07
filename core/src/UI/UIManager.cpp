@@ -7,6 +7,7 @@
 #include "Events.hpp"
 #include "Resources.hpp"
 #include "Input.hpp"
+#include "Components/CameraManager.hpp"
 
 namespace IWXMVM::UI
 {
@@ -78,6 +79,25 @@ namespace IWXMVM::UI
 			{
 				GetUIComponent(Component::DebugPanel)->Render();
 			}
+
+			auto& camera = Components::CameraManager::Get().GetActiveCamera();
+
+			auto model = glm::translate(glm::mat4(1.0f), camera.GetPosition());
+
+			auto view = glm::lookAt(camera.GetPosition(), camera.GetPosition() + camera.GetForwardVector(), glm::vec3(0, 0, 1));
+
+			auto projection = glm::perspectiveFov(camera.GetFov(), ImGui::GetMainViewport()->Size.x, ImGui::GetMainViewport()->Size.y, 0.1f, 1000.0f);
+
+			auto screenSpacePosition = glm::project(
+				glm::vec3(0, 0, 0), 
+				view * model,
+				projection,
+				glm::vec4(0, 0, ImGui::GetMainViewport()->Size.x, ImGui::GetMainViewport()->Size.y)
+			);
+
+			LOG_DEBUG("screenSpacePosition: {0} {1}", screenSpacePosition.x, screenSpacePosition.y);
+
+			ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(screenSpacePosition.x, screenSpacePosition.y), ImVec2(screenSpacePosition.x + 10, screenSpacePosition.y + 10), ImGui::GetColorU32(ImVec4(1, 0, 0, 1)));
 
 			ImGui::EndFrame();
 			ImGui::Render();
