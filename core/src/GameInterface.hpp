@@ -47,8 +47,8 @@ namespace IWXMVM
 		virtual void ToggleDemoPlaybackState() = 0;
 		virtual bool IsDemoPlaybackPaused() = 0;
 
-		virtual std::atomic<std::int32_t>& GetModifiedTick() = 0;
-		virtual void SetModifiedTick(std::int32_t) = 0;
+		virtual std::atomic<std::int32_t>& GetTickDelta() = 0;
+		virtual void SetTickDelta(std::int32_t) = 0;
 
 		// perhaps dvars shouldnt be exposed to core at all?
 		virtual std::optional<Types::Dvar> GetDvar(const std::string_view name) = 0;
