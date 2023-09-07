@@ -74,7 +74,7 @@ namespace IWXMVM::UI
 			if (!ImGui::SliderInt("##2", &tickValue, 0, demoInfo.endTick, "%d", ImGuiSliderFlags_NoInput))
 				tickValue = demoInfo.currentTick;
 			else 
-				Mod::GetGameInterface()->SetModifiedTick(tickValue - demoInfo.currentTick);
+				Mod::GetGameInterface()->SetTickDelta(tickValue - demoInfo.currentTick);
 
 			ImGui::SameLine(progressBarX);
 			ImGui::DemoProgressBarLines(demoInfo.currentTick, demoInfo.endTick);
