@@ -2,6 +2,6 @@
 
 namespace ImGui
 {
-	bool DemoProgressBar(uint32_t* currentTick, const uint32_t endTick, const ImVec2& size_arg, const char* overlay);
+	void DemoProgressBarLines(std::uint32_t currentTick, std::uint32_t endTick);
 	bool TimescaleSlider(const char* label, float* v, float v_min, float v_max, const char* format, ImGuiSliderFlags flags);
 }
