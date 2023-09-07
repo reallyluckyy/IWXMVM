@@ -181,5 +181,20 @@ namespace IWXMVM::IW3
 
 			return dvar;
 		}
+
+		std::atomic<std::int32_t> tick;
+
+		std::atomic<std::int32_t>& GetModifiedTick() final
+		{
+			return tick;
+		}
+
+		void SetModifiedTick(std::int32_t value) final
+		{
+			if (value > 0)
+				Structures::GetClientStatic()->realtime += value;
+			else if (value < 0)
+				tick.store(value);
+		}
 	};
 }
