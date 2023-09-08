@@ -43,10 +43,10 @@ namespace IWXMVM::Components
 	{
 		//if (!Input::GetFocusedWindow() == GameView)
 		//	return;
-	
+
 		auto& activeCamera = GetActiveCamera();
 		auto& cameraPosition = activeCamera.GetPosition();
-	
+
 		// TODO: make this configurable
 		constexpr float FREECAM_SPEED = 300;
 		constexpr float MOUSE_SPEED = 0.1f;
@@ -63,22 +63,22 @@ namespace IWXMVM::Components
 		const auto cameraMovementSpeed = cameraBaseSpeed * speedModifier;
 		const auto cameraHeightSpeed = cameraMovementSpeed;
 
-		if (Input::KeyHeld(ImGuiKey_W))
+		if (Input::BindHeld("freeCameraForward"))
 		{
 			cameraPosition += activeCamera.GetForwardVector() * cameraMovementSpeed;
 		}
-	
-		if (Input::KeyHeld(ImGuiKey_S))
+
+		if (Input::BindHeld("freeCameraBackward"))
 		{
 			cameraPosition -= activeCamera.GetForwardVector() * cameraMovementSpeed;
 		}
-	
-		if (Input::KeyHeld(ImGuiKey_A))
+
+		if (Input::BindHeld("freeCameraLeft"))
 		{
 			cameraPosition += activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
-	
-		if (Input::KeyHeld(ImGuiKey_D))
+
+		if (Input::BindHeld("freeCameraRight"))
 		{
 			cameraPosition -= activeCamera.GetRightVector() * cameraMovementSpeed;
 		}
@@ -103,31 +103,31 @@ namespace IWXMVM::Components
 			}
 		}
 
-		if (Input::MouseButtonHeld(ImGuiMouseButton_Middle)) 
+		if (Input::BindHeld("freeCameraReset"))
 		{
 			activeCamera.GetRotation() = {};
 			activeCamera.GetFov() = 90.0f;
 		}
-	
+
 		activeCamera.GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
 		activeCamera.GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
 
 		activeCamera.GetRotation()[0] = glm::clamp(activeCamera.GetRotation()[0], -89.9f, 89.9f);
-	
-		if (Input::KeyHeld(ImGuiKey_E))
+
+		if (Input::BindHeld("freeCameraUp"))
 			cameraPosition[2] += cameraHeightSpeed;
-	
-		if (Input::KeyHeld(ImGuiKey_Q))
+
+		if (Input::BindHeld("freeCameraDown"))
 			cameraPosition[2] -= cameraHeightSpeed;
 	}
 
 	void CameraManager::UpdateCameraFrame()
 	{
-		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu) 
+		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu)
 		{
 			return;
 		}
-		
+
 		auto& activeCamera = GetActiveCamera();
 		if (activeCamera.GetMode() == Camera::Mode::Free)
 		{

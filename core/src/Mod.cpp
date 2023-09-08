@@ -4,10 +4,12 @@
 #include "GameInterface.hpp"
 #include "Version.hpp"
 #include "WindowsConsole.hpp"
+#include "Input.hpp"
 #include "Utilities/HookManager.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Utilities/MemoryUtils.hpp"
 #include "UI/UIManager.hpp"
+#include "Configuration/Configuration.hpp"
 
 namespace IWXMVM
 {
@@ -51,12 +53,13 @@ namespace IWXMVM
 			gameInterface->SetupEventListeners();
 
 			// Initialize Components
+			Configuration::Get().Initialize();
 			Components::CameraManager::Get().Initialize();
 			
 			// TODO: ...
 
 			LOG_INFO("Initialized IWXMVM!");
-			
+
 			while (!ejectRequested.load())
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 

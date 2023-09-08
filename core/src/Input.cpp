@@ -44,4 +44,18 @@ namespace IWXMVM
 		ImGuiIO& io = ImGui::GetIO();
 		return io.DeltaTime;
 	}
+
+	bool Input::BindHeld(std::string_view bindName) 
+	{
+		Key bind = InputConfiguration::Get().GetKeyBind(bindName);
+		if (std::holds_alternative<ImGuiKey>(bind)) 
+		{
+			return KeyHeld(std::get<ImGuiKey>(bind));
+		}
+		else if (std::holds_alternative<ImGuiMouseButton_>(bind)) 
+		{
+			return MouseButtonHeld(std::get<ImGuiMouseButton_>(bind));
+		}
+		return false; // Invalid bind
+	}
 }
