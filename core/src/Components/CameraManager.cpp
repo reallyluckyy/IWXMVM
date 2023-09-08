@@ -121,89 +121,6 @@ namespace IWXMVM::Components
 			cameraPosition[2] -= cameraHeightSpeed;
 	}
 
-	void CameraManager::UpdateOrbitCameraMovement()
-	{
-		auto& activeCamera = GetActiveCamera();
-		auto& cameraPosition = activeCamera.GetPosition();
-	
-		constexpr float BASE_SPEED = 0.1f;
-		constexpr float ROTATION_SPEED = BASE_SPEED * 1.5f;
-		constexpr float TRANSLATION_SPEED = BASE_SPEED * 3.0f;
-		constexpr float ZOOM_SPEED = BASE_SPEED * 8.0f;
-		constexpr float HEIGHT_CEILING = 250.0f;
-		constexpr float HEIGHT_MULTIPLIER = 1.5f;
-		constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
-		constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
-		constexpr float MIN_ORBIT_DIST = 10;
-		const float SMOOTHING_FACTOR = glm::clamp(1.0f - 10.0f * Input::GetDeltaTime(), 0.0f, 1.0f);
-
-		static double scrollDelta = 0.0;
-		scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
-
-		// bump camera out of origin if it's at the origin
-		if (cameraPosition == orbitCameraOrigin)
-		{
-			cameraPosition = orbitCameraOrigin + glm::vector3::one;
-		}
-
-		if (Input::KeyDown(ImGuiKey_F4))
-		{
-			scrollDelta = 0.0;
-
-			orbitCameraOrigin = glm::vector3::zero;
-			cameraPosition = glm::vector3::one;
-		}
-
-		if (Input::MouseButtonHeld(ImGuiMouseButton_Middle))
-		{
-			auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
-			cameraPosition -= orbitCameraOrigin;
-			cameraPosition = glm::rotateZ(cameraPosition, glm::radians(horizontalDelta));
-			cameraPosition += orbitCameraOrigin;
-			
-			auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
-			cameraPosition -= orbitCameraOrigin;
-			cameraPosition = glm::rotate(cameraPosition, glm::radians(verticalDelta), glm::cross(glm::vector3::up, activeCamera.GetForwardVector()));
-			cameraPosition += orbitCameraOrigin;
-		}
-
-		if (Input::MouseButtonHeld(ImGuiMouseButton_Right))
-		{
-			// use the height value to move faster around at higher altitude 
-			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING) * TRANSLATION_SPEED;
-
-			glm::vec3 forward2D = glm::normalize(activeCamera.GetForwardVector());
-			forward2D.z = 0;
-			orbitCameraOrigin += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
-			cameraPosition += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
-
-			glm::vec3 right2D = glm::normalize(activeCamera.GetRightVector());
-			right2D.z = 0;
-			orbitCameraOrigin += right2D * Input::GetMouseDelta()[0] * translationSpeed;
-			cameraPosition += right2D * Input::GetMouseDelta()[0] * translationSpeed;
-		}
-
-		activeCamera.SetForwardVector(orbitCameraOrigin - cameraPosition);
-		
-		if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
-		{
-			auto desiredPosition = cameraPosition + glm::normalize(cameraPosition - orbitCameraOrigin) * ((1.0f - SMOOTHING_FACTOR) * scrollDelta) * 100;
-			if (glm::distance(desiredPosition, orbitCameraOrigin) > MIN_ORBIT_DIST)
-			{
-				cameraPosition = desiredPosition;
-			}
-			else 
-			{
-				cameraPosition = orbitCameraOrigin + glm::normalize(cameraPosition - orbitCameraOrigin) * MIN_ORBIT_DIST;
-			}
-			scrollDelta *= SMOOTHING_FACTOR;
-		} 
-		else if (scrollDelta != 0.0) 
-		{
-			scrollDelta = 0.0;
-		}
-	}
-
 	void CameraManager::UpdateCameraFrame()
 	{
 		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu) 
@@ -218,7 +135,7 @@ namespace IWXMVM::Components
 		}
 		else if (activeCamera.GetMode() == Camera::Mode::Orbit)
 		{
-			UpdateOrbitCameraMovement();
+			OrbitCamera::Get().UpdateMovement(activeCamera);
 		}
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "Camera.hpp"
+#include "OrbitCamera.hpp"
 
 namespace IWXMVM::Components
 {
@@ -29,7 +30,6 @@ namespace IWXMVM::Components
 		CameraManager() {}
 
 		void UpdateFreecamMovement();
-		void UpdateOrbitCameraMovement();
 
 		void UpdateCameraFrame();
 
@@ -45,7 +45,5 @@ namespace IWXMVM::Components
 		}();
 
 		int activeCameraIndex = 0;
-
-		glm::vec3 orbitCameraOrigin {};
 	};
 }

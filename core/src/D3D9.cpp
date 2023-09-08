@@ -88,7 +88,7 @@ namespace IWXMVM::D3D9
 			UI::UIManager::Get().Initialize(pDevice);
 		}
 
-		Events::Invoke(EventType::OnFrame);
+		UI::UIManager::Get().RunImGuiFrame();
 
 		return EndScene(pDevice);
 	}
