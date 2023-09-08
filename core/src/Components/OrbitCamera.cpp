@@ -31,7 +31,7 @@ namespace IWXMVM::Components
 			cameraPosition = orbitCameraOrigin + glm::vector3::one;
 		}
 
-		if (Input::KeyDown(ImGuiKey_F4))
+		if (Input::BindHeld("orbitCameraReset"))
 		{
 			scrollDelta = 0.0;
 
@@ -39,7 +39,7 @@ namespace IWXMVM::Components
 			cameraPosition = glm::vector3::one;
 		}
 
-		if (Input::MouseButtonHeld(ImGuiMouseButton_Middle))
+		if (Input::BindHeld("orbitCameraRotate"))
 		{
 			auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
 			cameraPosition -= orbitCameraOrigin;
@@ -52,7 +52,7 @@ namespace IWXMVM::Components
 			cameraPosition += orbitCameraOrigin;
 		}
 
-		if (Input::MouseButtonHeld(ImGuiMouseButton_Right))
+		if (Input::BindHeld("orbitCameraMove"))
 		{
 			DrawGrid(camera);
 
