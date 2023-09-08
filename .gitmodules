@@ -16,3 +16,6 @@
 [submodule "core/third-party/IconFontCppHeaders"]
 	path = core/third-party/IconFontCppHeaders
 	url = https://github.com/juliettef/IconFontCppHeaders
+[submodule "core/third-party/json"]
+	path = core/third-party/json
+	url = https://github.com/nlohmann/json.git
