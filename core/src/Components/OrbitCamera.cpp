@@ -140,14 +140,17 @@ namespace IWXMVM::Components
 		ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(viewport.x, viewport.y), ImVec2(viewport.z, viewport.w), ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.0f, 0.6f)));
 
 		const auto GLOBAL_AXIS_LENGTH = 3000.0f;
+		const auto MAIN_COLOR = ImVec4(0.4f, 0.4f, 0.4f, 0.6f);
+		const auto SECONDARY_COLOR = ImVec4(0.5f, 0.5f, 0.5f, 0.4f);
 
-		DrawLine(this, glm::vec3(-GLOBAL_AXIS_LENGTH, 0, 0), glm::vec3(GLOBAL_AXIS_LENGTH, 0, 0), ImVec4(0.4f, 0.4f, 0.4f, 0.6f), 5);
-		DrawLine(this, glm::vec3(0, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(0, GLOBAL_AXIS_LENGTH, 0), ImVec4(0.4f, 0.4f, 0.4f, 0.6f), 5);
+
+		DrawLine(this, glm::vec3(-GLOBAL_AXIS_LENGTH, 0, 0), glm::vec3(GLOBAL_AXIS_LENGTH, 0, 0), MAIN_COLOR, 5);
+		DrawLine(this, glm::vec3(0, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(0, GLOBAL_AXIS_LENGTH, 0), MAIN_COLOR, 5);
 
 		for (int i = -GLOBAL_AXIS_LENGTH; i < GLOBAL_AXIS_LENGTH; i += 100)
 		{
-			DrawLine(this, glm::vec3(-GLOBAL_AXIS_LENGTH, i, 0), glm::vec3(GLOBAL_AXIS_LENGTH, i, 0), ImVec4(0.5f, 0.5f, 0.5f, 0.4f), 3);
-			DrawLine(this, glm::vec3(i, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(i, GLOBAL_AXIS_LENGTH, 0), ImVec4(0.5f, 0.5f, 0.5f, 0.4f), 3);
+			DrawLine(this, glm::vec3(-GLOBAL_AXIS_LENGTH, i, 0), glm::vec3(GLOBAL_AXIS_LENGTH, i, 0), SECONDARY_COLOR, 3);
+			DrawLine(this, glm::vec3(i, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(i, GLOBAL_AXIS_LENGTH, 0), SECONDARY_COLOR, 3);
 		}
 	}
 

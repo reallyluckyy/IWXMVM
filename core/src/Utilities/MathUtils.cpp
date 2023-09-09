@@ -27,28 +27,12 @@ namespace IWXMVM::MathUtils
 
 	std::optional<ImVec2> WorldToScreenPoint(glm::vec3 point, Components::Camera& camera, glm::vec4 viewport)
 	{
-		glm::vec3 position = point - camera.GetPosition();
+		auto lookat = glm::lookAtLH(camera.GetPosition(), camera.GetPosition() + camera.GetForwardVector(), glm::vector3::up);
 
-		glm::vec3 transform;
+		// this is quite the magic number, but it seems to be the scaling factor necessary to line this up with the previous world to screen implementation
+		const auto MAGIC_NUMBER = 0.65f;
+		auto proj  = glm::project(point, (lookat), glm::perspectiveFov(glm::radians(camera.GetFov() * 0.65f), viewport.z, viewport.w, 0.1f, 1000.0f), viewport);
 
-		transform.x = glm::dot(position, camera.GetRightVector());
-		transform.y = glm::dot(position, camera.GetUpVector());
-		transform.z = glm::dot(position, camera.GetForwardVector());
-
-		if (transform.z < 0.1f)
-			return std::nullopt;
-
-		uint32_t widthCenter = (uint32_t)((viewport.z) / 2.0f);
-		uint32_t heightCenter = (uint32_t)((viewport.w) / 2.0f);
-
-		float multiplier = 0.75f; //currentView.isPOV ? 1.0f : 0.75f;
-
-		auto tanHalfFov = glm::tan(glm::radians(camera.GetFov()) * 0.5) * 0.75;
-		auto aspectRatio = viewport.z / viewport.w;
-
-		float x = (1 - (transform.x / (tanHalfFov * aspectRatio * multiplier) / transform.z));
-		float y = (1 - (transform.y / (tanHalfFov * multiplier) / transform.z));
-
-		return std::make_optional(ImVec2(widthCenter * x + viewport.x, heightCenter * y + viewport.y));
+		return std::make_optional(ImVec2(proj.x, proj.y));
 	}
 }
