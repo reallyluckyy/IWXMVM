@@ -59,7 +59,7 @@ namespace IWXMVM::UI
 			const char* framerateComboItems[] = { "250", "500", "1000" };
 			static int currentFramerateComboItem = 0;
 			ImGui::SetNextItemWidth(200);
-			ImGui::Combo("##captureMenuResolutionCombo", &currentFramerateComboItem, framerateComboItems, IM_ARRAYSIZE(framerateComboItems));
+			ImGui::Combo("##captureMenuFramerateCombo", &currentFramerateComboItem, framerateComboItems, IM_ARRAYSIZE(framerateComboItems));
 
 			ImGui::End();
 		}
