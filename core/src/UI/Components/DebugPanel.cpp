@@ -21,7 +21,7 @@ namespace IWXMVM::UI
 			ImGui::Text("Demo Tick: %d", Mod::GetGameInterface()->GetDemoInfo().currentTick);
 			ImGui::Text("Demo End Tick: %d", Mod::GetGameInterface()->GetDemoInfo().endTick);
 			auto& camera = Components::CameraManager::Get().GetActiveCamera();
-			ImGui::Text("Camera: %f %f %f", camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+			ImGui::Text("Camera: %f %f %f", camera->GetPosition().x, camera->GetPosition().y, camera->GetPosition().z);
 			if (ImGui::Button("Eject"))
 				Mod::RequestEject();
 			ImGui::End();

@@ -7,9 +7,9 @@
 
 namespace IWXMVM::Components
 {
-	void OrbitCamera::UpdateMovement(Camera& camera)
+	void OrbitCamera::Update()
 	{
-		auto& cameraPosition = camera.GetPosition();
+		auto& cameraPosition = this->GetPosition();
 
 		constexpr float BASE_SPEED = 0.1f;
 		constexpr float ROTATION_SPEED = BASE_SPEED * 1.5f;
@@ -48,29 +48,29 @@ namespace IWXMVM::Components
 
 			auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
 			cameraPosition -= orbitCameraOrigin;
-			cameraPosition = glm::rotate(cameraPosition, glm::radians(verticalDelta), glm::cross(glm::vector3::up, camera.GetForwardVector()));
+			cameraPosition = glm::rotate(cameraPosition, glm::radians(verticalDelta), glm::cross(glm::vector3::up, this->GetForwardVector()));
 			cameraPosition += orbitCameraOrigin;
 		}
 
 		if (Input::BindHeld("orbitCameraMove"))
 		{
-			DrawGrid(camera);
+			DrawGrid();
 
 			// use the height value to move faster around at higher altitude 
 			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING) * TRANSLATION_SPEED;
 
-			glm::vec3 forward2D = glm::normalize(camera.GetForwardVector());
+			glm::vec3 forward2D = glm::normalize(this->GetForwardVector());
 			forward2D.z = 0;
 			orbitCameraOrigin += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
 			cameraPosition += forward2D * Input::GetMouseDelta()[1] * translationSpeed;
 
-			glm::vec3 right2D = glm::normalize(camera.GetRightVector());
+			glm::vec3 right2D = glm::normalize(this->GetRightVector());
 			right2D.z = 0;
 			orbitCameraOrigin += right2D * Input::GetMouseDelta()[0] * translationSpeed;
 			cameraPosition += right2D * Input::GetMouseDelta()[0] * translationSpeed;
 		}
 
-		camera.SetForwardVector(orbitCameraOrigin - cameraPosition);
+		this->SetForwardVector(orbitCameraOrigin - cameraPosition);
 
 		if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
 		{
@@ -90,15 +90,15 @@ namespace IWXMVM::Components
 			scrollDelta = 0.0;
 		}
 
-		DrawOrbitPoint(camera);
+		DrawOrbitPoint();
 	}
 
-	void DrawLine(Camera& camera, glm::vec3 from, glm::vec3 to, ImVec4 color, float thickness)
+	void DrawLine(Camera* camera, glm::vec3 from, glm::vec3 to, ImVec4 color, float thickness)
 	{
 		auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
 		auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y, gameView->GetPosition().x + gameView->GetSize().x, gameView->GetPosition().y + gameView->GetSize().y);
-		auto screenPosition1 = MathUtils::WorldToScreenPoint(from, camera, viewport);
-		auto screenPosition2 = MathUtils::WorldToScreenPoint(to, camera, viewport);
+		auto screenPosition1 = MathUtils::WorldToScreenPoint(from, *camera, viewport);
+		auto screenPosition2 = MathUtils::WorldToScreenPoint(to, *camera, viewport);
 
 		if (screenPosition1.has_value() && screenPosition2.has_value())
 		{
@@ -106,11 +106,11 @@ namespace IWXMVM::Components
 		}
 	}
 
-	void DrawPoint(Camera& camera, glm::vec3 point, ImVec4 color) 
+	void DrawPoint(Camera* camera, glm::vec3 point, ImVec4 color) 
 	{
 		auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
 		auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y, gameView->GetPosition().x + gameView->GetSize().x, gameView->GetPosition().y + gameView->GetSize().y);
-		auto screenPosition = MathUtils::WorldToScreenPoint(point, camera, viewport);
+		auto screenPosition = MathUtils::WorldToScreenPoint(point, *camera, viewport);
 
 		if (screenPosition.has_value())
 		{
@@ -118,7 +118,7 @@ namespace IWXMVM::Components
 		}
 	}
 
-	void OrbitCamera::DrawGrid(Camera& camera)
+	void OrbitCamera::DrawGrid()
 	{
 		auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
 		auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y, gameView->GetPosition().x + gameView->GetSize().x, gameView->GetPosition().y + gameView->GetSize().y);
@@ -126,22 +126,22 @@ namespace IWXMVM::Components
 
 		const auto GLOBAL_AXIS_LENGTH = 3000.0f;
 
-		DrawLine(camera, glm::vec3(-GLOBAL_AXIS_LENGTH, 0, 0), glm::vec3(GLOBAL_AXIS_LENGTH, 0, 0), ImVec4(0.4f, 0.4f, 0.4f, 0.6f), 5);
-		DrawLine(camera, glm::vec3(0, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(0, GLOBAL_AXIS_LENGTH, 0), ImVec4(0.4f, 0.4f, 0.4f, 0.6f), 5);
+		DrawLine(this, glm::vec3(-GLOBAL_AXIS_LENGTH, 0, 0), glm::vec3(GLOBAL_AXIS_LENGTH, 0, 0), ImVec4(0.4f, 0.4f, 0.4f, 0.6f), 5);
+		DrawLine(this, glm::vec3(0, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(0, GLOBAL_AXIS_LENGTH, 0), ImVec4(0.4f, 0.4f, 0.4f, 0.6f), 5);
 
 		for (int i = -GLOBAL_AXIS_LENGTH; i < GLOBAL_AXIS_LENGTH; i += 100)
 		{
-			DrawLine(camera, glm::vec3(-GLOBAL_AXIS_LENGTH, i, 0), glm::vec3(GLOBAL_AXIS_LENGTH, i, 0), ImVec4(0.5f, 0.5f, 0.5f, 0.4f), 3);
-			DrawLine(camera, glm::vec3(i, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(i, GLOBAL_AXIS_LENGTH, 0), ImVec4(0.5f, 0.5f, 0.5f, 0.4f), 3);
+			DrawLine(this, glm::vec3(-GLOBAL_AXIS_LENGTH, i, 0), glm::vec3(GLOBAL_AXIS_LENGTH, i, 0), ImVec4(0.5f, 0.5f, 0.5f, 0.4f), 3);
+			DrawLine(this, glm::vec3(i, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(i, GLOBAL_AXIS_LENGTH, 0), ImVec4(0.5f, 0.5f, 0.5f, 0.4f), 3);
 		}
 	}
 
-	void OrbitCamera::DrawOrbitPoint(Camera& camera)
+	void OrbitCamera::DrawOrbitPoint()
 	{
 		const auto AXIS_LENGTH = 150.0f;
 
-		DrawLine(camera, orbitCameraOrigin - glm::vec3(AXIS_LENGTH, 0, 0), orbitCameraOrigin + glm::vec3(AXIS_LENGTH, 0, 0), ImVec4(1.0f, 0.0f, 0.0f, 0.8f), 5);
-		DrawLine(camera, orbitCameraOrigin - glm::vec3(0, AXIS_LENGTH, 0), orbitCameraOrigin + glm::vec3(0, AXIS_LENGTH, 0), ImVec4(0.0f, 1.0f, 0.0f, 0.8f), 5);
-		DrawLine(camera, orbitCameraOrigin - glm::vec3(0, 0, AXIS_LENGTH), orbitCameraOrigin + glm::vec3(0, 0, AXIS_LENGTH), ImVec4(0.0f, 0.0f, 1.0f, 0.8f), 5);
+		DrawLine(this, orbitCameraOrigin - glm::vec3(AXIS_LENGTH, 0, 0), orbitCameraOrigin + glm::vec3(AXIS_LENGTH, 0, 0), ImVec4(1.0f, 0.0f, 0.0f, 0.8f), 5);
+		DrawLine(this, orbitCameraOrigin - glm::vec3(0, AXIS_LENGTH, 0), orbitCameraOrigin + glm::vec3(0, AXIS_LENGTH, 0), ImVec4(0.0f, 1.0f, 0.0f, 0.8f), 5);
+		DrawLine(this, orbitCameraOrigin - glm::vec3(0, 0, AXIS_LENGTH), orbitCameraOrigin + glm::vec3(0, 0, AXIS_LENGTH), ImVec4(0.0f, 0.0f, 1.0f, 0.8f), 5);
 	}
 }

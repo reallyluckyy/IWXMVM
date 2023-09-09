@@ -3,24 +3,19 @@
 
 namespace IWXMVM::Components
 {
-	class OrbitCamera
+	class OrbitCamera : public Camera
 	{
 	public:
-		static OrbitCamera& Get()
+		OrbitCamera()
 		{
-			static OrbitCamera instance;
-			return instance;
+			this->mode = Camera::Mode::Orbit;
 		}
 
-		OrbitCamera(OrbitCamera const&) = delete;
-		void operator=(OrbitCamera const&) = delete;
-
-		void UpdateMovement(Camera& camera);
+		void Update() override;
 	private:
-		OrbitCamera() {}
 
-		void DrawOrbitPoint(Camera& camera);
-		void DrawGrid(Camera& camera);
+		void DrawOrbitPoint();
+		void DrawGrid();
 
 		glm::vec3 orbitCameraOrigin {};
 	};

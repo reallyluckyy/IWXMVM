@@ -1,6 +1,8 @@
 #pragma once
 #include "Camera.hpp"
+#include "DefaultCamera.hpp"
 #include "OrbitCamera.hpp"
+#include "FreeCamera.hpp"
 
 namespace IWXMVM::Components
 {
@@ -19,8 +21,8 @@ namespace IWXMVM::Components
 
 		void Initialize();
 
-		Camera& GetActiveCamera() { return cameras[activeCameraIndex]; }
-		Camera& GetCamera(Camera::Mode mode);
+		std::unique_ptr<Camera>& GetActiveCamera() { return cameras[activeCameraIndex]; }
+		std::unique_ptr<Camera>& GetCamera(Camera::Mode mode);
 		void SetActiveCamera(Camera::Mode mode);
 
 		std::string_view GetCameraModeLabel(Camera::Mode cameraMode);
@@ -29,16 +31,23 @@ namespace IWXMVM::Components
 	private:
 		CameraManager() {}
 
-		void UpdateFreecamMovement();
-
 		void UpdateCameraFrame();
 
-		std::vector<Camera> cameras = []() {
+		std::vector<std::unique_ptr<Camera>> cameras = []()
+		{
 			// Create one camera for each camera mode
-			std::vector<Camera> tmp;
+			std::vector<std::unique_ptr<Camera>> tmp;
 
-			for (int i = 0; i < (int)Camera::Mode::Count; i++) {
-				tmp.push_back(Camera((Camera::Mode)i));
+			tmp.push_back(std::make_unique<DefaultCamera>(DefaultCamera(Camera::Mode::FirstPerson)));
+			tmp.push_back(std::make_unique<DefaultCamera>(DefaultCamera(Camera::Mode::ThirdPerson)));
+			tmp.push_back(std::make_unique<FreeCamera>(FreeCamera()));
+			tmp.push_back(std::make_unique<OrbitCamera>(OrbitCamera()));
+			tmp.push_back(std::make_unique<DefaultCamera>(DefaultCamera(Camera::Mode::Dolly)));
+			tmp.push_back(std::make_unique<DefaultCamera>(DefaultCamera(Camera::Mode::Bone)));
+			
+			if (tmp.size() != (int)Camera::Mode::Count) 
+			{
+				LOG_ERROR("CameraManager::cameras is not the same size as Camera::Mode");
 			}
 
 			return tmp;

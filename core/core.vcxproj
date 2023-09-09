@@ -114,6 +114,7 @@
   <ItemGroup>
     <ClCompile Include="src\Components\Camera.cpp" />
     <ClCompile Include="src\Components\CameraManager.cpp" />
+    <ClCompile Include="src\Components\FreeCamera.cpp" />
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
     <ClCompile Include="src\Configuration\Configuration.cpp" />
     <ClCompile Include="src\Configuration\InputConfiguration.cpp" />
@@ -147,6 +148,8 @@
     <ClCompile Include="src\Utilities\PathUtils.cpp" />
     <ClCompile Include="src\Utilities\MathUtils.cpp" />
     <ClInclude Include="src\Components\CameraManager.hpp" />
+    <ClInclude Include="src\Components\DefaultCamera.hpp" />
+    <ClInclude Include="src\Components\FreeCamera.hpp" />
     <ClInclude Include="src\Components\OrbitCamera.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
     <ClInclude Include="src\Configuration\InputConfiguration.hpp" />

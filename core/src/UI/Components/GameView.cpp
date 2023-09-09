@@ -90,12 +90,12 @@ namespace IWXMVM::UI
 
 		ImGui::SetNextItemWidth(300);
 
-		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager.GetCameraModeLabel(currentCamera.GetMode()).data()))
+		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager.GetCameraModeLabel(currentCamera->GetMode()).data()))
 		{
 			for (auto cameraMode : cameraManager.GetCameraModes())
 			{
-				bool isSelected = currentCamera.GetMode() == cameraMode;
-				if (ImGui::Selectable(cameraManager.GetCameraModeLabel(cameraMode).data(), currentCamera.GetMode() == cameraMode))
+				bool isSelected = currentCamera->GetMode() == cameraMode;
+				if (ImGui::Selectable(cameraManager.GetCameraModeLabel(cameraMode).data(), currentCamera->GetMode() == cameraMode))
 				{
 					cameraManager.SetActiveCamera(cameraMode);
 				}
@@ -108,7 +108,7 @@ namespace IWXMVM::UI
 			ImGui::EndCombo();
 		}
 
-		if (currentCamera.GetMode() == Components::Camera::Mode::FirstPerson)
+		if (currentCamera->GetMode() == Components::Camera::Mode::FirstPerson)
 		{
 			ImGui::SameLine();
 
