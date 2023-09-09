@@ -11,6 +11,7 @@ namespace IWXMVM::Components
 			this->mode = mode;
 		}
 
+		void Initialize() override {};
 		void Update() override {};
 	};
 }

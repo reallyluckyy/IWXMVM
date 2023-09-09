@@ -4,6 +4,7 @@
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "Events.hpp"
 
 
 namespace IWXMVM::UI
@@ -173,6 +174,8 @@ namespace IWXMVM::UI
 		ImGui::SetCursorPosX((viewportSize.x - textureSize.x) / 2.0f);
 		ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f + topBarHeight);
 		ImGui::Image((void*)texture, textureSize);
+
+		Events::Invoke(EventType::OnRenderGameView);
 
 		ImGui::End();
 

@@ -11,8 +11,11 @@ namespace IWXMVM::Components
 			this->mode = Camera::Mode::Orbit;
 		}
 
+		void Initialize() override;
 		void Update() override;
 	private:
+
+		void DrawOverlay();
 
 		void DrawOrbitPoint();
 		void DrawGrid();

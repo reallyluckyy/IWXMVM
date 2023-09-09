@@ -25,6 +25,7 @@ namespace IWXMVM::Components
 
 
 	public:
+		virtual void Initialize() = 0;
 		virtual void Update() = 0;
 
 		Mode GetMode() { return mode; }

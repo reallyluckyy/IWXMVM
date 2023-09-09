@@ -11,6 +11,7 @@ namespace IWXMVM::Components
 			this->mode = Camera::Mode::Free;
 		}
 
+		void Initialize() override;
 		void Update() override;
 	};
 }

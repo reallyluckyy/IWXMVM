@@ -5,6 +5,11 @@
 
 namespace IWXMVM::Components
 {
+	void FreeCamera::Initialize()
+	{
+
+	}
+	
 	void FreeCamera::Update()
 	{
 		//if (!Input::GetFocusedWindow() == GameView)

@@ -51,6 +51,11 @@ namespace IWXMVM::Components
 
 	void CameraManager::Initialize()
 	{
+		for (auto& camera : cameras)
+		{
+			camera->Initialize();
+		}
+
 		Events::RegisterListener(EventType::OnFrame, [&]()
 			{
 				UpdateCameraFrame();

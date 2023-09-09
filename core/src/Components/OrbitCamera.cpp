@@ -4,9 +4,17 @@
 #include "Input.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "UI/UIManager.hpp"
+#include "Events.hpp"
 
 namespace IWXMVM::Components
 {
+	void OrbitCamera::Initialize()
+	{
+		Events::RegisterListener(EventType::OnRenderGameView, [&]() {
+			DrawOverlay();
+		});
+	}
+
 	void OrbitCamera::Update()
 	{
 		auto& cameraPosition = this->GetPosition();
@@ -54,8 +62,6 @@ namespace IWXMVM::Components
 
 		if (Input::BindHeld("orbitCameraMove"))
 		{
-			DrawGrid();
-
 			// use the height value to move faster around at higher altitude 
 			const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING) * TRANSLATION_SPEED;
 
@@ -90,6 +96,15 @@ namespace IWXMVM::Components
 			scrollDelta = 0.0;
 		}
 
+	}
+
+	void OrbitCamera::DrawOverlay()
+	{
+		if (Input::BindHeld("orbitCameraMove"))
+		{
+			DrawGrid();
+		}
+
 		DrawOrbitPoint();
 	}
 
@@ -102,7 +117,7 @@ namespace IWXMVM::Components
 
 		if (screenPosition1.has_value() && screenPosition2.has_value())
 		{
-			ImGui::GetForegroundDrawList()->AddLine(screenPosition1.value(), screenPosition2.value(), ImGui::ColorConvertFloat4ToU32(color), thickness);
+			ImGui::GetWindowDrawList()->AddLine(screenPosition1.value(), screenPosition2.value(), ImGui::ColorConvertFloat4ToU32(color), thickness);
 		}
 	}
 
@@ -114,7 +129,7 @@ namespace IWXMVM::Components
 
 		if (screenPosition.has_value())
 		{
-			ImGui::GetForegroundDrawList()->AddRectFilled(screenPosition.value() - ImVec2(3, 3), screenPosition.value() + ImVec2(3, 3), ImGui::ColorConvertFloat4ToU32(color));
+			ImGui::GetWindowDrawList()->AddRectFilled(screenPosition.value() - ImVec2(3, 3), screenPosition.value() + ImVec2(3, 3), ImGui::ColorConvertFloat4ToU32(color));
 		}
 	}
 
@@ -122,7 +137,7 @@ namespace IWXMVM::Components
 	{
 		auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
 		auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y, gameView->GetPosition().x + gameView->GetSize().x, gameView->GetPosition().y + gameView->GetSize().y);
-		ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(viewport.x, viewport.y), ImVec2(viewport.z, viewport.w), ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.0f, 0.6f)));
+		ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(viewport.x, viewport.y), ImVec2(viewport.z, viewport.w), ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.0f, 0.6f)));
 
 		const auto GLOBAL_AXIS_LENGTH = 3000.0f;
 
