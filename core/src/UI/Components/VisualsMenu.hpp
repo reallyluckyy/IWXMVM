@@ -8,8 +8,23 @@ namespace IWXMVM::UI
 	public:
 		void Render() final;
 		void Release() final;
-
+		
 	private:
+		struct Visuals
+		{
+			//DOF
+			bool* dofActive;
+			float* dofFarBlur;
+			float* dofFarStart;
+			float* dofFarEnd;
+
+			float* dofNearBlur;
+			float* dofNearStart;
+			float* dofNearEnd;
+
+			float* dofBias;
+		};
 		void Initialize() final;
+		Visuals visuals;
 	};
 }
