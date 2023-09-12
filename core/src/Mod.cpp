@@ -47,9 +47,9 @@ namespace IWXMVM
 			LOG_DEBUG("Scanning signatures...");
 			gameInterface->InitializeGameAddresses();
 
-			LOG_DEBUG("Installing game hooks...");
+			LOG_DEBUG("Installing game hooks and patches...");
 			D3D9::Initialize();
-			gameInterface->InstallHooks();
+			gameInterface->InstallHooksAndPatches();
 			gameInterface->SetupEventListeners();
 
 			// Initialize Components

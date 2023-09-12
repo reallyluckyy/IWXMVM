@@ -8,6 +8,7 @@
 #include "DemoParser.hpp"
 #include "Hooks/Camera.hpp"
 #include "Addresses.hpp"
+#include "Patches.hpp"
 
 namespace IWXMVM::IW3
 {
@@ -17,9 +18,10 @@ namespace IWXMVM::IW3
 
 		IW3Interface() : GameInterface(Types::Game::IW3) {}
 
-		void InstallHooks() final
+		void InstallHooksAndPatches() final
 		{
 			Hooks::Install();
+			Patches::GetGamePatches();
 		}
 
 		void SetupEventListeners() final
