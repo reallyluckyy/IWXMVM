@@ -181,5 +181,16 @@ namespace IWXMVM::IW3
 
 			return dvar;
 		}
+
+		Types::Sun* GetSun() final
+		{
+			Structures::sun** sunPtr = reinterpret_cast<Structures::sun**>(0x400000 + 0xCC702A8);
+			Structures::sun* iw3Sun = reinterpret_cast<Structures::sun*>(*sunPtr);
+
+			Types::Sun* sun = new Types::Sun;
+			sun->color = iw3Sun->Color;
+			sun->position = iw3Sun->Position;
+			return sun;
+		}
 	};
 }

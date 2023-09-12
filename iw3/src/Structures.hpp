@@ -917,6 +917,13 @@ namespace IWXMVM::IW3::Structures
 		dvar_s* hashNext;
 	};
 
+	struct sun
+	{
+		char pad_0000[4]; //0x0000
+		float Color[3]; //0x0004
+		float Position[3]; //0x0010
+	};
+
 	struct __declspec(align(4)) WinMouseVars_t
 	{
 		int oldButtonState;

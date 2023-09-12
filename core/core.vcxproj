@@ -155,6 +155,7 @@
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />
+    <ClInclude Include="src\Types\Sun.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />
     <ClInclude Include="src\Utilities\MathUtils.hpp" />

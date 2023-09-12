@@ -21,4 +21,5 @@ namespace IWXMVM::Types
 			uint8_t color[4];
 		}*value;
 	};
+
 }

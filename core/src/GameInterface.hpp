@@ -8,6 +8,7 @@
 #include "Types/DemoInfo.hpp"
 #include "Types/MouseMode.hpp"
 #include "Types/Dvar.hpp"
+#include "Types/Sun.hpp"
 
 namespace IWXMVM
 {
@@ -49,6 +50,8 @@ namespace IWXMVM
 
 		// perhaps dvars shouldnt be exposed to core at all?
 		virtual std::optional<Types::Dvar> GetDvar(const std::string_view name) = 0;
+
+		virtual Types::Sun* GetSun() = 0;
 
 	private:
 		Types::Game game;

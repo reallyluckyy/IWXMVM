@@ -17,7 +17,9 @@ namespace IWXMVM::UI
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearBlur").value().value->floating_point)),
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearStart").value().value->floating_point)),
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearEnd").value().value->floating_point)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_bias").value().value->floating_point))
+			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_bias").value().value->floating_point)),
+			Mod::GetGameInterface()->GetSun()->color,
+			Mod::GetGameInterface()->GetSun()->position
 		};
 	}
 
@@ -50,6 +52,15 @@ namespace IWXMVM::UI
 				ImGui::Separator();
 			}
 
+			{
+				ImGui::AlignTextToFramePadding();
+
+				ImGui::Text("Sun:");
+
+				ImGui::ColorEdit3("Color", visuals.sunColor);
+
+				ImGui::Separator();
+			}
 			ImGui::End();
 		}
 	}

@@ -23,8 +23,13 @@ namespace IWXMVM::UI
 			float* dofNearEnd;
 
 			float* dofBias;
+
+			//SUN
+			float* sunColor;
+			float* sunPosition;
 		};
 		void Initialize() final;
 		Visuals visuals;
+
 	};
 }
