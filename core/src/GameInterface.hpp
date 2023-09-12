@@ -22,7 +22,7 @@ namespace IWXMVM
 
 		Types::Game GetGame() const { return game; }
 
-		virtual void InstallHooks() = 0;
+		virtual void InstallHooksAndPatches() = 0;
 		virtual void SetupEventListeners() = 0;
 
 		virtual uintptr_t GetWndProc() = 0;
