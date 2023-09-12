@@ -9,6 +9,7 @@ namespace IWXMVM::UI
 		void Render() final;
 		void RenderDOF();
 		void RenderSun();
+		void UpdateSun();
 		void Release() final;
 		
 	private:
@@ -27,11 +28,13 @@ namespace IWXMVM::UI
 			float* dofBias;
 
 			//SUN
-			float* sunColor;
+			float* sunColorUI;
 			float* sunPosition;
+			float sunBrightness = 1;
 		};
 		void Initialize() final;
 		Visuals visuals;
-
+		float* sunColor = (float*)0x4;
+		float initColors[3] = { 0.6, 0.2, 0.8 };
 	};
 }

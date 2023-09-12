@@ -8,7 +8,6 @@ namespace IWXMVM::UI
 {
 	void VisualsMenu::Initialize()
 	{
-		//Mod::GetGameInterface()->GetDvar("r_dof_tweak").value().value->uint32 = 1;
 		visuals = {
 			reinterpret_cast<bool*>(&(Mod::GetGameInterface()->GetDvar("r_dof_tweak").value().value->uint32)),
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_farBlur").value().value->floating_point)),
@@ -18,9 +17,10 @@ namespace IWXMVM::UI
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearStart").value().value->floating_point)),
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearEnd").value().value->floating_point)),
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_bias").value().value->floating_point)),
-			Mod::GetGameInterface()->GetSun()->color,
-			Mod::GetGameInterface()->GetSun()->position
+			initColors
 		};
+
+		
 	}
 
 	void VisualsMenu::Render()
@@ -43,8 +43,8 @@ namespace IWXMVM::UI
 
 		ImGui::Checkbox("Enable DOF", visuals.dofActive);
 		ImGui::SliderFloat("Far Blur", visuals.dofFarBlur, 0, 10);
-		ImGui::SliderFloat("Far Start", visuals.dofFarStart, 0, 20000);
-		ImGui::SliderFloat("Far End", visuals.dofFarEnd, 0, 10000);
+		ImGui::SliderFloat("Far Start", visuals.dofFarStart, 0, 5000);
+		ImGui::SliderFloat("Far End", visuals.dofFarEnd, 0, 5000);
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Seperator
 
@@ -65,23 +65,28 @@ namespace IWXMVM::UI
 
 		ImGui::Text("Sun:");
 
-		if (visuals.sunColor == (float*)0x4)
-		{
-			if (Mod::GetGameInterface()->GetSun()->color != (float*)0x4)
-			{
-				visuals.sunColor = Mod::GetGameInterface()->GetSun()->color;
-				ImGui::ColorEdit3("Color", visuals.sunColor);
-			}
-		}
-		else if (visuals.sunColor != Mod::GetGameInterface()->GetSun()->color)
-		{
-			visuals.sunColor = Mod::GetGameInterface()->GetSun()->color;
-			ImGui::ColorEdit3("Color", visuals.sunColor);
-		}
-		else
-			ImGui::ColorEdit3("Color", visuals.sunColor);
+		if (ImGui::ColorEdit3("Color", visuals.sunColorUI))
+			UpdateSun();
+
+		if (ImGui::SliderFloat("Brightness", &visuals.sunBrightness, 0, 4))
+			UpdateSun();
+
 
 		ImGui::Separator();
+	}
+
+	void VisualsMenu::UpdateSun()
+	{
+		if (sunColor == (float*)0x4 && Mod::GetGameInterface()->GetSun()->color != (float*)0x4)
+			sunColor = Mod::GetGameInterface()->GetSun()->color;
+		else if (sunColor != Mod::GetGameInterface()->GetSun()->color)
+			sunColor = Mod::GetGameInterface()->GetSun()->color;
+		
+		if (sunColor != (float*)0x4)
+		{
+			for (int i = 0; i < 3; ++i)
+				sunColor[i] = visuals.sunColorUI[i] * visuals.sunBrightness;
+		}
 	}
 
 	void VisualsMenu::Release()
