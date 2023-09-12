@@ -28,41 +28,60 @@ namespace IWXMVM::UI
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
 		if (ImGui::Begin("Visuals", NULL, flags))
 		{
-
-			{
-				ImGui::AlignTextToFramePadding();
-
-				ImGui::Text("DOF:");
-
-				ImGui::Checkbox("Enable DOF", visuals.dofActive);
-				ImGui::SliderFloat("Far Blur", visuals.dofFarBlur, 0, 10);
-				ImGui::SliderFloat("Far Start", visuals.dofFarStart, 0, 20000);
-				ImGui::SliderFloat("Far End", visuals.dofFarEnd, 0, 10000);
-
-				ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Seperator
-
-				ImGui::SliderFloat("Near Blur", visuals.dofNearBlur, 0, 10);
-				ImGui::SliderFloat("Near Start", visuals.dofNearStart, 0, 1000);
-				ImGui::SliderFloat("Near End", visuals.dofNearEnd, 0, 1000);
-
-				ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Seperator
-
-				ImGui::SliderFloat("Bias", visuals.dofBias, 0, 10);
-
-				ImGui::Separator();
-			}
-
-			{
-				ImGui::AlignTextToFramePadding();
-
-				ImGui::Text("Sun:");
-
-				ImGui::ColorEdit3("Color", visuals.sunColor);
-
-				ImGui::Separator();
-			}
+			RenderDOF();
+			RenderSun();
+			
 			ImGui::End();
 		}
+	}
+
+	void VisualsMenu::RenderDOF()
+	{
+		ImGui::AlignTextToFramePadding();
+
+		ImGui::Text("DOF:");
+
+		ImGui::Checkbox("Enable DOF", visuals.dofActive);
+		ImGui::SliderFloat("Far Blur", visuals.dofFarBlur, 0, 10);
+		ImGui::SliderFloat("Far Start", visuals.dofFarStart, 0, 20000);
+		ImGui::SliderFloat("Far End", visuals.dofFarEnd, 0, 10000);
+
+		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Seperator
+
+		ImGui::SliderFloat("Near Blur", visuals.dofNearBlur, 0, 10);
+		ImGui::SliderFloat("Near Start", visuals.dofNearStart, 0, 1000);
+		ImGui::SliderFloat("Near End", visuals.dofNearEnd, 0, 1000);
+
+		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Seperator
+
+		ImGui::SliderFloat("Bias", visuals.dofBias, 0, 10);
+
+		ImGui::Separator();
+	}
+
+	void VisualsMenu::RenderSun()
+	{
+		ImGui::AlignTextToFramePadding();
+
+		ImGui::Text("Sun:");
+
+		if (visuals.sunColor == (float*)0x4)
+		{
+			if (Mod::GetGameInterface()->GetSun()->color != (float*)0x4)
+			{
+				visuals.sunColor = Mod::GetGameInterface()->GetSun()->color;
+				ImGui::ColorEdit3("Color", visuals.sunColor);
+			}
+		}
+		else if (visuals.sunColor != Mod::GetGameInterface()->GetSun()->color)
+		{
+			visuals.sunColor = Mod::GetGameInterface()->GetSun()->color;
+			ImGui::ColorEdit3("Color", visuals.sunColor);
+		}
+		else
+			ImGui::ColorEdit3("Color", visuals.sunColor);
+
+		ImGui::Separator();
 	}
 
 	void VisualsMenu::Release()

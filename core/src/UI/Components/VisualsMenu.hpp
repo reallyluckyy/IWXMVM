@@ -7,6 +7,8 @@ namespace IWXMVM::UI
 	{
 	public:
 		void Render() final;
+		void RenderDOF();
+		void RenderSun();
 		void Release() final;
 		
 	private:
