@@ -7,6 +7,8 @@
 #include "Events.hpp"
 #include "Resources.hpp"
 #include "Input.hpp"
+#include "Components/CameraManager.hpp"
+#include "Utilities/MathUtils.hpp"
 
 namespace IWXMVM::UI
 {
@@ -79,6 +81,8 @@ namespace IWXMVM::UI
 				GetUIComponent(Component::DebugPanel)->Render();
 			}
 
+			Events::Invoke(EventType::OnFrame);
+
 			ImGui::EndFrame();
 			ImGui::Render();
 			ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
@@ -141,15 +145,6 @@ namespace IWXMVM::UI
 		try
 		{
 			LOG_DEBUG("Initializing ImGui...");
-
-			// to avoid registering events after restarting ImGui
-			if (!isInitialized)
-			{
-				LOG_DEBUG("Registering OnFrame listener");
-				Events::RegisterListener(EventType::OnFrame, [&]() {
-					RunImGuiFrame();
-				});
-			}
 
 			LOG_DEBUG("Creating ImGui context");
 			IMGUI_CHECKVERSION();
