@@ -7,9 +7,6 @@ namespace IWXMVM::UI
 	{
 	public:
 		void Render() final;
-		void RenderDOF();
-		void RenderSun();
-		void UpdateSun();
 		void Release() final;
 		
 	private:
@@ -29,12 +26,27 @@ namespace IWXMVM::UI
 
 			//SUN
 			float* sunColorUI;
-			float* sunPosition;
+			float sunPositionXUI;
+			float sunPositionYUI;
+			float sunPositionZUI;
+			float sunPitch;
+			float sunYaw;
 			float sunBrightness = 1;
 		};
+		enum Pos
+		{
+			x, y, z
+		};
 		void Initialize() final;
+		void RenderDOF();
+		void RenderSun();
+		void UpdateSunColor();
+		void UpdateSunPosition(int);
+		void UpdateSunAngle();
 		Visuals visuals;
 		float* sunColor = (float*)0x4;
+		float* sunPosition = (float*)0x10;
 		float initColors[3] = { 0.6, 0.2, 0.8 };
+		float initPosition[3] = { 0, 0, 0 };
 	};
 }

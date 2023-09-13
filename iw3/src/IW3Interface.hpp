@@ -184,6 +184,7 @@ namespace IWXMVM::IW3
 
 		Types::Sun* GetSun() final
 		{
+			// TODO: Get Sun from dvars instead of address
 			Structures::sun** sunPtr = reinterpret_cast<Structures::sun**>(0x400000 + 0xCC702A8);
 			Structures::sun* iw3Sun = reinterpret_cast<Structures::sun*>(*sunPtr);
 
