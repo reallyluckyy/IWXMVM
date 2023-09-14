@@ -1,5 +1,6 @@
 #pragma once
 #include "UI/UIComponent.hpp"
+#include "glm/vec3.hpp"
 
 namespace IWXMVM::UI
 {
@@ -25,10 +26,8 @@ namespace IWXMVM::UI
 			float* dofBias;
 
 			//SUN
-			float* sunColorUI;
-			float sunPositionXUI;
-			float sunPositionYUI;
-			float sunPositionZUI;
+			glm::vec3 sunColorUI;
+			glm::vec3 sunPositionUI;
 			float sunPitch;
 			float sunYaw;
 			float sunBrightness = 1;
@@ -40,8 +39,7 @@ namespace IWXMVM::UI
 		void Initialize() final;
 		void RenderDOF();
 		void RenderSun();
-		void UpdateSunColor();
-		void UpdateSunPosition(int);
+		void UpdateSun();
 		void UpdateSunAngle();
 		Visuals visuals;
 		float* sunColor = (float*)0x4;

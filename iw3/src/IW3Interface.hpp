@@ -9,6 +9,9 @@
 #include "Hooks/Camera.hpp"
 #include "Addresses.hpp"
 
+#include "glm/vec3.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 namespace IWXMVM::IW3
 {
 	class IW3Interface : public GameInterface
@@ -182,16 +185,31 @@ namespace IWXMVM::IW3
 			return dvar;
 		}
 
-		Types::Sun* GetSun() final
+		Types::Sun GetSun() final
 		{
 			// TODO: Get Sun from dvars instead of address
 			Structures::sun** sunPtr = reinterpret_cast<Structures::sun**>(0x400000 + 0xCC702A8);
 			Structures::sun* iw3Sun = reinterpret_cast<Structures::sun*>(*sunPtr);
 
-			static Types::Sun* sun = new Types::Sun;
-			sun->color = iw3Sun->Color;
-			sun->position = iw3Sun->Position;
+			Types::Sun sun;
+			sun.color = glm::make_vec3(iw3Sun->Color);
+			sun.position = glm::make_vec3(iw3Sun->Position);
 			return sun;
+		}
+
+		void SetSun(Types::Sun sun) final
+		{
+			Structures::sun** sunPtr = reinterpret_cast<Structures::sun**>(0x400000 + 0xCC702A8);
+			Structures::sun* iw3Sun = reinterpret_cast<Structures::sun*>(*sunPtr);
+
+			if (iw3Sun)
+			{
+				for (int i = 0; i < 3; ++i)
+				{
+					iw3Sun->Color[i] = glm::value_ptr(sun.color)[i] * sun.brightness;
+					iw3Sun->Position[i] = glm::value_ptr(sun.position)[i];
+				}
+			}
 		}
 	};
 }

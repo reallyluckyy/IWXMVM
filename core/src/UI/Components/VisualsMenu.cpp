@@ -3,7 +3,6 @@
 #include "Mod.hpp"
 
 #include "UI/UIManager.hpp"
-#include "glm/vec3.hpp"
 
 namespace IWXMVM::UI
 {
@@ -17,11 +16,7 @@ namespace IWXMVM::UI
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearBlur").value().value->floating_point)),
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearStart").value().value->floating_point)),
 			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearEnd").value().value->floating_point)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_bias").value().value->floating_point)),
-			initColors,
-			initPosition[Pos::x],
-			initPosition[Pos::y],
-			initPosition[Pos::z]
+			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_bias").value().value->floating_point))
 		};
 
 		
@@ -69,11 +64,11 @@ namespace IWXMVM::UI
 
 		ImGui::Text("Sun:");
 
-		if (ImGui::ColorEdit3("Color", visuals.sunColorUI))
-			UpdateSunColor();
+		if (ImGui::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI)))
+			UpdateSun();
 
 		if (ImGui::SliderFloat("Brightness", &visuals.sunBrightness, 0, 4))
-			UpdateSunColor();
+			UpdateSun();
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Spacing
 
@@ -85,55 +80,23 @@ namespace IWXMVM::UI
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Spacing
 
-		if (ImGui::SliderFloat("X", &visuals.sunPositionXUI, -1, 1))
-			UpdateSunPosition(Pos::x);
+		if (ImGui::SliderFloat("X", glm::value_ptr(visuals.sunPositionUI), -1, 1))
+			UpdateSun();
 
-		if (ImGui::SliderFloat("Y", &visuals.sunPositionYUI, -1, 1))
-			UpdateSunPosition(Pos::y);
+		if (ImGui::SliderFloat("Y", &(glm::value_ptr(visuals.sunPositionUI)[1]), -1, 1))
+			UpdateSun();
 
-		if (ImGui::SliderFloat("Z", &visuals.sunPositionZUI, -1, 1))
-			UpdateSunPosition(Pos::z);
+		if (ImGui::SliderFloat("Z", &(glm::value_ptr(visuals.sunPositionUI)[2]), -1, 1))
+			UpdateSun();
 
 
 		ImGui::Separator();
 	}
 
-	void VisualsMenu::UpdateSunColor()
+	void VisualsMenu::UpdateSun()
 	{
-		if (sunColor == (float*)0x4 && Mod::GetGameInterface()->GetSun()->color != (float*)0x4)
-			sunColor = Mod::GetGameInterface()->GetSun()->color;
-		else if (sunColor != Mod::GetGameInterface()->GetSun()->color)
-			sunColor = Mod::GetGameInterface()->GetSun()->color;
-		
-		if (sunColor != (float*)0x4)
-		{
-			for (int i = 0; i < 3; ++i)
-				sunColor[i] = visuals.sunColorUI[i] * visuals.sunBrightness;
-		}
-	}
-
-	void VisualsMenu::UpdateSunPosition(int axis)
-	{
-		if (sunPosition == (float*)0x10 && Mod::GetGameInterface()->GetSun()->position != (float*)0x10)
-			sunPosition = Mod::GetGameInterface()->GetSun()->position;
-		else if (sunPosition != Mod::GetGameInterface()->GetSun()->position)
-			sunPosition = Mod::GetGameInterface()->GetSun()->position;
-
-		if (sunPosition != (float*)0x10)
-		{
-			switch (axis)
-			{
-				case Pos::x:
-					sunPosition[axis] = visuals.sunPositionXUI;
-					break;
-				case Pos::y:
-					sunPosition[axis] = visuals.sunPositionYUI;
-					break;
-				case Pos::z:
-					sunPosition[axis] = visuals.sunPositionZUI;
-					break;
-			}
-		}
+		IWXMVM::Types::Sun sun = { glm::make_vec3(visuals.sunColorUI), glm::make_vec3(visuals.sunPositionUI), visuals.sunBrightness };
+		Mod::GetGameInterface()->SetSun(sun);
 	}
 
 	void VisualsMenu::UpdateSunAngle()
@@ -143,12 +106,11 @@ namespace IWXMVM::UI
 		float radius = 1;
 		glm::vec3 rotation = { visuals.sunPitch, visuals.sunYaw ,0 };
 		
-		visuals.sunPositionXUI = (float)(origin + radius * cos(2*pi*(rotation.y/360)) * cos(2*pi*(rotation.x/360)));
-		visuals.sunPositionYUI = (float)(origin + radius * sin(2 * pi * (rotation.y / 360)) * cos(2 * pi * (rotation.z / 360)));
-		visuals.sunPositionZUI = -(float)(origin + radius * sin(2 * pi * (rotation.x / 360)));
-		UpdateSunPosition(Pos::x);
-		UpdateSunPosition(Pos::y);
-		UpdateSunPosition(Pos::z);
+		visuals.sunPositionUI.x = (float)(origin + radius * cos(2*pi*(rotation.y/360)) * cos(2*pi*(rotation.x/360)));
+		visuals.sunPositionUI.y = (float)(origin + radius * sin(2 * pi * (rotation.y / 360)) * cos(2 * pi * (rotation.z / 360)));
+		visuals.sunPositionUI.z = -(float)(origin + radius * sin(2 * pi * (rotation.x / 360)));
+
+		UpdateSun();
 	}
 
 	void VisualsMenu::Release()
