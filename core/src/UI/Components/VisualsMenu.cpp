@@ -72,10 +72,11 @@ namespace IWXMVM::UI
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Spacing
 
-		if (ImGui::SliderFloat("Pitch", &visuals.sunPitch, 0, 360))
+		// ImGui::SliderAngle sets sun angles in radians but displays them as degrees
+		if (ImGui::SliderAngle("Pitch", &visuals.sunPitch, 0, 360))
 			UpdateSunAngle();
 
-		if (ImGui::SliderFloat("Yaw", &visuals.sunYaw, 0, 360))
+		if (ImGui::SliderAngle("Yaw", &visuals.sunYaw, 0, 360))
 			UpdateSunAngle();
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Spacing
@@ -106,9 +107,9 @@ namespace IWXMVM::UI
 		float radius = 1;
 		glm::vec3 rotation = { visuals.sunPitch, visuals.sunYaw ,0 };
 		
-		visuals.sunPositionUI.x = (float)(origin + radius * cos(2*pi*(rotation.y/360)) * cos(2*pi*(rotation.x/360)));
-		visuals.sunPositionUI.y = (float)(origin + radius * sin(2 * pi * (rotation.y / 360)) * cos(2 * pi * (rotation.z / 360)));
-		visuals.sunPositionUI.z = -(float)(origin + radius * sin(2 * pi * (rotation.x / 360)));
+		visuals.sunPositionUI.x = (float)(origin + radius * cos(rotation.y) * cos(rotation.x));
+		visuals.sunPositionUI.y = (float)(origin + radius * sin(rotation.y) * cos(rotation.z));
+		visuals.sunPositionUI.z = -(float)(origin + radius * sin(rotation.x));
 
 		UpdateSun();
 	}
