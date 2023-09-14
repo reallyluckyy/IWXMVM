@@ -9,6 +9,7 @@
 #include "Types/MouseMode.hpp"
 #include "Types/Dvar.hpp"
 #include "Types/Sun.hpp"
+#include "Types/Dof.hpp"
 
 namespace IWXMVM
 {
@@ -52,7 +53,9 @@ namespace IWXMVM
 		virtual std::optional<Types::Dvar> GetDvar(const std::string_view name) = 0;
 
 		virtual Types::Sun GetSun() = 0;
+		virtual Types::DoF GetDof() = 0;
 		virtual void SetSun(Types::Sun) = 0;
+		virtual void SetDof(Types::DoF, Types::DoFSetting) = 0;
 
 	private:
 		Types::Game game;

@@ -1,6 +1,7 @@
 #pragma once
 #include "UI/UIComponent.hpp"
 #include "glm/vec3.hpp"
+#include "Types/dof.hpp"
 
 namespace IWXMVM::UI
 {
@@ -14,16 +15,16 @@ namespace IWXMVM::UI
 		struct Visuals
 		{
 			//DOF
-			bool* dofActive;
-			float* dofFarBlur;
-			float* dofFarStart;
-			float* dofFarEnd;
+			bool dofActive;
+			float dofFarBlur;
+			float dofFarStart;
+			float dofFarEnd;
 
-			float* dofNearBlur;
-			float* dofNearStart;
-			float* dofNearEnd;
+			float dofNearBlur;
+			float dofNearStart;
+			float dofNearEnd;
 
-			float* dofBias;
+			float dofBias;
 
 			//SUN
 			glm::vec3 sunColorUI;
@@ -32,15 +33,14 @@ namespace IWXMVM::UI
 			float sunYaw;
 			float sunBrightness = 1;
 		};
-		enum Pos
-		{
-			x, y, z
-		};
 		void Initialize() final;
 		void RenderDOF();
 		void RenderSun();
 		void UpdateSun();
 		void UpdateSunAngle();
+
+		IWXMVM::Types::DoF dof;
+
 		Visuals visuals;
 		float* sunColor = (float*)0x4;
 		float* sunPosition = (float*)0x10;

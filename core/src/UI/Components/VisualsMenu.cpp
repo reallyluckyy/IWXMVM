@@ -8,18 +8,6 @@ namespace IWXMVM::UI
 {
 	void VisualsMenu::Initialize()
 	{
-		visuals = {
-			reinterpret_cast<bool*>(&(Mod::GetGameInterface()->GetDvar("r_dof_tweak").value().value->uint32)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_farBlur").value().value->floating_point)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_farEnd").value().value->floating_point)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_farStart").value().value->floating_point)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearBlur").value().value->floating_point)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearStart").value().value->floating_point)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_nearEnd").value().value->floating_point)),
-			reinterpret_cast<float*>(&(Mod::GetGameInterface()->GetDvar("r_dof_bias").value().value->floating_point))
-		};
-
-		
 	}
 
 	void VisualsMenu::Render()
@@ -40,20 +28,53 @@ namespace IWXMVM::UI
 
 		ImGui::Text("DOF:");
 
-		ImGui::Checkbox("Enable DOF", visuals.dofActive);
-		ImGui::SliderFloat("Far Blur", visuals.dofFarBlur, 0, 10);
-		ImGui::SliderFloat("Far Start", visuals.dofFarStart, 0, 5000);
-		ImGui::SliderFloat("Far End", visuals.dofFarEnd, 0, 5000);
+		if (ImGui::Checkbox("Enable DOF", &visuals.dofActive))
+		{
+			dof.enabled = visuals.dofActive;
+			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::enabled);
+		}
+
+		if (ImGui::SliderFloat("Far Blur", &visuals.dofFarBlur, 0, 10))
+		{
+			dof.farBlur = visuals.dofFarBlur;
+			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::farBlur);
+		}
+		if (ImGui::SliderFloat("Far Start", &visuals.dofFarStart, 0, 5000))
+		{
+			dof.farStart = visuals.dofFarStart;
+			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::farStart);
+		}
+		if (ImGui::SliderFloat("Far End", &visuals.dofFarEnd, 0, 5000))
+		{
+			dof.farEnd = visuals.dofFarEnd;
+			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::farEnd);
+		}
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Spacing
 
-		ImGui::SliderFloat("Near Blur", visuals.dofNearBlur, 0, 10);
-		ImGui::SliderFloat("Near Start", visuals.dofNearStart, 0, 1000);
-		ImGui::SliderFloat("Near End", visuals.dofNearEnd, 0, 1000);
+		if (ImGui::SliderFloat("Near Blur", &visuals.dofNearBlur, 0, 10))
+		{
+			dof.nearBlur = visuals.dofNearBlur;
+			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::nearBlur);
+		}
+		if (ImGui::SliderFloat("Near Start", &visuals.dofNearStart, 0, 5000))
+		{
+			dof.nearStart = visuals.dofNearStart;
+			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::nearStart);
+		}
+		if (ImGui::SliderFloat("Near End", &visuals.dofNearEnd, 0, 5000))
+		{
+			dof.nearEnd = visuals.dofNearEnd;
+			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::nearEnd);
+		}
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Spacing
 
-		ImGui::SliderFloat("Bias", visuals.dofBias, 0, 10);
+		if (ImGui::SliderFloat("Bias", &visuals.dofBias, 0, 10))
+		{
+			dof.bias = visuals.dofBias;
+			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::bias);
+		}
 
 		ImGui::Separator();
 	}
