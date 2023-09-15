@@ -188,7 +188,7 @@ namespace IWXMVM::IW3
 		Types::Sun GetSun() final
 		{
 			Structures::sun** sunPtr = reinterpret_cast<Structures::sun**>(0x400000 + 0xCC702A8);
-			Structures::sun* iw3Sun = reinterpret_cast<Structures::sun*>(*sunPtr);
+			Structures::sun* iw3Sun = *sunPtr;
 
 			Types::Sun sun;
 			sun.color = glm::make_vec3(iw3Sun->Color);
@@ -215,7 +215,7 @@ namespace IWXMVM::IW3
 		void SetSun(Types::Sun sun) final
 		{
 			Structures::sun** sunPtr = reinterpret_cast<Structures::sun**>(0x400000 + 0xCC702A8);
-			Structures::sun* iw3Sun = reinterpret_cast<Structures::sun*>(*sunPtr);
+			Structures::sun* iw3Sun = *sunPtr;
 
 			if (iw3Sun)
 			{
