@@ -1,5 +1,7 @@
 #include "StdInclude.hpp"
 #include "CustomImGuiControls.hpp"
+#include "Resources.hpp"
+#include "Types/Marker.hpp"
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -9,6 +11,29 @@
 
 namespace ImGui
 {
+	void TimelineMarkers(const std::vector<IWXMVM::Types::Marker>& markers, std::uint32_t endTick)
+	{
+		ImGuiWindow* window = GetCurrentWindow();
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+		const float w = CalcItemWidth();
+
+		const ImVec2 label_size = CalcTextSize("##demoTimeline", NULL, true);
+		const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
+		const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
+
+		const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
+		const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
+
+		for (const auto& marker : markers)
+		{
+			const auto percentage = static_cast<float>(marker.tick) / static_cast<float>(endTick);
+			const auto x = frame_bb.Min.x + percentage * barLength;
+			window->DrawList->AddText(ImVec2(x - textSize.x / 2, frame_bb.Min.y + (barHeight - textSize.y) / 2), GetColorU32(ImGuiCol_Button), ICON_FA_DIAMOND);
+		}
+	}
+
 	void DemoProgressBarLines(std::uint32_t currentTick, std::uint32_t endTick)
 	{
 		constexpr std::size_t MARKER_DISTANCE = 5000;
