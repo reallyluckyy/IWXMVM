@@ -193,20 +193,21 @@ namespace IWXMVM::IW3
 			Types::Sun sun;
 			sun.color = glm::make_vec3(iw3Sun->Color);
 			sun.position = glm::make_vec3(iw3Sun->Position);
+			sun.brightness = 1;
 			return sun;
 		}
 
 		Types::DoF GetDof()
 		{
 			Types::DoF dof = {
-				(bool)(GetDvar("r_dof_tweak").value().value->uint32),
-				GetDvar("r_dof_farBlur").value().value->floating_point,
-				GetDvar("r_dof_farEnd").value().value->floating_point,
-				GetDvar("r_dof_farStart").value().value->floating_point,
-				GetDvar("r_dof_nearBlur").value().value->floating_point,
-				GetDvar("r_dof_nearStart").value().value->floating_point,
-				GetDvar("r_dof_nearEnd").value().value->floating_point,
-				GetDvar("r_dof_bias").value().value->floating_point
+				Structures::FindDvar("r_dof_tweak")->current.enabled && Structures::FindDvar("r_dof_enable")->current.enabled,
+				Structures::FindDvar("r_dof_farBlur")->current.value,
+				Structures::FindDvar("r_dof_farStart")->current.value,
+				Structures::FindDvar("r_dof_farEnd")->current.value,
+				Structures::FindDvar("r_dof_nearBlur")->current.value,
+				Structures::FindDvar("r_dof_nearStart")->current.value,
+				Structures::FindDvar("r_dof_nearEnd")->current.value,
+				Structures::FindDvar("r_dof_bias")->current.value
 			};
 
 			return dof;
@@ -227,35 +228,17 @@ namespace IWXMVM::IW3
 			}
 		}
 
-		void SetDof(Types::DoF dof, Types::DoFSetting setting) final
+		void SetDof(Types::DoF dof) final
 		{
-			switch (setting)
-			{
-				case Types::DoFSetting::enabled:
-					Mod::GetGameInterface()->GetDvar("r_dof_tweak").value().value->uint32 = dof.enabled;
-					break;
-				case Types::DoFSetting::farBlur:
-					Mod::GetGameInterface()->GetDvar("r_dof_farBlur").value().value->floating_point = dof.farBlur;
-					break;
-				case Types::DoFSetting::farStart:
-					Mod::GetGameInterface()->GetDvar("r_dof_farStart").value().value->floating_point = dof.farStart;
-					break;
-				case Types::DoFSetting::farEnd:
-					Mod::GetGameInterface()->GetDvar("r_dof_farEnd").value().value->floating_point = dof.farEnd;
-					break;
-				case Types::DoFSetting::nearBlur:
-					Mod::GetGameInterface()->GetDvar("r_dof_nearBlur").value().value->floating_point = dof.nearBlur;
-					break;
-				case Types::DoFSetting::nearStart:
-					Mod::GetGameInterface()->GetDvar("r_dof_nearStart").value().value->floating_point = dof.nearStart;
-					break;
-				case Types::DoFSetting::nearEnd:
-					Mod::GetGameInterface()->GetDvar("r_dof_nearEnd").value().value->floating_point = dof.nearEnd;
-					break;
-				case Types::DoFSetting::bias:
-					Mod::GetGameInterface()->GetDvar("r_dof_bias").value().value->floating_point = dof.bias;
-					break;
-			}
+			Structures::FindDvar("r_dof_tweak")->current.enabled = dof.enabled;
+			Structures::FindDvar("r_dof_enable")->current.enabled = dof.enabled;
+			Structures::FindDvar("r_dof_farBlur")->current.value = dof.farBlur;
+			Structures::FindDvar("r_dof_farStart")->current.value = dof.farStart;
+			Structures::FindDvar("r_dof_farEnd")->current.value = dof.farEnd;
+			Structures::FindDvar("r_dof_nearBlur")->current.value = dof.nearBlur;
+			Structures::FindDvar("r_dof_nearStart")->current.value = dof.nearStart;
+			Structures::FindDvar("r_dof_nearEnd")->current.value = dof.nearEnd;
+			Structures::FindDvar("r_dof_bias")->current.value = dof.bias;
 		}
 	};
 }

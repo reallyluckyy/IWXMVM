@@ -33,18 +33,16 @@ namespace IWXMVM::UI
 			float sunYaw;
 			float sunBrightness = 1;
 		};
+
 		void Initialize() final;
 		void RenderDOF();
 		void RenderSun();
+
+		void UpdateDof();
 		void UpdateSun();
 		void UpdateSunAngle();
 
-		IWXMVM::Types::DoF dof;
-
 		Visuals visuals;
-		float* sunColor = (float*)0x4;
-		float* sunPosition = (float*)0x10;
-		float initColors[3] = { 0.6, 0.2, 0.8 };
-		float initPosition[3] = { 0, 0, 0 };
+		bool visualsInitialized = false;
 	};
 }

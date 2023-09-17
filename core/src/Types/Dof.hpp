@@ -13,16 +13,4 @@ namespace IWXMVM::Types
 		float nearEnd;
 		float bias;
 	};
-
-	enum DoFSetting
-	{
-		enabled,
-		farBlur,
-		farStart,
-		farEnd,
-		nearBlur,
-		nearStart,
-		nearEnd,
-		bias
-	};
 }

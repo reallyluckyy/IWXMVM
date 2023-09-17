@@ -55,7 +55,7 @@ namespace IWXMVM
 		virtual Types::Sun GetSun() = 0;
 		virtual Types::DoF GetDof() = 0;
 		virtual void SetSun(Types::Sun) = 0;
-		virtual void SetDof(Types::DoF, Types::DoFSetting) = 0;
+		virtual void SetDof(Types::DoF) = 0;
 
 	private:
 		Types::Game game;

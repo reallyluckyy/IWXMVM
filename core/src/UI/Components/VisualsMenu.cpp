@@ -3,11 +3,42 @@
 #include "Mod.hpp"
 
 #include "UI/UIManager.hpp"
+#include "Events.hpp"
 
 namespace IWXMVM::UI
 {
 	void VisualsMenu::Initialize()
 	{
+		// TODO: Come up with a proper plan on when we want to initialize the UI values from the games values
+		// TODO: Ideally we dont want to ever overwrite a users custom settings, but what if the map changes,
+		// TODO: the user hasnt edited the sun settings yet, and suddenly the sun is in a different position?
+
+		Events::RegisterListener(EventType::OnDemoLoad, [&]() 
+			{
+				if (visualsInitialized)
+					return;
+
+				auto dof = Mod::GetGameInterface()->GetDof();
+				auto sun = Mod::GetGameInterface()->GetSun();
+
+				visuals = {
+					dof.enabled,
+					dof.farBlur,
+					dof.farStart,
+					dof.farEnd,
+					dof.nearBlur,
+					dof.nearStart,
+					dof.nearEnd,
+					dof.bias,
+					glm::make_vec3(sun.color),
+					glm::make_vec3(sun.position),
+					0, // TODO: initialize pitch and yaw
+					0,
+					sun.brightness
+				};
+
+				visualsInitialized = true;
+			});
 	}
 
 	void VisualsMenu::Render()
@@ -26,55 +57,35 @@ namespace IWXMVM::UI
 	{
 		ImGui::AlignTextToFramePadding();
 
-		ImGui::Text("DOF:");
+		ImGui::Text("Depth of Field");
 
 		if (ImGui::Checkbox("Enable DOF", &visuals.dofActive))
-		{
-			dof.enabled = visuals.dofActive;
-			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::enabled);
-		}
+			UpdateDof();
 
 		if (ImGui::SliderFloat("Far Blur", &visuals.dofFarBlur, 0, 10))
-		{
-			dof.farBlur = visuals.dofFarBlur;
-			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::farBlur);
-		}
+			UpdateDof();
+
 		if (ImGui::SliderFloat("Far Start", &visuals.dofFarStart, 0, 5000))
-		{
-			dof.farStart = visuals.dofFarStart;
-			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::farStart);
-		}
+			UpdateDof();
+
 		if (ImGui::SliderFloat("Far End", &visuals.dofFarEnd, 0, 5000))
-		{
-			dof.farEnd = visuals.dofFarEnd;
-			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::farEnd);
-		}
+			UpdateDof();
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Spacing
 
 		if (ImGui::SliderFloat("Near Blur", &visuals.dofNearBlur, 0, 10))
-		{
-			dof.nearBlur = visuals.dofNearBlur;
-			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::nearBlur);
-		}
+			UpdateDof();
+
 		if (ImGui::SliderFloat("Near Start", &visuals.dofNearStart, 0, 5000))
-		{
-			dof.nearStart = visuals.dofNearStart;
-			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::nearStart);
-		}
+			UpdateDof();
+
 		if (ImGui::SliderFloat("Near End", &visuals.dofNearEnd, 0, 5000))
-		{
-			dof.nearEnd = visuals.dofNearEnd;
-			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::nearEnd);
-		}
+			UpdateDof();
 
 		ImGui::Dummy(ImVec2(0.0f, 20.0f)); // Spacing
 
-		if (ImGui::SliderFloat("Bias", &visuals.dofBias, 0, 10))
-		{
-			dof.bias = visuals.dofBias;
-			Mod::GetGameInterface()->SetDof(dof, IWXMVM::Types::DoFSetting::bias);
-		}
+		if (ImGui::SliderFloat("Bias", &visuals.dofBias, 0.1, 10))
+			UpdateDof();
 
 		ImGui::Separator();
 	}
@@ -83,7 +94,7 @@ namespace IWXMVM::UI
 	{
 		ImGui::AlignTextToFramePadding();
 
-		ImGui::Text("Sun:");
+		ImGui::Text("Sun");
 
 		if (ImGui::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI)))
 			UpdateSun();
@@ -115,22 +126,27 @@ namespace IWXMVM::UI
 		ImGui::Separator();
 	}
 
+	void VisualsMenu::UpdateDof()
+	{
+		Types::DoF dofSettings = { visuals.dofActive, visuals.dofFarBlur, visuals.dofFarStart, visuals.dofFarEnd, visuals.dofNearBlur, visuals.dofNearStart, visuals.dofNearEnd, visuals.dofBias };
+		Mod::GetGameInterface()->SetDof(dofSettings);
+	}
+
 	void VisualsMenu::UpdateSun()
 	{
-		IWXMVM::Types::Sun sun = { glm::make_vec3(visuals.sunColorUI), glm::make_vec3(visuals.sunPositionUI), visuals.sunBrightness };
-		Mod::GetGameInterface()->SetSun(sun);
+		IWXMVM::Types::Sun sunSettings = { glm::make_vec3(visuals.sunColorUI), glm::make_vec3(visuals.sunPositionUI), visuals.sunBrightness };
+		Mod::GetGameInterface()->SetSun(sunSettings);
 	}
 
 	void VisualsMenu::UpdateSunAngle()
 	{
-		constexpr double pi = 3.14159265358979323846;
 		float origin = 0;
 		float radius = 1;
-		glm::vec3 rotation = { visuals.sunPitch, visuals.sunYaw ,0 };
+		glm::vec3 rotation = { visuals.sunPitch, visuals.sunYaw, 0 };
 		
-		visuals.sunPositionUI.x = (float)(origin + radius * cos(rotation.y) * cos(rotation.x));
-		visuals.sunPositionUI.y = (float)(origin + radius * sin(rotation.y) * cos(rotation.z));
-		visuals.sunPositionUI.z = -(float)(origin + radius * sin(rotation.x));
+		visuals.sunPositionUI.x = origin + radius * glm::cos(rotation.y) * glm::cos(rotation.x);
+		visuals.sunPositionUI.y = origin + radius * glm::sin(rotation.y) * glm::cos(rotation.z);
+		visuals.sunPositionUI.z = -(origin + radius * glm::sin(rotation.x));
 
 		UpdateSun();
 	}
