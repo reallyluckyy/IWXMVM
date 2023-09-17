@@ -23,6 +23,11 @@ namespace IWXMVM
 		return ImGui::IsMouseDown(mouseButton);
 	}
 
+	bool Input::MouseButtonDown(ImGuiMouseButton mouseButton)
+	{
+		return ImGui::IsMouseClicked(mouseButton);
+	}
+
 	glm::vec2 Input::GetMouseDelta()
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -55,6 +60,19 @@ namespace IWXMVM
 		else if (std::holds_alternative<ImGuiMouseButton_>(bind)) 
 		{
 			return MouseButtonHeld(std::get<ImGuiMouseButton_>(bind));
+		}
+		return false; // Invalid bind
+	}
+
+	bool Input::BindDown(std::string_view bindName)
+	{
+		Key bind = InputConfiguration::Get().GetKeyBind(bindName);
+		if (std::holds_alternative<ImGuiKey>(bind))
+		{
+			return KeyDown(std::get<ImGuiKey>(bind));
+		} else if (std::holds_alternative<ImGuiMouseButton_>(bind))
+		{
+			return MouseButtonDown(std::get<ImGuiMouseButton_>(bind));
 		}
 		return false; // Invalid bind
 	}

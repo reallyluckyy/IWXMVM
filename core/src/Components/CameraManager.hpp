@@ -1,8 +1,10 @@
 #pragma once
 #include "Camera.hpp"
 #include "DefaultCamera.hpp"
-#include "OrbitCamera.hpp"
+#include "DollyCamera.hpp"
 #include "FreeCamera.hpp"
+#include "OrbitCamera.hpp"
+#include "Types/Marker.hpp"
 
 namespace IWXMVM::Components
 {
@@ -23,6 +25,8 @@ namespace IWXMVM::Components
 
 		std::unique_ptr<Camera>& GetActiveCamera() { return cameras[activeCameraIndex]; }
 		std::unique_ptr<Camera>& GetCamera(Camera::Mode mode);
+		const std::vector<Types::Marker>& GetMarkers() const { return markers; }
+		void AddMarker(Types::Marker marker);
 		void SetActiveCamera(Camera::Mode mode);
 
 		std::string_view GetCameraModeLabel(Camera::Mode cameraMode);
@@ -42,7 +46,7 @@ namespace IWXMVM::Components
 			tmp.push_back(std::make_unique<DefaultCamera>(DefaultCamera(Camera::Mode::ThirdPerson)));
 			tmp.push_back(std::make_unique<FreeCamera>(FreeCamera()));
 			tmp.push_back(std::make_unique<OrbitCamera>(OrbitCamera()));
-			tmp.push_back(std::make_unique<DefaultCamera>(DefaultCamera(Camera::Mode::Dolly)));
+			tmp.push_back(std::make_unique<DollyCamera>(DollyCamera()));
 			tmp.push_back(std::make_unique<DefaultCamera>(DefaultCamera(Camera::Mode::Bone)));
 			
 			if (tmp.size() != (int)Camera::Mode::Count) 
@@ -54,5 +58,8 @@ namespace IWXMVM::Components
 		}();
 
 		int activeCameraIndex = 0;
+
+		// Vector storing camera markers in order of ticks
+		std::vector<Types::Marker> markers;
 	};
 }

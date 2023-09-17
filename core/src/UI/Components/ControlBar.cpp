@@ -2,6 +2,7 @@
 #include "ControlBar.hpp"
 
 #include "Mod.hpp"
+#include "Components/CameraManager.hpp"
 #include "CustomImGuiControls.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
@@ -78,6 +79,9 @@ namespace IWXMVM::UI
 
 			ImGui::SameLine(progressBarX);
 			ImGui::DemoProgressBarLines(demoInfo.currentTick, demoInfo.endTick);
+
+			ImGui::SameLine(progressBarX);
+			ImGui::TimelineMarkers(Components::CameraManager::Get().GetMarkers(), demoInfo.endTick);
 			
 			ImGui::SameLine();
 			ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());

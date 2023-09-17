@@ -47,6 +47,34 @@ namespace IWXMVM::Components
 		}
 
 		GetActiveCamera()->Update();
+
+		// Modifying markers shouldn't be possible while in Dolly mode
+		if (GetActiveCamera()->GetMode() != Camera::Mode::Dolly)
+		{
+			if (Input::BindDown("dollyAddMarker"))
+			{
+				Types::Marker marker{};
+				marker.position = GetActiveCamera()->GetPosition();
+				marker.rotation = GetActiveCamera()->GetRotation();
+				marker.fov = GetActiveCamera()->GetFov();
+				marker.tick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+				AddMarker(marker);
+
+				LOG_DEBUG("Placed marker at (x: {}; y: {}; z: {}) with (pitch: {}; yaw: {}; roll: {}) at tick {}", marker.position.x, marker.position.y, marker.position.z, marker.rotation.x, marker.rotation.y, marker.rotation.z, marker.tick);
+			}
+
+			if (Input::BindDown("dollyClearMarkers"))
+			{
+				markers.clear();
+
+				LOG_DEBUG("Markers cleared");
+			}
+
+			if (Input::BindDown("dollyPlayPath"))
+			{
+				SetActiveCamera(Camera::Mode::Dolly);
+			}
+		}
 	}
 
 	void CameraManager::Initialize()
@@ -80,6 +108,27 @@ namespace IWXMVM::Components
 		}
 
 		throw std::runtime_error("Failed to find camera with desired mode");
+	}
+
+	void CameraManager::AddMarker(Types::Marker marker)
+	{
+		// If there's another marker at this tick already, overwrite it
+		for (auto& m : markers)
+		{
+			if (m.tick == marker.tick)
+			{
+				m = marker;
+				return;
+			}
+		}
+
+		markers.push_back(marker);
+
+		// Vector needs to always be sorted in ascending order by marker ticks
+		std::sort(markers.begin(), markers.end(), [](const Types::Marker& a, const Types::Marker& b)
+			{
+				return a.tick < b.tick;
+			});
 	}
 
 	void CameraManager::SetActiveCamera(Camera::Mode mode)

@@ -30,7 +30,11 @@ namespace IWXMVM
 
 			{"orbitCameraReset", ImGuiKey_F4},
 			{"orbitCameraRotate", ImGuiMouseButton_Middle},
-			{"orbitCameraMove", ImGuiMouseButton_Right}
+			{"orbitCameraMove", ImGuiMouseButton_Right},
+
+			{"dollyAddMarker", ImGuiKey_K},
+			{"dollyClearMarkers", ImGuiKey_L},
+			{"dollyPlayPath", ImGuiKey_J}
 		};
 	}
 

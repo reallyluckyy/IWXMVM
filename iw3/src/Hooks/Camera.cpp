@@ -12,16 +12,17 @@ namespace IWXMVM::IW3::Hooks::Camera
 
 	void R_SetViewParmsForScene() 
 	{
+		auto& refdef = Structures::GetClientGlobals()->refdef;
+
 		auto& camera = Components::CameraManager::Get().GetActiveCamera();
 
 		if (!camera->IsModControlledCameraMode())
 		{
-			// TODO: if we want to use the first/third person cameras position in core, 
-			// TODO: we'd have to update it here with the values from refdef
+			camera->GetPosition() = *reinterpret_cast<glm::vec3*>(refdef.vieworg);
+			camera->GetFov() = glm::degrees(std::atan(refdef.tanHalfFovX) * 2.0f);
 			return;
 		}
 
-		auto& refdef = Structures::GetClientGlobals()->refdef;
 		refdef.vieworg[0] = camera->GetPosition()[0];
 		refdef.vieworg[1] = camera->GetPosition()[1];
 		refdef.vieworg[2] = camera->GetPosition()[2];
@@ -46,7 +47,10 @@ namespace IWXMVM::IW3::Hooks::Camera
 		auto& camera = Components::CameraManager::Get().GetActiveCamera();
 
 		if (!camera->IsModControlledCameraMode())
+		{
+			camera->GetRotation() = *reinterpret_cast<glm::vec3*>(angles);
 			return;
+		}
 
 		angles[0] = camera->GetRotation()[0];
 		angles[1] = camera->GetRotation()[1];
@@ -136,7 +140,7 @@ namespace IWXMVM::IW3::Hooks::Camera
 		auto& camera = Components::CameraManager::Get().GetActiveCamera();
 		auto isFreeCamera = camera->IsModControlledCameraMode();
 
-		Structures::FindDvar("cg_thirdperson")->current.enabled = (isFreeCamera) ? 1 : 0;
+		Structures::FindDvar("cg_thirdperson")->current.enabled = (camera->GetMode() == Components::Camera::Mode::ThirdPerson || isFreeCamera) ? 1 : 0;
 		Structures::FindDvar("cg_draw2d")->current.enabled = (isFreeCamera) ? 0 : 1;
 		Structures::FindDvar("cg_drawShellshock")->current.enabled = (isFreeCamera) ? 0 : 1;
 
