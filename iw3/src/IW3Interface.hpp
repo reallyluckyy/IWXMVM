@@ -8,6 +8,7 @@
 #include "DemoParser.hpp"
 #include "Hooks/Camera.hpp"
 #include "Addresses.hpp"
+#include "Patches.hpp"
 
 #include "glm/vec3.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -20,9 +21,10 @@ namespace IWXMVM::IW3
 
 		IW3Interface() : GameInterface(Types::Game::IW3) {}
 
-		void InstallHooks() final
+		void InstallHooksAndPatches() final
 		{
 			Hooks::Install();
+			Patches::GetGamePatches();
 		}
 
 		void SetupEventListeners() final
@@ -234,6 +236,21 @@ namespace IWXMVM::IW3
 			Structures::FindDvar("r_dof_nearStart")->current.value = dof.nearStart;
 			Structures::FindDvar("r_dof_nearEnd")->current.value = dof.nearEnd;
 			Structures::FindDvar("r_dof_bias")->current.value = dof.bias;
+    }
+
+		std::atomic<std::int32_t> tick;
+
+		std::atomic<std::int32_t>& GetTickDelta() final
+		{
+			return tick;
+		}
+
+		void SetTickDelta(std::int32_t value) final
+		{
+			if (value > 0)
+				Structures::GetClientStatic()->realtime += value;
+			else if (value < 0)
+				tick.store(value);
 		}
 	};
 }

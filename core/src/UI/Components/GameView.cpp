@@ -4,6 +4,7 @@
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "Events.hpp"
 
 
 namespace IWXMVM::UI
@@ -90,12 +91,12 @@ namespace IWXMVM::UI
 
 		ImGui::SetNextItemWidth(300);
 
-		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager.GetCameraModeLabel(currentCamera.GetMode()).data()))
+		if (ImGui::BeginCombo("##gameViewCameraCombo", cameraManager.GetCameraModeLabel(currentCamera->GetMode()).data()))
 		{
 			for (auto cameraMode : cameraManager.GetCameraModes())
 			{
-				bool isSelected = currentCamera.GetMode() == cameraMode;
-				if (ImGui::Selectable(cameraManager.GetCameraModeLabel(cameraMode).data(), currentCamera.GetMode() == cameraMode))
+				bool isSelected = currentCamera->GetMode() == cameraMode;
+				if (ImGui::Selectable(cameraManager.GetCameraModeLabel(cameraMode).data(), currentCamera->GetMode() == cameraMode))
 				{
 					cameraManager.SetActiveCamera(cameraMode);
 				}
@@ -108,7 +109,7 @@ namespace IWXMVM::UI
 			ImGui::EndCombo();
 		}
 
-		if (currentCamera.GetMode() == Components::Camera::Mode::FirstPerson)
+		if (currentCamera->GetMode() == Components::Camera::Mode::FirstPerson)
 		{
 			ImGui::SameLine();
 
@@ -173,6 +174,8 @@ namespace IWXMVM::UI
 		ImGui::SetCursorPosX((viewportSize.x - textureSize.x) / 2.0f);
 		ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f + topBarHeight);
 		ImGui::Image((void*)texture, textureSize);
+
+		Events::Invoke(EventType::OnRenderGameView);
 
 		ImGui::End();
 

@@ -24,7 +24,7 @@ namespace IWXMVM
 
 		Types::Game GetGame() const { return game; }
 
-		virtual void InstallHooks() = 0;
+		virtual void InstallHooksAndPatches() = 0;
 		virtual void SetupEventListeners() = 0;
 
 		virtual uintptr_t GetWndProc() = 0;
@@ -48,6 +48,9 @@ namespace IWXMVM
 
 		virtual void ToggleDemoPlaybackState() = 0;
 		virtual bool IsDemoPlaybackPaused() = 0;
+
+		virtual std::atomic<std::int32_t>& GetTickDelta() = 0;
+		virtual void SetTickDelta(std::int32_t) = 0;
 
 		// perhaps dvars shouldnt be exposed to core at all?
 		virtual std::optional<Types::Dvar> GetDvar(const std::string_view name) = 0;
