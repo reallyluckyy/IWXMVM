@@ -10,6 +10,9 @@
 #include "Addresses.hpp"
 #include "Patches.hpp"
 
+#include "glm/vec3.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 namespace IWXMVM::IW3
 {
 	class IW3Interface : public GameInterface
@@ -183,6 +186,57 @@ namespace IWXMVM::IW3
 
 			return dvar;
 		}
+
+		Types::Sun GetSun() final
+		{
+			auto gfxWorld = Structures::GetGfxWorld();
+
+			Types::Sun sun;
+			sun.color = glm::make_vec3(gfxWorld->sunLight->color);
+			sun.position = glm::make_vec3(gfxWorld->sunLight->dir);
+			sun.brightness = 1;
+			return sun;
+		}
+
+		Types::DoF GetDof()
+		{
+			Types::DoF dof = {
+				Structures::FindDvar("r_dof_tweak")->current.enabled && Structures::FindDvar("r_dof_enable")->current.enabled,
+				Structures::FindDvar("r_dof_farBlur")->current.value,
+				Structures::FindDvar("r_dof_farStart")->current.value,
+				Structures::FindDvar("r_dof_farEnd")->current.value,
+				Structures::FindDvar("r_dof_nearBlur")->current.value,
+				Structures::FindDvar("r_dof_nearStart")->current.value,
+				Structures::FindDvar("r_dof_nearEnd")->current.value,
+				Structures::FindDvar("r_dof_bias")->current.value
+			};
+
+			return dof;
+		}
+
+		void SetSun(Types::Sun sun) final
+		{
+			auto gfxWorld = Structures::GetGfxWorld();
+
+			for (int i = 0; i < 3; ++i)
+			{
+				gfxWorld->sunLight->color[i] = glm::value_ptr(sun.color)[i] * sun.brightness;
+				gfxWorld->sunLight->dir[i] = glm::value_ptr(sun.position)[i];
+			}
+		}
+
+		void SetDof(Types::DoF dof) final
+		{
+			Structures::FindDvar("r_dof_tweak")->current.enabled = dof.enabled;
+			Structures::FindDvar("r_dof_enable")->current.enabled = dof.enabled;
+			Structures::FindDvar("r_dof_farBlur")->current.value = dof.farBlur;
+			Structures::FindDvar("r_dof_farStart")->current.value = dof.farStart;
+			Structures::FindDvar("r_dof_farEnd")->current.value = dof.farEnd;
+			Structures::FindDvar("r_dof_nearBlur")->current.value = dof.nearBlur;
+			Structures::FindDvar("r_dof_nearStart")->current.value = dof.nearStart;
+			Structures::FindDvar("r_dof_nearEnd")->current.value = dof.nearEnd;
+			Structures::FindDvar("r_dof_bias")->current.value = dof.bias;
+    }
 
 		std::atomic<std::int32_t> tick;
 

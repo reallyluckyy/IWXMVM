@@ -142,6 +142,7 @@
     <ClCompile Include="src\UI\Components\GameView.cpp" />
     <ClCompile Include="src\UI\Components\MenuBar.cpp" />
     <ClCompile Include="src\UI\Components\PrimaryTabs.cpp" />
+    <ClCompile Include="src\UI\Components\VisualsMenu.cpp" />
     <ClCompile Include="src\UI\UIImage.cpp" />
     <ClCompile Include="src\UI\UIManager.cpp" />
     <ClCompile Include="src\Utilities\HookManager.cpp" />
@@ -157,11 +158,14 @@
     <ClInclude Include="src\Configuration\InputConfiguration.hpp" />
     <ClInclude Include="src\Input.hpp" />
     <ClInclude Include="src\Types\DemoInfo.hpp" />
+    <ClInclude Include="src\Types\Dof.hpp" />
     <ClInclude Include="src\Types\Dvar.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
     <ClInclude Include="src\Types\Marker.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />
+    <ClInclude Include="src\Types\Sun.hpp" />
+    <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />
     <ClInclude Include="src\Utilities\MathUtils.hpp" />
     <ClCompile Include="src\WindowsConsole.cpp" />

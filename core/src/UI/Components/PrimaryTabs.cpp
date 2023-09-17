@@ -33,6 +33,7 @@ namespace IWXMVM::UI
 				UIManager::Get().GetUIComponent(UI::Component::DemoLoader)->Render();
 				break;
 			case Tab::Visuals:
+				UIManager::Get().GetUIComponent(UI::Component::VisualsMenu)->Render();
 				break;
 			case Tab::Camera:
 				break;

@@ -11,6 +11,7 @@
 #include "Components/GameView.hpp"
 #include "Components/MenuBar.hpp"
 #include "Components/PrimaryTabs.hpp"
+#include "Components/VisualsMenu.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -25,6 +26,7 @@ namespace IWXMVM::UI
 			GameView,
 			PrimaryTabs,
 			DemoLoader,
+			VisualsMenu,
 			CaptureMenu,
 			ControlBar,
 			DebugPanel,
@@ -105,6 +107,7 @@ namespace IWXMVM::UI
 			std::make_unique<GameView>(),
 			std::make_unique<PrimaryTabs>(),
 			std::make_unique<DemoLoader>(),
+			std::make_unique<VisualsMenu>(),
 			std::make_unique<CaptureMenu>(),
 			std::make_unique<ControlBar>(),
 			std::make_unique<DebugPanel>(),

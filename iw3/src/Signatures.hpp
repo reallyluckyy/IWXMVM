@@ -34,6 +34,7 @@ namespace IWXMVM::IW3::Signatures
 		Sig("89 1D ?? ?? ?? ?? 5E 5F", 																		GAType::Data, 2, Lambda::DereferenceAddress)> mouseVars;
 		Sig("8B 1D ?? ?? ?? ?? 85 DB 74 E0", 																GAType::Data, 2)> fs_searchpaths;
 		Sig("F8 83 EC 3C 53 56 57", 																		GAType::Code, -5)> MainWndProc;
+		Sig("68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 68 C8 02 00 00", 												GAType::Data, 1, Lambda::DereferenceAddress)> gfxWorld;
 
 		// cod4x
 		using MType = Types::ModuleType;
