@@ -187,12 +187,11 @@ namespace IWXMVM::IW3
 
 		Types::Sun GetSun() final
 		{
-			Structures::sun** sunPtr = reinterpret_cast<Structures::sun**>(0x400000 + 0xCC702A8);
-			Structures::sun* iw3Sun = *sunPtr;
+			auto gfxWorld = Structures::GetGfxWorld();
 
 			Types::Sun sun;
-			sun.color = glm::make_vec3(iw3Sun->Color);
-			sun.position = glm::make_vec3(iw3Sun->Position);
+			sun.color = glm::make_vec3(gfxWorld->sunLight->color);
+			sun.position = glm::make_vec3(gfxWorld->sunLight->dir);
 			sun.brightness = 1;
 			return sun;
 		}
@@ -215,16 +214,12 @@ namespace IWXMVM::IW3
 
 		void SetSun(Types::Sun sun) final
 		{
-			Structures::sun** sunPtr = reinterpret_cast<Structures::sun**>(0x400000 + 0xCC702A8);
-			Structures::sun* iw3Sun = *sunPtr;
+			auto gfxWorld = Structures::GetGfxWorld();
 
-			if (iw3Sun)
+			for (int i = 0; i < 3; ++i)
 			{
-				for (int i = 0; i < 3; ++i)
-				{
-					iw3Sun->Color[i] = glm::value_ptr(sun.color)[i] * sun.brightness;
-					iw3Sun->Position[i] = glm::value_ptr(sun.position)[i];
-				}
+				gfxWorld->sunLight->color[i] = glm::value_ptr(sun.color)[i] * sun.brightness;
+				gfxWorld->sunLight->dir[i] = glm::value_ptr(sun.position)[i];
 			}
 		}
 

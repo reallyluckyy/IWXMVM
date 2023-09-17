@@ -917,11 +917,70 @@ namespace IWXMVM::IW3::Structures
 		dvar_s* hashNext;
 	};
 
-	struct sun
+	struct GfxWorldVertexData
 	{
-		char pad_0000[4]; //0x0000
-		float Color[3]; //0x0004
-		float Position[3]; //0x0010
+		void* vertices; // GfxWorldVertex*
+		IDirect3DVertexBuffer9* worldVb;
+	};
+
+	struct GfxWorldVertexLayerData
+	{
+		char* data;
+		IDirect3DVertexBuffer9* layerVb;
+	};
+
+	struct SunLightParseParams
+	{
+		char name[64];
+		float ambientScale;
+		float ambientColor[3];
+		float diffuseFraction;
+		float sunLight;
+		float sunColor[3];
+		float diffuseColor[3];
+		bool diffuseColorHasBeenSet;
+		float angles[3];
+	};
+
+	struct GfxLight
+	{
+		char type;
+		char canUseShadowMap;
+		char unused[2];
+		float color[3];
+		float dir[3];
+		float origin[3];
+		float radius;
+		float cosHalfFovOuter;
+		float cosHalfFovInner;
+		int exponent;
+		unsigned int spotShadowIndex;
+		void* def;
+	};
+
+	struct GfxWorld
+	{
+		const char* name;
+		const char* baseName;
+		int planeCount;
+		int nodeCount;
+		int indexCount;
+		unsigned __int16* indices;
+		int surfaceCount;
+		int streamInfo;
+		int skySurfCount;
+		int* skyStartSurfs;
+		void* skyImage; // originally a GfxImage*
+		char skySamplerState;
+		unsigned int vertexCount;
+		GfxWorldVertexData vd;
+		unsigned int vertexLayerDataSize;
+		GfxWorldVertexLayerData vld;
+		SunLightParseParams sunParse;
+		GfxLight* sunLight;
+		float sunColorFromBsp[3];
+		unsigned int sunPrimaryLightIndex;
+		unsigned int primaryLightCount;
 	};
 
 	struct __declspec(align(4)) WinMouseVars_t
@@ -938,6 +997,7 @@ namespace IWXMVM::IW3::Structures
 	cgs_t* GetClientGlobalsStatic();
 	cg_s* GetClientGlobals();
 	WinMouseVars_t* GetMouseVars();
+	GfxWorld* GetGfxWorld();
 
 	dvar_s* FindDvar(const std::string_view name);
 
