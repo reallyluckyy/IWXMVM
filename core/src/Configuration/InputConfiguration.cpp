@@ -20,21 +20,21 @@ namespace IWXMVM
 	void InputConfiguration::LoadDefault()
 	{
 		keyBinds = {
-			{"freeCameraForward", ImGuiKey_W},
-			{"freeCameraBackward", ImGuiKey_S},
-			{"freeCameraLeft", ImGuiKey_A},
-			{"freeCameraRight", ImGuiKey_D},
-			{"freeCameraUp", ImGuiKey_E},
-			{"freeCameraDown", ImGuiKey_Q},
-			{"freeCameraReset", ImGuiMouseButton_Middle},
+			{BIND_FREE_CAMERA_FORWARD, ImGuiKey_W},
+			{BIND_FREE_CAMERA_BACKWARD, ImGuiKey_S},
+			{BIND_FREE_CAMERA_LEFT, ImGuiKey_A},
+			{BIND_FREE_CAMERA_RIGHT, ImGuiKey_D},
+			{BIND_FREE_CAMERA_UP, ImGuiKey_E},
+			{BIND_FREE_CAMERA_DOWN, ImGuiKey_Q},
+			{BIND_FREE_CAMERA_RESET, ImGuiMouseButton_Middle},
 
-			{"orbitCameraReset", ImGuiKey_F4},
-			{"orbitCameraRotate", ImGuiMouseButton_Middle},
-			{"orbitCameraMove", ImGuiMouseButton_Right},
+			{BIND_ORBIT_CAMERA_RESET, ImGuiKey_F4},
+			{BIND_ORBIT_CAMERA_ROTATE, ImGuiMouseButton_Middle},
+			{BIND_ORBIT_CAMERA_MOVE, ImGuiMouseButton_Right},
 
-			{"dollyAddMarker", ImGuiKey_K},
-			{"dollyClearMarkers", ImGuiKey_L},
-			{"dollyPlayPath", ImGuiKey_J}
+			{BIND_DOLLY_ADD_MARKER, ImGuiKey_K},
+			{BIND_DOLLY_CLEAR_MARKERS, ImGuiKey_L},
+			{BIND_DOLLY_PLAY_PATH, ImGuiKey_J}
 		};
 	}
 

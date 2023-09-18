@@ -33,22 +33,22 @@ namespace IWXMVM::Components
 		const auto cameraMovementSpeed = cameraBaseSpeed * speedModifier;
 		const auto cameraHeightSpeed = cameraMovementSpeed;
 
-		if (Input::BindHeld("freeCameraForward"))
+		if (Input::BindHeld(InputConfiguration::BIND_FREE_CAMERA_FORWARD))
 		{
 			cameraPosition += this->GetForwardVector() * cameraMovementSpeed;
 		}
 
-		if (Input::BindHeld("freeCameraBackward"))
+		if (Input::BindHeld(InputConfiguration::BIND_FREE_CAMERA_BACKWARD))
 		{
 			cameraPosition -= this->GetForwardVector() * cameraMovementSpeed;
 		}
 
-		if (Input::BindHeld("freeCameraLeft"))
+		if (Input::BindHeld(InputConfiguration::BIND_FREE_CAMERA_LEFT))
 		{
 			cameraPosition += this->GetRightVector() * cameraMovementSpeed;
 		}
 
-		if (Input::BindHeld("freeCameraRight"))
+		if (Input::BindHeld(InputConfiguration::BIND_FREE_CAMERA_RIGHT))
 		{
 			cameraPosition -= this->GetRightVector() * cameraMovementSpeed;
 		}
@@ -73,7 +73,7 @@ namespace IWXMVM::Components
 			}
 		}
 
-		if (Input::BindHeld("freeCameraReset"))
+		if (Input::BindHeld(InputConfiguration::BIND_FREE_CAMERA_RESET))
 		{
 			this->GetRotation() = {};
 			this->GetFov() = 90.0f;
@@ -84,10 +84,10 @@ namespace IWXMVM::Components
 
 		this->GetRotation()[0] = glm::clamp(this->GetRotation()[0], -89.9f, 89.9f);
 
-		if (Input::BindHeld("freeCameraUp"))
+		if (Input::BindHeld(InputConfiguration::BIND_FREE_CAMERA_UP))
 			cameraPosition[2] += cameraHeightSpeed;
 
-		if (Input::BindHeld("freeCameraDown"))
+		if (Input::BindHeld(InputConfiguration::BIND_FREE_CAMERA_DOWN))
 			cameraPosition[2] -= cameraHeightSpeed;
 	}
 }

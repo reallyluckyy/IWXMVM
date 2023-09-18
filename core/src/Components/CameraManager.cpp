@@ -51,7 +51,7 @@ namespace IWXMVM::Components
 		// Modifying markers shouldn't be possible while in Dolly mode
 		if (GetActiveCamera()->GetMode() != Camera::Mode::Dolly)
 		{
-			if (Input::BindDown("dollyAddMarker"))
+			if (Input::BindDown(InputConfiguration::BIND_DOLLY_ADD_MARKER))
 			{
 				Types::Marker marker{};
 				marker.position = GetActiveCamera()->GetPosition();
@@ -63,14 +63,14 @@ namespace IWXMVM::Components
 				LOG_DEBUG("Placed marker at (x: {}; y: {}; z: {}) with (pitch: {}; yaw: {}; roll: {}) at tick {}", marker.position.x, marker.position.y, marker.position.z, marker.rotation.x, marker.rotation.y, marker.rotation.z, marker.tick);
 			}
 
-			if (Input::BindDown("dollyClearMarkers"))
+			if (Input::BindDown(InputConfiguration::BIND_DOLLY_CLEAR_MARKERS))
 			{
 				markers.clear();
 
 				LOG_DEBUG("Markers cleared");
 			}
 
-			if (Input::BindDown("dollyPlayPath"))
+			if (Input::BindDown(InputConfiguration::BIND_DOLLY_PLAY_PATH))
 			{
 				SetActiveCamera(Camera::Mode::Dolly);
 			}
