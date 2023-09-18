@@ -20,7 +20,7 @@ namespace IWXMVM
 		InputConfiguration(InputConfiguration const&) = delete;
 		void operator=(InputConfiguration const&) = delete;
 
-		const std::unordered_map<std::string_view, Key>& GetKeyBinds() const { return keyBinds; }
+		const std::unordered_map<std::string, Key>& GetKeyBinds() const { return keyBinds; }
 
 		Key GetKeyBind(std::string_view actionName) const;
 		void AddKeyBind(std::string_view actionName, Key key);
@@ -32,7 +32,7 @@ namespace IWXMVM
 	private:
 		InputConfiguration() {}
 
-		std::unordered_map<std::string_view, Key> keyBinds;
+		std::unordered_map<std::string, Key> keyBinds;
 
 		const std::string_view NODE_ACTION = "action";
 		const std::string_view NODE_KEY = "key";
