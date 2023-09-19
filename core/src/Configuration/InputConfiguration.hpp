@@ -52,5 +52,11 @@ namespace IWXMVM
 		const inline static std::string_view BIND_DOLLY_ADD_MARKER = "dollyAddMarker";
 		const inline static std::string_view BIND_DOLLY_CLEAR_MARKERS = "dollyClearMarkers";
 		const inline static std::string_view BIND_DOLLY_PLAY_PATH = "dollyPlayPath";
+
+		const inline static std::string_view BIND_PLAYBACK_TOGGLE = "playbackToggle";
+		const inline static std::string_view BIND_PLAYBACK_FASTER = "playbackFaster";
+		const inline static std::string_view BIND_PLAYBACK_SLOWER = "playbackSlower";
+		const inline static std::string_view BIND_PLAYBACK_SKIP_FORWARD = "playbackSkipForward";
+		const inline static std::string_view BIND_PLAYBACK_SKIP_BACKWARD = "playbackSkipBackward";
 	};
 }

@@ -34,7 +34,14 @@ namespace IWXMVM
 
 			{BIND_DOLLY_ADD_MARKER, ImGuiKey_K},
 			{BIND_DOLLY_CLEAR_MARKERS, ImGuiKey_L},
-			{BIND_DOLLY_PLAY_PATH, ImGuiKey_J}
+			{BIND_DOLLY_PLAY_PATH, ImGuiKey_J},
+
+			{BIND_PLAYBACK_TOGGLE, ImGuiKey_Space},
+			{BIND_PLAYBACK_FASTER, ImGuiKey_UpArrow},
+			{BIND_PLAYBACK_SLOWER, ImGuiKey_DownArrow},
+			{BIND_PLAYBACK_SKIP_FORWARD, ImGuiKey_RightArrow},
+			{BIND_PLAYBACK_SKIP_BACKWARD, ImGuiKey_LeftArrow},
+
 		};
 	}
 

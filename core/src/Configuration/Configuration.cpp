@@ -19,9 +19,11 @@ namespace IWXMVM
 		nlohmann::json config = nlohmann::json::parse(configFile);
 		configFile.close();
 
-		if (config[NODE_VERSION] != CONFIG_VERSION)
+		auto configVersion = config.at(NODE_VERSION).get<int32_t>();
+		if (configVersion != CONFIG_VERSION)
 		{
-			LOG_WARN("Config version mismatch (expected: {}, actual: {})", CONFIG_VERSION, config[NODE_VERSION]);
+			LOG_WARN("Config version mismatch (expected: {}, actual: {})", CONFIG_VERSION, configVersion);
+			LOG_WARN("Please consider deleting your config. Some keys may not be bound!");
 			// TODO: what do we do here?
 		}
 

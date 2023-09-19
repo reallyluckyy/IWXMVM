@@ -7,6 +7,7 @@
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "Input.hpp"
 
 namespace IWXMVM::UI
 {
@@ -17,6 +18,36 @@ namespace IWXMVM::UI
 	void ControlBar::Initialize()
 	{
 		playbackSpeed = 1.0f;
+	}
+
+	void HandlePlaybackInput()
+	{
+		// this should probably go somewhere else eventually
+
+		if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_TOGGLE))
+		{
+			Mod::GetGameInterface()->ToggleDemoPlaybackState();
+		}
+
+		if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_FASTER))
+		{
+			timescale.value().value->floating_point *= 2.0f;
+		}
+
+		if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_SLOWER))
+		{
+			timescale.value().value->floating_point /= 2.0f;
+		}
+
+		if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_SKIP_FORWARD))
+		{
+			Mod::GetGameInterface()->SetTickDelta(500);
+		}
+
+		if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_SKIP_FORWARD))
+		{
+			Mod::GetGameInterface()->SetTickDelta(-500);
+		}
 	}
 
 	INCBIN_EXTERN(IMG_PLAY_BUTTON);
@@ -32,6 +63,8 @@ namespace IWXMVM::UI
 			timescale = Mod::GetGameInterface()->GetDvar("timescale");
 			return;
 		}
+
+		HandlePlaybackInput();
 
 		SetPosition(
 			0,
