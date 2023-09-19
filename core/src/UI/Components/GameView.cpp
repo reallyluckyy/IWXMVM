@@ -5,7 +5,7 @@
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Events.hpp"
-
+#include "Input.hpp"
 
 namespace IWXMVM::UI
 {
@@ -131,8 +131,20 @@ namespace IWXMVM::UI
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 
+		bool showFocusBorder = HasFocus();
+		
+		if (showFocusBorder)
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 10);
+
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar;
 		ImGui::Begin("GameView", NULL, flags);
+
+		SetHasFocus(ImGui::IsWindowFocused());
+		if (HasFocus() && Input::KeyDown(ImGuiKey_Escape))
+		{
+			ImGui::SetWindowFocus(NULL);
+			SetHasFocus(false);
+		}
 
 		auto currentPos = ImGui::GetWindowPos();
 		auto currentSize = ImGui::GetWindowSize();
@@ -180,6 +192,9 @@ namespace IWXMVM::UI
 		ImGui::End();
 
 		ImGui::PopStyleVar();
+
+		if (showFocusBorder)
+			ImGui::PopStyleVar();
 	}
 
 	void GameView::Release()

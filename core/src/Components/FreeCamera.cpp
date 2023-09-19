@@ -2,6 +2,7 @@
 #include "FreeCamera.hpp"
 
 #include "Input.hpp"
+#include "UI/UIManager.hpp"
 
 namespace IWXMVM::Components
 {
@@ -12,8 +13,8 @@ namespace IWXMVM::Components
 	
 	void FreeCamera::Update()
 	{
-		//if (!Input::GetFocusedWindow() == GameView)
-		//	return;
+		if (!UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->HasFocus())
+			return;
 
 		auto& cameraPosition = this->GetPosition();
 

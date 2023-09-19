@@ -5,18 +5,26 @@
 #include "Utilities/MathUtils.hpp"
 #include "UI/UIManager.hpp"
 #include "Events.hpp"
+#include "Components/CameraManager.hpp"
 
 namespace IWXMVM::Components
 {
 	void OrbitCamera::Initialize()
 	{
 		Events::RegisterListener(EventType::OnRenderGameView, [&]() {
-			DrawOverlay();
+			if (UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->HasFocus()
+				&& CameraManager::Get().GetActiveCamera()->GetMode() == Camera::Mode::Orbit)
+			{
+				DrawOverlay();
+			}
 		});
 	}
 
 	void OrbitCamera::Update()
 	{
+		if (!UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->HasFocus())
+			return;
+
 		auto& cameraPosition = this->GetPosition();
 
 		constexpr float BASE_SPEED = 0.1f;

@@ -25,8 +25,12 @@ namespace IWXMVM::UI
 		void SetSize(float sizeX, float sizeY) { size.x = std::floor(sizeX); size.y = std::floor(sizeY); }
 		void SetSizeX(float sizeX) { size.x = std::floor(sizeX); }
 		void SetSizeY(float sizeY) { size.y = std::floor(sizeY); }
+
+		bool HasFocus() const { return hasFocus; }
+		void SetHasFocus(bool focus) { hasFocus = focus; }
 	private:
 		ImVec2 position = {};
 		ImVec2 size = {};
+		bool hasFocus = false;
 	};
 }
