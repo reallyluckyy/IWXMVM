@@ -55,6 +55,7 @@ namespace IWXMVM
 			// Initialize Components
 			Configuration::Get().Initialize();
 			Components::CameraManager::Get().Initialize();
+			Components::CampathManager::Get().Initialize();
 			
 			// TODO: ...
 

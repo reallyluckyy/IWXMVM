@@ -4,7 +4,6 @@
 #include "DollyCamera.hpp"
 #include "FreeCamera.hpp"
 #include "OrbitCamera.hpp"
-#include "Types/Marker.hpp"
 
 namespace IWXMVM::Components
 {
@@ -25,8 +24,6 @@ namespace IWXMVM::Components
 
 		std::unique_ptr<Camera>& GetActiveCamera() { return cameras[activeCameraIndex]; }
 		std::unique_ptr<Camera>& GetCamera(Camera::Mode mode);
-		const std::vector<Types::Marker>& GetMarkers() const { return markers; }
-		void AddMarker(Types::Marker marker);
 		void SetActiveCamera(Camera::Mode mode);
 
 		std::string_view GetCameraModeLabel(Camera::Mode cameraMode);
@@ -58,8 +55,5 @@ namespace IWXMVM::Components
 		}();
 
 		int activeCameraIndex = 0;
-
-		// Vector storing camera markers in order of ticks
-		std::vector<Types::Marker> markers;
 	};
 }

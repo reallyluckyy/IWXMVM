@@ -12,7 +12,7 @@ namespace IWXMVM::Components
 
 	void DollyCamera::Update()
 	{
-		const auto& markers = CameraManager::Get().GetMarkers();
+		const auto& markers = CampathManager::Get().GetMarkers();
 
 		if (markers.size() == 0)
 		{

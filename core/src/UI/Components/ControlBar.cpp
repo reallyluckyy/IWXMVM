@@ -81,7 +81,7 @@ namespace IWXMVM::UI
 			ImGui::DemoProgressBarLines(demoInfo.currentTick, demoInfo.endTick);
 
 			ImGui::SameLine(progressBarX);
-			ImGui::TimelineMarkers(Components::CameraManager::Get().GetMarkers(), demoInfo.endTick);
+			ImGui::TimelineMarkers(Components::CampathManager::Get().GetMarkers(), demoInfo.endTick);
 			
 			ImGui::SameLine();
 			ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());

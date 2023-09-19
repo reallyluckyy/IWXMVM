@@ -1,6 +1,7 @@
 #pragma once
 #include "GameInterface.hpp"
 #include "Components/CameraManager.hpp"
+#include "Components/CampathManager.hpp"
 
 namespace IWXMVM
 {
