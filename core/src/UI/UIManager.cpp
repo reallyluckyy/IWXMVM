@@ -110,7 +110,7 @@ namespace IWXMVM::UI
 		return CallWindowProc(UIManager::Get().GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
 	}
 
-	ImVec2 GetWindowSize(HWND hwnd)
+	ImVec2 UIManager::GetWindowSize(HWND hwnd)
 	{
 		RECT windowRect = {};
 		GetWindowRect(hwnd, &windowRect);
@@ -118,6 +118,18 @@ namespace IWXMVM::UI
 		{
 			static_cast<float>(windowRect.right - windowRect.left),
 			static_cast<float>(windowRect.bottom - windowRect.top)
+		};
+		return windowSize;
+	}
+
+	ImVec2 UIManager::GetWindowPosition(HWND hwnd)
+	{
+		RECT windowRect = {};
+		GetWindowRect(hwnd, &windowRect);
+		ImVec2 windowSize =
+		{
+			static_cast<float>(windowRect.left),
+			static_cast<float>(windowRect.top)
 		};
 		return windowSize;
 	}

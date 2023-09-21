@@ -52,6 +52,9 @@ namespace IWXMVM::UI
 		void ShutdownImGui();
 		void RunImGuiFrame();
 
+		ImVec2 GetWindowSize(HWND hwnd);
+		ImVec2 GetWindowPosition(HWND hwnd);
+
 		bool IsInitialized() const
 		{
 			return isInitialized;

@@ -1,6 +1,7 @@
 #include "StdInclude.hpp"
 #include "GameView.hpp"
 
+#include "CustomImGuiControls.hpp"
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
@@ -71,6 +72,26 @@ namespace IWXMVM::UI
 		return ImVec2(window.x, window.y);
 	}
 
+	void GameView::LockMouse()
+	{
+		// calling FindWindowHandle every frame here is probably not a good idea
+		auto windowPosition = UIManager::Get().GetWindowPosition(D3D9::FindWindowHandle());
+
+		POINT cursorPosition;
+		GetCursorPos(&cursorPosition);
+
+		ImVec2 viewportCenter = ImVec2(windowPosition.x + GetPosition().x + GetSize().x / 2, windowPosition.y + GetPosition().y + GetSize().y / 2);
+		ImGui::GetIO().MousePosPrev += ImVec2(viewportCenter.x - cursorPosition.x, viewportCenter.y - cursorPosition.y);
+		SetCursorPos(viewportCenter.x, viewportCenter.y);
+
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+	}
+
+	bool ViewportShouldLockMouse()
+	{
+		return Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free;
+	}
+
     void GameView::Initialize()
     {
 		auto scaleFactor = 0.8f;
@@ -119,6 +140,12 @@ namespace IWXMVM::UI
 			ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems, IM_ARRAYSIZE(playerCameraComboItems));
 		}
 
+		if (HasFocus())
+		{
+			ImGui::SameLine();
+			ImGui::Text("Press ESC to unlock mouse");
+		}
+
 		auto demoLabel = Mod::GetGameInterface()->GetDemoInfo().name;
 		ImGui::SameLine(GetSize().x - ImGui::CalcTextSize(demoLabel.c_str()).x - PADDING);
 		ImGui::Text(demoLabel.c_str());
@@ -129,21 +156,19 @@ namespace IWXMVM::UI
 		ImGui::SetNextWindowPos(GetPosition());
 		ImGui::SetNextWindowSize(GetSize());
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+		if (HasFocus() && ViewportShouldLockMouse())
+			LockMouse();
 
-		bool showFocusBorder = HasFocus();
-		
-		if (showFocusBorder)
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 10);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar;
 		ImGui::Begin("GameView", NULL, flags);
 
-		SetHasFocus(ImGui::IsWindowFocused());
 		if (HasFocus() && Input::KeyDown(ImGuiKey_Escape))
 		{
 			ImGui::SetWindowFocus(NULL);
 			SetHasFocus(false);
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 		}
 
 		auto currentPos = ImGui::GetWindowPos();
@@ -162,7 +187,6 @@ namespace IWXMVM::UI
 
 		auto topBarHeight = 0.0f;
 		if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo)
-
 		{
 			DrawTopBar();
 			topBarHeight = ImGui::GetItemRectSize().y + 30;
@@ -183,18 +207,24 @@ namespace IWXMVM::UI
 			throw std::exception("Failed to capture game view");
 		}
 
-		ImGui::SetCursorPosX((viewportSize.x - textureSize.x) / 2.0f);
-		ImGui::SetCursorPosY((viewportSize.y - textureSize.y) / 2.0f + topBarHeight);
-		ImGui::Image((void*)texture, textureSize);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
+		ImGui::SetCursorPos(ImVec2((viewportSize.x - textureSize.x) / 2.0f, (viewportSize.y - textureSize.y) / 2.0f + topBarHeight));
+		ImGui::BeginChildFrame(ImGui::GetID("gameViewportInternal"), textureSize, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+		ImGui::Image((void*)texture, textureSize);
+		
 		Events::Invoke(EventType::OnRenderGameView);
+
+		SetHasFocus(ImGui::IsWindowFocused());
+		ImGui::EndChildFrame();
+
+		ImGui::PopStyleVar();
+
+
 
 		ImGui::End();
 
 		ImGui::PopStyleVar();
-
-		if (showFocusBorder)
-			ImGui::PopStyleVar();
 	}
 
 	void GameView::Release()
