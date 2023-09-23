@@ -83,13 +83,6 @@ namespace IWXMVM::UI
 		ImVec2 viewportCenter = ImVec2(windowPosition.x + GetPosition().x + GetSize().x / 2, windowPosition.y + GetPosition().y + GetSize().y / 2);
 		ImGui::GetIO().MousePosPrev += ImVec2(viewportCenter.x - cursorPosition.x, viewportCenter.y - cursorPosition.y);
 		SetCursorPos(viewportCenter.x, viewportCenter.y);
-
-		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-	}
-
-	bool ViewportShouldLockMouse()
-	{
-		return Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free;
 	}
 
     void GameView::Initialize()
@@ -140,7 +133,7 @@ namespace IWXMVM::UI
 			ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems, IM_ARRAYSIZE(playerCameraComboItems));
 		}
 
-		if (HasFocus())
+		if (HasFocus() && UIManager::Get().ViewportShouldLockMouse())
 		{
 			ImGui::SameLine();
 			ImGui::Text("Press ESC to unlock mouse");
@@ -156,7 +149,7 @@ namespace IWXMVM::UI
 		ImGui::SetNextWindowPos(GetPosition());
 		ImGui::SetNextWindowSize(GetSize());
 
-		if (HasFocus() && ViewportShouldLockMouse())
+		if (HasFocus() && UIManager::Get().ViewportShouldLockMouse())
 			LockMouse();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
@@ -168,7 +161,6 @@ namespace IWXMVM::UI
 		{
 			ImGui::SetWindowFocus(NULL);
 			SetHasFocus(false);
-			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 		}
 
 		auto currentPos = ImGui::GetWindowPos();

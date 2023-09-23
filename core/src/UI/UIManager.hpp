@@ -52,6 +52,8 @@ namespace IWXMVM::UI
 		void ShutdownImGui();
 		void RunImGuiFrame();
 
+		bool ViewportShouldLockMouse();
+
 		ImVec2 GetWindowSize(HWND hwnd);
 		ImVec2 GetWindowPosition(HWND hwnd);
 

@@ -102,12 +102,27 @@ namespace IWXMVM::UI
 
 	HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
+		auto& gameView = UIManager::Get().GetUIComponent(UI::Component::GameView);
+		if (gameView->HasFocus() && UIManager::Get().ViewportShouldLockMouse())
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+		}
+		else
+		{
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
+		}
+
 		if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
 		{
 			return true;
 		}
 
 		return CallWindowProc(UIManager::Get().GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
+	}
+
+	bool UIManager::ViewportShouldLockMouse()
+	{
+		return Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free;
 	}
 
 	ImVec2 UIManager::GetWindowSize(HWND hwnd)
