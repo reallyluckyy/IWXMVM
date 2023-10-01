@@ -1,7 +1,7 @@
 #include "StdInclude.hpp"
 #include "CustomImGuiControls.hpp"
 #include "Resources.hpp"
-#include "Types/Marker.hpp"
+#include "Types/CampathNode.hpp"
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -11,7 +11,7 @@
 
 namespace ImGui
 {
-	void TimelineMarkers(const std::vector<IWXMVM::Types::Marker>& markers, std::uint32_t endTick)
+	void TimelineMarkers(const std::vector<IWXMVM::Types::CampathNode>& nodes, std::uint32_t endTick)
 	{
 		ImGuiWindow* window = GetCurrentWindow();
 
@@ -26,9 +26,9 @@ namespace ImGui
 		const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
 		const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
 
-		for (const auto& marker : markers)
+		for (const auto& node : nodes)
 		{
-			const auto percentage = static_cast<float>(marker.tick) / static_cast<float>(endTick);
+			const auto percentage = static_cast<float>(node.tick) / static_cast<float>(endTick);
 			const auto x = frame_bb.Min.x + percentage * barLength;
 			window->DrawList->AddText(ImVec2(x - textSize.x / 2, frame_bb.Min.y + (barHeight - textSize.y) / 2), GetColorU32(ImGuiCol_Button), ICON_FA_DIAMOND);
 		}

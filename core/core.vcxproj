@@ -165,7 +165,7 @@
     <ClInclude Include="src\Types\Dvar.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
-    <ClInclude Include="src\Types\Marker.hpp" />
+    <ClInclude Include="src\Types\CampathNode.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />
     <ClInclude Include="src\Types\Sun.hpp" />
     <ClInclude Include="src\UI\Components\CampathMenu.hpp" />

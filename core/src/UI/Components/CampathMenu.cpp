@@ -26,6 +26,27 @@ namespace IWXMVM::UI
 		{
 			RenderHotkeyOverlay();
 		}
+
+		auto& campathManager = Components::CampathManager::Get();
+
+		ImGui::AlignTextToFramePadding();
+		if (ImGui::BeginCombo("##campathMenuInterpolationCombo", campathManager.GetInterpolationModeLabel(campathManager.GetInterpolationMode()).data()))
+		{
+			for (auto interpolationMode : campathManager.GetInterpolationModes())
+			{
+				bool isSelected = campathManager.GetInterpolationMode() == interpolationMode;
+				if (ImGui::Selectable(campathManager.GetInterpolationModeLabel(interpolationMode).data(), campathManager.GetInterpolationMode() == interpolationMode))
+				{
+					campathManager.SetInterpolationMode(interpolationMode);
+				}
+
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
 	}
 
 	void DrawKeyLine(Key key, std::string_view label, ImVec2 position)
@@ -51,9 +72,9 @@ namespace IWXMVM::UI
 
 		ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(), ImGui::GetFontSize(), contentBasePos, ImGui::GetColorU32(ImGuiCol_Text), "Campath Hotkeys");
 
-		DrawKeyLine(InputConfiguration::Get().GetKeyBind(InputConfiguration::BIND_DOLLY_ADD_MARKER), "Add Marker", contentBasePos + ImVec2(0, lineHeight * 1.5));
+		DrawKeyLine(InputConfiguration::Get().GetKeyBind(InputConfiguration::BIND_DOLLY_ADD_NODE), "Add Node", contentBasePos + ImVec2(0, lineHeight * 1.5));
 		DrawKeyLine(InputConfiguration::Get().GetKeyBind(InputConfiguration::BIND_DOLLY_PLAY_PATH), "Switch To Dollycam", contentBasePos + ImVec2(0, lineHeight * 1.5 + lineHeight));
-		DrawKeyLine(InputConfiguration::Get().GetKeyBind(InputConfiguration::BIND_DOLLY_CLEAR_MARKERS), "Delete All Markers", contentBasePos + ImVec2(0, lineHeight * 1.5 + lineHeight * 2));
+		DrawKeyLine(InputConfiguration::Get().GetKeyBind(InputConfiguration::BIND_DOLLY_CLEAR_NODES), "Delete All Nodes", contentBasePos + ImVec2(0, lineHeight * 1.5 + lineHeight * 2));
 	}
 
 	void CampathMenu::Release()

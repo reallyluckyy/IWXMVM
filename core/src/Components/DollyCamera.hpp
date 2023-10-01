@@ -1,6 +1,6 @@
 #pragma once
 #include "Camera.hpp"
-#include "Types/Marker.hpp"
+#include "Types/CampathNode.hpp"
 
 namespace IWXMVM::Components
 {
@@ -16,6 +16,6 @@ namespace IWXMVM::Components
 		void Update() override;
 
 	private:
-		std::vector<Types::Marker> markers;
+		std::vector<Types::CampathNode> markers;
 	};
 }

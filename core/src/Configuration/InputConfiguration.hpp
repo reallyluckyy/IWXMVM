@@ -49,8 +49,8 @@ namespace IWXMVM
 		const inline static std::string_view BIND_ORBIT_CAMERA_ROTATE = "orbitCameraRotate";
 		const inline static std::string_view BIND_ORBIT_CAMERA_MOVE = "orbitCameraMove";
 
-		const inline static std::string_view BIND_DOLLY_ADD_MARKER = "dollyAddMarker";
-		const inline static std::string_view BIND_DOLLY_CLEAR_MARKERS = "dollyClearMarkers";
+		const inline static std::string_view BIND_DOLLY_ADD_NODE = "dollyAddMarker";
+		const inline static std::string_view BIND_DOLLY_CLEAR_NODES = "dollyClearMarkers";
 		const inline static std::string_view BIND_DOLLY_PLAY_PATH = "dollyPlayPath";
 
 		const inline static std::string_view BIND_PLAYBACK_TOGGLE = "playbackToggle";

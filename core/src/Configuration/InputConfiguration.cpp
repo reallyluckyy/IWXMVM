@@ -32,8 +32,8 @@ namespace IWXMVM
 			{BIND_ORBIT_CAMERA_ROTATE, ImGuiKey_MouseMiddle},
 			{BIND_ORBIT_CAMERA_MOVE, ImGuiKey_MouseRight},
 
-			{BIND_DOLLY_ADD_MARKER, ImGuiKey_K},
-			{BIND_DOLLY_CLEAR_MARKERS, ImGuiKey_L},
+			{BIND_DOLLY_ADD_NODE, ImGuiKey_K},
+			{BIND_DOLLY_CLEAR_NODES, ImGuiKey_L},
 			{BIND_DOLLY_PLAY_PATH, ImGuiKey_J},
 
 			{BIND_PLAYBACK_TOGGLE, ImGuiKey_Space},
