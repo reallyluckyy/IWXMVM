@@ -26,11 +26,11 @@ namespace IWXMVM
 			{BIND_FREE_CAMERA_RIGHT, ImGuiKey_D},
 			{BIND_FREE_CAMERA_UP, ImGuiKey_E},
 			{BIND_FREE_CAMERA_DOWN, ImGuiKey_Q},
-			{BIND_FREE_CAMERA_RESET, ImGuiMouseButton_Middle},
+			{BIND_FREE_CAMERA_RESET, ImGuiKey_MouseMiddle},
 
 			{BIND_ORBIT_CAMERA_RESET, ImGuiKey_F4},
-			{BIND_ORBIT_CAMERA_ROTATE, ImGuiMouseButton_Middle},
-			{BIND_ORBIT_CAMERA_MOVE, ImGuiMouseButton_Right},
+			{BIND_ORBIT_CAMERA_ROTATE, ImGuiKey_MouseMiddle},
+			{BIND_ORBIT_CAMERA_MOVE, ImGuiKey_MouseRight},
 
 			{BIND_DOLLY_ADD_MARKER, ImGuiKey_K},
 			{BIND_DOLLY_CLEAR_MARKERS, ImGuiKey_L},
@@ -45,24 +45,6 @@ namespace IWXMVM
 		};
 	}
 
-	int32_t GetRawKeyValue(Key key)
-	{
-		if (std::holds_alternative<ImGuiKey>(key))
-			return std::get<ImGuiKey>(key);
-		else if (std::holds_alternative<ImGuiMouseButton_>(key))
-			return std::get<ImGuiMouseButton_>(key);
-		else
-			throw std::runtime_error("Invalid key type");
-	}
-
-	Key ParseRawKeyValue(int32_t value)
-	{
-		if (value > 0 && value < 512)
-			return (ImGuiMouseButton_)value;
-		else
-			return (ImGuiKey)value;
-	}
-
 	void InputConfiguration::Serialize(json& j)
 	{
 		j = json::array();
@@ -70,7 +52,7 @@ namespace IWXMVM
 		{
 			json entry;
 			entry[NODE_ACTION] = bind.first;
-			entry[NODE_KEY] = GetRawKeyValue(bind.second);
+			entry[NODE_KEY] = (int32_t)bind.second;
 
 			j.push_back(entry);
 		}
@@ -90,7 +72,7 @@ namespace IWXMVM
 
 			std::string	action = entry.at(NODE_ACTION).get<std::string>();
 			auto rawKeyValue = entry.at(NODE_KEY).get<std::int32_t>();
-			Key key = ParseRawKeyValue(rawKeyValue);
+			Key key = (Key)rawKeyValue;
 			keyBinds[action] = key;
 
 			LOG_DEBUG("Deserialized keybind for action {} with key {}", action, rawKeyValue);

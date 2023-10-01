@@ -128,6 +128,7 @@
     </ClCompile>
     <ClCompile Include="src\Resources.cpp" />
     <ClCompile Include="src\UI\Components\Background.cpp" />
+    <ClCompile Include="src\UI\Components\CampathMenu.cpp" />
     <ClCompile Include="src\UI\Components\CaptureMenu.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
     <ClCompile Include="src\UI\Components\CustomImGuiControls.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\Types\Marker.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />
     <ClInclude Include="src\Types\Sun.hpp" />
+    <ClInclude Include="src\UI\Components\CampathMenu.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />
     <ClInclude Include="src\Utilities\MathUtils.hpp" />

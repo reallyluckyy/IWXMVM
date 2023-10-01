@@ -5,7 +5,7 @@ namespace IWXMVM
 {
 	using json = nlohmann::json;
 
-	typedef std::variant<ImGuiKey, ImGuiMouseButton_> Key;
+	typedef ImGuiKey Key;
 
 	class InputConfiguration
 	{
