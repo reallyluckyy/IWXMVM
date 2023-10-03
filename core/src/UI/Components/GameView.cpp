@@ -1,7 +1,7 @@
 #include "StdInclude.hpp"
 #include "GameView.hpp"
 
-#include "CustomImGuiControls.hpp"
+#include "UI/ImGuiExtensions.hpp"
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"

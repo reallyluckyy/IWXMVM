@@ -3,7 +3,7 @@
 
 #include "Mod.hpp"
 #include "Components/CameraManager.hpp"
-#include "CustomImGuiControls.hpp"
+#include "UI/ImGuiExtensions.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
@@ -96,7 +96,7 @@ namespace IWXMVM::UI
 
 			ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
 			ImGui::SameLine();
-			ImGui::TimescaleSlider("##1", &timescale.value().value->floating_point, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
+			ImGuiEx::TimescaleSlider("##1", &timescale.value().value->floating_point, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
 			auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
 			auto progressBarX = PADDING + pauseButtonSize.x + playbackSpeedSliderWidth + PADDING * 3;
@@ -111,10 +111,10 @@ namespace IWXMVM::UI
 				Mod::GetGameInterface()->SetTickDelta(tickValue - demoInfo.currentTick);
 
 			ImGui::SameLine(progressBarX);
-			ImGui::DemoProgressBarLines(demoInfo.currentTick, demoInfo.endTick);
+			ImGuiEx::DemoProgressBarLines(demoInfo.currentTick, demoInfo.endTick);
 
 			ImGui::SameLine(progressBarX);
-			ImGui::TimelineMarkers(Components::CampathManager::Get().GetNodes(), demoInfo.endTick);
+			ImGuiEx::TimelineMarkers(Components::CampathManager::Get().GetNodes(), demoInfo.endTick);
 			
 			ImGui::SameLine();
 			ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());

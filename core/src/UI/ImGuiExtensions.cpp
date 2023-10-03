@@ -1,5 +1,6 @@
 #include "StdInclude.hpp"
-#include "CustomImGuiControls.hpp"
+#include "ImGuiExtensions.hpp"
+
 #include "Resources.hpp"
 #include "Types/CampathNode.hpp"
 
@@ -9,10 +10,49 @@
 
 #include "imgui_internal.h"
 
-namespace ImGui
+#include "UIManager.hpp"
+#include "Utilities/MathUtils.hpp"
+#include "Components/CameraManager.hpp"
+
+namespace ImGuiEx
 {
+	void DrawLine3D(glm::vec3 from, glm::vec3 to, ImVec4 color, float thickness)
+	{
+		using namespace IWXMVM;
+
+		const auto& camera = Components::CameraManager::Get().GetActiveCamera();
+
+		auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
+		auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y, gameView->GetPosition().x + gameView->GetSize().x, gameView->GetPosition().y + gameView->GetSize().y);
+		auto screenPosition1 = MathUtils::WorldToScreenPoint(from, *camera, viewport);
+		auto screenPosition2 = MathUtils::WorldToScreenPoint(to, *camera, viewport);
+
+		if (screenPosition1.has_value() && screenPosition2.has_value())
+		{
+			ImGui::GetWindowDrawList()->AddLine(screenPosition1.value(), screenPosition2.value(), ImGui::ColorConvertFloat4ToU32(color), thickness);
+		}
+	}
+
+	void DrawPoint3D(glm::vec3 point, ImVec4 color, ImVec2 size)
+	{
+		using namespace IWXMVM;
+
+		const auto& camera = Components::CameraManager::Get().GetActiveCamera();
+
+		auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
+		auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y, gameView->GetPosition().x + gameView->GetSize().x, gameView->GetPosition().y + gameView->GetSize().y);
+		auto screenPosition = MathUtils::WorldToScreenPoint(point, *camera, viewport);
+
+		if (screenPosition.has_value())
+		{
+			ImGui::GetWindowDrawList()->AddRectFilled(screenPosition.value() - size, screenPosition.value() + size, ImGui::ColorConvertFloat4ToU32(color));
+		}
+	}
+
 	void TimelineMarkers(const std::vector<IWXMVM::Types::CampathNode>& nodes, std::uint32_t endTick)
 	{
+		using namespace ImGui;
+
 		ImGuiWindow* window = GetCurrentWindow();
 
 		ImGuiContext& g = *GImGui;
@@ -36,6 +76,8 @@ namespace ImGui
 
 	void DemoProgressBarLines(std::uint32_t currentTick, std::uint32_t endTick)
 	{
+		using namespace ImGui;
+
 		constexpr std::size_t MARKER_DISTANCE = 5000;
 
 		ImGuiWindow* window = GetCurrentWindow();
@@ -60,6 +102,8 @@ namespace ImGui
 
 	bool TimescaleSliderInternal(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags flags, auto ClampValueFn)
 	{
+		using namespace ImGui;
+
 		ImGuiWindow* window = GetCurrentWindow();
 		if (window->SkipItems)
 			return false;
@@ -156,6 +200,6 @@ namespace ImGui
 
 		// TimescaleSliderInternal is a copy of SliderScalar with the intended behavior of being a slider with fixed steps
 		// the only change to SliderScalar is the above lambda and its execution, to clamp the slider value if it has changed 
-		return ImGui::TimescaleSliderInternal(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags, ClampValue);
+		return ImGuiEx::TimescaleSliderInternal(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags, ClampValue);
 	}
 }

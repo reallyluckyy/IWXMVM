@@ -29,6 +29,7 @@ namespace IWXMVM::Components
 		const std::vector<Types::CampathNode>& GetNodes() const { return nodes; }
 		void AddNode(Types::CampathNode marker);
 
+		Types::CampathNode Interpolate(uint32_t tick);
 		InterpolationMode GetInterpolationMode() const { return interpolationMode; }
 		void SetInterpolationMode(InterpolationMode interpolationMode) { interpolationMode = interpolationMode; }
 		std::string_view GetInterpolationModeLabel(InterpolationMode interpolationMode);

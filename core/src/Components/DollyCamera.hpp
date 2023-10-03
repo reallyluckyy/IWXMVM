@@ -14,8 +14,5 @@ namespace IWXMVM::Components
 
 		void Initialize() override;
 		void Update() override;
-
-	private:
-		std::vector<Types::CampathNode> markers;
 	};
 }
