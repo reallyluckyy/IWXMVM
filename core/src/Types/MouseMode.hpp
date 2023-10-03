@@ -2,8 +2,9 @@
 
 namespace IWXMVM::Types
 {
-	enum class MouseMode
-	{
-		Capture, Passthrough
-	};
+    enum class MouseMode
+    {
+        Capture,
+        Passthrough
+    };
 }

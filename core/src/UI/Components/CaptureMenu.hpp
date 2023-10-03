@@ -3,13 +3,13 @@
 
 namespace IWXMVM::UI
 {
-	class CaptureMenu : public UIComponent
-	{
-	public:
-		void Render() final;
-		void Release() final;
+    class CaptureMenu : public UIComponent
+    {
+       public:
+        void Render() final;
+        void Release() final;
 
-	private:
-		void Initialize() final;
-	};
-}
+       private:
+        void Initialize() final;
+    };
+}  // namespace IWXMVM::UI

@@ -5,42 +5,42 @@
 
 namespace IWXMVM::UI
 {
-	ImVec2 UIImage::GetDimensions() const
-	{
+    ImVec2 UIImage::GetDimensions() const
+    {
         return dimensions;
-	}
+    }
 
     ImTextureID UIImage::GetTextureID() const
     {
         return texture;
     }
 
-	/*
-    std::unordered_map<std::string, UIImage> fileImageCache;
+    /*
+std::unordered_map<std::string, UIImage> fileImageCache;
 
-    UIImage UIImage::FromFile(const std::string path)
-	{
-        if (fileImageCache.contains(path))
-            return fileImageCache[path];
+UIImage UIImage::FromFile(const std::string path)
+    {
+    if (fileImageCache.contains(path))
+        return fileImageCache[path];
 
-        UIImage image;
+    UIImage image;
 
-        PDIRECT3DTEXTURE9 texture;
-        const HRESULT hresult = D3DXCreateTextureFromFileA(D3D9::GetDevice(), path.c_str(), &texture);
-        if (hresult != S_OK)
-            throw std::exception("failed to load image");
+    PDIRECT3DTEXTURE9 texture;
+    const HRESULT hresult = D3DXCreateTextureFromFileA(D3D9::GetDevice(), path.c_str(), &texture);
+    if (hresult != S_OK)
+        throw std::exception("failed to load image");
 
-        D3DSURFACE_DESC imageDesc;
-        texture->GetLevelDesc(0, &imageDesc);
+    D3DSURFACE_DESC imageDesc;
+    texture->GetLevelDesc(0, &imageDesc);
 
-        image.texture = texture;
-        image.dimensions = ImVec2(imageDesc.Width, imageDesc.Height);
+    image.texture = texture;
+    image.dimensions = ImVec2(imageDesc.Width, imageDesc.Height);
 
-        fileImageCache.insert({ path, image });
+    fileImageCache.insert({ path, image });
 
-        return image;
-	}
-    */
+    return image;
+    }
+*/
 
     std::unordered_map<uint8_t*, UIImage> resourceImageCache;
 
@@ -62,24 +62,26 @@ namespace IWXMVM::UI
         image.texture = texture;
         image.dimensions = ImVec2(imageDesc.Width, imageDesc.Height);
 
-        resourceImageCache.insert({ (uint8_t*)data, image });
+        resourceImageCache.insert({(uint8_t*)data, image});
 
         return image;
     }
 
     void UIImage::ReleaseResource(const uint8_t data[])
     {
-        try {
+        try
+        {
             auto search = resourceImageCache.find((uint8_t*)data);
 
-            if (search != resourceImageCache.end()) {
+            if (search != resourceImageCache.end())
+            {
                 PDIRECT3DTEXTURE9 texture = (PDIRECT3DTEXTURE9)search->second.texture;
                 texture->Release();
 
                 resourceImageCache.erase(search);
             }
         }
-        catch (...) 
+        catch (...)
         {
             // TODO: searching the resource container fails when closing the game
             // potential memory leak because the textures are not released
@@ -87,4 +89,4 @@ namespace IWXMVM::UI
             // possible solution: move ownership away from global container to class instance of ControlBar
         }
     }
-}
+}  // namespace IWXMVM::UI

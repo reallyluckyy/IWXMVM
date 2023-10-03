@@ -4,15 +4,18 @@
 
 namespace IWXMVM::Types
 {
-	struct CampathNode
-	{
-		glm::vec3 position;
-		glm::vec3 rotation;
-		float fov;
+    struct CampathNode
+    {
+        glm::vec3 position;
+        glm::vec3 rotation;
+        float fov;
 
-		std::uint32_t tick;
+        std::uint32_t tick;
 
-		CampathNode() = default;
-		CampathNode(glm::vec3 position, glm::vec3 rotation, float fov, std::uint32_t tick) : position(position), rotation(rotation), fov(fov), tick(tick) {}
-	};
-}
+        CampathNode() = default;
+        CampathNode(glm::vec3 position, glm::vec3 rotation, float fov, std::uint32_t tick)
+            : position(position), rotation(rotation), fov(fov), tick(tick)
+        {
+        }
+    };
+}  // namespace IWXMVM::Types

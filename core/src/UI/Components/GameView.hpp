@@ -3,19 +3,19 @@
 
 namespace IWXMVM::UI
 {
-	class GameView : public UIComponent
-	{
-	public:
-		void Render() final;
-		void Release() final;
+    class GameView : public UIComponent
+    {
+       public:
+        void Render() final;
+        void Release() final;
 
-	private:
-		void Initialize() final;
-		void DrawTopBar();
+       private:
+        void Initialize() final;
+        void DrawTopBar();
 
-		void LockMouse();
+        void LockMouse();
 
-		IDirect3DTexture9* texture = NULL;
-		ImVec2 textureSize = ImVec2(0, 0);
-	};
-}
+        IDirect3DTexture9* texture = NULL;
+        ImVec2 textureSize = ImVec2(0, 0);
+    };
+}  // namespace IWXMVM::UI

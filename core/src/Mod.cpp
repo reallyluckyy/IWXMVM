@@ -13,73 +13,73 @@
 
 namespace IWXMVM
 {
-	GameInterface* Mod::internalGameInterface = nullptr;
-	std::atomic<bool> Mod::ejectRequested = false;
+    GameInterface* Mod::internalGameInterface = nullptr;
+    std::atomic<bool> Mod::ejectRequested = false;
 
-	HMODULE GetCurrentModule()
-	{
-		static bool dummy;
+    HMODULE GetCurrentModule()
+    {
+        static bool dummy;
 
-		MEMORY_BASIC_INFORMATION mbi;
-		::VirtualQuery(&dummy, &mbi, sizeof(mbi));
+        MEMORY_BASIC_INFORMATION mbi;
+        ::VirtualQuery(&dummy, &mbi, sizeof(mbi));
 
-		return static_cast<HMODULE>(mbi.AllocationBase);
-	}
+        return static_cast<HMODULE>(mbi.AllocationBase);
+    }
 
-	void Mod::RequestEject()
-	{
-		ejectRequested.store(true);
-	}
+    void Mod::RequestEject()
+    {
+        ejectRequested.store(true);
+    }
 
-	void Mod::Initialize(GameInterface* gameInterface)
-	{
-		try 
-		{
-			internalGameInterface = gameInterface;
+    void Mod::Initialize(GameInterface* gameInterface)
+    {
+        try
+        {
+            internalGameInterface = gameInterface;
 
-			WindowsConsole::Open();
-			Logger::Initialize();
+            WindowsConsole::Open();
+            Logger::Initialize();
 
-			LOG_INFO("Loading IWXMVM {}", IWXMVM_VERSION);
-			LOG_INFO("Game: {}", Types::ToString(gameInterface->GetGame()));
-			LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
+            LOG_INFO("Loading IWXMVM {}", IWXMVM_VERSION);
+            LOG_INFO("Game: {}", Types::ToString(gameInterface->GetGame()));
+            LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
 
-			LOG_DEBUG("Scanning signatures...");
-			gameInterface->InitializeGameAddresses();
+            LOG_DEBUG("Scanning signatures...");
+            gameInterface->InitializeGameAddresses();
 
-			LOG_DEBUG("Installing game hooks and patches...");
-			D3D9::Initialize();
-			gameInterface->InstallHooksAndPatches();
-			gameInterface->SetupEventListeners();
+            LOG_DEBUG("Installing game hooks and patches...");
+            D3D9::Initialize();
+            gameInterface->InstallHooksAndPatches();
+            gameInterface->SetupEventListeners();
 
-			// Initialize Components
-			Configuration::Get().Initialize();
-			Components::CameraManager::Get().Initialize();
-			Components::CampathManager::Get().Initialize();
-			
-			// TODO: ...
+            // Initialize Components
+            Configuration::Get().Initialize();
+            Components::CameraManager::Get().Initialize();
+            Components::CampathManager::Get().Initialize();
 
-			LOG_INFO("Initialized IWXMVM!");
+            // TODO: ...
 
-			while (!ejectRequested.load())
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            LOG_INFO("Initialized IWXMVM!");
 
-			HookManager::Unhook();
-			LOG_DEBUG("Unhooked");
-			UI::UIManager::Get().ShutdownImGui();
-			LOG_DEBUG("ImGui successfully shutdown");
+            while (!ejectRequested.load())
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-			WindowsConsole::Close();
-			::FreeLibraryAndExitThread(GetCurrentModule(), 0);
-		}
-		catch (std::exception& ex)
-		{
-			LOG_ERROR("An error occurred during initialization: {}", ex.what());
-			// TODO: What do we do here?
-		}
-		catch (...)
-		{
-			LOG_ERROR("An error occurred during initialization");
-		}
-	}
-}
+            HookManager::Unhook();
+            LOG_DEBUG("Unhooked");
+            UI::UIManager::Get().ShutdownImGui();
+            LOG_DEBUG("ImGui successfully shutdown");
+
+            WindowsConsole::Close();
+            ::FreeLibraryAndExitThread(GetCurrentModule(), 0);
+        }
+        catch (std::exception& ex)
+        {
+            LOG_ERROR("An error occurred during initialization: {}", ex.what());
+            // TODO: What do we do here?
+        }
+        catch (...)
+        {
+            LOG_ERROR("An error occurred during initialization");
+        }
+    }
+}  // namespace IWXMVM

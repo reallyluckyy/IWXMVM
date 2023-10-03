@@ -3,14 +3,15 @@
 
 namespace IWXMVM::UI
 {
-	class CampathMenu : public UIComponent
-	{
-	public:
-		void Initialize() final;
-		void Render() final;
-		void Release() final;
-	private:
-		void RenderHotkeyOverlay();
-		void DrawCampath();
-	};
-}
+    class CampathMenu : public UIComponent
+    {
+       public:
+        void Initialize() final;
+        void Render() final;
+        void Release() final;
+
+       private:
+        void RenderHotkeyOverlay();
+        void DrawCampath();
+    };
+}  // namespace IWXMVM::UI

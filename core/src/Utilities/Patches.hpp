@@ -1,11 +1,11 @@
 #pragma once
 #include "StdInclude.hpp"
 
-namespace IWXMVM::Patches 
+namespace IWXMVM::Patches
 {
     inline constexpr std::uint8_t HexToDecimal(char c)
     {
-        constexpr std::array<std::uint8_t, 4> boundaries{ '0', '9', 'A', 'F' };
+        constexpr std::array<std::uint8_t, 4> boundaries{'0', '9', 'A', 'F'};
         const std::uint8_t val = static_cast<std::uint8_t>(c);
 
         if (val >= boundaries[0] && val <= boundaries[1])  // 0-9
@@ -60,10 +60,9 @@ namespace IWXMVM::Patches
     template <std::size_t length>
     class Patch
     {
-    public:
-        Patch(std::uintptr_t dst, std::array<std::uint8_t, length> bytes, PatchApplySetting setting = {}) : 
-            _dst(reinterpret_cast<std::uint8_t*>(dst)),
-            _src(bytes)
+       public:
+        Patch(std::uintptr_t dst, std::array<std::uint8_t, length> bytes, PatchApplySetting setting = {})
+            : _dst(reinterpret_cast<std::uint8_t*>(dst)), _src(bytes)
         {
             assert(_dst != nullptr);
 
@@ -83,7 +82,7 @@ namespace IWXMVM::Patches
 
         void Apply()
         {
-            if (!_active) 
+            if (!_active)
             {
                 DWORD oldProtection;
                 ::VirtualProtect(_dst, _size, PAGE_EXECUTE_READWRITE, &oldProtection);
@@ -98,7 +97,7 @@ namespace IWXMVM::Patches
 
         void Revert()
         {
-            if (_active) 
+            if (_active)
             {
                 DWORD oldProtection;
                 ::VirtualProtect(_dst, _size, PAGE_EXECUTE_READWRITE, &oldProtection);
@@ -110,9 +109,9 @@ namespace IWXMVM::Patches
             }
         }
 
-    private:
+       private:
         static constexpr std::size_t _size = length;
-        
+
         bool _active{};
         std::uint8_t* _dst{};
         std::array<std::uint8_t, _size> _src{};
@@ -121,40 +120,44 @@ namespace IWXMVM::Patches
 
     class ReturnPatch : public Patch<1>
     {
-    public:
-        ReturnPatch(std::uintptr_t dst, PatchApplySetting setting = {}) : Patch<1>(dst, std::array{ RETURN_OPCODE }, setting)
-        {}
+       public:
+        ReturnPatch(std::uintptr_t dst, PatchApplySetting setting = {})
+            : Patch<1>(dst, std::array{RETURN_OPCODE}, setting)
+        {
+        }
 
-    private:
+       private:
         static constexpr std::uint8_t RETURN_OPCODE = 0xC3;
     };
 
     class JumpPatch : public Patch<1>
     {
-    public:
-        JumpPatch(std::uintptr_t dst, PatchApplySetting setting = {}) : Patch<1>(dst, std::array{ UNCOND_REL_JUMP_OPCODE }, setting)
-        {}
+       public:
+        JumpPatch(std::uintptr_t dst, PatchApplySetting setting = {})
+            : Patch<1>(dst, std::array{UNCOND_REL_JUMP_OPCODE}, setting)
+        {
+        }
 
-    private:
+       private:
         static constexpr std::uint8_t UNCOND_REL_JUMP_OPCODE = 0xEB;
     };
 
     template <std::size_t count>
     class NopPatch : public Patch<count>
     {
-    public:
+       public:
         NopPatch(std::uintptr_t dst, PatchApplySetting setting = {}) : Patch<count>(dst, _bytes, setting)
-        {}
+        {
+        }
 
-    private:
+       private:
         static constexpr std::uint8_t NOP_OPCODE = 0x90;
 
-        static constexpr auto _bytes = []()
-        {
+        static constexpr auto _bytes = []() {
             std::array<std::uint8_t, count> tmp;
             tmp.fill(NOP_OPCODE);
 
             return tmp;
         }();
     };
-}
+}  // namespace IWXMVM::Patches
