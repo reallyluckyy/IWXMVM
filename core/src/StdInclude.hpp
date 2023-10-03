@@ -35,6 +35,7 @@
 #include "glm/gtx/scalar_multiplication.hpp"
 #include "glm/gtx/vector_angle.hpp"
 #include "glm/gtx/rotate_vector.hpp"
+#include "glm/gtx/spline.hpp"
 #include "Utilities/GLMExtensions.hpp"
 
 #pragma warning(push, 0)

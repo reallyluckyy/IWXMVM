@@ -3,13 +3,15 @@
 
 namespace IWXMVM::UI
 {
-    class DebugPanel : public UIComponent
+    class CampathMenu : public UIComponent
     {
        public:
+        void Initialize() final;
         void Render() final;
         void Release() final;
 
        private:
-        void Initialize() final;
+        void RenderHotkeyOverlay();
+        void DrawCampath();
     };
 }  // namespace IWXMVM::UI

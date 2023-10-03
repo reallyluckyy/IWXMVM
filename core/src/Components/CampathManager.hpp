@@ -1,31 +1,58 @@
 #pragma once
-#include "Types/Marker.hpp"
+#include "Types/CampathNode.hpp"
 
 namespace IWXMVM::Components
 {
-	class CampathManager 
-	{
+    enum class InterpolationMode
+    {
+        Linear,
+        CatmullRom,
 
-	public:
-		static CampathManager& Get()
-		{
-			static CampathManager instance;
-			return instance;
-		}
+        Count
+    };
 
-		CampathManager(CampathManager const&) = delete;
-		void operator=(CampathManager const&) = delete;
+    class CampathManager
+    {
+       public:
+        static CampathManager& Get()
+        {
+            static CampathManager instance;
+            return instance;
+        }
 
-		void Initialize();
-		void Update();
+        CampathManager(CampathManager const&) = delete;
+        void operator=(CampathManager const&) = delete;
 
-		const std::vector<Types::Marker>& GetMarkers() const { return markers; }
-		void AddMarker(Types::Marker marker);
+        void Initialize();
+        void Update();
 
-	private:
-		CampathManager() {}
+        const std::vector<Types::CampathNode>& GetNodes() const
+        {
+            return nodes;
+        }
+        void AddNode(Types::CampathNode marker);
 
-		// Vector storing campath markers in order of ticks
-		std::vector<Types::Marker> markers;
-	};
-}
+        Types::CampathNode Interpolate(uint32_t tick);
+        InterpolationMode GetInterpolationMode() const
+        {
+            return interpolationMode;
+        }
+        void SetInterpolationMode(InterpolationMode interpolationMode)
+        {
+            this->interpolationMode = interpolationMode;
+        }
+        std::string_view GetInterpolationModeLabel(InterpolationMode interpolationMode);
+        std::vector<InterpolationMode> GetInterpolationModes();
+        int32_t GetRequiredNodeCount() const;
+
+       private:
+        CampathManager()
+        {
+        }
+
+        // Vector storing campath nodes in order of ticks
+        std::vector<Types::CampathNode> nodes;
+
+        InterpolationMode interpolationMode = InterpolationMode::Linear;
+    };
+}  // namespace IWXMVM::Components

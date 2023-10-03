@@ -128,9 +128,10 @@
     </ClCompile>
     <ClCompile Include="src\Resources.cpp" />
     <ClCompile Include="src\UI\Components\Background.cpp" />
+    <ClCompile Include="src\UI\Components\CampathMenu.cpp" />
     <ClCompile Include="src\UI\Components\CaptureMenu.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
-    <ClCompile Include="src\UI\Components\CustomImGuiControls.cpp" />
+    <ClCompile Include="src\UI\ImGuiExtensions.cpp" />
     <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
     <ClCompile Include="src\Events.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -164,9 +165,10 @@
     <ClInclude Include="src\Types\Dvar.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
-    <ClInclude Include="src\Types\Marker.hpp" />
+    <ClInclude Include="src\Types\CampathNode.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />
     <ClInclude Include="src\Types\Sun.hpp" />
+    <ClInclude Include="src\UI\Components\CampathMenu.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />
     <ClInclude Include="src\Utilities\MathUtils.hpp" />
@@ -179,7 +181,7 @@
     <ClInclude Include="src\UI\Components\Background.hpp" />
     <ClInclude Include="src\UI\Components\CaptureMenu.hpp" />
     <ClInclude Include="src\UI\Components\ControlBar.hpp" />
-    <ClInclude Include="src\UI\Components\CustomImGuiControls.hpp" />
+    <ClInclude Include="src\UI\ImGuiExtensions.hpp" />
     <ClInclude Include="src\UI\Components\DebugPanel.hpp" />
     <ClInclude Include="src\UI\Components\DemoLoader.hpp" />
     <ClInclude Include="src\UI\Components\GameView.hpp" />

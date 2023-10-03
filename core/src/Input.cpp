@@ -3,77 +3,67 @@
 
 namespace IWXMVM
 {
-	bool Input::KeyDown(ImGuiKey key)
-	{
-		return ImGui::IsKeyPressed(key);
-	}
+    const std::map<ImGuiKey, ImGuiMouseButton> mouseButtonMap = {{ImGuiKey_MouseLeft, ImGuiMouseButton_Left},
+                                                                 {ImGuiKey_MouseRight, ImGuiMouseButton_Right},
+                                                                 {ImGuiKey_MouseMiddle, ImGuiMouseButton_Middle}};
 
-	bool Input::KeyUp(ImGuiKey key)
-	{
-		return ImGui::IsKeyReleased(key);
-	}
+    bool IsMouseButton(ImGuiKey key)
+    {
+        return key >= ImGuiKey_MouseLeft && key <= ImGuiKey_MouseWheelY;
+    }
 
-	bool Input::KeyHeld(ImGuiKey key)
-	{
-		return ImGui::IsKeyDown(key);
-	}
+    bool Input::KeyDown(ImGuiKey key)
+    {
+        if (IsMouseButton(key))
+            return ImGui::IsMouseClicked(mouseButtonMap.at(key));
+        return ImGui::IsKeyPressed(key);
+    }
 
-	bool Input::MouseButtonHeld(ImGuiMouseButton mouseButton)
-	{
-		return ImGui::IsMouseDown(mouseButton);
-	}
+    bool Input::KeyUp(ImGuiKey key)
+    {
+        if (IsMouseButton(key))
+            return ImGui::IsMouseReleased(mouseButtonMap.at(key));
+        return ImGui::IsKeyReleased(key);
+    }
 
-	bool Input::MouseButtonDown(ImGuiMouseButton mouseButton)
-	{
-		return ImGui::IsMouseClicked(mouseButton);
-	}
+    bool Input::KeyHeld(ImGuiKey key)
+    {
+        if (IsMouseButton(key))
+            return ImGui::IsMouseDown(mouseButtonMap.at(key));
+        return ImGui::IsKeyDown(key);
+    }
 
-	glm::vec2 Input::GetMouseDelta()
-	{
-		ImGuiIO& io = ImGui::GetIO();
-		return glm::vec2(io.MouseDelta.x, io.MouseDelta.y);
-	}
+    glm::vec2 Input::GetMouseDelta()
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        return glm::vec2(io.MouseDelta.x, io.MouseDelta.y);
+    }
 
-	float Input::GetScrollDelta()
-	{
-		return mouseWheelDelta;
-	}
+    float Input::GetScrollDelta()
+    {
+        return mouseWheelDelta;
+    }
 
-	void Input::UpdateState(ImGuiIO& io)
-	{
-		mouseWheelDelta = io.MouseWheel;
-	}
+    void Input::UpdateState(ImGuiIO& io)
+    {
+        mouseWheelDelta = io.MouseWheel;
+    }
 
-	float Input::GetDeltaTime()
-	{
-		ImGuiIO& io = ImGui::GetIO();
-		return io.DeltaTime;
-	}
+    float Input::GetDeltaTime()
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        return io.DeltaTime;
+    }
 
-	bool Input::BindHeld(std::string_view bindName) 
-	{
-		Key bind = InputConfiguration::Get().GetKeyBind(bindName);
-		if (std::holds_alternative<ImGuiKey>(bind)) 
-		{
-			return KeyHeld(std::get<ImGuiKey>(bind));
-		}
-		else if (std::holds_alternative<ImGuiMouseButton_>(bind)) 
-		{
-			return MouseButtonHeld(std::get<ImGuiMouseButton_>(bind));
-		}
-		return false; // Invalid bind
-	}
+    bool Input::BindHeld(std::string_view bindName)
+    {
+        Key bind = InputConfiguration::Get().GetKeyBind(bindName);
+        return KeyHeld(bind);
+    }
 
-	bool Input::BindDown(std::string_view bindName)
-	{
-		Key bind = InputConfiguration::Get().GetKeyBind(bindName);
-		if (std::holds_alternative<ImGuiKey>(bind))
-		{
-			return KeyDown(std::get<ImGuiKey>(bind));
-		} else if (std::holds_alternative<ImGuiMouseButton_>(bind))
-		{
-			return MouseButtonDown(std::get<ImGuiMouseButton_>(bind));
-		}
-		return false; // Invalid bind
-	}
-}
+    bool Input::BindDown(std::string_view bindName)
+    {
+        Key bind = InputConfiguration::Get().GetKeyBind(bindName);
+        return KeyDown(bind);
+    }
+}  // namespace IWXMVM
