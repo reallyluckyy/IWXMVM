@@ -3,22 +3,24 @@
 
 namespace IWXMVM::UI
 {
-	enum Tab {
-		Demos,
-		Visuals,
-		Camera,
-		Record,
+enum Tab
+{
+    Demos,
+    Visuals,
+    Camera,
+    Record,
 
-		Count,
-	};
+    Count,
+};
 
-	class PrimaryTabs : public UIComponent
-	{
-	public:
-		void Initialize() final;
-		void Render() final;
-		void Release() final;
-	private:
-		void RenderSelectedTab();
-	};
-}
+class PrimaryTabs : public UIComponent
+{
+   public:
+    void Initialize() final;
+    void Render() final;
+    void Release() final;
+
+   private:
+    void RenderSelectedTab();
+};
+}  // namespace IWXMVM::UI

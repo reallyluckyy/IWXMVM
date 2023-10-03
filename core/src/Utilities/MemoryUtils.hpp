@@ -2,5 +2,5 @@
 
 namespace IWXMVM::MemoryUtils
 {
-	void UnprotectModule(std::uintptr_t module = NULL);
+void UnprotectModule(std::uintptr_t module = NULL);
 }

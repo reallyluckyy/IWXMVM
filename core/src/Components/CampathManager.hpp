@@ -3,29 +3,33 @@
 
 namespace IWXMVM::Components
 {
-	class CampathManager 
-	{
+class CampathManager
+{
+   public:
+    static CampathManager& Get()
+    {
+        static CampathManager instance;
+        return instance;
+    }
 
-	public:
-		static CampathManager& Get()
-		{
-			static CampathManager instance;
-			return instance;
-		}
+    CampathManager(CampathManager const&) = delete;
+    void operator=(CampathManager const&) = delete;
 
-		CampathManager(CampathManager const&) = delete;
-		void operator=(CampathManager const&) = delete;
+    void Initialize();
+    void Update();
 
-		void Initialize();
-		void Update();
+    const std::vector<Types::Marker>& GetMarkers() const
+    {
+        return markers;
+    }
+    void AddMarker(Types::Marker marker);
 
-		const std::vector<Types::Marker>& GetMarkers() const { return markers; }
-		void AddMarker(Types::Marker marker);
+   private:
+    CampathManager()
+    {
+    }
 
-	private:
-		CampathManager() {}
-
-		// Vector storing campath markers in order of ticks
-		std::vector<Types::Marker> markers;
-	};
-}
+    // Vector storing campath markers in order of ticks
+    std::vector<Types::Marker> markers;
+};
+}  // namespace IWXMVM::Components

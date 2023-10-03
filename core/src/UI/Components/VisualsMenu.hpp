@@ -5,44 +5,44 @@
 
 namespace IWXMVM::UI
 {
-	class VisualsMenu : public UIComponent
-	{
-	public:
-		void Render() final;
-		void Release() final;
-		
-	private:
-		struct Visuals
-		{
-			//DOF
-			bool dofActive;
-			float dofFarBlur;
-			float dofFarStart;
-			float dofFarEnd;
+class VisualsMenu : public UIComponent
+{
+   public:
+    void Render() final;
+    void Release() final;
 
-			float dofNearBlur;
-			float dofNearStart;
-			float dofNearEnd;
+   private:
+    struct Visuals
+    {
+        // DOF
+        bool dofActive;
+        float dofFarBlur;
+        float dofFarStart;
+        float dofFarEnd;
 
-			float dofBias;
+        float dofNearBlur;
+        float dofNearStart;
+        float dofNearEnd;
 
-			//SUN
-			glm::vec3 sunColorUI;
-			glm::vec3 sunPositionUI;
-			float sunPitch;
-			float sunYaw;
-			float sunBrightness = 1;
-		};
+        float dofBias;
 
-		void Initialize() final;
-		void RenderDOF();
-		void RenderSun();
+        // SUN
+        glm::vec3 sunColorUI;
+        glm::vec3 sunPositionUI;
+        float sunPitch;
+        float sunYaw;
+        float sunBrightness = 1;
+    };
 
-		void UpdateDof();
-		void UpdateSun();
-		void UpdateSunAngle();
+    void Initialize() final;
+    void RenderDOF();
+    void RenderSun();
 
-		Visuals visuals;
-		bool visualsInitialized = false;
-	};
-}
+    void UpdateDof();
+    void UpdateSun();
+    void UpdateSunAngle();
+
+    Visuals visuals;
+    bool visualsInitialized = false;
+};
+}  // namespace IWXMVM::UI
