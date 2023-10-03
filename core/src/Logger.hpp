@@ -15,13 +15,13 @@
 namespace IWXMVM
 {
 
-class Logger
-{
-   public:
-    static void Initialize();
-    static std::shared_ptr<spdlog::logger> GetInternalLogger();
+    class Logger
+    {
+       public:
+        static void Initialize();
+        static std::shared_ptr<spdlog::logger> GetInternalLogger();
 
-   private:
-    static std::shared_ptr<spdlog::logger> internalLogger;
-};
+       private:
+        static std::shared_ptr<spdlog::logger> internalLogger;
+    };
 }  // namespace IWXMVM

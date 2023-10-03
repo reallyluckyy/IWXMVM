@@ -3,15 +3,15 @@
 
 namespace IWXMVM::Components
 {
-class FreeCamera : public Camera
-{
-   public:
-    FreeCamera()
+    class FreeCamera : public Camera
     {
-        this->mode = Camera::Mode::Free;
-    }
+       public:
+        FreeCamera()
+        {
+            this->mode = Camera::Mode::Free;
+        }
 
-    void Initialize() override;
-    void Update() override;
-};
+        void Initialize() override;
+        void Update() override;
+    };
 }  // namespace IWXMVM::Components

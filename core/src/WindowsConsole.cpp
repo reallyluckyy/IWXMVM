@@ -3,17 +3,17 @@
 
 namespace IWXMVM
 {
-void WindowsConsole::Open()
-{
-    if (AllocConsole())
+    void WindowsConsole::Open()
     {
-        FILE* stream;
-        freopen_s(&stream, "CONOUT$", "w", stdout);
+        if (AllocConsole())
+        {
+            FILE* stream;
+            freopen_s(&stream, "CONOUT$", "w", stdout);
+        }
     }
-}
 
-void WindowsConsole::Close()
-{
-    FreeConsole();
-}
+    void WindowsConsole::Close()
+    {
+        FreeConsole();
+    }
 }  // namespace IWXMVM

@@ -4,12 +4,12 @@
 
 namespace IWXMVM::Types
 {
-struct Marker
-{
-    glm::vec3 position;
-    glm::vec3 rotation;
-    float fov;
+    struct Marker
+    {
+        glm::vec3 position;
+        glm::vec3 rotation;
+        float fov;
 
-    std::uint32_t tick;
-};
+        std::uint32_t tick;
+    };
 }  // namespace IWXMVM::Types

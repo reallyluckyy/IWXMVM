@@ -3,23 +3,23 @@
 
 namespace IWXMVM::Components
 {
-class OrbitCamera : public Camera
-{
-   public:
-    OrbitCamera()
+    class OrbitCamera : public Camera
     {
-        this->mode = Camera::Mode::Orbit;
-    }
+       public:
+        OrbitCamera()
+        {
+            this->mode = Camera::Mode::Orbit;
+        }
 
-    void Initialize() override;
-    void Update() override;
+        void Initialize() override;
+        void Update() override;
 
-   private:
-    void DrawOverlay();
+       private:
+        void DrawOverlay();
 
-    void DrawOrbitPoint();
-    void DrawGrid();
+        void DrawOrbitPoint();
+        void DrawGrid();
 
-    glm::vec3 orbitCameraOrigin{};
-};
+        glm::vec3 orbitCameraOrigin{};
+    };
 }  // namespace IWXMVM::Components

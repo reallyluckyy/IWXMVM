@@ -3,13 +3,13 @@
 
 namespace IWXMVM::UI
 {
-class ControlBar : public UIComponent
-{
-   public:
-    void Render() final;
-    void Release() final;
+    class ControlBar : public UIComponent
+    {
+       public:
+        void Render() final;
+        void Release() final;
 
-   private:
-    void Initialize() final;
-};
+       private:
+        void Initialize() final;
+    };
 }  // namespace IWXMVM::UI

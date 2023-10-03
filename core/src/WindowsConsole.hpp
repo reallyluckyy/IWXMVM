@@ -3,10 +3,10 @@
 namespace IWXMVM
 {
 
-class WindowsConsole
-{
-   public:
-    static void Open();
-    static void Close();
-};
+    class WindowsConsole
+    {
+       public:
+        static void Open();
+        static void Close();
+    };
 }  // namespace IWXMVM

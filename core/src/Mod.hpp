@@ -5,21 +5,21 @@
 
 namespace IWXMVM
 {
-class Mod
-{
-   public:
-    static void Initialize(GameInterface* gameInterface);
-
-    static GameInterface* GetGameInterface()
+    class Mod
     {
-        return internalGameInterface;
-    }
+       public:
+        static void Initialize(GameInterface* gameInterface);
 
-    static void RequestEject();
+        static GameInterface* GetGameInterface()
+        {
+            return internalGameInterface;
+        }
 
-   private:
-    static GameInterface* internalGameInterface;
+        static void RequestEject();
 
-    static std::atomic<bool> ejectRequested;
-};
+       private:
+        static GameInterface* internalGameInterface;
+
+        static std::atomic<bool> ejectRequested;
+    };
 }  // namespace IWXMVM

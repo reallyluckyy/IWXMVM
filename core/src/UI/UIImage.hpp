@@ -3,18 +3,18 @@
 
 namespace IWXMVM::UI
 {
-class UIImage
-{
-   private:
-    ImVec2 dimensions;
-    ImTextureID texture;
+    class UIImage
+    {
+       private:
+        ImVec2 dimensions;
+        ImTextureID texture;
 
-   public:
-    ImVec2 GetDimensions() const;
-    ImTextureID GetTextureID() const;
+       public:
+        ImVec2 GetDimensions() const;
+        ImTextureID GetTextureID() const;
 
-    // static UIImage FromFile(std::string path);
-    static UIImage FromResource(const uint8_t data[], uint32_t size);
-    static void ReleaseResource(const uint8_t data[]);
-};
+        // static UIImage FromFile(std::string path);
+        static UIImage FromResource(const uint8_t data[], uint32_t size);
+        static void ReleaseResource(const uint8_t data[]);
+    };
 }  // namespace IWXMVM::UI

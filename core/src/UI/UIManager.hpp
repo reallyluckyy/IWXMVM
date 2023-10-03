@@ -17,108 +17,108 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace IWXMVM::UI
 {
-namespace Component
-{
-enum Component
-{
-    Background = 0,
-    MenuBar,
-    GameView,
-    PrimaryTabs,
-    DemoLoader,
-    VisualsMenu,
-    CaptureMenu,
-    ControlBar,
-    DebugPanel,
-
-    Count,
-};
-}
-
-class UIManager
-{
-   public:
-    static UIManager& Get()
+    namespace Component
     {
-        static UIManager instance;
-        return instance;
+        enum Component
+        {
+            Background = 0,
+            MenuBar,
+            GameView,
+            PrimaryTabs,
+            DemoLoader,
+            VisualsMenu,
+            CaptureMenu,
+            ControlBar,
+            DebugPanel,
+
+            Count,
+        };
     }
 
-    UIManager(UIManager const&) = delete;
-    void operator=(UIManager const&) = delete;
-
-    void Initialize(IDirect3DDevice9* device, HWND hwnd = nullptr);
-    void ShutdownImGui();
-    void RunImGuiFrame();
-
-    bool ViewportShouldLockMouse();
-
-    ImVec2 GetWindowSize(HWND hwnd);
-    ImVec2 GetWindowPosition(HWND hwnd);
-
-    bool IsInitialized() const
+    class UIManager
     {
-        return isInitialized;
-    }
+       public:
+        static UIManager& Get()
+        {
+            static UIManager instance;
+            return instance;
+        }
 
-    WNDPROC GetOriginalGameWndProc() const
-    {
-        return originalGameWndProc;
-    }
+        UIManager(UIManager const&) = delete;
+        void operator=(UIManager const&) = delete;
 
-    std::unique_ptr<UIComponent> const& GetUIComponent(Component::Component component) const
-    {
-        return uiComponents[component];
-    }
+        void Initialize(IDirect3DDevice9* device, HWND hwnd = nullptr);
+        void ShutdownImGui();
+        void RunImGuiFrame();
 
-    std::array<std::unique_ptr<UIComponent>, Component::Count> const& GetUIComponents() const
-    {
-        return uiComponents;
-    }
+        bool ViewportShouldLockMouse();
 
-    void SelectTab(Tab tab)
-    {
-        selectedTab = tab;
-    }
+        ImVec2 GetWindowSize(HWND hwnd);
+        ImVec2 GetWindowPosition(HWND hwnd);
 
-    Tab GetSelectedTab() const
-    {
-        return selectedTab;
-    }
+        bool IsInitialized() const
+        {
+            return isInitialized;
+        }
 
-    void ToggleOverlay()
-    {
-        hideOverlay = !hideOverlay;
-    }
+        WNDPROC GetOriginalGameWndProc() const
+        {
+            return originalGameWndProc;
+        }
 
-    void ToggleImGuiDemo()
-    {
-        showImGuiDemo = !showImGuiDemo;
-    }
+        std::unique_ptr<UIComponent> const& GetUIComponent(Component::Component component) const
+        {
+            return uiComponents[component];
+        }
 
-    void ToggleDebugPanel()
-    {
-        showDebugPanel = !showDebugPanel;
-    }
+        std::array<std::unique_ptr<UIComponent>, Component::Count> const& GetUIComponents() const
+        {
+            return uiComponents;
+        }
 
-   private:
-    UIManager()
-    {
-    }
+        void SelectTab(Tab tab)
+        {
+            selectedTab = tab;
+        }
 
-    std::array<std::unique_ptr<UIComponent>, Component::Count> uiComponents = {
-        std::make_unique<Background>(),  std::make_unique<MenuBar>(),    std::make_unique<GameView>(),
-        std::make_unique<PrimaryTabs>(), std::make_unique<DemoLoader>(), std::make_unique<VisualsMenu>(),
-        std::make_unique<CaptureMenu>(), std::make_unique<ControlBar>(), std::make_unique<DebugPanel>(),
+        Tab GetSelectedTab() const
+        {
+            return selectedTab;
+        }
+
+        void ToggleOverlay()
+        {
+            hideOverlay = !hideOverlay;
+        }
+
+        void ToggleImGuiDemo()
+        {
+            showImGuiDemo = !showImGuiDemo;
+        }
+
+        void ToggleDebugPanel()
+        {
+            showDebugPanel = !showDebugPanel;
+        }
+
+       private:
+        UIManager()
+        {
+        }
+
+        std::array<std::unique_ptr<UIComponent>, Component::Count> uiComponents = {
+            std::make_unique<Background>(),  std::make_unique<MenuBar>(),    std::make_unique<GameView>(),
+            std::make_unique<PrimaryTabs>(), std::make_unique<DemoLoader>(), std::make_unique<VisualsMenu>(),
+            std::make_unique<CaptureMenu>(), std::make_unique<ControlBar>(), std::make_unique<DebugPanel>(),
+        };
+
+        Tab selectedTab = Tab::Demos;
+        bool isInitialized = false;
+
+        bool hideOverlay = false;
+        bool showImGuiDemo = false;
+        bool showDebugPanel = false;
+
+        WNDPROC originalGameWndProc = nullptr;
     };
-
-    Tab selectedTab = Tab::Demos;
-    bool isInitialized = false;
-
-    bool hideOverlay = false;
-    bool showImGuiDemo = false;
-    bool showDebugPanel = false;
-
-    WNDPROC originalGameWndProc = nullptr;
-};
 }  // namespace IWXMVM::UI

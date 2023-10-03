@@ -3,15 +3,15 @@
 
 namespace IWXMVM::Components
 {
-class DefaultCamera : public Camera
-{
-   public:
-    DefaultCamera(Camera::Mode mode)
+    class DefaultCamera : public Camera
     {
-        this->mode = mode;
-    }
+       public:
+        DefaultCamera(Camera::Mode mode)
+        {
+            this->mode = mode;
+        }
 
-    void Initialize() override{};
-    void Update() override{};
-};
+        void Initialize() override{};
+        void Update() override{};
+    };
 }  // namespace IWXMVM::Components

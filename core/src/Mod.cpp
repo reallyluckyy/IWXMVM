@@ -13,73 +13,73 @@
 
 namespace IWXMVM
 {
-GameInterface* Mod::internalGameInterface = nullptr;
-std::atomic<bool> Mod::ejectRequested = false;
+    GameInterface* Mod::internalGameInterface = nullptr;
+    std::atomic<bool> Mod::ejectRequested = false;
 
-HMODULE GetCurrentModule()
-{
-    static bool dummy;
-
-    MEMORY_BASIC_INFORMATION mbi;
-    ::VirtualQuery(&dummy, &mbi, sizeof(mbi));
-
-    return static_cast<HMODULE>(mbi.AllocationBase);
-}
-
-void Mod::RequestEject()
-{
-    ejectRequested.store(true);
-}
-
-void Mod::Initialize(GameInterface* gameInterface)
-{
-    try
+    HMODULE GetCurrentModule()
     {
-        internalGameInterface = gameInterface;
+        static bool dummy;
 
-        WindowsConsole::Open();
-        Logger::Initialize();
+        MEMORY_BASIC_INFORMATION mbi;
+        ::VirtualQuery(&dummy, &mbi, sizeof(mbi));
 
-        LOG_INFO("Loading IWXMVM {}", IWXMVM_VERSION);
-        LOG_INFO("Game: {}", Types::ToString(gameInterface->GetGame()));
-        LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
-
-        LOG_DEBUG("Scanning signatures...");
-        gameInterface->InitializeGameAddresses();
-
-        LOG_DEBUG("Installing game hooks and patches...");
-        D3D9::Initialize();
-        gameInterface->InstallHooksAndPatches();
-        gameInterface->SetupEventListeners();
-
-        // Initialize Components
-        Configuration::Get().Initialize();
-        Components::CameraManager::Get().Initialize();
-        Components::CampathManager::Get().Initialize();
-
-        // TODO: ...
-
-        LOG_INFO("Initialized IWXMVM!");
-
-        while (!ejectRequested.load())
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-        HookManager::Unhook();
-        LOG_DEBUG("Unhooked");
-        UI::UIManager::Get().ShutdownImGui();
-        LOG_DEBUG("ImGui successfully shutdown");
-
-        WindowsConsole::Close();
-        ::FreeLibraryAndExitThread(GetCurrentModule(), 0);
+        return static_cast<HMODULE>(mbi.AllocationBase);
     }
-    catch (std::exception& ex)
+
+    void Mod::RequestEject()
     {
-        LOG_ERROR("An error occurred during initialization: {}", ex.what());
-        // TODO: What do we do here?
+        ejectRequested.store(true);
     }
-    catch (...)
+
+    void Mod::Initialize(GameInterface* gameInterface)
     {
-        LOG_ERROR("An error occurred during initialization");
+        try
+        {
+            internalGameInterface = gameInterface;
+
+            WindowsConsole::Open();
+            Logger::Initialize();
+
+            LOG_INFO("Loading IWXMVM {}", IWXMVM_VERSION);
+            LOG_INFO("Game: {}", Types::ToString(gameInterface->GetGame()));
+            LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
+
+            LOG_DEBUG("Scanning signatures...");
+            gameInterface->InitializeGameAddresses();
+
+            LOG_DEBUG("Installing game hooks and patches...");
+            D3D9::Initialize();
+            gameInterface->InstallHooksAndPatches();
+            gameInterface->SetupEventListeners();
+
+            // Initialize Components
+            Configuration::Get().Initialize();
+            Components::CameraManager::Get().Initialize();
+            Components::CampathManager::Get().Initialize();
+
+            // TODO: ...
+
+            LOG_INFO("Initialized IWXMVM!");
+
+            while (!ejectRequested.load())
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+            HookManager::Unhook();
+            LOG_DEBUG("Unhooked");
+            UI::UIManager::Get().ShutdownImGui();
+            LOG_DEBUG("ImGui successfully shutdown");
+
+            WindowsConsole::Close();
+            ::FreeLibraryAndExitThread(GetCurrentModule(), 0);
+        }
+        catch (std::exception& ex)
+        {
+            LOG_ERROR("An error occurred during initialization: {}", ex.what());
+            // TODO: What do we do here?
+        }
+        catch (...)
+        {
+            LOG_ERROR("An error occurred during initialization");
+        }
     }
-}
 }  // namespace IWXMVM
