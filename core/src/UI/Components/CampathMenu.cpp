@@ -90,25 +90,32 @@ namespace IWXMVM::UI
 
 	void CampathMenu::DrawCampath()
 	{
+		constexpr auto NODE_COLOR = ImVec4(1.0f, 0.0f, 0.0f, 0.8f);
+		constexpr auto NODE_SIZE = ImVec2(10, 10);
+		constexpr auto PATH_COLOR = ImVec4(1.0f, 0.75f, 0.0f, 0.8f);
+
 		const auto& campathManager = Components::CampathManager::Get();
 
 		for (const auto& node : campathManager.GetNodes())
 		{
-			ImGuiEx::DrawPoint3D(node.position, ImVec4(1.0f, 0.0f, 0.0f, 0.8f), ImVec2(10, 10));
+			ImGuiEx::DrawPoint3D(node.position, NODE_COLOR, NODE_SIZE);
+			ImGuiEx::DrawLine3D(node.position, node.position + MathUtils::ForwardVectorFromAngles(node.rotation) * 50, NODE_COLOR, NODE_SIZE.x / 2);
 		}
 
-		constexpr auto EVALUATION_DISTANCE = 150;
 		
-		if (!campathManager.GetNodes().empty())
+		if (campathManager.GetNodes().size() >= campathManager.GetRequiredNodeCount())
 		{
+			const auto EVALUATION_DISTANCE = glm::clamp(100 * (campathManager.GetNodes().back().tick - campathManager.GetNodes().front().tick) / 5000, 1u, 1000u);
+
 			auto previousNode = campathManager.GetNodes().front();
-			for (auto tick = campathManager.GetNodes().front().tick + EVALUATION_DISTANCE; tick < campathManager.GetNodes().back().tick; tick += EVALUATION_DISTANCE)
+			for (auto tick = campathManager.GetNodes().front().tick + EVALUATION_DISTANCE; tick <= campathManager.GetNodes().back().tick; tick += EVALUATION_DISTANCE)
 			{
 				auto node = Components::CampathManager::Get().Interpolate(tick);
-				ImGuiEx::DrawLine3D(previousNode.position, node.position, ImVec4(0.0f, 1.0f, 0.0f, 0.8f), 3.0f);
+				ImGuiEx::DrawLine3D(previousNode.position, node.position, PATH_COLOR, NODE_SIZE.x / 2);
 
 				previousNode = node;
 			}
+			ImGuiEx::DrawLine3D(previousNode.position, campathManager.GetNodes().back().position, PATH_COLOR, NODE_SIZE.x / 2);
 		}
 	}
 

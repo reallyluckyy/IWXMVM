@@ -35,6 +35,7 @@ namespace IWXMVM::Components
 		void SetInterpolationMode(InterpolationMode interpolationMode) { this->interpolationMode = interpolationMode; }
 		std::string_view GetInterpolationModeLabel(InterpolationMode interpolationMode);
 		std::vector<InterpolationMode> GetInterpolationModes();
+		int32_t GetRequiredNodeCount() const;
 
 	private:
 		CampathManager() {}

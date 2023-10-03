@@ -3,10 +3,10 @@
 
 namespace IWXMVM::MathUtils
 {
-	glm::vec3 ForwardVectorFromAngles(float pitch, float yaw, float roll)
+	glm::vec3 ForwardVectorFromAngles(glm::vec3 eulerAngles)
 	{
-		auto p = glm::radians(pitch);
-		auto y = glm::radians(yaw);
+		auto p = glm::radians(eulerAngles[0]);
+		auto y = glm::radians(eulerAngles[1]);
 		return glm::vec3(
 			std::cos(y) * std::cos(p),
 			std::sin(y) * std::cos(p),

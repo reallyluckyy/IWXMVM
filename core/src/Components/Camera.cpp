@@ -13,7 +13,7 @@ namespace IWXMVM::Components
 
 	glm::vec3 Camera::GetForwardVector() 
 	{
-		return MathUtils::ForwardVectorFromAngles(this->rotation[0], this->rotation[1], this->rotation[2]);
+		return MathUtils::ForwardVectorFromAngles(this->rotation);
 	}
 
 	glm::vec3 Camera::GetRightVector()

@@ -78,12 +78,12 @@ namespace IWXMVM::Components
 		const auto& p2 = campathNodes[p2Idx];
 		const auto& p3 = campathNodes[p2Idx + 1 >= campathNodes.size() ? campathNodes.size() - 1 : p2Idx + 1];
 
-		float local_t = (float)(tick - p1.tick) / (float)(p2.tick - p1.tick);
+		float t = (float)(tick - p1.tick) / (float)(p2.tick - p1.tick);
 
 		return Types::CampathNode(
-			glm::catmullRom(p0.position, p1.position, p2.position, p3.position, local_t),
-			glm::catmullRom(p0.rotation, p1.rotation, p2.rotation, p3.rotation, local_t),
-			90,
+			glm::catmullRom(p0.position, p1.position, p2.position, p3.position, t),
+			glm::catmullRom(p0.rotation, p1.rotation, p2.rotation, p3.rotation, t),
+			glm::catmullRom(glm::vec1(p0.fov), glm::vec1(p1.fov), glm::vec1(p2.fov), glm::vec1(p3.fov), t).x,
 			tick
 		);
 	}
@@ -98,6 +98,19 @@ namespace IWXMVM::Components
 				return CatmullRomInterpolate(nodes, tick);
 			default:
 				return Types::CampathNode();
+		}
+	}
+
+	int32_t CampathManager::GetRequiredNodeCount() const
+	{
+		switch (interpolationMode)
+		{
+			case InterpolationMode::Linear:
+				return 2;
+			case InterpolationMode::CatmullRom:
+				return 2;
+			default:
+				return 0;
 		}
 	}
 
