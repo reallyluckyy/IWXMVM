@@ -6,6 +6,7 @@ namespace IWXMVM::Components
 	enum class InterpolationMode
 	{
 		Linear,
+		CatmullRom,
 
 		Count
 	};
@@ -31,7 +32,7 @@ namespace IWXMVM::Components
 
 		Types::CampathNode Interpolate(uint32_t tick);
 		InterpolationMode GetInterpolationMode() const { return interpolationMode; }
-		void SetInterpolationMode(InterpolationMode interpolationMode) { interpolationMode = interpolationMode; }
+		void SetInterpolationMode(InterpolationMode interpolationMode) { this->interpolationMode = interpolationMode; }
 		std::string_view GetInterpolationModeLabel(InterpolationMode interpolationMode);
 		std::vector<InterpolationMode> GetInterpolationModes();
 

@@ -97,7 +97,7 @@ namespace IWXMVM::UI
 			ImGuiEx::DrawPoint3D(node.position, ImVec4(1.0f, 0.0f, 0.0f, 0.8f), ImVec2(10, 10));
 		}
 
-		constexpr auto EVALUATION_DISTANCE = 10;
+		constexpr auto EVALUATION_DISTANCE = 150;
 		
 		if (!campathManager.GetNodes().empty())
 		{

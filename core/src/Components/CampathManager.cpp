@@ -14,6 +14,8 @@ namespace IWXMVM::Components
 		{
 			case InterpolationMode::Linear:
 				return "Linear";
+			case InterpolationMode::CatmullRom:
+				return "Catmull Rom";
 			default:
 				return "Unknown";
 		}
@@ -58,12 +60,42 @@ namespace IWXMVM::Components
 		);
 	}
 
+	Types::CampathNode CatmullRomInterpolate(const std::vector<Types::CampathNode>& campathNodes, uint32_t tick)
+	{
+		std::int32_t p1Idx = 0, p2Idx = 1;
+		for (std::size_t i = 0; i < campathNodes.size() - 1; i++)
+		{
+			if (tick >= campathNodes[i].tick && tick <= campathNodes[i + 1].tick)
+			{
+				p1Idx = i;
+				p2Idx = i + 1;
+				break;
+			}
+		}
+
+		const auto& p0 = campathNodes[p1Idx - 1 < 0 ? 0 : p1Idx - 1];
+		const auto& p1 = campathNodes[p1Idx];
+		const auto& p2 = campathNodes[p2Idx];
+		const auto& p3 = campathNodes[p2Idx + 1 >= campathNodes.size() ? campathNodes.size() - 1 : p2Idx + 1];
+
+		float local_t = (float)(tick - p1.tick) / (float)(p2.tick - p1.tick);
+
+		return Types::CampathNode(
+			glm::catmullRom(p0.position, p1.position, p2.position, p3.position, local_t),
+			glm::catmullRom(p0.rotation, p1.rotation, p2.rotation, p3.rotation, local_t),
+			90,
+			tick
+		);
+	}
+
 	Types::CampathNode CampathManager::Interpolate(uint32_t tick)
 	{
 		switch (interpolationMode)
 		{
 			case InterpolationMode::Linear:
 				return LinearlyInterpolate(nodes, tick);
+			case InterpolationMode::CatmullRom:
+				return CatmullRomInterpolate(nodes, tick);
 			default:
 				return Types::CampathNode();
 		}
