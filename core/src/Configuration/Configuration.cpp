@@ -6,28 +6,27 @@
 
 namespace IWXMVM
 {
-
     void Configuration::Initialize()
     {
-        std::ifstream configFile(GetUserConfigPath());
+        auto configPath = GetUserConfigPath();
+        if (!std::filesystem::exists(configPath.parent_path()))
+        {
+            std::filesystem::create_directories(configPath.parent_path());
+        }
+
+        std::ifstream configFile(configPath);
         if (!configFile.is_open())
         {
-            WriteDefaultConfig();
-            configFile.open(GetUserConfigPath());
+            Write();
+            configFile.open(configPath);
         }
 
         nlohmann::json config = nlohmann::json::parse(configFile);
         configFile.close();
 
-        auto configVersion = config.at(NODE_VERSION).get<int32_t>();
-        if (configVersion != CONFIG_VERSION)
-        {
-            LOG_WARN("Config version mismatch (expected: {}, actual: {})", CONFIG_VERSION, configVersion);
-            LOG_WARN("Please consider deleting your config. Some keys may not be bound!");
-            // TODO: what do we do here?
-        }
+        BindsDeserialize(config[NODE_KEYBINDS]);
 
-        InputConfiguration::Get().Deserialize(config[NODE_KEYBINDS]);
+        Write();
     }
 
     void Configuration::Write()
@@ -35,15 +34,10 @@ namespace IWXMVM
         using json = nlohmann::json;
 
         json config;
-        config[NODE_VERSION] = CONFIG_VERSION;
 
-        InputConfiguration::Get().Serialize(config[NODE_KEYBINDS]);
+        BindsSerialize(config[NODE_KEYBINDS]);
 
-        auto configPath = GetUserConfigPath();
-        if (!std::filesystem::exists(configPath.parent_path()))
-            std::filesystem::create_directories(configPath.parent_path());
-
-        std::ofstream configFile(configPath);
+        std::ofstream configFile(GetUserConfigPath());
         configFile << config.dump(4);
         configFile.close();
     }
@@ -51,11 +45,5 @@ namespace IWXMVM
     std::filesystem::path Configuration::GetUserConfigPath()
     {
         return std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "config.json";
-    }
-
-    void Configuration::WriteDefaultConfig()
-    {
-        InputConfiguration::Get().LoadDefault();
-        Write();
     }
 }  // namespace IWXMVM

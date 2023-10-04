@@ -61,9 +61,9 @@ namespace IWXMVM::UI
         }
     }
 
-    void DrawKeyLine(Key key, std::string_view label, ImVec2 position)
+    void DrawKeyLine(Bind bind, std::string_view label, ImVec2 position)
     {
-        auto text = std::format("{} - {}", ImGui::GetKeyName(key), label);
+        auto text = std::format("{} - {}", ImGui::GetKeyName(BindToKey(bind)), label);
         ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(), ImGui::GetFontSize(), position,
                                                 ImGui::GetColorU32(ImGuiCol_Text), text.data());
     }
@@ -87,11 +87,11 @@ namespace IWXMVM::UI
         ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(), ImGui::GetFontSize(), contentBasePos,
                                                 ImGui::GetColorU32(ImGuiCol_Text), "Campath Hotkeys");
 
-        DrawKeyLine(InputConfiguration::Get().GetKeyBind(InputConfiguration::BIND_DOLLY_ADD_NODE), "Add Node",
+        DrawKeyLine(Bind::DollyAddNode, "Add Node",
                     contentBasePos + ImVec2(0, lineHeight * 1.5));
-        DrawKeyLine(InputConfiguration::Get().GetKeyBind(InputConfiguration::BIND_DOLLY_PLAY_PATH),
+        DrawKeyLine(Bind::DollyPlayPath,
                     "Switch To Dollycam", contentBasePos + ImVec2(0, lineHeight * 1.5 + lineHeight));
-        DrawKeyLine(InputConfiguration::Get().GetKeyBind(InputConfiguration::BIND_DOLLY_CLEAR_NODES),
+        DrawKeyLine(Bind::DollyClearNodes,
                     "Delete All Nodes", contentBasePos + ImVec2(0, lineHeight * 1.5 + lineHeight * 2));
     }
 

@@ -48,7 +48,7 @@ namespace IWXMVM::Components
             cameraPosition = orbitCameraOrigin + glm::vector3::one;
         }
 
-        if (Input::BindHeld(InputConfiguration::BIND_ORBIT_CAMERA_RESET))
+        if (Input::BindHeld(Bind::OrbitCameraReset))
         {
             scrollDelta = 0.0;
 
@@ -56,7 +56,7 @@ namespace IWXMVM::Components
             cameraPosition = glm::vector3::one;
         }
 
-        if (Input::BindHeld(InputConfiguration::BIND_ORBIT_CAMERA_ROTATE))
+        if (Input::BindHeld(Bind::OrbitCameraRotate))
         {
             auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
             cameraPosition -= orbitCameraOrigin;
@@ -70,7 +70,7 @@ namespace IWXMVM::Components
             cameraPosition += orbitCameraOrigin;
         }
 
-        if (Input::BindHeld(InputConfiguration::BIND_ORBIT_CAMERA_MOVE))
+        if (Input::BindHeld(Bind::OrbitCameraMove))
         {
             // use the height value to move faster around at higher altitude
             const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER *
@@ -113,7 +113,7 @@ namespace IWXMVM::Components
 
     void OrbitCamera::DrawOverlay()
     {
-        if (Input::BindHeld(InputConfiguration::BIND_ORBIT_CAMERA_MOVE))
+        if (Input::BindHeld(Bind::OrbitCameraMove))
         {
             DrawGrid();
         }

@@ -3,6 +3,30 @@
 
 #include "Configuration/InputConfiguration.hpp"
 
+enum Bind
+{
+    DollyAddNode,
+    DollyClearNodes,
+    DollyPlayPath,
+    FreeCameraBackward,
+    FreeCameraDown,
+    FreeCameraForward,
+    FreeCameraLeft,
+    FreeCameraReset,
+    FreeCameraRight,
+    FreeCameraUp,
+    OrbitCameraMove,
+    OrbitCameraReset,
+    OrbitCameraRotate,
+    PlaybackFaster,
+    PlaybackSkipBackward,
+    PlaybackSkipForward,
+    PlaybackSlower,
+    PlaybackToggle,
+
+    Count,
+};
+
 namespace IWXMVM
 {
     class Input
@@ -11,8 +35,8 @@ namespace IWXMVM
         static bool KeyDown(ImGuiKey key);
         static bool KeyUp(ImGuiKey key);
         static bool KeyHeld(ImGuiKey key);
-        static bool BindHeld(std::string_view bindName);
-        static bool BindDown(std::string_view bindName);
+        static bool BindHeld(Bind bind);
+        static bool BindDown(Bind bind);
 
         static glm::vec2 GetMouseDelta();
         static float GetScrollDelta();
