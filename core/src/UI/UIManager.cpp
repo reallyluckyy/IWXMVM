@@ -220,6 +220,8 @@ namespace IWXMVM::UI
 
             SetImGuiStyle(fontSize);
 
+            ImGui::GetIO().ConfigInputTrickleEventQueue = false;
+
             Mod::GetGameInterface()->SetMouseMode(Types::MouseMode::Capture);
             isInitialized = true;
 
