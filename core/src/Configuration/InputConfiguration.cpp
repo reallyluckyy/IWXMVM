@@ -64,11 +64,11 @@ namespace IWXMVM
 
             std::string action = entry.at(NODE_ACTION).get<std::string>();
             auto rawKeyValue = entry.at(NODE_KEY).get<std::int32_t>();
+
             if (stringToBindMap.contains(action))
             {
                 auto bind = stringToBindMap[action];
                 bindToKeyMap[bind].imGuiKey = (ImGuiKey)rawKeyValue;
-                LOG_DEBUG("Deserialized keybind for action {} with key {}", action, rawKeyValue);
             }
         }
     }
