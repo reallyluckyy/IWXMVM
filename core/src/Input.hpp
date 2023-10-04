@@ -3,7 +3,7 @@
 
 #include "Configuration/InputConfiguration.hpp"
 
-enum Bind
+enum Action
 {
     DollyAddNode,
     DollyClearNodes,
@@ -35,8 +35,8 @@ namespace IWXMVM
         static bool KeyDown(ImGuiKey key);
         static bool KeyUp(ImGuiKey key);
         static bool KeyHeld(ImGuiKey key);
-        static bool BindHeld(Bind bind);
-        static bool BindDown(Bind bind);
+        static bool BindHeld(Action action);
+        static bool BindDown(Action action);
 
         static glm::vec2 GetMouseDelta();
         static float GetScrollDelta();

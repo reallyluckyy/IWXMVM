@@ -21,10 +21,17 @@ namespace IWXMVM
             configFile.open(configPath);
         }
 
-        nlohmann::json config = nlohmann::json::parse(configFile);
-        configFile.close();
+        try
+        {
+            nlohmann::json config = nlohmann::json::parse(configFile);
+            InputConfiguration::Get().Deserialize(config[NODE_KEYBINDS]);
+        }
+        catch (const std::exception& e)
+        {
+            LOG_ERROR("Failed to parse config file. Falling back to defaults");
+        }
 
-        BindsDeserialize(config[NODE_KEYBINDS]);
+        configFile.close();
 
         Write();
     }
@@ -35,7 +42,7 @@ namespace IWXMVM
 
         json config;
 
-        BindsSerialize(config[NODE_KEYBINDS]);
+        InputConfiguration::Get().Serialize(config[NODE_KEYBINDS]);
 
         std::ofstream configFile(GetUserConfigPath());
         configFile << config.dump(4);

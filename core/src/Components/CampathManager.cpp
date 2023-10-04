@@ -122,7 +122,7 @@ namespace IWXMVM::Components
         // able to place nodes while in POV for example.
         if (UI::UIManager::Get().GetSelectedTab() == UI::Tab::Camera && activeCamera->GetMode() != Camera::Mode::Dolly)
         {
-            if (Input::BindDown(Bind::DollyAddNode))
+            if (Input::BindDown(Action::DollyAddNode))
             {
                 Types::CampathNode node{};
                 node.position = activeCamera->GetPosition();
@@ -136,14 +136,14 @@ namespace IWXMVM::Components
                           node.rotation.z, node.tick);
             }
 
-            if (Input::BindDown(Bind::DollyClearNodes))
+            if (Input::BindDown(Action::DollyClearNodes))
             {
                 nodes.clear();
 
                 LOG_DEBUG("Nodes cleared");
             }
 
-            if (Input::BindDown(Bind::DollyPlayPath))
+            if (Input::BindDown(Action::DollyPlayPath))
             {
                 CameraManager::Get().SetActiveCamera(Camera::Mode::Dolly);
             }
