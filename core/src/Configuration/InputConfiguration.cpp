@@ -93,11 +93,6 @@ namespace IWXMVM
         return bindToKeyMap[bind].imGuiKey;
     }
 
-    Bind BindFromString(std::string_view string)
-    {
-        return Bind::Count;
-    }
-
     std::string_view BindToString(Bind bind) noexcept
     {
         return bindToKeyMap[bind].string;

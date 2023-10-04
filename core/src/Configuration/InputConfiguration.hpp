@@ -33,6 +33,5 @@ namespace IWXMVM
 	void BindsDeserialize(const nlohmann::json& j);
     void BindsSerialize(nlohmann::json& j);
 	ImGuiKey BindToKey(Bind bind) noexcept;
-    Bind BindFromString(std::string_view string);
     std::string_view BindToString(Bind bind) noexcept;
 }  // namespace IWXMVM
