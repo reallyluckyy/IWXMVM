@@ -3,30 +3,6 @@
 
 #include "Configuration/InputConfiguration.hpp"
 
-enum Action
-{
-    DollyAddNode,
-    DollyClearNodes,
-    DollyPlayPath,
-    FreeCameraBackward,
-    FreeCameraDown,
-    FreeCameraForward,
-    FreeCameraLeft,
-    FreeCameraReset,
-    FreeCameraRight,
-    FreeCameraUp,
-    OrbitCameraMove,
-    OrbitCameraReset,
-    OrbitCameraRotate,
-    PlaybackFaster,
-    PlaybackSkipBackward,
-    PlaybackSkipForward,
-    PlaybackSlower,
-    PlaybackToggle,
-
-    Count,
-};
-
 namespace IWXMVM
 {
     class Input

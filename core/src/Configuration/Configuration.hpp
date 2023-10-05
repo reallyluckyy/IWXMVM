@@ -1,6 +1,5 @@
 #pragma once
 #include "nlohmann/json.hpp"
-#include "Input.hpp"
 
 namespace IWXMVM
 {
