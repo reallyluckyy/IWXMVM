@@ -66,7 +66,7 @@ namespace IWXMVM
         }
     }
 
-    void InputConfiguration::Serialize(nlohmann::json& j)
+    void InputConfiguration::Serialize(nlohmann::json& j) const
     {
         j = nlohmann::json::array();
         for (std::size_t i = 0; i < (std::size_t)Action::Count; i++)

@@ -40,7 +40,7 @@ namespace IWXMVM
         void operator=(InputConfiguration const&) = delete;
 
         void Deserialize(const nlohmann::json& j);
-        void Serialize(nlohmann::json& j);
+        void Serialize(nlohmann::json& j) const;
 
         ImGuiKey ActionToKey(Action bind) const noexcept;
         std::string_view ActionToString(Action bind) const noexcept;
