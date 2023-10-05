@@ -28,7 +28,7 @@ namespace IWXMVM
         }
         catch (const std::exception& e)
         {
-            LOG_ERROR("Failed to parse config file ({}). Falling back to defaults", e.what());
+            LOG_ERROR("Failed to parse config file ({}). Resetting config to default values...", e.what());
         }
 
         configFile.close();
