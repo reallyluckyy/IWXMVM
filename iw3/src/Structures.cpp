@@ -49,7 +49,11 @@ namespace IWXMVM::IW3::Structures
         typedef dvar_s*(__cdecl * Dvar_FindVar_t)();
         Dvar_FindVar_t Dvar_FindVar_Internal = (Dvar_FindVar_t)GetGameAddresses().Dvar_FindMalleableVar();
 
-        __asm mov edi, _name return Dvar_FindVar_Internal();
+        __asm {
+            mov edi, _name
+        }
+
+        return Dvar_FindVar_Internal();
     }
 
     std::string GetFilePath(const std::string_view demoName)

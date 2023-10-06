@@ -55,15 +55,13 @@ namespace IWXMVM
         return io.DeltaTime;
     }
 
-    bool Input::BindHeld(std::string_view bindName)
+    bool Input::BindHeld(Action action)
     {
-        Key bind = InputConfiguration::Get().GetKeyBind(bindName);
-        return KeyHeld(bind);
+        return Input::KeyHeld(InputConfiguration::Get().GetBoundKey(action));
     }
 
-    bool Input::BindDown(std::string_view bindName)
+    bool Input::BindDown(Action action)
     {
-        Key bind = InputConfiguration::Get().GetKeyBind(bindName);
-        return KeyDown(bind);
+        return Input::KeyDown(InputConfiguration::Get().GetBoundKey(action));
     }
 }  // namespace IWXMVM

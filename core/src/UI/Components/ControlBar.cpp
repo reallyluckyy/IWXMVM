@@ -24,27 +24,27 @@ namespace IWXMVM::UI
     {
         // this should probably go somewhere else eventually
 
-        if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_TOGGLE))
+        if (Input::BindDown(Action::PlaybackToggle))
         {
             Mod::GetGameInterface()->ToggleDemoPlaybackState();
         }
 
-        if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_FASTER))
+        if (Input::BindDown(Action::PlaybackFaster))
         {
             timescale.value().value->floating_point *= 2.0f;
         }
 
-        if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_SLOWER))
+        if (Input::BindDown(Action::PlaybackSlower))
         {
             timescale.value().value->floating_point /= 2.0f;
         }
 
-        if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_SKIP_FORWARD))
+        if (Input::BindDown(Action::PlaybackSkipForward))
         {
             Mod::GetGameInterface()->SetTickDelta(500);
         }
 
-        if (Input::BindDown(InputConfiguration::BIND_PLAYBACK_SKIP_FORWARD))
+        if (Input::BindDown(Action::PlaybackSkipBackward))
         {
             Mod::GetGameInterface()->SetTickDelta(-500);
         }

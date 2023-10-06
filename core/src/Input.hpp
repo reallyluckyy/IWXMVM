@@ -11,8 +11,8 @@ namespace IWXMVM
         static bool KeyDown(ImGuiKey key);
         static bool KeyUp(ImGuiKey key);
         static bool KeyHeld(ImGuiKey key);
-        static bool BindHeld(std::string_view bindName);
-        static bool BindDown(std::string_view bindName);
+        static bool BindHeld(Action action);
+        static bool BindDown(Action action);
 
         static glm::vec2 GetMouseDelta();
         static float GetScrollDelta();

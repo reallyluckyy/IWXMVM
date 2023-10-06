@@ -3,66 +3,39 @@
 
 namespace IWXMVM
 {
-    Key InputConfiguration::GetKeyBind(std::string_view actionName) const
-    {
-        auto it = keyBinds.find(actionName.data());
-        if (it != keyBinds.end())
-            return it->second;
-        else
-            return ImGuiKey();
-    }
-
-    void InputConfiguration::AddKeyBind(std::string_view actionName, Key key)
-    {
-        keyBinds[actionName.data()] = key;
-    }
-
-    void InputConfiguration::LoadDefault()
-    {
-        keyBinds = {
-            {BIND_FREE_CAMERA_FORWARD, ImGuiKey_W},
-            {BIND_FREE_CAMERA_BACKWARD, ImGuiKey_S},
-            {BIND_FREE_CAMERA_LEFT, ImGuiKey_A},
-            {BIND_FREE_CAMERA_RIGHT, ImGuiKey_D},
-            {BIND_FREE_CAMERA_UP, ImGuiKey_E},
-            {BIND_FREE_CAMERA_DOWN, ImGuiKey_Q},
-            {BIND_FREE_CAMERA_RESET, ImGuiKey_MouseMiddle},
-
-            {BIND_ORBIT_CAMERA_RESET, ImGuiKey_F4},
-            {BIND_ORBIT_CAMERA_ROTATE, ImGuiKey_MouseMiddle},
-            {BIND_ORBIT_CAMERA_MOVE, ImGuiKey_MouseRight},
-
-            {BIND_DOLLY_ADD_NODE, ImGuiKey_K},
-            {BIND_DOLLY_CLEAR_NODES, ImGuiKey_L},
-            {BIND_DOLLY_PLAY_PATH, ImGuiKey_J},
-
-            {BIND_PLAYBACK_TOGGLE, ImGuiKey_Space},
-            {BIND_PLAYBACK_FASTER, ImGuiKey_UpArrow},
-            {BIND_PLAYBACK_SLOWER, ImGuiKey_DownArrow},
-            {BIND_PLAYBACK_SKIP_FORWARD, ImGuiKey_RightArrow},
-            {BIND_PLAYBACK_SKIP_BACKWARD, ImGuiKey_LeftArrow},
-
-        };
-    }
-
-    void InputConfiguration::Serialize(json& j)
-    {
-        j = json::array();
-        for (auto bind : keyBinds)
+    InputConfiguration::InputConfiguration()
+        :
+        actionToBindMap([]()
         {
-            json entry;
-            entry[NODE_ACTION] = bind.first;
-            entry[NODE_KEY] = (int32_t)bind.second;
+            std::array<Bind, Action::Count> defaults{};
 
-            j.push_back(entry);
-        }
+            defaults[Action::DollyAddNode]         = Bind{ImGuiKey_K, "DollyAddNode"};
+            defaults[Action::DollyClearNodes]      = Bind{ImGuiKey_L, "DollyClearNodes"};
+            defaults[Action::DollyPlayPath]        = Bind{ImGuiKey_J, "DollyPlayPath"};
+            defaults[Action::FreeCameraBackward]   = Bind{ImGuiKey_S, "FreeCameraBackward"};
+            defaults[Action::FreeCameraDown]       = Bind{ImGuiKey_Q, "FreeCameraDown"};
+            defaults[Action::FreeCameraForward]    = Bind{ImGuiKey_W, "FreeCameraForward"};
+            defaults[Action::FreeCameraLeft]       = Bind{ImGuiKey_A, "FreeCameraLeft"};
+            defaults[Action::FreeCameraReset]      = Bind{ImGuiKey_MouseMiddle, "FreeCameraReset"};
+            defaults[Action::FreeCameraRight]      = Bind{ImGuiKey_D, "FreeCameraRight"};
+            defaults[Action::FreeCameraUp]         = Bind{ImGuiKey_E, "FreeCameraUp"};
+            defaults[Action::OrbitCameraMove]      = Bind{ImGuiKey_MouseRight, "OrbitCameraMove"};
+            defaults[Action::OrbitCameraReset]     = Bind{ImGuiKey_F4, "OrbitCameraReset"};
+            defaults[Action::OrbitCameraRotate]    = Bind{ImGuiKey_MouseMiddle, "OrbitCameraRotate"};
+            defaults[Action::PlaybackFaster]       = Bind{ImGuiKey_UpArrow, "PlaybackFaster"};
+            defaults[Action::PlaybackSkipBackward] = Bind{ImGuiKey_LeftArrow, "PlaybackSkipBackward"};
+            defaults[Action::PlaybackSkipForward]  = Bind{ImGuiKey_RightArrow, "PlaybackSkipForward"};
+            defaults[Action::PlaybackSlower]       = Bind{ImGuiKey_DownArrow, "PlaybackSlower"};
+            defaults[Action::PlaybackToggle]       = Bind{ImGuiKey_Space, "PlaybackToggle"};
+
+            return defaults;
+        }())
+    {
     }
 
-    void InputConfiguration::Deserialize(const json& j)
+    void InputConfiguration::Deserialize(const nlohmann::json& j)
     {
-        keyBinds.clear();
-
-        for (auto entry : j)
+        for (const auto& entry : j)
         {
             if (!entry.is_object())
             {
@@ -70,12 +43,42 @@ namespace IWXMVM
                 return;
             }
 
-            std::string action = entry.at(NODE_ACTION).get<std::string>();
+            std::string actionName = entry.at(NODE_ACTION).get<std::string>();
             auto rawKeyValue = entry.at(NODE_KEY).get<std::int32_t>();
-            Key key = (Key)rawKeyValue;
-            keyBinds[action] = key;
 
-            LOG_DEBUG("Deserialized keybind for action {} with key {}", action, rawKeyValue);
+            for (std::size_t i = 0; i < (std::size_t)Action::Count; i++)
+            {
+                const auto& bind = actionToBindMap[i];
+                if (bind.actionName == actionName)
+                {
+                    actionToBindMap[i].key = (ImGuiKey)rawKeyValue;
+				}
+			}
         }
+    }
+
+    void InputConfiguration::Serialize(nlohmann::json& j) const
+    {
+        j = nlohmann::json::array();
+        for (std::size_t i = 0; i < (std::size_t)Action::Count; i++)
+        {
+            Action action = (Action)i;
+
+            nlohmann::json entry;
+            entry[NODE_ACTION] = ActionToString(action);
+            entry[NODE_KEY] = (int32_t)GetBoundKey(action);
+
+            j.push_back(entry);
+        }
+    }
+
+    ImGuiKey InputConfiguration::GetBoundKey(Action action) const noexcept
+    {
+        return actionToBindMap[action].key;
+    }
+
+    std::string_view InputConfiguration::ActionToString(Action action) const noexcept
+    {
+        return actionToBindMap[action].actionName;
     }
 }  // namespace IWXMVM
