@@ -57,11 +57,11 @@ namespace IWXMVM
 
     bool Input::BindHeld(Action action)
     {
-        return Input::KeyHeld(InputConfiguration::Get().ActionToKey(action));
+        return Input::KeyHeld(InputConfiguration::Get().GetBoundKey(action));
     }
 
     bool Input::BindDown(Action action)
     {
-        return Input::KeyDown(InputConfiguration::Get().ActionToKey(action));
+        return Input::KeyDown(InputConfiguration::Get().GetBoundKey(action));
     }
 }  // namespace IWXMVM

@@ -7,40 +7,28 @@ namespace IWXMVM
         :
         actionToBindMap([]()
         {
-            std::array<Bind, Action::Count> tmp{};
+            std::array<Bind, Action::Count> defaults{};
 
-            tmp[Action::DollyAddNode]         = Bind{ImGuiKey_K, "DollyAddNode"};
-            tmp[Action::DollyClearNodes]      = Bind{ImGuiKey_L, "DollyClearNodes"};
-            tmp[Action::DollyPlayPath]        = Bind{ImGuiKey_J, "DollyPlayPath"};
-            tmp[Action::FreeCameraBackward]   = Bind{ImGuiKey_S, "FreeCameraBackward"};
-            tmp[Action::FreeCameraDown]       = Bind{ImGuiKey_Q, "FreeCameraDown"};
-            tmp[Action::FreeCameraForward]    = Bind{ImGuiKey_W, "FreeCameraForward"};
-            tmp[Action::FreeCameraLeft]       = Bind{ImGuiKey_A, "FreeCameraLeft"};
-            tmp[Action::FreeCameraReset]      = Bind{ImGuiKey_MouseMiddle, "FreeCameraReset"};
-            tmp[Action::FreeCameraRight]      = Bind{ImGuiKey_D, "FreeCameraRight"};
-            tmp[Action::FreeCameraUp]         = Bind{ImGuiKey_E, "FreeCameraUp"};
-            tmp[Action::OrbitCameraMove]      = Bind{ImGuiKey_MouseRight, "OrbitCameraMove"};
-            tmp[Action::OrbitCameraReset]     = Bind{ImGuiKey_F4, "OrbitCameraReset"};
-            tmp[Action::OrbitCameraRotate]    = Bind{ImGuiKey_MouseMiddle, "OrbitCameraRotate"};
-            tmp[Action::PlaybackFaster]       = Bind{ImGuiKey_UpArrow, "PlaybackFaster"};
-            tmp[Action::PlaybackSkipBackward] = Bind{ImGuiKey_LeftArrow, "PlaybackSkipBackward"};
-            tmp[Action::PlaybackSkipForward]  = Bind{ImGuiKey_RightArrow, "PlaybackSkipForward"};
-            tmp[Action::PlaybackSlower]       = Bind{ImGuiKey_DownArrow, "PlaybackSlower"};
-            tmp[Action::PlaybackToggle]       = Bind{ImGuiKey_Space, "PlaybackToggle"};
+            defaults[Action::DollyAddNode]         = Bind{ImGuiKey_K, "DollyAddNode"};
+            defaults[Action::DollyClearNodes]      = Bind{ImGuiKey_L, "DollyClearNodes"};
+            defaults[Action::DollyPlayPath]        = Bind{ImGuiKey_J, "DollyPlayPath"};
+            defaults[Action::FreeCameraBackward]   = Bind{ImGuiKey_S, "FreeCameraBackward"};
+            defaults[Action::FreeCameraDown]       = Bind{ImGuiKey_Q, "FreeCameraDown"};
+            defaults[Action::FreeCameraForward]    = Bind{ImGuiKey_W, "FreeCameraForward"};
+            defaults[Action::FreeCameraLeft]       = Bind{ImGuiKey_A, "FreeCameraLeft"};
+            defaults[Action::FreeCameraReset]      = Bind{ImGuiKey_MouseMiddle, "FreeCameraReset"};
+            defaults[Action::FreeCameraRight]      = Bind{ImGuiKey_D, "FreeCameraRight"};
+            defaults[Action::FreeCameraUp]         = Bind{ImGuiKey_E, "FreeCameraUp"};
+            defaults[Action::OrbitCameraMove]      = Bind{ImGuiKey_MouseRight, "OrbitCameraMove"};
+            defaults[Action::OrbitCameraReset]     = Bind{ImGuiKey_F4, "OrbitCameraReset"};
+            defaults[Action::OrbitCameraRotate]    = Bind{ImGuiKey_MouseMiddle, "OrbitCameraRotate"};
+            defaults[Action::PlaybackFaster]       = Bind{ImGuiKey_UpArrow, "PlaybackFaster"};
+            defaults[Action::PlaybackSkipBackward] = Bind{ImGuiKey_LeftArrow, "PlaybackSkipBackward"};
+            defaults[Action::PlaybackSkipForward]  = Bind{ImGuiKey_RightArrow, "PlaybackSkipForward"};
+            defaults[Action::PlaybackSlower]       = Bind{ImGuiKey_DownArrow, "PlaybackSlower"};
+            defaults[Action::PlaybackToggle]       = Bind{ImGuiKey_Space, "PlaybackToggle"};
 
-            return tmp;
-        }()),
-        stringToActionMap([&]()
-        {
-            std::unordered_map<std::string, Action> tmp{};
-
-            for (std::size_t i = 0; i < actionToBindMap.size(); i++)
-            {
-                std::string name(actionToBindMap[i].name);
-                tmp[name] = (Action)i;
-            }
-
-            return tmp;
+            return defaults;
         }())
     {
     }
@@ -58,11 +46,14 @@ namespace IWXMVM
             std::string actionName = entry.at(NODE_ACTION).get<std::string>();
             auto rawKeyValue = entry.at(NODE_KEY).get<std::int32_t>();
 
-            if (stringToActionMap.contains(actionName))
+            for (std::size_t i = 0; i < (std::size_t)Action::Count; i++)
             {
-                auto action = stringToActionMap.at(actionName);
-                actionToBindMap[action].key = (ImGuiKey)rawKeyValue;
-            }
+                const auto& bind = actionToBindMap[i];
+                if (bind.actionName == actionName)
+                {
+                    actionToBindMap[i].key = (ImGuiKey)rawKeyValue;
+				}
+			}
         }
     }
 
@@ -75,19 +66,19 @@ namespace IWXMVM
 
             nlohmann::json entry;
             entry[NODE_ACTION] = ActionToString(action);
-            entry[NODE_KEY] = (int32_t)ActionToKey(action);
+            entry[NODE_KEY] = (int32_t)GetBoundKey(action);
 
             j.push_back(entry);
         }
     }
 
-    ImGuiKey InputConfiguration::ActionToKey(Action action) const noexcept
+    ImGuiKey InputConfiguration::GetBoundKey(Action action) const noexcept
     {
         return actionToBindMap[action].key;
     }
 
     std::string_view InputConfiguration::ActionToString(Action action) const noexcept
     {
-        return actionToBindMap[action].name;
+        return actionToBindMap[action].actionName;
     }
 }  // namespace IWXMVM

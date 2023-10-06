@@ -63,7 +63,7 @@ namespace IWXMVM::UI
 
     void DrawKeyLine(Action action, std::string_view label, ImVec2 position)
     {
-        auto text = std::format("{} - {}", ImGui::GetKeyName(InputConfiguration::Get().ActionToKey(action)), label);
+        auto text = std::format("{} - {}", ImGui::GetKeyName(InputConfiguration::Get().GetBoundKey(action)), label);
         ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(), ImGui::GetFontSize(), position,
                                                 ImGui::GetColorU32(ImGuiCol_Text), text.data());
     }

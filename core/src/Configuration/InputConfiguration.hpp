@@ -42,7 +42,7 @@ namespace IWXMVM
         void Deserialize(const nlohmann::json& j);
         void Serialize(nlohmann::json& j) const;
 
-        ImGuiKey ActionToKey(Action bind) const noexcept;
+        ImGuiKey GetBoundKey(Action bind) const noexcept;
         std::string_view ActionToString(Action bind) const noexcept;
 
        private:
@@ -51,13 +51,12 @@ namespace IWXMVM
         struct Bind
         {
             ImGuiKey key;
-            std::string_view name;
+            std::string_view actionName;
         };
 
         const std::string_view NODE_ACTION = "action";
         const std::string_view NODE_KEY = "key";
 
         std::array<Bind, Action::Count> actionToBindMap;
-        const std::unordered_map<std::string, Action> stringToActionMap;
     };
 }  // namespace IWXMVM
