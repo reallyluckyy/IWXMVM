@@ -66,9 +66,11 @@ namespace IWXMVM::UI
 
         HandlePlaybackInput();
 
+        const auto padding = ImGui::GetStyle().WindowPadding;
+
         SetPosition(0, UIManager::Get().GetUIComponent(UI::Component::MenuBar)->GetSize().y +
                            UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().y);
-        SetSize(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y - GetPosition().y);
+        SetSize(ImGui::GetIO().DisplaySize.x, ImGui::GetFontSize() * 1.4f + padding.y * 2 + 4);
 
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
@@ -77,8 +79,7 @@ namespace IWXMVM::UI
                                  ImGuiWindowFlags_NoTitleBar;
         if (ImGui::Begin("Playback Controls", nullptr, flags))
         {
-            constexpr auto PADDING = 20;
-            ImGui::SetCursorPosX(PADDING);
+            ImGui::SetCursorPosX(padding.x);
 
             auto pauseButtonSize = ImVec2(ImGui::GetFontSize() * 1.4f, ImGui::GetFontSize() * 1.4f);
 
@@ -97,10 +98,11 @@ namespace IWXMVM::UI
                                      ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
             auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            auto progressBarX = PADDING + pauseButtonSize.x + playbackSpeedSliderWidth + PADDING * 3;
-            auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - PADDING;
+            auto progressBarX = padding.x + pauseButtonSize.x + playbackSpeedSliderWidth + padding.x * 3;
+            auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - padding.x;
 
             ImGui::SameLine(progressBarX);
+            ImGui::SetNextItemWidth(progressBarWidth);
             static std::int32_t tickValue{};
 
             if (!ImGui::SliderInt("##2", &tickValue, 0, demoInfo.endTick, "%d", ImGuiSliderFlags_NoInput))
@@ -111,14 +113,13 @@ namespace IWXMVM::UI
             ImGui::SameLine(progressBarX);
             ImGuiEx::DemoProgressBarLines(demoInfo.currentTick, demoInfo.endTick);
 
-            ImGui::SameLine(progressBarX);
-            ImGuiEx::TimelineMarkers(Components::CampathManager::Get().GetNodes(), demoInfo.endTick);
-
             ImGui::SameLine();
             ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());
 
             ImGui::End();
         }
+
+        UIManager::Get().GetUIComponent(UI::Component::KeyframeEditor)->Render();
     }
 
     void ControlBar::Release()

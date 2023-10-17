@@ -55,38 +55,11 @@ namespace ImGuiEx
         }
     }
 
-    void TimelineMarkers(const std::vector<IWXMVM::Types::CampathNode>& nodes, std::uint32_t endTick)
-    {
-        using namespace ImGui;
-
-        ImGuiWindow* window = GetCurrentWindow();
-
-        ImGuiContext& g = *GImGui;
-        const ImGuiStyle& style = g.Style;
-        const float w = CalcItemWidth();
-
-        const ImVec2 label_size = CalcTextSize("##demoTimeline", NULL, true);
-        const ImRect frame_bb(window->DC.CursorPos,
-                              window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
-        const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
-
-        const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
-        const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
-
-        for (const auto& node : nodes)
-        {
-            const auto percentage = static_cast<float>(node.tick) / static_cast<float>(endTick);
-            const auto x = frame_bb.Min.x + percentage * barLength;
-            window->DrawList->AddText(ImVec2(x - textSize.x / 2, frame_bb.Min.y + (barHeight - textSize.y) / 2),
-                                      GetColorU32(ImGuiCol_Button), ICON_FA_DIAMOND);
-        }
-    }
+    constexpr std::size_t MARKER_DISTANCE = 5000;
 
     void DemoProgressBarLines(std::uint32_t currentTick, std::uint32_t endTick)
     {
         using namespace ImGui;
-
-        constexpr std::size_t MARKER_DISTANCE = 5000;
 
         ImGuiWindow* window = GetCurrentWindow();
 
@@ -236,4 +209,84 @@ namespace ImGuiEx
         return ImGuiEx::TimescaleSliderInternal(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags,
                                                 ClampValue);
     }
+
+    void DrawKeyframeSliderInternal(const char* label, uint32_t* currentTick, uint32_t* startTick, uint32_t* endTick, const std::vector<IWXMVM::Types::Keyframe>& keyframes)
+    {
+        using namespace ImGui;
+
+        auto flags = ImGuiSliderFlags_NoInput;
+        auto data_type = ImGuiDataType_S32;
+
+        ImGuiWindow* window = GetCurrentWindow();
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
+        const float w = CalcItemWidth();
+
+        const ImVec2 label_size = CalcTextSize(label, NULL, true);
+        const ImRect frame_bb(window->DC.CursorPos,
+                              window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
+        const ImRect total_bb(
+            frame_bb.Min,
+            frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
+
+        ItemSize(total_bb, style.FramePadding.y);
+        ItemAdd(total_bb, id, &frame_bb, 0);
+
+        // Draw frame
+        const ImU32 frame_col = GetColorU32(ImGuiCol_FrameBg);
+        RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
+
+        // Slider behavior
+        auto needleWidth = 4;
+
+        auto t = static_cast<float>(*currentTick) / static_cast<float>(*endTick - *startTick);
+        ImRect grab_bb = ImRect(
+            frame_bb.Min.x + t * w - needleWidth / 2, 
+            frame_bb.Min.y, 
+            frame_bb.Min.x + t * w + needleWidth / 2, 
+            frame_bb.Max.y
+            );
+
+        // Render grab
+        if (grab_bb.Max.x > grab_bb.Min.x)
+            window->DrawList->AddRectFilled(
+                grab_bb.Min, grab_bb.Max,
+                GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+
+        const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
+        const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
+
+        for (uint32_t i = MARKER_DISTANCE; i < *currentTick; i += MARKER_DISTANCE)
+        {
+            const auto percentage = i / (float)*endTick;
+            const auto x = frame_bb.Min.x + percentage * barLength;
+            window->DrawList->AddRectFilled(ImVec2(x, frame_bb.Min.y), ImVec2(x + 2, frame_bb.Max.y),
+                                            GetColorU32(ImGuiCol_Button));
+        }
+
+        const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
+
+        for (const auto& k : keyframes)
+        {
+            const auto percentage = static_cast<float>(*k.tick) / static_cast<float>(*endTick);
+            const auto x = frame_bb.Min.x + percentage * barLength;
+
+            ImRect text_bb(
+                ImVec2(x - textSize.x / 2, frame_bb.Min.y + (barHeight - textSize.y) / 2),
+                ImVec2(x + textSize.x / 2, frame_bb.Max.y - (barHeight - textSize.y) / 2)
+            );
+            const bool hovered = ItemHoverable(text_bb, id, g.LastItemData.InFlags);
+
+            if (hovered && IsMouseClicked(0, id))
+            {
+                // TODO: select keyframe for dragging
+            }
+
+            const ImU32 col = GetColorU32(hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+            window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
+        }
+    }
+
 }  // namespace ImGuiEx
