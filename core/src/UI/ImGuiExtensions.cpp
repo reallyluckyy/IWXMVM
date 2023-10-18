@@ -220,9 +220,7 @@ namespace ImGuiEx
     {
         auto ClampValue = [](void* p_data) {
             static constexpr double ROUNDING = 0.00000001;
-            static constexpr std::array TIMESCALE_STEPS{0.001, 0.002, 0.005, 0.01,  0.02, 0.025, 0.05,  0.075, 0.1,
-                                                        0.125, 0.2,   0.25,  0.333, 0.5,  0.75,  1.0,   1.25,  1.5,
-                                                        2.0,   5.0,   10.0,  20.0,  50.0, 100.0, 500.0, 1000.0};
+            static constexpr std::array TIMESCALE_STEPS = IWXMVM::UI::TIMESCALE_STEPS;
 
             float* ptr = static_cast<float*>(p_data);
             const auto it = std::upper_bound(TIMESCALE_STEPS.begin(), TIMESCALE_STEPS.end(), *ptr - ROUNDING);
@@ -231,7 +229,7 @@ namespace ImGuiEx
         };
 
         // TimescaleSliderInternal is a copy of SliderScalar with the intended behavior of being a slider with fixed
-        // steps the only change to SliderScalar is the above lambda and its execution, to clamp the slider value if it
+        // steps; the only change to SliderScalar is the above lambda and its execution, to clamp the slider value if it
         // has changed
         return ImGuiEx::TimescaleSliderInternal(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags,
                                                 ClampValue);

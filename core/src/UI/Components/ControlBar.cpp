@@ -31,12 +31,21 @@ namespace IWXMVM::UI
 
         if (Input::BindDown(Action::PlaybackFaster))
         {
-            timescale.value().value->floating_point *= 2.0f;
+            float& fTimescale = timescale.value().value->floating_point;
+
+            if (const auto it = std::upper_bound(TIMESCALE_STEPS.begin(), TIMESCALE_STEPS.end(), fTimescale);
+                it != TIMESCALE_STEPS.end())
+                fTimescale = *it;
         }
 
         if (Input::BindDown(Action::PlaybackSlower))
         {
-            timescale.value().value->floating_point /= 2.0f;
+            float& fTimescale = timescale.value().value->floating_point;
+
+            if (const auto it = std::upper_bound(TIMESCALE_STEPS.rbegin(), TIMESCALE_STEPS.rend(), fTimescale,
+                                                 std::greater<float>());
+                it != TIMESCALE_STEPS.rend())
+                fTimescale = *it;
         }
 
         if (Input::BindDown(Action::PlaybackSkipForward))
