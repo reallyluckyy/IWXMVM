@@ -117,6 +117,7 @@
     <ClCompile Include="src\Components\CampathManager.cpp" />
     <ClCompile Include="src\Components\DollyCamera.cpp" />
     <ClCompile Include="src\Components\FreeCamera.cpp" />
+    <ClCompile Include="src\Components\KeyframeManager.cpp" />
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
     <ClCompile Include="src\Configuration\Configuration.cpp" />
     <ClCompile Include="src\Configuration\InputConfiguration.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="src\Components\DefaultCamera.hpp" />
     <ClInclude Include="src\Components\DollyCamera.hpp" />
     <ClInclude Include="src\Components\FreeCamera.hpp" />
+    <ClInclude Include="src\Components\KeyframeManager.hpp" />
     <ClInclude Include="src\Components\OrbitCamera.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
     <ClInclude Include="src\Configuration\InputConfiguration.hpp" />
@@ -168,6 +170,7 @@
     <ClInclude Include="src\Types\GameState.hpp" />
     <ClInclude Include="src\Types\CampathNode.hpp" />
     <ClInclude Include="src\Types\Keyframe.hpp" />
+    <ClInclude Include="src\Types\KeyframeableProperty.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />
     <ClInclude Include="src\Types\Sun.hpp" />
     <ClInclude Include="src\UI\Components\CampathMenu.hpp" />

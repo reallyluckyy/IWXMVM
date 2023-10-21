@@ -1,5 +1,6 @@
 #pragma once
 #include "UI/UIComponent.hpp"
+#include "Types/KeyframeableProperty.hpp"
 
 namespace IWXMVM::UI
 {
@@ -11,6 +12,7 @@ namespace IWXMVM::UI
 
        private:
         void Initialize() final;
-        void DrawKeyframeSlider(const char* label);
+        void DrawKeyframeSlider(const Types::KeyframeableProperty& property);
+        void DrawCurveEditor(const Types::KeyframeableProperty& property);
     };
 }  // namespace IWXMVM::UI

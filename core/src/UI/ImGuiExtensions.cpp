@@ -12,6 +12,7 @@
 
 #include "UIManager.hpp"
 #include "Utilities/MathUtils.hpp"
+#include "Components/KeyframeManager.hpp"
 #include "Components/CameraManager.hpp"
 
 namespace ImGuiEx
@@ -210,7 +211,9 @@ namespace ImGuiEx
                                                 ClampValue);
     }
 
-    void DrawKeyframeSliderInternal(const char* label, uint32_t* currentTick, uint32_t* startTick, uint32_t* endTick, const std::vector<IWXMVM::Types::Keyframe>& keyframes)
+    void DrawKeyframeSliderInternal(const IWXMVM::Types::KeyframeableProperty& property, uint32_t* currentTick,
+                                    uint32_t* startTick, uint32_t* endTick,
+                                    std::vector<IWXMVM::Types::Keyframe>& keyframes)
     {
         using namespace ImGui;
 
@@ -218,6 +221,8 @@ namespace ImGuiEx
         auto data_type = ImGuiDataType_S32;
 
         ImGuiWindow* window = GetCurrentWindow();
+
+        const char* label = property.name.data();
 
         ImGuiContext& g = *GImGui;
         const ImGuiStyle& style = g.Style;
@@ -238,18 +243,13 @@ namespace ImGuiEx
         const ImU32 frame_col = GetColorU32(ImGuiCol_FrameBg);
         RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
 
-        // Slider behavior
+        // Draw timeline indicator
         auto needleWidth = 4;
 
         auto t = static_cast<float>(*currentTick) / static_cast<float>(*endTick - *startTick);
-        ImRect grab_bb = ImRect(
-            frame_bb.Min.x + t * w - needleWidth / 2, 
-            frame_bb.Min.y, 
-            frame_bb.Min.x + t * w + needleWidth / 2, 
-            frame_bb.Max.y
-            );
+        ImRect grab_bb = ImRect(frame_bb.Min.x + t * w - needleWidth / 2, frame_bb.Min.y,
+                                frame_bb.Min.x + t * w + needleWidth / 2, frame_bb.Max.y);
 
-        // Render grab
         if (grab_bb.Max.x > grab_bb.Min.x)
             window->DrawList->AddRectFilled(
                 grab_bb.Min, grab_bb.Max,
@@ -266,26 +266,206 @@ namespace ImGuiEx
                                             GetColorU32(ImGuiCol_Button));
         }
 
-        const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
+        static IWXMVM::Types::Keyframe* selectedKeyframe = nullptr;
 
-        for (const auto& k : keyframes)
+        const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
+        for (auto& k : keyframes)
         {
-            const auto percentage = static_cast<float>(*k.tick) / static_cast<float>(*endTick);
+            const auto percentage = static_cast<float>(k.tick) / static_cast<float>(*endTick);
             const auto x = frame_bb.Min.x + percentage * barLength;
 
-            ImRect text_bb(
-                ImVec2(x - textSize.x / 2, frame_bb.Min.y + (barHeight - textSize.y) / 2),
-                ImVec2(x + textSize.x / 2, frame_bb.Max.y - (barHeight - textSize.y) / 2)
-            );
+            ImRect text_bb(ImVec2(x - textSize.x / 2, frame_bb.Min.y + (barHeight - textSize.y) / 2),
+                           ImVec2(x + textSize.x / 2, frame_bb.Max.y - (barHeight - textSize.y) / 2));
             const bool hovered = ItemHoverable(text_bb, id, g.LastItemData.InFlags);
 
-            if (hovered && IsMouseClicked(0, id))
+            if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
             {
-                // TODO: select keyframe for dragging
+                selectedKeyframe = &k;
             }
 
-            const ImU32 col = GetColorU32(hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+            const ImU32 col = GetColorU32(hovered || selectedKeyframe == &k ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
+        }
+
+        if (selectedKeyframe != nullptr)
+        {
+            const auto percentage = (GetMousePos().x - frame_bb.Min.x) / barLength;
+            const auto tick = static_cast<uint32_t>(percentage * (*endTick - *startTick));
+            selectedKeyframe->tick = tick;
+
+            if (IsMouseReleased(ImGuiMouseButton_Left))
+            {
+                selectedKeyframe = nullptr;
+            }
+        }
+
+        const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
+        if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+            const auto percentage = (GetMousePos().x - frame_bb.Min.x) / barLength;
+            const auto tick = static_cast<uint32_t>(percentage * (*endTick - *startTick));
+            if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
+                keyframes.end())
+            {
+                // TODO: the value here should be the interpolated value between neighboring keyframes
+                keyframes.push_back({property, tick, IWXMVM::Types::KeyframeValue(glm::vector3::zero)});
+            }
+        }
+    }
+
+    void DrawCurveEditorInternal(const IWXMVM::Types::KeyframeableProperty& property, uint32_t* currentTick,
+                                 uint32_t* startTick, uint32_t* endTick,
+                                 std::vector<IWXMVM::Types::Keyframe>& keyframes)
+    {
+        using namespace ImGui;
+
+        auto flags = ImGuiSliderFlags_NoInput;
+        auto data_type = ImGuiDataType_S32;
+
+        ImGuiWindow* window = GetCurrentWindow();
+
+        const char* label = property.name.data();
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
+        const float w = CalcItemWidth();
+
+        const ImVec2 label_size = CalcTextSize(label, NULL, true);
+        const float curveEditorHeightMultiplier = 4.0f;
+        const ImRect frame_bb(
+            window->DC.CursorPos,
+            window->DC.CursorPos + ImVec2(w, label_size.y * curveEditorHeightMultiplier + style.FramePadding.y * 2.0f));
+        const ImRect total_bb(
+            frame_bb.Min,
+            frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
+
+        ItemSize(total_bb, style.FramePadding.y);
+        ItemAdd(total_bb, id, &frame_bb, 0);
+
+        // Draw frame
+        const ImU32 frame_col = GetColorU32(ImGuiCol_FrameBg);
+        RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
+
+        // Draw timeline indicator
+        auto needleWidth = 4;
+
+        auto t = static_cast<float>(*currentTick) / static_cast<float>(*endTick - *startTick);
+        ImRect grab_bb = ImRect(frame_bb.Min.x + t * w - needleWidth / 2, frame_bb.Min.y,
+                                frame_bb.Min.x + t * w + needleWidth / 2, frame_bb.Max.y);
+
+        if (grab_bb.Max.x > grab_bb.Min.x)
+            window->DrawList->AddRectFilled(
+                grab_bb.Min, grab_bb.Max,
+                GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+
+        const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
+        const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
+
+        for (uint32_t i = MARKER_DISTANCE; i < *currentTick; i += MARKER_DISTANCE)
+        {
+            const auto percentage = i / (float)*endTick;
+            const auto x = frame_bb.Min.x + percentage * barLength;
+            window->DrawList->AddRectFilled(ImVec2(x, frame_bb.Min.y), ImVec2(x + 2, frame_bb.Max.y),
+                                            GetColorU32(ImGuiCol_Button));
+        }
+
+        static IWXMVM::Types::Keyframe* selectedKeyframe = nullptr;
+
+        const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
+        const auto maxValue = std::max_element(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) {
+            return a.value.floating_point < b.value.floating_point;
+        });
+        const auto minValue = std::min_element(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) {
+            return a.value.floating_point < b.value.floating_point;
+        });
+        const ImVec2 valueBoundaries = ImVec2(minValue == keyframes.end() ? -10 : minValue->value.floating_point - 10,
+                                              maxValue == keyframes.end() ? 10 : maxValue->value.floating_point + 10);
+        for (auto& k : keyframes)
+        {
+            const auto percentage = static_cast<float>(k.tick) / static_cast<float>(*endTick);
+            const auto x = frame_bb.Min.x + percentage * barLength;
+            const auto y = frame_bb.Min.y + (1.0f - (k.value.floating_point - valueBoundaries.x) /
+                                                        (valueBoundaries.y - valueBoundaries.x)) *
+                                                barHeight;
+
+            ImRect text_bb(ImVec2(x - textSize.x / 2, y - textSize.y / 2),
+                           ImVec2(x + textSize.x / 2, y + textSize.y / 2));
+            const bool hovered = ItemHoverable(text_bb, id, g.LastItemData.InFlags);
+
+            if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
+            {
+                selectedKeyframe = &k;
+            }
+
+            const ImU32 col = GetColorU32(hovered || selectedKeyframe == &k ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+            window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
+            window->DrawList->AddText(ImVec2(text_bb.Max.x, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
+                                      std::format("{0:.0f}", k.value.floating_point).c_str());
+        }
+
+        if (!keyframes.empty())
+        {
+            const auto EVALUATION_DISTANCE =
+                glm::clamp(100 * (keyframes.back().tick - keyframes.front().tick) / 5000, 1u, 1000u);
+
+            auto previousKeyframe = keyframes.front();
+            for (auto tick = keyframes.front().tick + EVALUATION_DISTANCE; tick <= keyframes.back().tick;
+                 tick += EVALUATION_DISTANCE)
+            {
+                auto keyframe = IWXMVM::Components::KeyframeManager::Get().Interpolate(property, tick);
+                window->DrawList->AddLine(
+                    ImVec2(frame_bb.Min.x + (previousKeyframe.tick - *startTick) / (float)*endTick * barLength,
+                           frame_bb.Min.y + (1.0f - (previousKeyframe.value.floating_point - valueBoundaries.x) /
+                                                        (valueBoundaries.y - valueBoundaries.x)) *
+                                                barHeight),
+                    ImVec2(frame_bb.Min.x + (keyframe.tick - *startTick) / (float)*endTick * barLength,
+                           frame_bb.Min.y + (1.0f - (keyframe.value.floating_point - valueBoundaries.x) /
+                                                        (valueBoundaries.y - valueBoundaries.x)) *
+                                                barHeight),
+                    GetColorU32(ImGuiCol_Button));
+                previousKeyframe = keyframe;
+            }
+            window->DrawList->AddLine(
+                ImVec2(frame_bb.Min.x + (previousKeyframe.tick - *startTick) / (float)*endTick * barLength,
+                       frame_bb.Min.y + (1.0f - (previousKeyframe.value.floating_point - valueBoundaries.x) /
+                                                    (valueBoundaries.y - valueBoundaries.x)) *
+                                            barHeight),
+                ImVec2(frame_bb.Max.x,
+                       frame_bb.Min.y + (1.0f - (previousKeyframe.value.floating_point - valueBoundaries.x) /
+                                                    (valueBoundaries.y - valueBoundaries.x)) *
+                                            barHeight),
+                GetColorU32(ImGuiCol_Button));
+        }
+
+        if (selectedKeyframe != nullptr)
+        {
+            const auto percentage = (GetMousePos().x - frame_bb.Min.x) / barLength;
+            const auto tick = static_cast<uint32_t>(percentage * (*endTick - *startTick));
+            selectedKeyframe->tick = tick;
+
+            selectedKeyframe->value.floating_point = valueBoundaries.y - (GetMousePos().y - frame_bb.Min.y) /
+                                                                             barHeight *
+                                                                             (valueBoundaries.y - valueBoundaries.x);
+
+            if (IsMouseReleased(ImGuiMouseButton_Left))
+            {
+                selectedKeyframe = nullptr;
+            }
+        }
+
+        const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
+        if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+            const auto percentage = (GetMousePos().x - frame_bb.Min.x) / barLength;
+            const auto tick = static_cast<uint32_t>(percentage * (*endTick - *startTick));
+            const auto value = valueBoundaries.y - (GetMousePos().y - frame_bb.Min.y) / barHeight *
+														  (valueBoundaries.y - valueBoundaries.x);
+            if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
+                keyframes.end())
+            {
+                keyframes.push_back({property, tick, value});
+            }
         }
     }
 

@@ -4,6 +4,7 @@
 #include "UI/UIManager.hpp"
 #include "UI/ImGuiExtensions.hpp"
 #include "Mod.hpp"
+#include "Components/KeyframeManager.hpp"
 
 
 namespace IWXMVM::UI
@@ -12,18 +13,24 @@ namespace IWXMVM::UI
     {
     }
 
-    void KeyframeEditor::DrawKeyframeSlider(const char* label)
+    void KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
     {
         auto startTick = 0u;
         auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
         auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
 
-        std::vector<Types::Keyframe> keyframes;
-        for (const auto& node : Components::CampathManager::Get().GetNodes())
-        {
-            keyframes.push_back(Types::Keyframe((std::uint32_t*)&node.tick, (float*)&node.position[0]));
-        }
-        ImGuiEx::DrawKeyframeSliderInternal(label, &currentTick, &startTick, &endTick, keyframes);
+        ImGuiEx::DrawKeyframeSliderInternal(property, &currentTick, &startTick, &endTick, 
+                                            Components::KeyframeManager::Get().GetKeyframes(property));
+    }
+
+    void KeyframeEditor::DrawCurveEditor(const Types::KeyframeableProperty& property)
+    {
+        auto startTick = 0u;
+        auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
+        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+
+        ImGuiEx::DrawCurveEditorInternal(property, &currentTick, &startTick, &endTick,
+                                         Components::KeyframeManager::Get().GetKeyframes(property));
     }
 
     void KeyframeEditor::Render()
@@ -53,21 +60,26 @@ namespace IWXMVM::UI
                 ImGui::TableSetupColumn("Keyframes", ImGuiTableColumnFlags_NoSort, GetSize().x / 8 * 7);
                 ImGui::TableHeadersRow();
             
-                for (int row = 0; row < 4; row++)
+                for (const auto& pair : Components::KeyframeManager::Get().GetKeyframes())
                 {
                     ImGui::TableNextRow();
             
                     ImGui::SetNextItemWidth(GetSize().x / 8);
                     ImGui::TableSetColumnIndex(0);
-                    if (ImGui::TreeNode("Test##1"))
-                    {
-                        ImGui::TreePop();
-                    }
-            
+                    auto showCurve = ImGui::TreeNode(pair.first.name.data());
+
                     auto progressBarWidth = GetSize().x - firstColumnSize - GetSize().x * 0.05f - padding.x;
                     ImGui::SetNextItemWidth(progressBarWidth);
                     ImGui::TableSetColumnIndex(1);
-                    DrawKeyframeSlider("Test2##1");
+                    DrawKeyframeSlider(pair.first);
+
+                    if (showCurve)
+                    {
+                        ImGui::SetNextItemWidth(progressBarWidth);
+                        DrawCurveEditor(pair.first);
+
+                        ImGui::TreePop();
+                    }
                 }
                 ImGui::EndTable();
             }

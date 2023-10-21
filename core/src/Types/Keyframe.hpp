@@ -1,14 +1,45 @@
 #pragma once
+#include "KeyframeableProperty.hpp"
 
 namespace IWXMVM::Types
 {
+    union KeyframeValue
+    {
+        float floating_point;
+    	glm::vec3 vector3;
+
+        KeyframeValue(float floating_point)
+			: floating_point(floating_point)
+        {
+        }
+
+        KeyframeValue(glm::vec3 vector3)
+            : vector3(vector3)
+        {
+		}
+    };
+
     struct Keyframe
     {
-        std::uint32_t* tick;
-        float* value; // TODO: we probably also want vec3 keyframes eventually?
+        const KeyframeableProperty& property;
 
-        Keyframe(std::uint32_t* tick, float* value) : tick(tick), value(value)
+        std::uint32_t tick;
+        KeyframeValue value;
+
+        Keyframe(const KeyframeableProperty& property, std::uint32_t tick, KeyframeValue value)
+            : property(property), tick(tick), value(value)
         {
+		}
+
+        Keyframe(const KeyframeableProperty& property)
+			: property(property), tick(0), value(0)
+		{}
+
+        Keyframe operator=(const Keyframe& other)
+        {
+			tick = other.tick;
+			value = other.value;
+			return *this;
         }
     };
 }
