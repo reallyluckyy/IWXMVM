@@ -27,7 +27,7 @@ namespace IWXMVM::Components
             return keyframes[property];
         }
 
-        Types::Keyframe Interpolate(const Types::KeyframeableProperty& property, const unsigned int& tick) const;
+        Types::Keyframe Interpolate(const Types::KeyframeableProperty& property, const uint32_t tick) const;
 
        private:
         KeyframeManager()

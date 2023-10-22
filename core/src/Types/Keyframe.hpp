@@ -41,5 +41,10 @@ namespace IWXMVM::Types
 			value = other.value;
 			return *this;
         }
+
+        bool operator<(const Keyframe& other) const
+        {
+			return tick < other.tick;
+        }
     };
 }

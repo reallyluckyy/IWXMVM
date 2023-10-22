@@ -16,21 +16,31 @@ namespace IWXMVM::Components
         keyframes[testProperty] = std::vector<Types::Keyframe>();
     }
 
-    Types::Keyframe KeyframeManager::Interpolate(const Types::KeyframeableProperty& property,
-                                                 const unsigned int& tick) const
+    Types::Keyframe KeyframeManager::Interpolate(const Types::KeyframeableProperty& property, const uint32_t tick) const
     {
         auto keyframes = KeyframeManager::Get().GetKeyframes(property);
 
-        std::size_t p0Idx = 0, p1Idx = 1;
-        for (std::size_t i = 0; i < keyframes.size() - 1; i++)
+        std::int32_t p0Idx = -1, p1Idx = -1;
+        for (std::size_t i = 0; i < keyframes.size(); i++)
         {
-            if (tick >= keyframes[i].tick && tick <= keyframes[i + 1].tick)
-            {
-                p0Idx = i;
-                p1Idx = i + 1;
-                break;
-            }
+            if (keyframes[i].tick < tick && (p0Idx == -1 || keyframes [i].tick > keyframes[p0Idx].tick))
+				p0Idx = i;
+            if (keyframes[i].tick > tick && (p1Idx == -1 || keyframes[i].tick < keyframes[p1Idx].tick))
+                p1Idx = i;
+
+            if (keyframes[i].tick == tick)
+				return keyframes[i];
         }
+
+        if (p0Idx == -1)
+			return Types::Keyframe(property, tick, keyframes[p1Idx].value);
+
+        if (p1Idx == -1)
+            return Types::Keyframe(property, tick, keyframes[p0Idx].value);
+
+        assert(p0Idx != -1 || p1Idx != -1);
+        assert(keyframes[p0Idx].tick < keyframes[p1Idx].tick);
+        assert(p0Idx != p1Idx);
 
         const auto& p0 = keyframes[p0Idx];
         const auto& p1 = keyframes[p1Idx];
