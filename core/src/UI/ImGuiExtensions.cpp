@@ -78,8 +78,6 @@ namespace ImGuiEx
     bool DemoProgressBar(int32_t* currentTick, uint32_t startTick, uint32_t endTick)
     {
         using namespace ImGui;
-        auto flags = ImGuiSliderFlags_NoInput;
-        auto data_type = ImGuiDataType_S32;
         auto label = "##demoProgressBar";
         auto format = "%d";
 
@@ -90,47 +88,30 @@ namespace ImGuiEx
         ImGuiContext& g = *GImGui;
         const ImGuiStyle& style = g.Style;
         const ImGuiID id = window->GetID(label);
-        const float w = CalcItemWidth();
 
         const ImVec2 label_size = CalcTextSize(label, NULL, true);
         const ImRect frame_bb(window->DC.CursorPos,
-                              window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
+            window->DC.CursorPos + ImVec2(CalcItemWidth(), label_size.y + style.FramePadding.y * 2.0f));
         const ImRect total_bb(
             frame_bb.Min,
-            frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
+            frame_bb.Max);
 
-        const bool temp_input_allowed = (flags & ImGuiSliderFlags_NoInput) == 0;
         ItemSize(total_bb, style.FramePadding.y);
-        if (!ItemAdd(total_bb, id, &frame_bb, temp_input_allowed ? ImGuiItemFlags_Inputable : 0))
+        if (!ItemAdd(total_bb, id, &frame_bb, 0))
             return false;
 
-        // Default format string when passing NULL
-        if (format == NULL)
-            format = DataTypeGetInfo(data_type)->PrintFmt;
-
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
-        bool temp_input_is_active = temp_input_allowed && TempInputIsActive(id);
-        if (false || !temp_input_is_active)
-        {
-            // Tabbing or CTRL-clicking on Slider turns it into an input box
-            const bool input_requested_by_tabbing =
-                temp_input_allowed && (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
-            const bool clicked = hovered && IsMouseClicked(0, id);
-            const bool make_active = (input_requested_by_tabbing || clicked || g.NavActivateId == id);
-            if (make_active && clicked)
-                SetKeyOwner(ImGuiKey_MouseLeft, id);
-            if (make_active && temp_input_allowed)
-                if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) ||
-                    (g.NavActivateId == id && (g.NavActivateFlags & ImGuiActivateFlags_PreferInput)))
-                    temp_input_is_active = true;
+        const bool clicked = hovered && IsMouseClicked(0, id);
+        const bool make_active = (clicked || g.NavActivateId == id);
+        if (make_active && clicked)
+            SetKeyOwner(ImGuiKey_MouseLeft, id);
 
-            if (make_active && !temp_input_is_active)
-            {
-                SetActiveID(id, window);
-                SetFocusID(id, window);
-                FocusWindow(window);
-                g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
-            }
+        if (make_active)
+        {
+            SetActiveID(id, window);
+            SetFocusID(id, window);
+            FocusWindow(window);
+            g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
         }
 
         // Draw frame
@@ -142,8 +123,8 @@ namespace ImGuiEx
 
         // Slider behavior
         ImRect grab_bb;
-        const bool value_changed =
-            SliderBehavior(frame_bb, id, data_type, currentTick, &startTick, &endTick, format, flags, &grab_bb);
+        const bool value_changed = SliderBehavior(frame_bb, id, ImGuiDataType_S32, currentTick, &startTick, &endTick,
+                                                  format, ImGuiSliderFlags_NoInput, &grab_bb);
         if (value_changed)
             MarkItemEdited(id);
 
@@ -155,17 +136,9 @@ namespace ImGuiEx
 
         // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
         char value_buf[64];
-        const char* value_buf_end =
-            value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), data_type, currentTick, format);
-        if (g.LogEnabled)
-            LogSetNextTextDecoration("{", "}");
+        const char* value_buf_end = value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf),
+                                                                     ImGuiDataType_S32, currentTick, format);
         RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
-
-        if (label_size.x > 0.0f)
-            RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
-
-        IMGUI_TEST_ENGINE_ITEM_INFO(
-            id, label, g.LastItemData.StatusFlags | (temp_input_allowed ? ImGuiItemStatusFlags_Inputable : 0));
 
         ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, endTick);
 
