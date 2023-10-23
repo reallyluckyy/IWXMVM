@@ -105,13 +105,10 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(progressBarWidth);
             static std::int32_t tickValue{};
 
-            if (!ImGui::SliderInt("##2", &tickValue, 0, demoInfo.endTick, "%d", ImGuiSliderFlags_NoInput))
+            if (!ImGuiEx::DemoProgressBar(&tickValue, 0, demoInfo.endTick))
                 tickValue = demoInfo.currentTick;
             else
                 Mod::GetGameInterface()->SetTickDelta(tickValue - demoInfo.currentTick);
-
-            ImGui::SameLine(progressBarX);
-            ImGuiEx::DemoProgressBarLines(demoInfo.currentTick, demoInfo.endTick);
 
             ImGui::SameLine();
             ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());

@@ -68,7 +68,7 @@ namespace IWXMVM::UI
                     ImGui::TableSetColumnIndex(0);
                     auto showCurve = ImGui::TreeNode(pair.first.name.data());
 
-                    auto progressBarWidth = GetSize().x - firstColumnSize - GetSize().x * 0.05f - padding.x;
+                    auto progressBarWidth = GetSize().x - firstColumnSize - GetSize().x * 0.05f - padding.x * 2;
                     ImGui::SetNextItemWidth(progressBarWidth);
                     ImGui::TableSetColumnIndex(1);
                     DrawKeyframeSlider(pair.first);

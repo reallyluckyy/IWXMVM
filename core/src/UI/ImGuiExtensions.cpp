@@ -58,32 +58,118 @@ namespace ImGuiEx
 
     constexpr std::size_t MARKER_DISTANCE = 5000;
 
-    void DemoProgressBarLines(std::uint32_t currentTick, std::uint32_t endTick)
+    void DemoProgressBarLines(const ImRect rect, std::uint32_t currentTick, std::uint32_t endTick)
     {
         using namespace ImGui;
 
         ImGuiWindow* window = GetCurrentWindow();
 
+        const auto barLength = rect.Max.x - rect.Min.x;
+
+        for (uint32_t i = MARKER_DISTANCE; i < currentTick; i += MARKER_DISTANCE)
+        {
+            const auto percentage = i / (float)endTick;
+            const auto x = rect.Min.x + percentage * barLength;
+            window->DrawList->AddRectFilled(ImVec2(x, rect.Min.y), ImVec2(x + 2, rect.Max.y),
+                                            GetColorU32(ImGuiCol_Button));
+        }
+    }
+
+    bool DemoProgressBar(int32_t* currentTick, uint32_t startTick, uint32_t endTick)
+    {
+        using namespace ImGui;
+        auto flags = ImGuiSliderFlags_NoInput;
+        auto data_type = ImGuiDataType_S32;
+        auto label = "##demoProgressBar";
+        auto format = "%d";
+
+        ImGuiWindow* window = GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
         ImGuiContext& g = *GImGui;
         const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
         const float w = CalcItemWidth();
 
-        const ImVec2 label_size = CalcTextSize("##demoTimeline", NULL, true);
+        const ImVec2 label_size = CalcTextSize(label, NULL, true);
         const ImRect frame_bb(window->DC.CursorPos,
                               window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
         const ImRect total_bb(
             frame_bb.Min,
             frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
 
-        const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
+        const bool temp_input_allowed = (flags & ImGuiSliderFlags_NoInput) == 0;
+        ItemSize(total_bb, style.FramePadding.y);
+        if (!ItemAdd(total_bb, id, &frame_bb, temp_input_allowed ? ImGuiItemFlags_Inputable : 0))
+            return false;
 
-        for (uint32_t i = MARKER_DISTANCE; i < currentTick; i += MARKER_DISTANCE)
+        // Default format string when passing NULL
+        if (format == NULL)
+            format = DataTypeGetInfo(data_type)->PrintFmt;
+
+        const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
+        bool temp_input_is_active = temp_input_allowed && TempInputIsActive(id);
+        if (false || !temp_input_is_active)
         {
-            const auto percentage = i / (float)endTick;
-            const auto x = frame_bb.Min.x + percentage * barLength;
-            window->DrawList->AddRectFilled(ImVec2(x, frame_bb.Min.y), ImVec2(x + 2, frame_bb.Max.y),
-                                            GetColorU32(ImGuiCol_Button));
+            // Tabbing or CTRL-clicking on Slider turns it into an input box
+            const bool input_requested_by_tabbing =
+                temp_input_allowed && (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
+            const bool clicked = hovered && IsMouseClicked(0, id);
+            const bool make_active = (input_requested_by_tabbing || clicked || g.NavActivateId == id);
+            if (make_active && clicked)
+                SetKeyOwner(ImGuiKey_MouseLeft, id);
+            if (make_active && temp_input_allowed)
+                if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) ||
+                    (g.NavActivateId == id && (g.NavActivateFlags & ImGuiActivateFlags_PreferInput)))
+                    temp_input_is_active = true;
+
+            if (make_active && !temp_input_is_active)
+            {
+                SetActiveID(id, window);
+                SetFocusID(id, window);
+                FocusWindow(window);
+                g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
+            }
         }
+
+        // Draw frame
+        const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive
+                                            : hovered        ? ImGuiCol_FrameBgHovered
+                                                             : ImGuiCol_FrameBg);
+        RenderNavHighlight(frame_bb, id);
+        RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
+
+        // Slider behavior
+        ImRect grab_bb;
+        const bool value_changed =
+            SliderBehavior(frame_bb, id, data_type, currentTick, &startTick, &endTick, format, flags, &grab_bb);
+        if (value_changed)
+            MarkItemEdited(id);
+
+        // Render grab
+        if (grab_bb.Max.x > grab_bb.Min.x)
+            window->DrawList->AddRectFilled(
+                grab_bb.Min, grab_bb.Max,
+                GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+
+        // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
+        char value_buf[64];
+        const char* value_buf_end =
+            value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), data_type, currentTick, format);
+        if (g.LogEnabled)
+            LogSetNextTextDecoration("{", "}");
+        RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
+
+        if (label_size.x > 0.0f)
+            RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
+
+        IMGUI_TEST_ENGINE_ITEM_INFO(
+            id, label, g.LastItemData.StatusFlags | (temp_input_allowed ? ImGuiItemStatusFlags_Inputable : 0));
+
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, endTick);
+
+        return value_changed;
     }
 
     bool TimescaleSliderInternal(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min,
@@ -278,16 +364,7 @@ namespace ImGuiEx
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
-        const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
-
-        for (uint32_t i = MARKER_DISTANCE; i < *currentTick; i += MARKER_DISTANCE)
-        {
-            const auto percentage = i / (float)*endTick;
-            const auto x = frame_bb.Min.x + percentage * barLength;
-            window->DrawList->AddRectFilled(ImVec2(x, frame_bb.Min.y), ImVec2(x + 2, frame_bb.Max.y),
-                                            GetColorU32(ImGuiCol_Button));
-        }
+        DemoProgressBarLines(frame_bb, *currentTick, *endTick);
 
         static Types::Keyframe* selectedKeyframe = nullptr;
 
@@ -296,6 +373,7 @@ namespace ImGuiEx
         {
             const auto position = GetPositionForKeyframe(frame_bb, k, *endTick);
 
+            const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
             ImRect text_bb(ImVec2(position.x - textSize.x / 2, frame_bb.Min.y + (barHeight - textSize.y) / 2),
                            ImVec2(position.x + textSize.x / 2, frame_bb.Max.y - (barHeight - textSize.y) / 2));
             const bool hovered = ItemHoverable(text_bb, id, g.LastItemData.InFlags);
@@ -354,7 +432,7 @@ namespace ImGuiEx
         const float w = CalcItemWidth();
 
         const ImVec2 label_size = CalcTextSize(label, NULL, true);
-        const float curveEditorHeightMultiplier = 4.0f;
+        const float curveEditorHeightMultiplier = 5.0f;
         const ImRect frame_bb(
             window->DC.CursorPos,
             window->DC.CursorPos + ImVec2(w, label_size.y * curveEditorHeightMultiplier + style.FramePadding.y * 2.0f));
@@ -381,16 +459,7 @@ namespace ImGuiEx
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
-        const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
-
-        for (uint32_t i = MARKER_DISTANCE; i < *currentTick; i += MARKER_DISTANCE)
-        {
-            const auto percentage = i / (float)*endTick;
-            const auto x = frame_bb.Min.x + percentage * barLength;
-            window->DrawList->AddRectFilled(ImVec2(x, frame_bb.Min.y), ImVec2(x + 2, frame_bb.Max.y),
-                                            GetColorU32(ImGuiCol_Button));
-        }
+        DemoProgressBarLines(frame_bb, *currentTick, *endTick);
 
         static Types::Keyframe* selectedKeyframe = nullptr;
 
@@ -446,7 +515,7 @@ namespace ImGuiEx
             auto [tick, value] = GetKeyframeForPosition(property, GetMousePos(), frame_bb, *startTick, *endTick, valueBoundaries);
 
             selectedKeyframe->tick = tick;
-            selectedKeyframe->value.floating_point = value.floating_point;
+            selectedKeyframe->value.floating_point = glm::fclamp(value.floating_point, -100'000.0f, 100'000.0f);
 
             if (IsMouseReleased(ImGuiMouseButton_Left))
             {
