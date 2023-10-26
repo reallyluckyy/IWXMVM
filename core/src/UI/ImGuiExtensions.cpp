@@ -2,7 +2,6 @@
 #include "ImGuiExtensions.hpp"
 
 #include "Resources.hpp"
-#include "Types/CampathNode.hpp"
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -275,7 +274,7 @@ namespace ImGuiEx
         const auto barLength = rect.Max.x - rect.Min.x;
         const auto percentage = static_cast<float>(keyframe.tick) / static_cast<float>(endTick);
         const auto x = rect.Min.x + percentage * barLength;
-        const auto y = rect.Min.y + (1.0f - (keyframe.value.floating_point - valueBoundaries.x) /
+        const auto y = rect.Min.y + (1.0f - (keyframe.value.floatingPoint - valueBoundaries.x) /
                                                 (valueBoundaries.y - valueBoundaries.x)) *
                                         barHeight;
         return ImVec2(x, y);
@@ -438,13 +437,13 @@ namespace ImGuiEx
 
         const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
         const auto maxValue = std::max_element(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) {
-            return a.value.floating_point < b.value.floating_point;
+            return a.value.floatingPoint < b.value.floatingPoint;
         });
         const auto minValue = std::min_element(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) {
-            return a.value.floating_point < b.value.floating_point;
+            return a.value.floatingPoint < b.value.floatingPoint;
         });
-        const ImVec2 valueBoundaries = ImVec2(minValue == keyframes.end() ? -10 : minValue->value.floating_point - 10,
-                                              maxValue == keyframes.end() ? 10 : maxValue->value.floating_point + 10);
+        const ImVec2 valueBoundaries = ImVec2(minValue == keyframes.end() ? -10 : minValue->value.floatingPoint - 10,
+                                              maxValue == keyframes.end() ? 10 : maxValue->value.floatingPoint + 10);
 
         for (auto& k : keyframes)
         {
@@ -462,7 +461,7 @@ namespace ImGuiEx
             const ImU32 col = GetColorU32(hovered || selectedKeyframe == &k ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
             window->DrawList->AddText(ImVec2(text_bb.Max.x, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
-                                      std::format("{0:.0f}", k.value.floating_point).c_str());
+                                      std::format("{0:.0f}", k.value.floatingPoint).c_str());
         }
 
         if (!keyframes.empty())
@@ -488,7 +487,7 @@ namespace ImGuiEx
             auto [tick, value] = GetKeyframeForPosition(property, GetMousePos(), frame_bb, *startTick, *endTick, valueBoundaries);
 
             selectedKeyframe->tick = tick;
-            selectedKeyframe->value.floating_point = glm::fclamp(value.floating_point, -100'000.0f, 100'000.0f);
+            selectedKeyframe->value.floatingPoint = glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f);
 
             if (IsMouseReleased(ImGuiMouseButton_Left))
             {

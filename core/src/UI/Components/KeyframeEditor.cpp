@@ -62,21 +62,31 @@ namespace IWXMVM::UI
             
                 for (const auto& pair : Components::KeyframeManager::Get().GetKeyframes())
                 {
+                    const auto& property = pair.first;
+                    const auto& keyframes = pair.second;
+
+                    if (pair.second.empty())
+						continue;
+
                     ImGui::TableNextRow();
             
                     ImGui::SetNextItemWidth(GetSize().x / 8);
                     ImGui::TableSetColumnIndex(0);
-                    auto showCurve = ImGui::TreeNode(pair.first.name.data());
+                    auto showCurve = ImGui::TreeNode(property.name.data());
 
                     auto progressBarWidth = GetSize().x - firstColumnSize - GetSize().x * 0.05f - padding.x * 2;
                     ImGui::SetNextItemWidth(progressBarWidth);
                     ImGui::TableSetColumnIndex(1);
-                    DrawKeyframeSlider(pair.first);
+                    DrawKeyframeSlider(property);
 
                     if (showCurve)
                     {
-                        ImGui::SetNextItemWidth(progressBarWidth);
-                        DrawCurveEditor(pair.first);
+                        // TODO: support curve editor for properties of other types?
+                        if (property.valueType == Types::KeyframeValueType::FloatingPoint)
+                        {
+                            ImGui::SetNextItemWidth(progressBarWidth);
+                            DrawCurveEditor(property);
+                        }
 
                         ImGui::TreePop();
                     }

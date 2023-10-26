@@ -5,15 +5,26 @@
 
 namespace IWXMVM::Components
 {
-    Types::KeyframeableProperty campathPositionProperty(ICON_FA_VIDEO " Campath Position",
-                                                        Types::KeyframeValueType::Vector3);
+    Types::KeyframeableProperty campathCameraProperty(ICON_FA_VIDEO " Campath Camera",
+                                                        Types::KeyframeValueType::CameraData);
     Types::KeyframeableProperty testProperty(ICON_FA_CAMPGROUND " Test Property",
                                              Types::KeyframeValueType::FloatingPoint);
 
     void KeyframeManager::Initialize()
     {
-        keyframes[campathPositionProperty] = std::vector<Types::Keyframe>();
+        keyframes[campathCameraProperty] = std::vector<Types::Keyframe>();
         keyframes[testProperty] = std::vector<Types::Keyframe>();
+    }
+
+    const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const
+    {
+        switch (property)
+        {
+            case Types::KeyframeablePropertyType::CampathCamera:
+                return campathCameraProperty;
+            case Types::KeyframeablePropertyType::TestProperty:
+                return testProperty;
+        }
     }
 
     Types::Keyframe KeyframeManager::Interpolate(const Types::KeyframeableProperty& property, const uint32_t tick) const
@@ -49,10 +60,17 @@ namespace IWXMVM::Components
         switch (property.valueType)
         {
             case Types::KeyframeValueType::FloatingPoint:
-                return Types::Keyframe(property, tick,
-                                       (1.0f - t) * p0.value.floating_point + t * p1.value.floating_point);
+                return Types::Keyframe(property, tick, (1.0f - t) * p0.value.floatingPoint + t * p1.value.floatingPoint);
             case Types::KeyframeValueType::Vector3:
                 return Types::Keyframe(property, tick, (1.0f - t) * p0.value.vector3 + t * p1.value.vector3);
+            case Types::KeyframeValueType::CameraData:
+                return Types::Keyframe(property, tick, 
+                    Types::CameraData(
+                        (1.0f - t) * p0.value.cameraData.position + t * p1.value.cameraData.position,
+                        (1.0f - t) * p0.value.cameraData.rotation + t * p1.value.cameraData.rotation,
+                        (1.0f - t) * p0.value.cameraData.fov + t * p1.value.cameraData.fov
+                    )
+                );
             default:
                 return Types::Keyframe(property, tick, 0.0f);
         }

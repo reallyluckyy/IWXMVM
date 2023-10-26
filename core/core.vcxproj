@@ -168,7 +168,6 @@
     <ClInclude Include="src\Types\Dvar.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
-    <ClInclude Include="src\Types\CampathNode.hpp" />
     <ClInclude Include="src\Types\Keyframe.hpp" />
     <ClInclude Include="src\Types\KeyframeableProperty.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />

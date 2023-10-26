@@ -2,10 +2,17 @@
 
 namespace IWXMVM::Types
 {
+    enum class KeyframeablePropertyType
+    {
+        CampathCamera,
+        TestProperty
+    };
+
     enum class KeyframeValueType
     {
         FloatingPoint,
-		Vector3
+		Vector3,
+        CameraData
     };
 
     struct KeyframeableProperty

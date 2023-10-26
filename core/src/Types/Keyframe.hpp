@@ -3,13 +3,20 @@
 
 namespace IWXMVM::Types
 {
+    struct CameraData
+    {
+        glm::vec3 position;
+        glm::vec3 rotation;
+        float fov;
+    };
+
     union KeyframeValue
     {
-        float floating_point;
+        float floatingPoint;
     	glm::vec3 vector3;
+        CameraData cameraData;
 
-        KeyframeValue(float floating_point)
-			: floating_point(floating_point)
+        KeyframeValue(float floatingPoint) : floatingPoint(floatingPoint)
         {
         }
 
@@ -17,6 +24,11 @@ namespace IWXMVM::Types
             : vector3(vector3)
         {
 		}
+
+        KeyframeValue(CameraData cameraData)
+			: cameraData(cameraData)
+        {
+        }
     };
 
     struct Keyframe

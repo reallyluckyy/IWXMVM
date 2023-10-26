@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Types/CampathNode.hpp"
 #include "Types/KeyframeableProperty.hpp"
 #include "Types/Keyframe.hpp"
 #include "Components/Camera.hpp"
