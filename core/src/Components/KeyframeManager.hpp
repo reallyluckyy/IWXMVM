@@ -19,8 +19,8 @@ namespace IWXMVM::Components
         void Initialize();
         const std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& GetKeyframes() const
         {
-			return keyframes;
-		}
+            return keyframes;
+        }
 
         std::vector<Types::Keyframe>& GetKeyframes(const Types::KeyframeableProperty& property)
         {

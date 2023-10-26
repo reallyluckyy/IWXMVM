@@ -13,7 +13,7 @@ namespace IWXMVM::Types
     union KeyframeValue
     {
         float floatingPoint;
-    	glm::vec3 vector3;
+        glm::vec3 vector3;
         CameraData cameraData;
 
         KeyframeValue(float floatingPoint) : floatingPoint(floatingPoint)
@@ -23,10 +23,10 @@ namespace IWXMVM::Types
         KeyframeValue(glm::vec3 vector3)
             : vector3(vector3)
         {
-		}
+        }
 
         KeyframeValue(CameraData cameraData)
-			: cameraData(cameraData)
+            : cameraData(cameraData)
         {
         }
     };
@@ -41,22 +41,22 @@ namespace IWXMVM::Types
         Keyframe(const KeyframeableProperty& property, std::uint32_t tick, KeyframeValue value)
             : property(property), tick(tick), value(value)
         {
-		}
+        }
 
         Keyframe(const KeyframeableProperty& property)
-			: property(property), tick(0), value(0)
-		{}
+            : property(property), tick(0), value(0)
+        {}
 
         Keyframe operator=(const Keyframe& other)
         {
-			tick = other.tick;
-			value = other.value;
-			return *this;
+            tick = other.tick;
+            value = other.value;
+            return *this;
         }
 
         bool operator<(const Keyframe& other) const
         {
-			return tick < other.tick;
+            return tick < other.tick;
         }
     };
 }
