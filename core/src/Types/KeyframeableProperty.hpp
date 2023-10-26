@@ -11,7 +11,7 @@ namespace IWXMVM::Types
     enum class KeyframeValueType
     {
         FloatingPoint,
-		Vector3,
+        Vector3,
         CameraData
     };
 
@@ -23,11 +23,11 @@ namespace IWXMVM::Types
         KeyframeableProperty(std::string_view name, KeyframeValueType valueType)
             : name(name), valueType(valueType)
         {
-		}
+        }
 
         bool operator<(const KeyframeableProperty& other) const
         {
             return name < other.name;
-		}
+        }
     };
 }
