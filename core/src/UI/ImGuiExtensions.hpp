@@ -12,9 +12,12 @@ namespace ImGuiEx
     bool TimescaleSlider(const char* label, float* v, float v_min, float v_max, const char* format,
                          ImGuiSliderFlags flags);
     bool DemoProgressBar(int32_t* currentTick, uint32_t startTick, uint32_t endTick);
-    void DrawKeyframeSliderInternal(const IWXMVM::Types::KeyframeableProperty& property, uint32_t* currentTick, uint32_t* startTick,
-                                    uint32_t* endTick, std::vector<IWXMVM::Types::Keyframe>& keyframes);
-    void DrawCurveEditorInternal(const IWXMVM::Types::KeyframeableProperty& property, uint32_t* currentTick,
+    void DrawKeyframeSliderInternal(const IWXMVM::Types::KeyframeableProperty& property, uint32_t* currentTick,
                                     uint32_t* startTick, uint32_t* endTick,
                                     std::vector<IWXMVM::Types::Keyframe>& keyframes);
+    void DrawCurveEditorInternal(const IWXMVM::Types::KeyframeableProperty& property, uint32_t* currentTick,
+                                 uint32_t* startTick, uint32_t* endTick, float width,
+                                 std::vector<IWXMVM::Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
+                                 std::function<float(const IWXMVM::Types::Keyframe&)>,
+                                 std::function<void(IWXMVM::Types::Keyframe&, float)>);
 }  // namespace ImGuiEx

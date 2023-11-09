@@ -29,6 +29,35 @@ namespace IWXMVM::Types
             : cameraData(cameraData)
         {
         }
+
+        // This is real spooky
+        float GetFloatValueByIndex(uint32_t index) const
+        {
+            try
+            {
+                if (index > sizeof(KeyframeValue) / sizeof(float))
+                    throw std::invalid_argument("Index for KeyframeValue out of range");    
+                return (&this->floatingPoint)[index];
+            }
+            catch (...)
+            {
+                LOG_DEBUG("this threw");
+            }
+        }
+
+        void SetFloatValueByIndex(uint32_t index, float value)
+        {
+            try
+            {
+                if (index > sizeof(KeyframeValue) / sizeof(float))
+                    throw std::invalid_argument("Index for KeyframeValue out of range");    
+                (&this->floatingPoint)[index] = value;
+            }
+            catch (...)
+            {
+                LOG_DEBUG("this threw");
+            }
+        }
     };
 
     struct Keyframe

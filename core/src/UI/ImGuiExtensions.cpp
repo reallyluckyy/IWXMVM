@@ -89,11 +89,10 @@ namespace ImGuiEx
         const ImGuiID id = window->GetID(label);
 
         const ImVec2 label_size = CalcTextSize(label, NULL, true);
-        const ImRect frame_bb(window->DC.CursorPos,
+        const ImRect frame_bb(
+            window->DC.CursorPos,
             window->DC.CursorPos + ImVec2(CalcItemWidth(), label_size.y + style.FramePadding.y * 2.0f));
-        const ImRect total_bb(
-            frame_bb.Min,
-            frame_bb.Max);
+        const ImRect total_bb(frame_bb.Min, frame_bb.Max);
 
         ItemSize(total_bb, style.FramePadding.y);
         if (!ItemAdd(total_bb, id, &frame_bb, 0))
@@ -114,9 +113,11 @@ namespace ImGuiEx
         }
 
         // Draw frame
-        const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive
-                                            : hovered        ? ImGuiCol_FrameBgHovered
-                                                             : ImGuiCol_FrameBg);
+        const ImU32 frame_col = GetColorU32(g.ActiveId == id
+                                                ? ImGuiCol_FrameBgActive
+                                                : hovered
+                                                ? ImGuiCol_FrameBgHovered
+                                                : ImGuiCol_FrameBg);
         RenderNavHighlight(frame_bb, id);
         RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
 
@@ -208,9 +209,11 @@ namespace ImGuiEx
         }
 
         // Draw frame
-        const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive
-                                            : hovered        ? ImGuiCol_FrameBgHovered
-                                                             : ImGuiCol_FrameBg);
+        const ImU32 frame_col = GetColorU32(g.ActiveId == id
+                                                ? ImGuiCol_FrameBgActive
+                                                : hovered
+                                                ? ImGuiCol_FrameBgHovered
+                                                : ImGuiCol_FrameBg);
         RenderNavHighlight(frame_bb, id);
         RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
 
@@ -252,9 +255,9 @@ namespace ImGuiEx
     {
         auto ClampValue = [](void* p_data) {
             static constexpr double ROUNDING = 0.00000001;
-            static constexpr std::array TIMESCALE_STEPS{0.001, 0.002, 0.005, 0.01,  0.02, 0.025, 0.05,  0.075, 0.1,
-                                                        0.125, 0.2,   0.25,  0.333, 0.5,  0.75,  1.0,   1.25,  1.5,
-                                                        2.0,   5.0,   10.0,  20.0,  50.0, 100.0, 500.0, 1000.0};
+            static constexpr std::array TIMESCALE_STEPS{0.001, 0.002, 0.005, 0.01, 0.02, 0.025, 0.05, 0.075, 0.1,
+                                                        0.125, 0.2, 0.25, 0.333, 0.5, 0.75, 1.0, 1.25, 1.5,
+                                                        2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 500.0, 1000.0};
 
             float* ptr = static_cast<float*>(p_data);
             const auto it = std::upper_bound(TIMESCALE_STEPS.begin(), TIMESCALE_STEPS.end(), *ptr - ROUNDING);
@@ -269,25 +272,33 @@ namespace ImGuiEx
                                                 ClampValue);
     }
 
-    ImVec2 GetPositionForKeyframe(const ImRect rect, const IWXMVM::Types::Keyframe& keyframe, const uint32_t endTick, const ImVec2 valueBoundaries = ImVec2(-10, 10)) {
+    ImVec2 GetPositionForKeyframe(
+        const ImRect rect, const IWXMVM::Types::Keyframe& keyframe, const uint32_t endTick,
+        const ImVec2 valueBoundaries = ImVec2(-10, 10),
+        std::function<float(const IWXMVM::Types::Keyframe&)> GetKeyframeValue = [](const auto& keyframe) {
+            return 0;
+        })
+    {
         const auto barHeight = rect.Max.y - rect.Min.y;
         const auto barLength = rect.Max.x - rect.Min.x;
         const auto percentage = static_cast<float>(keyframe.tick) / static_cast<float>(endTick);
         const auto x = rect.Min.x + percentage * barLength;
-        const auto y = rect.Min.y + (1.0f - (keyframe.value.floatingPoint - valueBoundaries.x) /
-                                                (valueBoundaries.y - valueBoundaries.x)) *
-                                        barHeight;
+        const auto y = rect.Min.y + (1.0f - (GetKeyframeValue(keyframe) - valueBoundaries.x) /
+                                     (valueBoundaries.y - valueBoundaries.x)) *
+                       barHeight;
         return ImVec2(x, y);
     };
 
-    std::tuple<uint32_t, IWXMVM::Types::KeyframeValue> GetKeyframeForPosition(const IWXMVM::Types::KeyframeableProperty& property, const ImVec2 position,
-                                                   const ImRect rect, const uint32_t startTick, const uint32_t endTick,  const ImVec2 valueBoundaries = ImVec2(-10, 10))
+    std::tuple<uint32_t, IWXMVM::Types::KeyframeValue> GetKeyframeForPosition(
+        const ImVec2 position, const ImRect rect, const uint32_t startTick, const uint32_t endTick,
+        const ImVec2 valueBoundaries = ImVec2(-10, 10))
     {
         const auto barHeight = rect.Max.y - rect.Min.y;
         const auto barLength = rect.Max.x - rect.Min.x;
         const auto percentage = (position.x - rect.Min.x) / barLength;
         const auto tick = static_cast<uint32_t>(percentage * (endTick - startTick));
-        const auto value = valueBoundaries.y - (position.y - rect.Min.y) / barHeight * (valueBoundaries.y - valueBoundaries.x);
+        const auto value =
+            valueBoundaries.y - (position.y - rect.Min.y) / barHeight * (valueBoundaries.y - valueBoundaries.x);
         return std::make_tuple(tick, value);
     };
 
@@ -361,7 +372,7 @@ namespace ImGuiEx
 
         if (selectedKeyframe != nullptr)
         {
-            auto [tick, _] = GetKeyframeForPosition(property, GetMousePos(), frame_bb, *startTick, *endTick);
+            auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, *startTick, *endTick);
             selectedKeyframe->tick = tick;
 
             if (IsMouseReleased(ImGuiMouseButton_Left))
@@ -373,9 +384,11 @@ namespace ImGuiEx
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
-            auto [tick, _] = GetKeyframeForPosition(property, GetMousePos(), frame_bb, *startTick, *endTick);
+            auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, *startTick, *endTick);
 
-            if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
+            if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) {
+                    return k.tick == tick;
+                }) ==
                 keyframes.end())
             {
                 // TODO: the value here should be the interpolated value between neighboring keyframes
@@ -385,14 +398,13 @@ namespace ImGuiEx
     }
 
     void DrawCurveEditorInternal(const IWXMVM::Types::KeyframeableProperty& property, uint32_t* currentTick,
-                                 uint32_t* startTick, uint32_t* endTick,
-                                 std::vector<IWXMVM::Types::Keyframe>& keyframes)
+                                 uint32_t* startTick, uint32_t* endTick, const float width,
+                                 std::vector<IWXMVM::Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
+                                 std::function<float(const IWXMVM::Types::Keyframe&)> GetKeyframeValue,
+                                 std::function<void(IWXMVM::Types::Keyframe&, float)> SetKeyframeValue)
     {
         using namespace ImGui;
         using namespace IWXMVM;
-
-        auto flags = ImGuiSliderFlags_NoInput;
-        auto data_type = ImGuiDataType_S32;
 
         ImGuiWindow* window = GetCurrentWindow();
 
@@ -401,13 +413,12 @@ namespace ImGuiEx
         ImGuiContext& g = *GImGui;
         const ImGuiStyle& style = g.Style;
         const ImGuiID id = window->GetID(label);
-        const float w = CalcItemWidth();
 
         const ImVec2 label_size = CalcTextSize(label, NULL, true);
         const float curveEditorHeightMultiplier = 5.0f;
-        const ImRect frame_bb(
-            window->DC.CursorPos,
-            window->DC.CursorPos + ImVec2(w, label_size.y * curveEditorHeightMultiplier + style.FramePadding.y * 2.0f));
+        const ImRect frame_bb(window->DC.CursorPos,
+                              window->DC.CursorPos + ImVec2(width, label_size.y * curveEditorHeightMultiplier +
+                                                                   style.FramePadding.y * 2.0f));
         const ImRect total_bb(
             frame_bb.Min,
             frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
@@ -423,8 +434,8 @@ namespace ImGuiEx
         auto needleWidth = 4;
 
         auto t = static_cast<float>(*currentTick) / static_cast<float>(*endTick - *startTick);
-        ImRect grab_bb = ImRect(frame_bb.Min.x + t * w - needleWidth / 2, frame_bb.Min.y,
-                                frame_bb.Min.x + t * w + needleWidth / 2, frame_bb.Max.y);
+        ImRect grab_bb = ImRect(frame_bb.Min.x + t * width - needleWidth / 2, frame_bb.Min.y,
+                                frame_bb.Min.x + t * width + needleWidth / 2, frame_bb.Max.y);
 
         if (grab_bb.Max.x > grab_bb.Min.x)
             window->DrawList->AddRectFilled(
@@ -434,20 +445,25 @@ namespace ImGuiEx
         DemoProgressBarLines(frame_bb, *currentTick, *endTick);
 
         static Types::Keyframe* selectedKeyframe = nullptr;
+        static int32_t selectedKeyframeValueIndex = -1;
 
         const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
-        const auto maxValue = std::max_element(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) {
-            return a.value.floatingPoint < b.value.floatingPoint;
-        });
-        const auto minValue = std::min_element(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) {
-            return a.value.floatingPoint < b.value.floatingPoint;
-        });
-        const ImVec2 valueBoundaries = ImVec2(minValue == keyframes.end() ? -10 : minValue->value.floatingPoint - 10,
-                                              maxValue == keyframes.end() ? 10 : maxValue->value.floatingPoint + 10);
+        const auto maxValue = std::max_element(
+            keyframes.begin(), keyframes.end(),
+            [GetKeyframeValue](const auto& a, const auto& b) {
+                return GetKeyframeValue(a) < GetKeyframeValue(b);
+            });
+        const auto minValue = std::min_element(
+            keyframes.begin(), keyframes.end(),
+            [GetKeyframeValue](const auto& a, const auto& b) {
+                return GetKeyframeValue(a) < GetKeyframeValue(b);
+            });
+        const ImVec2 valueBoundaries = ImVec2(minValue == keyframes.end() ? -10 : GetKeyframeValue(*minValue) - 10,
+                                              maxValue == keyframes.end() ? 10 : GetKeyframeValue(*maxValue) + 10);
 
         for (auto& k : keyframes)
         {
-            const auto position = GetPositionForKeyframe(frame_bb, k, *endTick, valueBoundaries);
+            const auto position = GetPositionForKeyframe(frame_bb, k, *endTick, valueBoundaries, GetKeyframeValue);
 
             ImRect text_bb(ImVec2(position.x - textSize.x / 2, position.y - textSize.y / 2),
                            ImVec2(position.x + textSize.x / 2, position.y + textSize.y / 2));
@@ -456,12 +472,13 @@ namespace ImGuiEx
             if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
             {
                 selectedKeyframe = &k;
+                selectedKeyframeValueIndex = keyframeValueIndex;
             }
 
             const ImU32 col = GetColorU32(hovered || selectedKeyframe == &k ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
             window->DrawList->AddText(ImVec2(text_bb.Max.x, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
-                                      std::format("{0:.0f}", k.value.floatingPoint).c_str());
+                                      std::format("{0:.0f}", GetKeyframeValue(k)).c_str());
         }
 
         if (!keyframes.empty())
@@ -469,42 +486,46 @@ namespace ImGuiEx
             const auto lowestTickKeyframe = std::min_element(keyframes.begin(), keyframes.end());
             const auto highestTickKeyframe = std::max_element(keyframes.begin(), keyframes.end());
 
-            const auto EVALUATION_DISTANCE = glm::clamp(100 * (highestTickKeyframe->tick - lowestTickKeyframe->tick) / 5000, 50u, 1000u);
+            const auto EVALUATION_DISTANCE =
+                glm::clamp(100 * (highestTickKeyframe->tick - lowestTickKeyframe->tick) / 5000, 50u, 1000u);
 
             auto previousKeyframe = *lowestTickKeyframe;
             for (auto tick = *startTick; tick <= *endTick; tick += EVALUATION_DISTANCE)
             {
-                auto keyframe = IWXMVM::Components::KeyframeManager::Get().Interpolate(property, tick);
-                auto lastPosition = GetPositionForKeyframe(frame_bb, previousKeyframe, *endTick, valueBoundaries);
-                auto position = GetPositionForKeyframe(frame_bb, keyframe, *endTick, valueBoundaries);
+                auto keyframe = Components::KeyframeManager::Get().Interpolate(property, tick);
+                auto lastPosition =
+                    GetPositionForKeyframe(frame_bb, previousKeyframe, *endTick, valueBoundaries, GetKeyframeValue);
+                auto position = GetPositionForKeyframe(frame_bb, keyframe, *endTick, valueBoundaries, GetKeyframeValue);
                 window->DrawList->AddLine(lastPosition, position, GetColorU32(ImGuiCol_Button));
                 previousKeyframe = keyframe;
             }
         }
 
-        if (selectedKeyframe != nullptr)
+        if (selectedKeyframe != nullptr && selectedKeyframeValueIndex == keyframeValueIndex)
         {
-            auto [tick, value] = GetKeyframeForPosition(property, GetMousePos(), frame_bb, *startTick, *endTick, valueBoundaries);
+            auto [tick, value] = GetKeyframeForPosition(GetMousePos(), frame_bb, *startTick, *endTick, valueBoundaries);
 
             selectedKeyframe->tick = tick;
-            selectedKeyframe->value.floatingPoint = glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f);
+            SetKeyframeValue(*selectedKeyframe, glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f));
 
             if (IsMouseReleased(ImGuiMouseButton_Left))
             {
                 selectedKeyframe = nullptr;
+                selectedKeyframeValueIndex = -1;
             }
         }
 
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
-            auto [tick, value] = GetKeyframeForPosition(property, GetMousePos(), frame_bb, *startTick, *endTick, valueBoundaries);
-            if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
+            auto [tick, value] = GetKeyframeForPosition(GetMousePos(), frame_bb, *startTick, *endTick, valueBoundaries);
+            if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) {
+                    return k.tick == tick;
+                }) ==
                 keyframes.end())
             {
                 keyframes.push_back({property, tick, value});
             }
         }
     }
-
-}  // namespace ImGuiEx
+} // namespace ImGuiEx

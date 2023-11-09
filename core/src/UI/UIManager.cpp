@@ -90,6 +90,7 @@ namespace IWXMVM::UI
         catch (std::exception& e)
         {
             LOG_CRITICAL("An exception occurred while rendering the IWXMVM user interface: {0}", e.what());
+            __debugbreak();
         }
         catch (...)
         {
