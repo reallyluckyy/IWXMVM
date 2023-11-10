@@ -12,6 +12,5 @@ namespace IWXMVM::UI
 
        private:
         void Initialize() final;
-        void DrawKeyframeSlider(const Types::KeyframeableProperty& property) const;
     };
 }  // namespace IWXMVM::UI
