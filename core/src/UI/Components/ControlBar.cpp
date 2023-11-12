@@ -59,29 +59,43 @@ namespace IWXMVM::UI
 
     void HandleTimelineZoomInteractions()
     {
-        const float ZOOM_MULTIPLIER = 2000.0f;
-        const float MOVE_MULTIPLIER = 100.0f;
+        const auto ZOOM_MULTIPLIER = 2000;
+        const auto MOVE_MULTIPLIER = 100;
 
+        const auto minTick = 0;
+        const auto maxTick = (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick;
+
+        // TODO: fix window moving when zooming in after min window size is reached
         auto scrollDelta = Input::GetScrollDelta() * Input::GetDeltaTime();
-
         displayStartTick += scrollDelta * 100 * ZOOM_MULTIPLIER;
         displayEndTick -= scrollDelta * 100 * ZOOM_MULTIPLIER;
         
         if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle))
         {
-            // TODO: this should not tighten the zoom window when scrolling onto an edge
+            auto zoomWindowSizeBefore = displayEndTick - displayStartTick;
 
             auto delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle);
-            displayStartTick -= delta.x * MOVE_MULTIPLIER;
-            displayEndTick -= delta.x * MOVE_MULTIPLIER;
+            displayStartTick = glm::max(displayStartTick - (int32_t)(delta.x * MOVE_MULTIPLIER), minTick);
+            displayEndTick = glm::min(displayEndTick - (int32_t)(delta.x * MOVE_MULTIPLIER), maxTick);
+
+            auto zoomWindowSizeAfter = displayEndTick - displayStartTick;
+
+            if (zoomWindowSizeAfter != zoomWindowSizeBefore)
+            {
+                if (displayStartTick == minTick)
+                    displayEndTick = displayStartTick + zoomWindowSizeBefore;
+                else
+                    displayStartTick = displayEndTick - zoomWindowSizeBefore;
+			}
+
 
             ImGui::ResetMouseDragDelta(ImGuiMouseButton_Middle);
         }
 
-        const int32_t MINIMUM_ZOOM = 100;
+        const int32_t MINIMUM_ZOOM = 500;
 
-        displayStartTick = glm::clamp(displayStartTick, 0, displayEndTick - MINIMUM_ZOOM);
-        displayEndTick = glm::clamp(displayEndTick, displayStartTick + MINIMUM_ZOOM, (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick);
+        displayStartTick = glm::clamp(displayStartTick, minTick, displayEndTick - MINIMUM_ZOOM);
+        displayEndTick = glm::clamp(displayEndTick, displayStartTick + MINIMUM_ZOOM, maxTick);
     }
 
     bool DrawDemoProgressBar(int32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)
