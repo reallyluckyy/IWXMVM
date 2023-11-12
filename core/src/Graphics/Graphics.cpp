@@ -17,7 +17,7 @@ namespace IWXMVM::GFX
         BufferManager::Get().AddMesh(&axis);
         BufferManager::Get().AddMesh(&camera);
         BufferManager::Get().AddMesh(&icosphere);
-        icosphere.fillMode = D3DFILL_WIREFRAME;
+        //icosphere.fillMode = D3DFILL_WIREFRAME;
     }
 
     void GraphicsManager::Uninitialize()
