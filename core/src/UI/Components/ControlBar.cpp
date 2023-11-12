@@ -8,16 +8,23 @@
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Input.hpp"
+#include "Events.hpp"
 
 namespace IWXMVM::UI
 {
     float playbackSpeed;
+    int32_t displayStartTick, displayEndTick;
 
     std::optional<Types::Dvar> timescale;
 
     void ControlBar::Initialize()
     {
         playbackSpeed = 1.0f;
+
+        Events::RegisterListener(EventType::OnDemoLoad, []() {
+            displayStartTick = 0;
+            displayEndTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
+        });
     }
 
     void HandlePlaybackInput()
@@ -48,6 +55,112 @@ namespace IWXMVM::UI
         {
             Mod::GetGameInterface()->SetTickDelta(-500);
         }
+    }
+
+    void HandleTimelineZoomInteractions()
+    {
+        const int32_t ZOOM_AMOUNT = Mod::GetGameInterface()->GetDemoInfo().endTick / 200;
+        if (Input::GetScrollDelta() > 0)
+        {
+            displayStartTick = glm::clamp(displayStartTick + ZOOM_AMOUNT, 0, displayEndTick - ZOOM_AMOUNT);
+            displayEndTick = glm::clamp(displayEndTick - ZOOM_AMOUNT, displayStartTick + ZOOM_AMOUNT,
+                                        (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick);
+        }
+        else if (Input::GetScrollDelta() < 0)
+        {
+            displayStartTick = glm::clamp(displayStartTick - ZOOM_AMOUNT, 0, displayEndTick - ZOOM_AMOUNT);
+            displayEndTick = glm::clamp(displayEndTick + ZOOM_AMOUNT, displayStartTick + ZOOM_AMOUNT,
+                                        (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick);
+        }
+    }
+
+    bool DrawDemoProgressBar(int32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)
+    {
+        using namespace ImGui;
+        auto label = "##demoProgressBar";
+        auto format = "%d";
+
+        ImGuiWindow* window = GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
+
+        const ImVec2 label_size = CalcTextSize(label, NULL, true);
+        const ImRect frame_bb(
+            window->DC.CursorPos,
+            window->DC.CursorPos + ImVec2(CalcItemWidth(), label_size.y + style.FramePadding.y * 2.0f));
+        const ImRect total_bb(frame_bb.Min, frame_bb.Max);
+
+        ItemSize(total_bb, style.FramePadding.y);
+        if (!ItemAdd(total_bb, id, &frame_bb, 0))
+            return false;
+
+        const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
+        const bool clicked = hovered && IsMouseClicked(0, id);
+        const bool make_active = (clicked || g.NavActivateId == id);
+        if (make_active && clicked)
+            SetKeyOwner(ImGuiKey_MouseLeft, id);
+
+        if (make_active)
+        {
+            SetActiveID(id, window);
+            SetFocusID(id, window);
+            FocusWindow(window);
+            g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
+        }
+
+        if (hovered)
+        {
+            HandleTimelineZoomInteractions();
+        }
+
+        if (displayStartTick > 0 || displayEndTick < endTick)
+        {
+            auto indicatorBarRect = ImRect(frame_bb.Min - ImVec2(0, 10), ImVec2(frame_bb.Max.x, frame_bb.Min.y - 2));
+
+            window->DrawList->AddRectFilled(indicatorBarRect.Min, indicatorBarRect.Max,
+                                            GetColorU32(ImGuiCol_FrameBg), 0, 0);
+
+            auto startIndicatorOffset = (indicatorBarRect.Max.x - indicatorBarRect.Min.x) / endTick * displayStartTick;
+            auto endIndicatorOffset = (indicatorBarRect.Max.x - indicatorBarRect.Min.x) / endTick * displayEndTick;
+            window->DrawList->AddRectFilled(indicatorBarRect.Min + ImVec2(startIndicatorOffset, 0),
+                                            indicatorBarRect.Min + ImVec2(endIndicatorOffset, 4),
+                                            GetColorU32(ImGuiCol_Button), 0, 0);
+        }
+
+        // Draw frame
+        const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive
+                                            : hovered        ? ImGuiCol_FrameBgHovered
+                                                             : ImGuiCol_FrameBg);
+        RenderNavHighlight(frame_bb, id);
+        RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
+
+        // Slider behavior
+        ImRect grab_bb;
+        const bool value_changed = SliderBehavior(frame_bb, id, ImGuiDataType_S32, currentTick, &displayStartTick,
+                                                  &displayEndTick,
+                                                  format, ImGuiSliderFlags_NoInput, &grab_bb);
+        if (value_changed)
+            MarkItemEdited(id);
+
+        // Render grab
+        if (grab_bb.Max.x > grab_bb.Min.x)
+            window->DrawList->AddRectFilled(
+                grab_bb.Min, grab_bb.Max,
+                GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+
+        // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
+        char value_buf[64];
+        const char* value_buf_end = value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf),
+                                                                     ImGuiDataType_S32, currentTick, format);
+        RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
+
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayEndTick);
+
+        return value_changed;
     }
 
     INCBIN_EXTERN(IMG_PLAY_BUTTON);
@@ -105,7 +218,7 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(progressBarWidth);
             static std::int32_t tickValue{};
 
-            if (!ImGuiEx::DemoProgressBar(&tickValue, 0, demoInfo.endTick))
+            if (!DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick))
                 tickValue = demoInfo.currentTick;
             else
                 Mod::GetGameInterface()->SetTickDelta(tickValue - demoInfo.currentTick);
