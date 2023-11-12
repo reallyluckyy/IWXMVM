@@ -97,6 +97,7 @@ namespace IWXMVM::UI
 
     void CampathMenu::DrawCampath()
     {
+        /*
         constexpr auto NODE_COLOR = ImVec4(1.0f, 0.0f, 0.0f, 0.8f);
         constexpr auto NODE_SIZE = ImVec2(10, 10);
         constexpr auto PATH_COLOR = ImVec4(1.0f, 0.75f, 0.0f, 0.8f);
@@ -128,6 +129,7 @@ namespace IWXMVM::UI
             ImGuiEx::DrawLine3D(previousNode.position, campathManager.GetNodes().back().position, PATH_COLOR,
                                 NODE_SIZE.x / 2);
         }
+        */
     }
 
     void CampathMenu::Release()

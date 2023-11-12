@@ -31,7 +31,7 @@ namespace IWXMVM::Components
         return interpolationModes;
     }
 
-    Types::CampathNode LinearlyInterpolate(const std::vector<Types::CampathNode>& campathNodes, uint32_t tick)
+    Types::CampathNode LinearlyInterpolate(const std::vector<Types::CampathNode>& campathNodes, float tick)
     {
         // We want to know the campathNodes that the current tick is sandwiched between
         // p0 will be the node before the current tick, p1 the node after the current tick
@@ -51,12 +51,12 @@ namespace IWXMVM::Components
         const auto& p1 = campathNodes[p1Idx];
 
         // Interpolate between p0 and p1
-        const float t = static_cast<float>(tick - p0.tick) / static_cast<float>(p1.tick - p0.tick);
+        const float t = (tick - p0.tick) / (p1.tick - p0.tick);
         return Types::CampathNode((1.0f - t) * p0.position + t * p1.position,
                                   (1.0f - t) * p0.rotation + t * p1.rotation, (1.0f - t) * p0.fov + t * p1.fov, tick);
     }
 
-    Types::CampathNode CatmullRomInterpolate(const std::vector<Types::CampathNode>& campathNodes, uint32_t tick)
+    Types::CampathNode CatmullRomInterpolate(const std::vector<Types::CampathNode>& campathNodes, float tick)
     {
         std::int32_t p1Idx = 0, p2Idx = 1;
         for (std::size_t i = 0; i < campathNodes.size() - 1; i++)
@@ -74,7 +74,7 @@ namespace IWXMVM::Components
         const auto& p2 = campathNodes[p2Idx];
         const auto& p3 = campathNodes[p2Idx + 1 >= campathNodes.size() ? campathNodes.size() - 1 : p2Idx + 1];
 
-        float t = (float)(tick - p1.tick) / (float)(p2.tick - p1.tick);
+        float t = (tick - p1.tick) / (p2.tick - p1.tick);
 
         return Types::CampathNode(
             glm::catmullRom(p0.position, p1.position, p2.position, p3.position, t),
@@ -82,7 +82,7 @@ namespace IWXMVM::Components
             glm::catmullRom(glm::vec1(p0.fov), glm::vec1(p1.fov), glm::vec1(p2.fov), glm::vec1(p3.fov), t).x, tick);
     }
 
-    Types::CampathNode CampathManager::Interpolate(uint32_t tick)
+    Types::CampathNode CampathManager::Interpolate(float tick)
     {
         switch (interpolationMode)
         {

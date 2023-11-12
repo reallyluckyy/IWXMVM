@@ -19,3 +19,6 @@
 [submodule "core/third-party/json"]
 	path = core/third-party/json
 	url = https://github.com/nlohmann/json.git
+[submodule "core/third-party/tinyobjloader"]
+	path = core/third-party/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader.git

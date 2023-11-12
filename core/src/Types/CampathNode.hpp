@@ -10,10 +10,10 @@ namespace IWXMVM::Types
         glm::vec3 rotation;
         float fov;
 
-        std::uint32_t tick;
+        float tick;
 
         CampathNode() = default;
-        CampathNode(glm::vec3 position, glm::vec3 rotation, float fov, std::uint32_t tick)
+        CampathNode(glm::vec3 position, glm::vec3 rotation, float fov, float tick)
             : position(position), rotation(rotation), fov(fov), tick(tick)
         {
         }

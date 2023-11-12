@@ -4,6 +4,7 @@
 #include "MinHook.h"
 
 #include "Events.hpp"
+#include "Graphics/Graphics.hpp"
 #include "Utilities/HookManager.hpp"
 #include "Mod.hpp"
 
@@ -72,11 +73,13 @@ namespace IWXMVM::D3D9
             return hr;
         }
 
+        GFX::GraphicsManager::Get().Uninitialize();
         UI::UIManager::Get().ShutdownImGui();
 
         device = *ppReturnedDeviceInterface;
 
         UI::UIManager::Get().Initialize(device, pPresentationParameters->hDeviceWindow);
+        GFX::GraphicsManager::Get().Initialize();
 
         return hr;
     }
@@ -93,8 +96,13 @@ namespace IWXMVM::D3D9
         {
             device = pDevice;
             UI::UIManager::Get().Initialize(pDevice);
+            GFX::GraphicsManager::Get().Initialize();
         }
 
+        if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo)
+        {
+            GFX::GraphicsManager::Get().Render();
+        }
         UI::UIManager::Get().RunImGuiFrame();
 
         return EndScene(pDevice);
