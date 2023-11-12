@@ -59,26 +59,35 @@ namespace IWXMVM::UI
 
     void HandleTimelineZoomInteractions()
     {
-        const int32_t ZOOM_AMOUNT = Mod::GetGameInterface()->GetDemoInfo().endTick / 200;
-        if (Input::GetScrollDelta() > 0)
+        const float ZOOM_MULTIPLIER = 2000.0f;
+        const float MOVE_MULTIPLIER = 100.0f;
+
+        auto scrollDelta = Input::GetScrollDelta() * Input::GetDeltaTime();
+
+        displayStartTick += scrollDelta * 100 * ZOOM_MULTIPLIER;
+        displayEndTick -= scrollDelta * 100 * ZOOM_MULTIPLIER;
+        
+        if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle))
         {
-            displayStartTick = glm::clamp(displayStartTick + ZOOM_AMOUNT, 0, displayEndTick - ZOOM_AMOUNT);
-            displayEndTick = glm::clamp(displayEndTick - ZOOM_AMOUNT, displayStartTick + ZOOM_AMOUNT,
-                                        (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick);
+            // TODO: this should not tighten the zoom window when scrolling onto an edge
+
+            auto delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle);
+            displayStartTick -= delta.x * MOVE_MULTIPLIER;
+            displayEndTick -= delta.x * MOVE_MULTIPLIER;
+
+            ImGui::ResetMouseDragDelta(ImGuiMouseButton_Middle);
         }
-        else if (Input::GetScrollDelta() < 0)
-        {
-            displayStartTick = glm::clamp(displayStartTick - ZOOM_AMOUNT, 0, displayEndTick - ZOOM_AMOUNT);
-            displayEndTick = glm::clamp(displayEndTick + ZOOM_AMOUNT, displayStartTick + ZOOM_AMOUNT,
-                                        (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick);
-        }
+
+        const int32_t MINIMUM_ZOOM = 100;
+
+        displayStartTick = glm::clamp(displayStartTick, 0, displayEndTick - MINIMUM_ZOOM);
+        displayEndTick = glm::clamp(displayEndTick, displayStartTick + MINIMUM_ZOOM, (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick);
     }
 
     bool DrawDemoProgressBar(int32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)
     {
         using namespace ImGui;
         auto label = "##demoProgressBar";
-        auto format = "%d";
 
         ImGuiWindow* window = GetCurrentWindow();
         if (window->SkipItems)
@@ -141,22 +150,17 @@ namespace IWXMVM::UI
         // Slider behavior
         ImRect grab_bb;
         const bool value_changed = SliderBehavior(frame_bb, id, ImGuiDataType_S32, currentTick, &displayStartTick,
-                                                  &displayEndTick,
-                                                  format, ImGuiSliderFlags_NoInput, &grab_bb);
+                                                  &displayEndTick, "", ImGuiSliderFlags_NoInput, &grab_bb);
         if (value_changed)
             MarkItemEdited(id);
 
         // Render grab
-        if (grab_bb.Max.x > grab_bb.Min.x)
+        if (grab_bb.Max.x > grab_bb.Min.x && *currentTick >= displayStartTick && *currentTick <= displayEndTick)
+        {
             window->DrawList->AddRectFilled(
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
-
-        // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
-        char value_buf[64];
-        const char* value_buf_end = value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf),
-                                                                     ImGuiDataType_S32, currentTick, format);
-        RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
+        }
 
         ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
 
