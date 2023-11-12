@@ -158,7 +158,7 @@ namespace IWXMVM::UI
                                                                      ImGuiDataType_S32, currentTick, format);
         RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayEndTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
 
         return value_changed;
     }

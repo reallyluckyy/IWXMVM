@@ -83,7 +83,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, *endTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, *startTick, *endTick);
 
         static Types::Keyframe* selectedKeyframe = nullptr;
 
@@ -187,7 +187,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, *endTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, *startTick, *endTick);
 
         static Types::Keyframe* selectedKeyframe = nullptr;
         static int32_t selectedKeyframeValueIndex = -1;
