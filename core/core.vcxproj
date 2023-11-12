@@ -62,7 +62,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -90,7 +90,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -121,6 +121,8 @@
     <ClCompile Include="src\Configuration\Configuration.cpp" />
     <ClCompile Include="src\Configuration\InputConfiguration.cpp" />
     <ClCompile Include="src\D3D9.cpp" />
+    <ClCompile Include="src\Graphics\Graphics.cpp" />
+    <ClCompile Include="src\Graphics\Resource.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\ResourceData.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -159,6 +161,8 @@
     <ClInclude Include="src\Components\OrbitCamera.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
     <ClInclude Include="src\Configuration\InputConfiguration.hpp" />
+    <ClInclude Include="src\Graphics\Graphics.hpp" />
+    <ClInclude Include="src\Graphics\Resource.hpp" />
     <ClInclude Include="src\Input.hpp" />
     <ClInclude Include="src\Types\DemoInfo.hpp" />
     <ClInclude Include="src\Types\Dof.hpp" />
@@ -168,6 +172,7 @@
     <ClInclude Include="src\Types\CampathNode.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />
     <ClInclude Include="src\Types\Sun.hpp" />
+    <ClInclude Include="src\Types\Vertex.hpp" />
     <ClInclude Include="src\UI\Components\CampathMenu.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />

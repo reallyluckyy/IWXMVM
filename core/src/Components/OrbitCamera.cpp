@@ -118,7 +118,7 @@ namespace IWXMVM::Components
             DrawGrid();
         }
 
-        DrawOrbitPoint();
+        // DrawOrbitPoint();
     }
 
     void OrbitCamera::DrawGrid()

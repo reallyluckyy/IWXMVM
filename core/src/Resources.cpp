@@ -10,8 +10,7 @@ namespace IWXMVM::Resources
     INCBIN(RUBIK_FONT, "resources/Rubik-Regular.ttf");
     INCBIN(WORK_SANS_FONT, "resources/WorkSans-Regular.ttf");
     INCBIN(FA_ICONS_FONT, "resources/fa-solid-900.ttf");
-    INCBIN(CFG_ICON, "resources/cfg_icon.png");
-    INCBIN(DEMOS_ICON, "resources/demos_icon.png");
-    INCBIN(CAPTURE_ICON, "resources/capture_icon.png");
-    INCBIN(DEBUG_ICON, "resources/debug_icon.png");
+    INCBIN(AXIS_MODEL, "resources/axis.obj");
+    INCBIN(CAMERA_MODEL, "resources/camera.obj");
+    INCBIN(ICOSPHERE_MODEL, "resources/icosphere.obj");
 };  // namespace IWXMVM::Resources

@@ -32,7 +32,7 @@ namespace IWXMVM::Components
         }
         void AddNode(Types::CampathNode marker);
 
-        Types::CampathNode Interpolate(uint32_t tick);
+        Types::CampathNode Interpolate(float tick);
         InterpolationMode GetInterpolationMode() const
         {
             return interpolationMode;
