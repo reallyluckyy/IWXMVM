@@ -107,10 +107,6 @@ namespace IWXMVM::UI
         {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         }
-        else
-        {
-            ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
-        }
 
         if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
         {

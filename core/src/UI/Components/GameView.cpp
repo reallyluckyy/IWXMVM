@@ -168,6 +168,7 @@ namespace IWXMVM::UI
         {
             ImGui::SetWindowFocus(NULL);
             SetHasFocus(false);
+            ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
         }
 
         auto currentPos = ImGui::GetWindowPos();
