@@ -55,8 +55,7 @@ namespace ImGuiEx
 
     constexpr std::size_t MARKER_DISTANCE = 5000;
 
-    void DemoProgressBarLines(const ImRect rect, std::uint32_t currentTick,
-                              std::uint32_t displayStartTick, std::uint32_t displayEndTick)
+    void DemoProgressBarLines(const ImRect rect, uint32_t currentTick, uint32_t displayStartTick, uint32_t displayEndTick)
     {
         using namespace ImGui;
 
@@ -68,8 +67,12 @@ namespace ImGuiEx
         {
             if (i % MARKER_DISTANCE == 0)
             {
-                const auto percentage = (i - displayStartTick) / (float)displayEndTick;
+                const auto percentage = static_cast<float>(i - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
                 const auto x = rect.Min.x + percentage * barLength;
+
+                if (x > rect.Max.x)
+					break;
+
                 window->DrawList->AddRectFilled(ImVec2(x, rect.Min.y), ImVec2(x + 2, rect.Max.y),
                                                 GetColorU32(ImGuiCol_Button));
             }

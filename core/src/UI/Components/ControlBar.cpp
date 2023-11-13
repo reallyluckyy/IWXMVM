@@ -6,25 +6,17 @@
 #include "UI/ImGuiExtensions.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
-#include "Utilities/PathUtils.hpp"
 #include "Input.hpp"
-#include "Events.hpp"
 
 namespace IWXMVM::UI
 {
     float playbackSpeed;
-    int32_t displayStartTick, displayEndTick;
 
     std::optional<Types::Dvar> timescale;
 
     void ControlBar::Initialize()
     {
         playbackSpeed = 1.0f;
-
-        Events::RegisterListener(EventType::OnDemoLoad, []() {
-            displayStartTick = 0;
-            displayEndTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
-        });
     }
 
     void HandlePlaybackInput()
@@ -57,48 +49,7 @@ namespace IWXMVM::UI
         }
     }
 
-    void HandleTimelineZoomInteractions()
-    {
-        const auto ZOOM_MULTIPLIER = 2000;
-        const auto MOVE_MULTIPLIER = 100;
-
-        const auto minTick = 0;
-        const auto maxTick = (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick;
-
-        // TODO: fix window moving when zooming in after min window size is reached
-        auto scrollDelta = Input::GetScrollDelta() * Input::GetDeltaTime();
-        displayStartTick += scrollDelta * 100 * ZOOM_MULTIPLIER;
-        displayEndTick -= scrollDelta * 100 * ZOOM_MULTIPLIER;
-        
-        if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle))
-        {
-            auto zoomWindowSizeBefore = displayEndTick - displayStartTick;
-
-            auto delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Middle);
-            displayStartTick = glm::max(displayStartTick - (int32_t)(delta.x * MOVE_MULTIPLIER), minTick);
-            displayEndTick = glm::min(displayEndTick - (int32_t)(delta.x * MOVE_MULTIPLIER), maxTick);
-
-            auto zoomWindowSizeAfter = displayEndTick - displayStartTick;
-
-            if (zoomWindowSizeAfter != zoomWindowSizeBefore)
-            {
-                if (displayStartTick == minTick)
-                    displayEndTick = displayStartTick + zoomWindowSizeBefore;
-                else
-                    displayStartTick = displayEndTick - zoomWindowSizeBefore;
-			}
-
-
-            ImGui::ResetMouseDragDelta(ImGuiMouseButton_Middle);
-        }
-
-        const int32_t MINIMUM_ZOOM = 500;
-
-        displayStartTick = glm::clamp(displayStartTick, minTick, displayEndTick - MINIMUM_ZOOM);
-        displayEndTick = glm::clamp(displayEndTick, displayStartTick + MINIMUM_ZOOM, maxTick);
-    }
-
-    bool DrawDemoProgressBar(int32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)
+    bool ControlBar::DrawDemoProgressBar(int32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)
     {
         using namespace ImGui;
         auto label = "##demoProgressBar";
@@ -111,14 +62,14 @@ namespace IWXMVM::UI
         const ImGuiStyle& style = g.Style;
         const ImGuiID id = window->GetID(label);
 
+        const auto w = CalcItemWidth();
         const ImVec2 label_size = CalcTextSize(label, NULL, true);
         const ImRect frame_bb(
             window->DC.CursorPos,
-            window->DC.CursorPos + ImVec2(CalcItemWidth(), label_size.y + style.FramePadding.y * 2.0f));
-        const ImRect total_bb(frame_bb.Min, frame_bb.Max);
+            window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
 
-        ItemSize(total_bb, style.FramePadding.y);
-        if (!ItemAdd(total_bb, id, &frame_bb, 0))
+        ItemSize(frame_bb, style.FramePadding.y);
+        if (!ItemAdd(frame_bb, id, &frame_bb, 0))
             return false;
 
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
@@ -133,11 +84,6 @@ namespace IWXMVM::UI
             SetFocusID(id, window);
             FocusWindow(window);
             g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
-        }
-
-        if (hovered)
-        {
-            HandleTimelineZoomInteractions();
         }
 
         if (displayStartTick > 0 || displayEndTick < endTick)
@@ -161,10 +107,16 @@ namespace IWXMVM::UI
         RenderNavHighlight(frame_bb, id);
         RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
 
+        float halfNeedleWidth = 4.0f;
+
         // Slider behavior
         ImRect grab_bb;
         const bool value_changed = SliderBehavior(frame_bb, id, ImGuiDataType_S32, currentTick, &displayStartTick,
                                                   &displayEndTick, "", ImGuiSliderFlags_NoInput, &grab_bb);
+        
+        auto t = static_cast<float>(*currentTick - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
+        grab_bb = ImRect(frame_bb.Min.x + t * w - halfNeedleWidth, frame_bb.Min.y,
+                         frame_bb.Min.x + t * w + halfNeedleWidth, frame_bb.Max.y);
         if (value_changed)
             MarkItemEdited(id);
 
@@ -236,6 +188,8 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(progressBarWidth);
             static std::int32_t tickValue{};
 
+            auto keyframeEditor = dynamic_cast<KeyframeEditor*>(UIManager::Get().GetUIComponent(UI::Component::KeyframeEditor).get());
+            auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
             if (!DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick))
                 tickValue = demoInfo.currentTick;
             else
