@@ -29,7 +29,7 @@ namespace IWXMVM::Components
 
     Types::Keyframe KeyframeManager::Interpolate(const Types::KeyframeableProperty& property, const uint32_t tick) const
     {
-        auto keyframes = KeyframeManager::Get().GetKeyframes(property);
+        const auto& keyframes = KeyframeManager::Get().GetKeyframes(property);
 
         std::int32_t p0Idx = -1, p1Idx = -1;
         for (std::size_t i = 0; i < keyframes.size(); i++)

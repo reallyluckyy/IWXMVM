@@ -290,6 +290,7 @@ namespace IWXMVM::UI
                 auto position = GetPositionForKeyframe(frame_bb, keyframe, displayStartTick, displayEndTick,
                                                        valueBoundaries,
                                                        GetKeyframeValue);
+                // TODO: polyline to reduce vertex count?
                 window->DrawList->AddLine(lastPosition, position, GetColorU32(ImGuiCol_Button));
                 previousKeyframe = keyframe;
             }
