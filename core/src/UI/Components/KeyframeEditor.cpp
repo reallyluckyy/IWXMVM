@@ -1,3 +1,4 @@
+
 #include "StdInclude.hpp"
 #include "KeyframeEditor.hpp"
 
@@ -88,8 +89,7 @@ namespace IWXMVM::UI
     };
 
     void KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
-                                    uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick,
-                                    uint32_t endTick, std::vector<Types::Keyframe>& keyframes)
+                                    uint32_t displayStartTick, uint32_t displayEndTick, std::vector<Types::Keyframe>& keyframes)
     {
         using namespace ImGui;
 
@@ -193,7 +193,7 @@ namespace IWXMVM::UI
     }
 
     void DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
-                                 uint32_t* startTick, uint32_t* endTick, const float width,
+                                 uint32_t displayStartTick, uint32_t displayEndTick, const float width,
                                  std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
                                  std::function<float(const Types::Keyframe&)> GetKeyframeValue,
                                  std::function<void(Types::Keyframe&, float)> SetKeyframeValue)
@@ -227,7 +227,8 @@ namespace IWXMVM::UI
         // Draw timeline indicator
         float halfNeedleWidth = 2;
 
-        auto t = static_cast<float>(*currentTick) / static_cast<float>(*endTick - *startTick);
+        auto t =
+            static_cast<float>(*currentTick - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
         ImRect grab_bb = ImRect(frame_bb.Min.x + t * width - halfNeedleWidth, frame_bb.Min.y,
                                 frame_bb.Min.x + t * width + halfNeedleWidth, frame_bb.Max.y);
 
@@ -236,7 +237,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, *startTick, *endTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
 
         static Types::Keyframe* selectedKeyframe = nullptr;
         static int32_t selectedKeyframeValueIndex = -1;
@@ -254,7 +255,7 @@ namespace IWXMVM::UI
         for (auto& k : keyframes)
         {
             const auto position =
-                GetPositionForKeyframe(frame_bb, k, *startTick, *endTick, valueBoundaries, GetKeyframeValue);
+                GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries, GetKeyframeValue);
 
             ImRect text_bb(ImVec2(position.x - textSize.x / 2, position.y - textSize.y / 2),
                            ImVec2(position.x + textSize.x / 2, position.y + textSize.y / 2));
@@ -281,13 +282,14 @@ namespace IWXMVM::UI
                 glm::clamp(100 * (highestTickKeyframe->tick - lowestTickKeyframe->tick) / 5000, 50u, 1000u);
 
             auto previousKeyframe = *lowestTickKeyframe;
-            for (auto tick = *startTick; tick <= *endTick; tick += EVALUATION_DISTANCE)
+            for (auto tick = displayStartTick; tick <= displayEndTick; tick += EVALUATION_DISTANCE)
             {
                 auto keyframe = Components::KeyframeManager::Get().Interpolate(property, tick);
-                auto lastPosition = GetPositionForKeyframe(frame_bb, previousKeyframe, *startTick, *endTick,
+                auto lastPosition = GetPositionForKeyframe(frame_bb, previousKeyframe, displayStartTick, displayEndTick,
                                                            valueBoundaries, GetKeyframeValue);
-                auto position =
-                    GetPositionForKeyframe(frame_bb, keyframe, *startTick, *endTick, valueBoundaries, GetKeyframeValue);
+                auto position = GetPositionForKeyframe(frame_bb, keyframe, displayStartTick, displayEndTick,
+                                                       valueBoundaries,
+                                                       GetKeyframeValue);
                 window->DrawList->AddLine(lastPosition, position, GetColorU32(ImGuiCol_Button));
                 previousKeyframe = keyframe;
             }
@@ -295,7 +297,8 @@ namespace IWXMVM::UI
 
         if (selectedKeyframe != nullptr && selectedKeyframeValueIndex == keyframeValueIndex)
         {
-            auto [tick, value] = GetKeyframeForPosition(GetMousePos(), frame_bb, *startTick, *endTick, valueBoundaries);
+            auto [tick, value] =
+                GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
 
             selectedKeyframe->tick = tick;
             SetKeyframeValue(*selectedKeyframe, glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f));
@@ -310,7 +313,8 @@ namespace IWXMVM::UI
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
-            auto [tick, value] = GetKeyframeForPosition(GetMousePos(), frame_bb, *startTick, *endTick, valueBoundaries);
+            auto [tick, value] =
+                GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
             if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
                 keyframes.end())
             {
@@ -329,24 +333,21 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
     {
-        auto startTick = 0u;
-        auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
         auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
-        DrawKeyframeSliderInternal(property, &currentTick, displayStartTick, displayEndTick, startTick, endTick,
+        DrawKeyframeSliderInternal(property, &currentTick, displayStartTick, displayEndTick,
                                    Components::KeyframeManager::Get().GetKeyframes(property));
     }
 
-    void DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width)
+    void KeyframeEditor::DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width)
     {
-        auto startTick = 0u;
-        auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
         auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
         // Disabled for now, as I'm not sure if this is helpful to the user at all
-        if (property.valueType == Types::KeyframeValueType::CameraData)
-            return;
+        //if (property.valueType == Types::KeyframeValueType::CameraData)
+        //    return;
 
         // I dont really like the way this is done, I just cant really think of a better solution right now
         auto GetValueCountForProperty = [](auto property) -> int32_t {
@@ -366,7 +367,7 @@ namespace IWXMVM::UI
         for (int i = 0; i < GetValueCountForProperty(property); i++)
         {
             DrawCurveEditorInternal(
-                property, &currentTick, &startTick, &endTick, width,
+                property, &currentTick, displayStartTick, displayEndTick, width,
                 Components::KeyframeManager::Get().GetKeyframes(property), i,
                 [i](const auto& keyframe) { return keyframe.value.GetFloatValueByIndex(i); },
                 [i](auto& keyframe, float value) { keyframe.value.SetFloatValueByIndex(i, value); });
