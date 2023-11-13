@@ -164,7 +164,8 @@ namespace IWXMVM::UI
                                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar;
         ImGui::Begin("GameView", NULL, flags);
 
-        if (HasFocus() && Input::KeyDown(ImGuiKey_Escape))
+        auto isGameFocused = D3D9::FindWindowHandle() == GetForegroundWindow();
+        if (HasFocus() && (Input::KeyDown(ImGuiKey_Escape) || !isGameFocused))
         {
             ImGui::SetWindowFocus(NULL);
             SetHasFocus(false);
