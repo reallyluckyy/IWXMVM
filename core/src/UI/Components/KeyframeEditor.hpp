@@ -18,6 +18,12 @@ namespace IWXMVM::UI
 
         void HandleTimelineZoomInteractions(float barLength);
 
+        void DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
+                                     uint32_t displayStartTick, uint32_t displayEndTick, const float width,
+                                     std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
+                                     std::function<float(const Types::Keyframe&)> GetKeyframeValue,
+                                     std::function<void(Types::Keyframe&, float)> SetKeyframeValue);
+
         void DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width);
 
         void DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,

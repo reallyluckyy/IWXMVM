@@ -89,7 +89,8 @@ namespace IWXMVM::UI
     };
 
     void KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
-                                    uint32_t displayStartTick, uint32_t displayEndTick, std::vector<Types::Keyframe>& keyframes)
+                                                    uint32_t displayStartTick, uint32_t displayEndTick,
+                                                    std::vector<Types::Keyframe>& keyframes)
     {
         using namespace ImGui;
 
@@ -116,7 +117,8 @@ namespace IWXMVM::UI
         // Draw timeline indicator
         float halfNeedleWidth = 2;
 
-        auto t = static_cast<float>(*currentTick - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
+        auto t =
+            static_cast<float>(*currentTick - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
         ImRect grab_bb = ImRect(frame_bb.Min.x + t * w - halfNeedleWidth, frame_bb.Min.y,
                                 frame_bb.Min.x + t * w + halfNeedleWidth, frame_bb.Max.y);
 
@@ -192,11 +194,11 @@ namespace IWXMVM::UI
         }
     }
 
-    void DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
-                                 uint32_t displayStartTick, uint32_t displayEndTick, const float width,
-                                 std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
-                                 std::function<float(const Types::Keyframe&)> GetKeyframeValue,
-                                 std::function<void(Types::Keyframe&, float)> SetKeyframeValue)
+    void KeyframeEditor::DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
+                                                 uint32_t displayStartTick, uint32_t displayEndTick, const float width,
+                                                 std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
+                                                 std::function<float(const Types::Keyframe&)> GetKeyframeValue,
+                                                 std::function<void(Types::Keyframe&, float)> SetKeyframeValue)
     {
         using namespace ImGui;
 
@@ -239,6 +241,8 @@ namespace IWXMVM::UI
 
         ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
 
+        bool isAnyKeyframeHovered = false;
+
         static Types::Keyframe* selectedKeyframe = nullptr;
         static int32_t selectedKeyframeValueIndex = -1;
 
@@ -254,12 +258,14 @@ namespace IWXMVM::UI
 
         for (auto& k : keyframes)
         {
-            const auto position =
-                GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries, GetKeyframeValue);
+            const auto position = GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries,
+                                                         GetKeyframeValue);
 
             ImRect text_bb(ImVec2(position.x - textSize.x / 2, position.y - textSize.y / 2),
                            ImVec2(position.x + textSize.x / 2, position.y + textSize.y / 2));
             const bool hovered = ItemHoverable(text_bb, id, g.LastItemData.InFlags);
+
+            isAnyKeyframeHovered |= hovered;
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
             {
@@ -281,19 +287,18 @@ namespace IWXMVM::UI
             const auto EVALUATION_DISTANCE =
                 glm::clamp(100 * (highestTickKeyframe->tick - lowestTickKeyframe->tick) / 5000, 50u, 1000u);
 
-            auto previousKeyframe = *lowestTickKeyframe;
+            std::vector<ImVec2> polylinePoints;
+
             for (auto tick = displayStartTick; tick <= displayEndTick; tick += EVALUATION_DISTANCE)
             {
                 auto keyframe = Components::KeyframeManager::Get().Interpolate(property, tick);
-                auto lastPosition = GetPositionForKeyframe(frame_bb, previousKeyframe, displayStartTick, displayEndTick,
-                                                           valueBoundaries, GetKeyframeValue);
                 auto position = GetPositionForKeyframe(frame_bb, keyframe, displayStartTick, displayEndTick,
-                                                       valueBoundaries,
-                                                       GetKeyframeValue);
-                // TODO: polyline to reduce vertex count?
-                window->DrawList->AddLine(lastPosition, position, GetColorU32(ImGuiCol_Button));
-                previousKeyframe = keyframe;
+                                                        valueBoundaries, GetKeyframeValue);
+                polylinePoints.push_back(position);
             }
+
+            window->DrawList->AddPolyline(polylinePoints.data(), polylinePoints.size(), GetColorU32(ImGuiCol_Button), 0,
+                                          2.0f);
         }
 
         if (selectedKeyframe != nullptr && selectedKeyframeValueIndex == keyframeValueIndex)
@@ -312,6 +317,11 @@ namespace IWXMVM::UI
         }
 
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
+        if (hovered && !isAnyKeyframeHovered)
+        {
+            HandleTimelineZoomInteractions(frame_bb.Max.x - frame_bb.Min.x);
+        }
+
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
             auto [tick, value] =
@@ -346,8 +356,9 @@ namespace IWXMVM::UI
         auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
-        // Disabled for now, as I'm not sure if this is helpful to the user at all
-        //if (property.valueType == Types::KeyframeValueType::CameraData)
+        // TODO: Probably disable for CameraData, as I'm not sure if this is helpful to the user at all
+        
+        // if (property.valueType == Types::KeyframeValueType::CameraData)
         //    return;
 
         // I dont really like the way this is done, I just cant really think of a better solution right now
@@ -387,7 +398,7 @@ namespace IWXMVM::UI
         const auto padding = ImGui::GetStyle().WindowPadding;
 
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-                                 ImGuiWindowFlags_NoTitleBar;
+                                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollWithMouse;
         if (ImGui::Begin("Keyframe Editor", nullptr, flags))
         {
             ImGui::SetCursorPos(padding);
