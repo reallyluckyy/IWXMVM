@@ -1,6 +1,5 @@
 #pragma once
 #include "Camera.hpp"
-#include "Types/CampathNode.hpp"
 
 namespace IWXMVM::Components
 {

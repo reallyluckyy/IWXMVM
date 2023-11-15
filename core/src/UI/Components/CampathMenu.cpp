@@ -28,30 +28,6 @@ namespace IWXMVM::UI
 
         auto& campathManager = Components::CampathManager::Get();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Interpolation: ");
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(150);
-        if (ImGui::BeginCombo("##campathMenuInterpolationCombo",
-                              campathManager.GetInterpolationModeLabel(campathManager.GetInterpolationMode()).data()))
-        {
-            for (auto interpolationMode : campathManager.GetInterpolationModes())
-            {
-                bool isSelected = campathManager.GetInterpolationMode() == interpolationMode;
-                if (ImGui::Selectable(campathManager.GetInterpolationModeLabel(interpolationMode).data(),
-                                      campathManager.GetInterpolationMode() == interpolationMode))
-                {
-                    campathManager.SetInterpolationMode(interpolationMode);
-                }
-
-                if (isSelected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-            ImGui::EndCombo();
-        }
-
         ImGui::End();
 
         if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
@@ -102,31 +78,35 @@ namespace IWXMVM::UI
         constexpr auto NODE_SIZE = ImVec2(10, 10);
         constexpr auto PATH_COLOR = ImVec4(1.0f, 0.75f, 0.0f, 0.8f);
 
-        const auto& campathManager = Components::CampathManager::Get();
+        auto& keyframeManager = Components::KeyframeManager::Get();
+        const auto& property = keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera);
+        auto nodes = keyframeManager.GetKeyframes(property);
 
-        for (const auto& node : campathManager.GetNodes())
+        for (const auto& node : nodes)
         {
-            ImGuiEx::DrawPoint3D(node.position, NODE_COLOR, NODE_SIZE);
-            ImGuiEx::DrawLine3D(node.position, node.position + MathUtils::ForwardVectorFromAngles(node.rotation) * 50,
+            ImGuiEx::DrawPoint3D(node.value.cameraData.position, NODE_COLOR, NODE_SIZE);
+            ImGuiEx::DrawLine3D(node.value.cameraData.position,
+                                node.value.cameraData.position + MathUtils::ForwardVectorFromAngles(node.value.cameraData.rotation) * 50,
                                 NODE_COLOR, NODE_SIZE.x / 2);
         }
-
-        if (campathManager.GetNodes().size() >= campathManager.GetRequiredNodeCount())
+        
+        if (nodes.size() >= 1)
         {
-            const auto EVALUATION_DISTANCE = glm::clamp(
-                100 * (campathManager.GetNodes().back().tick - campathManager.GetNodes().front().tick) / 5000, 1u,
+            const auto EVALUATION_DISTANCE =
+                glm::clamp(100 * (nodes.back().tick - nodes.front().tick) / 5000, 1u,
                 1000u);
-
-            auto previousNode = campathManager.GetNodes().front();
-            for (auto tick = campathManager.GetNodes().front().tick + EVALUATION_DISTANCE;
-                 tick <= campathManager.GetNodes().back().tick; tick += EVALUATION_DISTANCE)
+        
+            auto previousNode = nodes.front();
+            for (auto tick = nodes.front().tick + EVALUATION_DISTANCE; tick <= nodes.back().tick;
+                 tick += EVALUATION_DISTANCE)
             {
-                auto node = Components::CampathManager::Get().Interpolate(tick);
-                ImGuiEx::DrawLine3D(previousNode.position, node.position, PATH_COLOR, NODE_SIZE.x / 2);
-
+                auto node = keyframeManager.Interpolate(property, tick);
+                ImGuiEx::DrawLine3D(previousNode.value.cameraData.position, node.value.cameraData.position, PATH_COLOR, NODE_SIZE.x / 2);
+        
                 previousNode = node;
             }
-            ImGuiEx::DrawLine3D(previousNode.position, campathManager.GetNodes().back().position, PATH_COLOR,
+            ImGuiEx::DrawLine3D(previousNode.value.cameraData.position, nodes.back().value.cameraData.position,
+                                PATH_COLOR,
                                 NODE_SIZE.x / 2);
         }
         */

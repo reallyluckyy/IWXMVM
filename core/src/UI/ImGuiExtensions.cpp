@@ -2,13 +2,11 @@
 #include "ImGuiExtensions.hpp"
 
 #include "Resources.hpp"
-#include "Types/CampathNode.hpp"
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 
-#include "imgui_internal.h"
 
 #include "UIManager.hpp"
 #include "Utilities/MathUtils.hpp"
@@ -55,60 +53,29 @@ namespace ImGuiEx
         }
     }
 
-    void TimelineMarkers(const std::vector<IWXMVM::Types::CampathNode>& nodes, std::uint32_t endTick)
+    constexpr std::size_t MARKER_DISTANCE = 5000;
+
+    void DemoProgressBarLines(const ImRect rect, uint32_t currentTick, uint32_t displayStartTick, uint32_t displayEndTick)
     {
         using namespace ImGui;
 
         ImGuiWindow* window = GetCurrentWindow();
 
-        ImGuiContext& g = *GImGui;
-        const ImGuiStyle& style = g.Style;
-        const float w = CalcItemWidth();
+        const auto barLength = rect.Max.x - rect.Min.x;
 
-        const ImVec2 label_size = CalcTextSize("##demoTimeline", NULL, true);
-        const ImRect frame_bb(window->DC.CursorPos,
-                              window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
-        const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
-
-        const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
-        const auto barHeight = frame_bb.Max.y - frame_bb.Min.y;
-
-        for (const auto& node : nodes)
+        for (uint32_t i = displayStartTick; i < currentTick; i++)
         {
-            const auto percentage = static_cast<float>(node.tick) / static_cast<float>(endTick);
-            const auto x = frame_bb.Min.x + percentage * barLength;
-            window->DrawList->AddText(ImVec2(x - textSize.x / 2, frame_bb.Min.y + (barHeight - textSize.y) / 2),
-                                      GetColorU32(ImGuiCol_Button), ICON_FA_DIAMOND);
-        }
-    }
+            if (i % MARKER_DISTANCE == 0)
+            {
+                const auto percentage = static_cast<float>(i - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
+                const auto x = rect.Min.x + percentage * barLength;
 
-    void DemoProgressBarLines(std::uint32_t currentTick, std::uint32_t endTick)
-    {
-        using namespace ImGui;
+                if (x > rect.Max.x)
+					break;
 
-        constexpr std::size_t MARKER_DISTANCE = 5000;
-
-        ImGuiWindow* window = GetCurrentWindow();
-
-        ImGuiContext& g = *GImGui;
-        const ImGuiStyle& style = g.Style;
-        const float w = CalcItemWidth();
-
-        const ImVec2 label_size = CalcTextSize("##demoTimeline", NULL, true);
-        const ImRect frame_bb(window->DC.CursorPos,
-                              window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
-        const ImRect total_bb(
-            frame_bb.Min,
-            frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
-
-        const auto barLength = frame_bb.Max.x - frame_bb.Min.x;
-
-        for (uint32_t i = MARKER_DISTANCE; i < currentTick; i += MARKER_DISTANCE)
-        {
-            const auto percentage = i / (float)endTick;
-            const auto x = frame_bb.Min.x + percentage * barLength;
-            window->DrawList->AddRectFilled(ImVec2(x, frame_bb.Min.y), ImVec2(x + 2, frame_bb.Max.y),
-                                            GetColorU32(ImGuiCol_Button));
+                window->DrawList->AddRectFilled(ImVec2(x, rect.Min.y), ImVec2(x + 2, rect.Max.y),
+                                                GetColorU32(ImGuiCol_Button));
+            }
         }
     }
 
@@ -176,9 +143,11 @@ namespace ImGuiEx
         }
 
         // Draw frame
-        const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive
-                                            : hovered        ? ImGuiCol_FrameBgHovered
-                                                             : ImGuiCol_FrameBg);
+        const ImU32 frame_col = GetColorU32(g.ActiveId == id
+                                                ? ImGuiCol_FrameBgActive
+                                                : hovered
+                                                ? ImGuiCol_FrameBgHovered
+                                                : ImGuiCol_FrameBg);
         RenderNavHighlight(frame_bb, id);
         RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
 
@@ -234,4 +203,4 @@ namespace ImGuiEx
         return ImGuiEx::TimescaleSliderInternal(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags,
                                                 ClampValue);
     }
-}  // namespace ImGuiEx
+} // namespace ImGuiEx

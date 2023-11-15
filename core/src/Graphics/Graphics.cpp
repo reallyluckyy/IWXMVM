@@ -121,36 +121,39 @@ namespace IWXMVM::GFX
                 device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
             }
 
-            const auto& campathManager = Components::CampathManager::Get();
-            const auto& nodes = campathManager.GetNodes();
+            auto& keyframeManager = Components::KeyframeManager::Get();
+            const auto& property = keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera);
+            const auto& nodes = keyframeManager.GetKeyframes(property);
 
             // Iterate through all nodes and draw the camera model
             for (const auto& node : nodes)
             {
-                const auto translate = glm::translate(node.position);
-                const auto rotate = glm::eulerAngleZYX(glm::radians(node.rotation.y), glm::radians(node.rotation.x),
-                                                       glm::radians(node.rotation.z));
+                const auto translate = glm::translate(node.value.cameraData.position);
+                const auto rotate = glm::eulerAngleZYX(glm::radians(node.value.cameraData.rotation.y),
+                                       glm::radians(node.value.cameraData.rotation.x),
+                                                       glm::radians(node.value.cameraData.rotation.z));
                 BufferManager::Get().DrawMesh(camera, translate * rotate);
             }
 
             // Drawing the path
-            if (nodes.size() >= campathManager.GetRequiredNodeCount())
+            if (!nodes.empty())
             {
-                constexpr float samplesPerUnit = 0.1f; // Changes how many models are placed inbetween each node
+                constexpr float samplesPerUnit = 0.1f;  // Changes how many models are placed inbetween each node
 
                 for (std::size_t i = 0; i < nodes.size() - 1; i++)
                 {
-                    const auto distance = glm::distance(nodes[i].position, nodes[i + 1].position);
+                    const auto distance =
+                        glm::distance(nodes[i].value.cameraData.position, nodes[i + 1].value.cameraData.position);
                     for (float t = 0.0f; t <= 1.0f; t += 1.0f / (distance * samplesPerUnit))
                     {
                         const float interpTick = nodes[i + 1].tick * t + nodes[i].tick * (1.0f - t);
-                        const auto interpNode = campathManager.Get().Interpolate(interpTick);
+                        const auto interpNode = keyframeManager.Get().Interpolate(property, interpTick);
 
-                        const auto translate = glm::translate(interpNode.position);
+                        const auto translate = glm::translate(interpNode.value.cameraData.position);
                         const auto scale = glm::scale(glm::vec3(2.1f, 2.1f, 2.1f));
-                        const auto rotate =
-                            glm::eulerAngleZYX(glm::radians(interpNode.rotation.y), glm::radians(interpNode.rotation.x),
-                                               glm::radians(interpNode.rotation.z));
+                        const auto rotate = glm::eulerAngleZYX(glm::radians(interpNode.value.cameraData.rotation.y),
+                                                               glm::radians(interpNode.value.cameraData.rotation.x),
+                                                               glm::radians(interpNode.value.cameraData.rotation.z));
                         BufferManager::Get().DrawMesh(icosphere, translate * scale * rotate);
                     }
                 }
