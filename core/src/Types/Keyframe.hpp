@@ -48,30 +48,26 @@ namespace IWXMVM::Types
 
     struct Keyframe
     {
-        const KeyframeableProperty& property;
+        std::reference_wrapper<const KeyframeableProperty> property;
 
+        std::int32_t id;
         std::uint32_t tick;
         KeyframeValue value;
 
         Keyframe(const KeyframeableProperty& property, std::uint32_t tick, KeyframeValue value)
-            : property(property), tick(tick), value(value)
+            : id(nextId++), property(property), tick(tick), value(value)
         {
         }
 
-        Keyframe(const KeyframeableProperty& property)
-            : property(property), tick(0), value(0)
+        Keyframe(const KeyframeableProperty& property) : id(nextId++), property(property), tick(0), value(0)
         {}
-
-        Keyframe operator=(const Keyframe& other)
-        {
-            tick = other.tick;
-            value = other.value;
-            return *this;
-        }
 
         bool operator<(const Keyframe& other) const
         {
             return tick < other.tick;
         }
+
+        private:
+            inline static std::atomic_int32_t nextId = 0;
     };
 }

@@ -14,11 +14,11 @@ namespace IWXMVM::Components
         const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
         
         const auto& keyframeManager = KeyframeManager::Get();
-        const auto interpolatedKeyframe = keyframeManager.Interpolate(
+        const auto interpolatedValue = keyframeManager.Interpolate(
             keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera), currentTick);
 
-        this->GetPosition() = interpolatedKeyframe.value.cameraData.position;
-        this->GetRotation() = interpolatedKeyframe.value.cameraData.rotation;
-        this->GetFov() = interpolatedKeyframe.value.cameraData.fov;
+        this->GetPosition() = interpolatedValue.cameraData.position;
+        this->GetRotation() = interpolatedValue.cameraData.rotation;
+        this->GetFov() = interpolatedValue.cameraData.fov;
     }
 }  // namespace IWXMVM::Components

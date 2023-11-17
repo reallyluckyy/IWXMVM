@@ -147,13 +147,13 @@ namespace IWXMVM::GFX
                     for (float t = 0.0f; t <= 1.0f; t += 1.0f / (distance * samplesPerUnit))
                     {
                         const float interpTick = nodes[i + 1].tick * t + nodes[i].tick * (1.0f - t);
-                        const auto interpNode = keyframeManager.Get().Interpolate(property, interpTick);
+                        const auto interpValue = keyframeManager.Get().Interpolate(property, interpTick);
 
-                        const auto translate = glm::translate(interpNode.value.cameraData.position);
+                        const auto translate = glm::translate(interpValue.cameraData.position);
                         const auto scale = glm::scale(glm::vec3(2.1f, 2.1f, 2.1f));
-                        const auto rotate = glm::eulerAngleZYX(glm::radians(interpNode.value.cameraData.rotation.y),
-                                                               glm::radians(interpNode.value.cameraData.rotation.x),
-                                                               glm::radians(interpNode.value.cameraData.rotation.z));
+                        const auto rotate = glm::eulerAngleZYX(glm::radians(interpValue.cameraData.rotation.y),
+                                                               glm::radians(interpValue.cameraData.rotation.x),
+                                                               glm::radians(interpValue.cameraData.rotation.z));
                         BufferManager::Get().DrawMesh(icosphere, translate * scale * rotate);
                     }
                 }

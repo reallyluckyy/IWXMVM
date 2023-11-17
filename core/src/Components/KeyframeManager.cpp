@@ -27,27 +27,26 @@ namespace IWXMVM::Components
         }
     }
 
-    Types::Keyframe KeyframeManager::Interpolate(const Types::KeyframeableProperty& property, const float tick) const
+    Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property, const float tick) const
     {
         const auto& keyframes = KeyframeManager::Get().GetKeyframes(property);
 
-        std::int32_t p0Idx = -1, p1Idx = -1;
-        for (std::size_t i = 0; i < keyframes.size(); i++)
-        {
-            if (keyframes[i].tick < tick && (p0Idx == -1 || keyframes [i].tick > keyframes[p0Idx].tick))
-				p0Idx = i;
-            if (keyframes[i].tick > tick && (p1Idx == -1 || keyframes[i].tick < keyframes[p1Idx].tick))
-                p1Idx = i;
+        if (tick < keyframes.front().tick)
+			return keyframes.front().value;
+        if (tick > keyframes.back().tick)
+            return keyframes.back().value;
 
-            if (keyframes[i].tick == tick)
-				return keyframes[i];
+        std::int32_t p0Idx = 0, p1Idx = 1;
+        for (std::size_t i = 0; i < keyframes.size() - 1; i++)
+        {
+            if (tick >= keyframes[i].tick && tick <= keyframes[i + 1].tick)
+            {
+                p0Idx = i;
+                p1Idx = i + 1;
+                break;
+            }
         }
 
-        if (p0Idx == -1)
-			return Types::Keyframe(property, tick, keyframes[p1Idx].value);
-
-        if (p1Idx == -1)
-            return Types::Keyframe(property, tick, keyframes[p0Idx].value);
 
         assert(p0Idx != -1 || p1Idx != -1);
         assert(keyframes[p0Idx].tick < keyframes[p1Idx].tick);
@@ -60,11 +59,11 @@ namespace IWXMVM::Components
         switch (property.valueType)
         {
             case Types::KeyframeValueType::FloatingPoint:
-                return Types::Keyframe(property, tick, (1.0f - t) * p0.value.floatingPoint + t * p1.value.floatingPoint);
+                return Types::KeyframeValue((1.0f - t) * p0.value.floatingPoint + t * p1.value.floatingPoint);
             case Types::KeyframeValueType::Vector3:
-                return Types::Keyframe(property, tick, (1.0f - t) * p0.value.vector3 + t * p1.value.vector3);
+                return Types::KeyframeValue((1.0f - t) * p0.value.vector3 + t * p1.value.vector3);
             case Types::KeyframeValueType::CameraData:
-                return Types::Keyframe(property, tick, 
+                return Types::KeyframeValue(
                     Types::CameraData(
                         (1.0f - t) * p0.value.cameraData.position + t * p1.value.cameraData.position,
                         (1.0f - t) * p0.value.cameraData.rotation + t * p1.value.cameraData.rotation,
@@ -72,7 +71,7 @@ namespace IWXMVM::Components
                     )
                 );
             default:
-                return Types::Keyframe(property, tick, 0.0f);
+                return Types::KeyframeValue(0.0f);
         }
     }
 

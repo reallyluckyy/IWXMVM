@@ -67,11 +67,11 @@ namespace IWXMVM::UI
     {
         const auto barHeight = rect.Max.y - rect.Min.y;
         const auto barLength = rect.Max.x - rect.Min.x;
-        const auto percentage = static_cast<float>(keyframe.tick - startTick) / static_cast<float>(endTick - startTick);
-        const auto x = rect.Min.x + percentage * barLength;
-        const auto y = rect.Min.y + (1.0f - (GetKeyframeValue(keyframe) - valueBoundaries.x) /
-                                                (valueBoundaries.y - valueBoundaries.x)) *
-                                        barHeight;
+        const auto tickPercentage = static_cast<float>(keyframe.tick - startTick) / static_cast<float>(endTick - startTick);
+        const auto x = rect.Min.x + tickPercentage * barLength;
+        const auto valuePercentage =
+            1 - (GetKeyframeValue(keyframe) - valueBoundaries.x) / (valueBoundaries.y - valueBoundaries.x);
+        const auto y = rect.Min.y + valuePercentage * barHeight;
         return ImVec2(x, y);
     };
 
@@ -81,12 +81,21 @@ namespace IWXMVM::UI
     {
         const auto barHeight = rect.Max.y - rect.Min.y;
         const auto barLength = rect.Max.x - rect.Min.x;
-        const auto percentage = (position.x - rect.Min.x) / barLength;
-        const auto tick = static_cast<uint32_t>(startTick + percentage * (endTick - startTick));
-        const auto value =
-            valueBoundaries.y - (position.y - rect.Min.y) / barHeight * (valueBoundaries.y - valueBoundaries.x);
+        const auto tickPercentage = (position.x - rect.Min.x) / barLength;
+        const auto tick = static_cast<uint32_t>(startTick + tickPercentage * (endTick - startTick));
+        const auto valuePercentage = (position.y - rect.Min.y) / barHeight;
+        const auto value = valueBoundaries.x + (1 - valuePercentage) * (valueBoundaries.y - valueBoundaries.x);
         return std::make_tuple(tick, value);
     };
+
+    void SortKeyframes(std::vector<Types::Keyframe>& keyframes)
+    {
+        std::sort(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) { return a.tick < b.tick; });
+	}
+
+    std::optional<int32_t> selectedKeyframeId = std::nullopt;
+    std::optional<int32_t> selectedKeyframeValueIndex = std::nullopt;
+
 
     void KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                     uint32_t displayStartTick, uint32_t displayEndTick,
@@ -131,7 +140,6 @@ namespace IWXMVM::UI
 
         bool isAnyKeyframeHovered = false;
 
-        static Types::Keyframe* selectedKeyframe = nullptr;
 
         const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
         for (auto it = keyframes.begin(); it != keyframes.end();)
@@ -149,10 +157,10 @@ namespace IWXMVM::UI
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
             {
-                selectedKeyframe = &k;
+                selectedKeyframeId = k.id;
             }
 
-            const ImU32 col = GetColorU32(hovered || selectedKeyframe == &k ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+            const ImU32 col = GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Right))
@@ -161,22 +169,23 @@ namespace IWXMVM::UI
                 break;
             }
 
+            if (selectedKeyframeId == k.id)
+            {
+				auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick);
+				k.tick = tick;
+				SortKeyframes(keyframes);
+
+                if (IsMouseReleased(ImGuiMouseButton_Left))
+                {
+					selectedKeyframeId = std::nullopt;
+				}
+			}
+
             ++it;
         }
 
-        if (selectedKeyframe != nullptr)
-        {
-            auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick);
-            selectedKeyframe->tick = tick;
-
-            if (IsMouseReleased(ImGuiMouseButton_Left))
-            {
-                selectedKeyframe = nullptr;
-            }
-        }
-
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
-        if (hovered && !isAnyKeyframeHovered)
+        if (hovered && !isAnyKeyframeHovered && !selectedKeyframeId.has_value())
         {
             HandleTimelineZoomInteractions(frame_bb.Max.x - frame_bb.Min.x);
         }
@@ -190,6 +199,8 @@ namespace IWXMVM::UI
             {
                 // TODO: the value here should be the interpolated value between neighboring keyframes
                 keyframes.emplace_back(property, tick, Types::KeyframeValue(0));
+
+                SortKeyframes(keyframes);
             }
         }
     }
@@ -243,18 +254,29 @@ namespace IWXMVM::UI
 
         bool isAnyKeyframeHovered = false;
 
-        static Types::Keyframe* selectedKeyframe = nullptr;
-        static int32_t selectedKeyframeValueIndex = -1;
-
         const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
-        const auto maxValue = std::max_element(
-            keyframes.begin(), keyframes.end(),
-            [GetKeyframeValue](const auto& a, const auto& b) { return GetKeyframeValue(a) < GetKeyframeValue(b); });
-        const auto minValue = std::min_element(
-            keyframes.begin(), keyframes.end(),
-            [GetKeyframeValue](const auto& a, const auto& b) { return GetKeyframeValue(a) < GetKeyframeValue(b); });
-        const ImVec2 valueBoundaries = ImVec2(minValue == keyframes.end() ? -10 : GetKeyframeValue(*minValue) - 10,
-                                              maxValue == keyframes.end() ? 10 : GetKeyframeValue(*maxValue) + 10);
+
+        ImVec2 valueBoundaries;
+        if (keyframes.empty())
+        {
+            valueBoundaries = ImVec2(-10, 10);
+        }
+        else
+        {
+            const auto minValueKeyframe = std::min_element(
+                keyframes.begin(), keyframes.end(),
+                [GetKeyframeValue](const auto& a, const auto& b) { return GetKeyframeValue(a) < GetKeyframeValue(b); });
+
+            const auto maxValueKeyframe = std::max_element(
+                keyframes.begin(), keyframes.end(),
+                [GetKeyframeValue](const auto& a, const auto& b) { return GetKeyframeValue(a) < GetKeyframeValue(b); });
+
+            auto minValue = GetKeyframeValue(*minValueKeyframe);
+            auto maxValue = GetKeyframeValue(*maxValueKeyframe);
+            valueBoundaries = ImVec2(minValue < 0 ? minValue * 1.15f : minValue / 1.15f,
+                                     maxValue < 0 ? maxValue / 1.15f : maxValue * 1.15f);
+            valueBoundaries += ImVec2(-10, 10);
+        }
 
         for (auto& k : keyframes)
         {
@@ -269,14 +291,30 @@ namespace IWXMVM::UI
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
             {
-                selectedKeyframe = &k;
+                selectedKeyframeId = k.id;
                 selectedKeyframeValueIndex = keyframeValueIndex;
             }
 
-            const ImU32 col = GetColorU32(hovered || selectedKeyframe == &k ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+            const ImU32 col = GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
             window->DrawList->AddText(ImVec2(text_bb.Max.x, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
                                       std::format("{0:.0f}", GetKeyframeValue(k)).c_str());
+
+            if (selectedKeyframeId == k.id && selectedKeyframeValueIndex == keyframeValueIndex)
+            {
+                auto [tick, value] =
+                    GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
+
+                k.tick = tick;
+                SetKeyframeValue(k, glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f));
+                SortKeyframes(keyframes);
+
+                if (IsMouseReleased(ImGuiMouseButton_Left))
+                {
+                    selectedKeyframeId = std::nullopt;
+                    selectedKeyframeValueIndex = std::nullopt;
+                }
+            }
         }
 
         if (!keyframes.empty())
@@ -291,8 +329,8 @@ namespace IWXMVM::UI
 
             for (auto tick = displayStartTick; tick <= displayEndTick; tick += EVALUATION_DISTANCE)
             {
-                auto keyframe = Components::KeyframeManager::Get().Interpolate(property, tick);
-                auto position = GetPositionForKeyframe(frame_bb, keyframe, displayStartTick, displayEndTick,
+                auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
+                auto position = GetPositionForKeyframe(frame_bb, Types::Keyframe(property, tick, value), displayStartTick, displayEndTick,
                                                         valueBoundaries, GetKeyframeValue);
                 polylinePoints.push_back(position);
             }
@@ -301,23 +339,8 @@ namespace IWXMVM::UI
                                           2.0f);
         }
 
-        if (selectedKeyframe != nullptr && selectedKeyframeValueIndex == keyframeValueIndex)
-        {
-            auto [tick, value] =
-                GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
-
-            selectedKeyframe->tick = tick;
-            SetKeyframeValue(*selectedKeyframe, glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f));
-
-            if (IsMouseReleased(ImGuiMouseButton_Left))
-            {
-                selectedKeyframe = nullptr;
-                selectedKeyframeValueIndex = -1;
-            }
-        }
-
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
-        if (hovered && !isAnyKeyframeHovered)
+        if (hovered && !isAnyKeyframeHovered && !selectedKeyframeId.has_value())
         {
             HandleTimelineZoomInteractions(frame_bb.Max.x - frame_bb.Min.x);
         }
@@ -330,6 +353,7 @@ namespace IWXMVM::UI
                 keyframes.end())
             {
                 keyframes.emplace_back(property, tick, value);
+                SortKeyframes(keyframes);
             }
         }
     }
