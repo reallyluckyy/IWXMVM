@@ -27,6 +27,8 @@ namespace IWXMVM::Components
             return keyframes[property];
         }
 
+        Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
+                                         const std::vector<Types::Keyframe>& keyframes, const float tick) const;
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property, const float tick) const;
 
         const Types::KeyframeableProperty& GetProperty(const Types::KeyframeablePropertyType property) const;
@@ -35,6 +37,11 @@ namespace IWXMVM::Components
         KeyframeManager()
         {
         }
+
+        Types::KeyframeValue CubicInterpolate(Types::KeyframeValueType valueType, const auto& keyframes,
+                                              const float tick) const;
+        Types::KeyframeValue LinearlyInterpolate(Types::KeyframeValueType valueType, const auto& keyframes,
+                                                 const float tick) const;
 
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes;
     };

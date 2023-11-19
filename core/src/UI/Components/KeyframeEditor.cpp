@@ -62,15 +62,14 @@ namespace IWXMVM::UI
 
     ImVec2 GetPositionForKeyframe(
         const ImRect rect, const Types::Keyframe& keyframe, const uint32_t startTick, const uint32_t endTick,
-        const ImVec2 valueBoundaries = ImVec2(-10, 10),
-        std::function<float(const Types::Keyframe&)> GetKeyframeValue = [](const auto& keyframe) { return 0; })
+        const ImVec2 valueBoundaries = ImVec2(-10, 10), int32_t valueIndex = 0)
     {
         const auto barHeight = rect.Max.y - rect.Min.y;
         const auto barLength = rect.Max.x - rect.Min.x;
         const auto tickPercentage = static_cast<float>(keyframe.tick - startTick) / static_cast<float>(endTick - startTick);
         const auto x = rect.Min.x + tickPercentage * barLength;
         const auto valuePercentage =
-            1 - (GetKeyframeValue(keyframe) - valueBoundaries.x) / (valueBoundaries.y - valueBoundaries.x);
+            1 - (keyframe.value.GetByIndex(valueIndex) - valueBoundaries.x) / (valueBoundaries.y - valueBoundaries.x);
         const auto y = rect.Min.y + valuePercentage * barHeight;
         return ImVec2(x, y);
     };
@@ -158,6 +157,7 @@ namespace IWXMVM::UI
             if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
             {
                 selectedKeyframeId = k.id;
+                selectedKeyframeValueIndex = std::nullopt;
             }
 
             const ImU32 col = GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
@@ -178,6 +178,7 @@ namespace IWXMVM::UI
                 if (IsMouseReleased(ImGuiMouseButton_Left))
                 {
 					selectedKeyframeId = std::nullopt;
+                    selectedKeyframeValueIndex = std::nullopt;
 				}
 			}
 
@@ -207,9 +208,7 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                  uint32_t displayStartTick, uint32_t displayEndTick, const float width,
-                                                 std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
-                                                 std::function<float(const Types::Keyframe&)> GetKeyframeValue,
-                                                 std::function<void(Types::Keyframe&, float)> SetKeyframeValue)
+                                                 std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex)
     {
         using namespace ImGui;
 
@@ -265,14 +264,14 @@ namespace IWXMVM::UI
         {
             const auto minValueKeyframe = std::min_element(
                 keyframes.begin(), keyframes.end(),
-                [GetKeyframeValue](const auto& a, const auto& b) { return GetKeyframeValue(a) < GetKeyframeValue(b); });
+                [keyframeValueIndex](const auto& a, const auto& b) { return a.value.GetByIndex(keyframeValueIndex) < b.value.GetByIndex(keyframeValueIndex); });
 
             const auto maxValueKeyframe = std::max_element(
                 keyframes.begin(), keyframes.end(),
-                [GetKeyframeValue](const auto& a, const auto& b) { return GetKeyframeValue(a) < GetKeyframeValue(b); });
+                [keyframeValueIndex](const auto& a, const auto& b) { return a.value.GetByIndex(keyframeValueIndex) < b.value.GetByIndex(keyframeValueIndex); });
 
-            auto minValue = GetKeyframeValue(*minValueKeyframe);
-            auto maxValue = GetKeyframeValue(*maxValueKeyframe);
+            auto minValue = minValueKeyframe->value.GetByIndex(keyframeValueIndex);
+            auto maxValue = maxValueKeyframe->value.GetByIndex(keyframeValueIndex);
             valueBoundaries = ImVec2(minValue < 0 ? minValue * 1.15f : minValue / 1.15f,
                                      maxValue < 0 ? maxValue / 1.15f : maxValue * 1.15f);
             valueBoundaries += ImVec2(-10, 10);
@@ -280,8 +279,7 @@ namespace IWXMVM::UI
 
         for (auto& k : keyframes)
         {
-            const auto position = GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries,
-                                                         GetKeyframeValue);
+            const auto position = GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries, keyframeValueIndex);
 
             ImRect text_bb(ImVec2(position.x - textSize.x / 2, position.y - textSize.y / 2),
                            ImVec2(position.x + textSize.x / 2, position.y + textSize.y / 2));
@@ -298,7 +296,7 @@ namespace IWXMVM::UI
             const ImU32 col = GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
             window->DrawList->AddText(ImVec2(text_bb.Max.x, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
-                                      std::format("{0:.0f}", GetKeyframeValue(k)).c_str());
+                                      std::format("{0:.0f}", k.value.GetByIndex(keyframeValueIndex)).c_str());
 
             if (selectedKeyframeId == k.id && selectedKeyframeValueIndex == keyframeValueIndex)
             {
@@ -306,7 +304,7 @@ namespace IWXMVM::UI
                     GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
 
                 k.tick = tick;
-                SetKeyframeValue(k, glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f));
+                k.value.SetByIndex(keyframeValueIndex, glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f));
                 SortKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
@@ -329,9 +327,9 @@ namespace IWXMVM::UI
 
             for (auto tick = displayStartTick; tick <= displayEndTick; tick += EVALUATION_DISTANCE)
             {
-                auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
+                auto value = Components::KeyframeManager::Get().Interpolate(property, keyframes, tick);
                 auto position = GetPositionForKeyframe(frame_bb, Types::Keyframe(property, tick, value), displayStartTick, displayEndTick,
-                                                        valueBoundaries, GetKeyframeValue);
+                                                        valueBoundaries, keyframeValueIndex);
                 polylinePoints.push_back(position);
             }
 
@@ -404,9 +402,8 @@ namespace IWXMVM::UI
         {
             DrawCurveEditorInternal(
                 property, &currentTick, displayStartTick, displayEndTick, width,
-                Components::KeyframeManager::Get().GetKeyframes(property), i,
-                [i](const auto& keyframe) { return keyframe.value.GetFloatValueByIndex(i); },
-                [i](auto& keyframe, float value) { keyframe.value.SetFloatValueByIndex(i, value); });
+                Components::KeyframeManager::Get().GetKeyframes(property), i
+            );
         }
     }
 

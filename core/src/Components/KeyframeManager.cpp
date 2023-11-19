@@ -2,6 +2,7 @@
 #include "KeyframeManager.hpp"
 
 #include "Resources.hpp"
+#include "Utilities/MathUtils.hpp"
 
 namespace IWXMVM::Components
 {
@@ -27,14 +28,65 @@ namespace IWXMVM::Components
         }
     }
 
+    Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property,
+                                                      const std::vector<Types::Keyframe>& keyframes,
+                                                      const float tick) const
+    {
+        if (tick < keyframes.front().tick)
+            return keyframes.front().value;
+        if (tick > keyframes.back().tick)
+            return keyframes.back().value;
+
+        // TODO: generalize
+        if (keyframes.size() < 4)
+            return keyframes.front().value;
+
+        return CubicInterpolate(property.valueType, keyframes, tick);
+    }
+
     Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property, const float tick) const
     {
         const auto& keyframes = KeyframeManager::Get().GetKeyframes(property);
+        return Interpolate(property, keyframes, tick);
+    }
 
-        if (tick < keyframes.front().tick)
-			return keyframes.front().value;
-        if (tick > keyframes.back().tick)
-            return keyframes.back().value;
+    Types::KeyframeValue KeyframeManager::CubicInterpolate(Types::KeyframeValueType valueType,
+                                                           const auto& keyframes,
+                                                           const float tick) const
+    {
+        switch (valueType)
+        {
+            case Types::KeyframeValueType::FloatingPoint:
+                throw std::exception("Not implemented");
+            case Types::KeyframeValueType::Vector3:
+                throw std::exception("Not implemented");
+            case Types::KeyframeValueType::CameraData:
+            {
+                return Types::KeyframeValue(
+                    Types::CameraData(
+                        glm::vec3(
+                            MathUtils::InterpolateCubicSpline(keyframes, 0, tick),
+                            MathUtils::InterpolateCubicSpline(keyframes, 1, tick),
+                            MathUtils::InterpolateCubicSpline(keyframes, 2, tick)
+                        ),
+                        // TODO: do proper quaternion interpolation here
+                        glm::vec3(
+                            MathUtils::InterpolateCubicSpline(keyframes, 3, tick),
+                            MathUtils::InterpolateCubicSpline(keyframes, 4, tick),
+                            MathUtils::InterpolateCubicSpline(keyframes, 5, tick)
+                        ), 
+                        MathUtils::InterpolateCubicSpline(keyframes, 6, tick)
+                    )
+                );
+            }
+            default:
+                return Types::KeyframeValue(0.0f);
+        }
+    }
+
+    Types::KeyframeValue KeyframeManager::LinearlyInterpolate(Types::KeyframeValueType valueType, const auto& keyframes,
+                                                              const float tick) const
+    {
 
         std::int32_t p0Idx = 0, p1Idx = 1;
         for (std::size_t i = 0; i < keyframes.size() - 1; i++)
@@ -47,7 +99,6 @@ namespace IWXMVM::Components
             }
         }
 
-
         assert(p0Idx != -1 || p1Idx != -1);
         assert(keyframes[p0Idx].tick < keyframes[p1Idx].tick);
         assert(p0Idx != p1Idx);
@@ -56,7 +107,7 @@ namespace IWXMVM::Components
         const auto& p1 = keyframes[p1Idx];
 
         const float t = static_cast<float>(tick - p0.tick) / static_cast<float>(p1.tick - p0.tick);
-        switch (property.valueType)
+        switch (valueType)
         {
             case Types::KeyframeValueType::FloatingPoint:
                 return Types::KeyframeValue((1.0f - t) * p0.value.floatingPoint + t * p1.value.floatingPoint);
@@ -64,12 +115,9 @@ namespace IWXMVM::Components
                 return Types::KeyframeValue((1.0f - t) * p0.value.vector3 + t * p1.value.vector3);
             case Types::KeyframeValueType::CameraData:
                 return Types::KeyframeValue(
-                    Types::CameraData(
-                        (1.0f - t) * p0.value.cameraData.position + t * p1.value.cameraData.position,
-                        (1.0f - t) * p0.value.cameraData.rotation + t * p1.value.cameraData.rotation,
-                        (1.0f - t) * p0.value.cameraData.fov + t * p1.value.cameraData.fov
-                    )
-                );
+                    Types::CameraData((1.0f - t) * p0.value.cameraData.position + t * p1.value.cameraData.position,
+                                      (1.0f - t) * p0.value.cameraData.rotation + t * p1.value.cameraData.rotation,
+                                      (1.0f - t) * p0.value.cameraData.fov + t * p1.value.cameraData.fov));
             default:
                 return Types::KeyframeValue(0.0f);
         }
