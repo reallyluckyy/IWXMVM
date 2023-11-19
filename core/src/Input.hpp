@@ -14,7 +14,7 @@ namespace IWXMVM
         static bool BindHeld(Action action);
         static bool BindDown(Action action);
 
-        static glm::vec2 GetMouseDelta();
+        static ImVec2 GetMouseDelta();
         static float GetScrollDelta();
         static void UpdateState(ImGuiIO& io);
 

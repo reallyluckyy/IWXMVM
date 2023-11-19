@@ -33,10 +33,10 @@ namespace IWXMVM
         return ImGui::IsKeyDown(key);
     }
 
-    glm::vec2 Input::GetMouseDelta()
+    ImVec2 Input::GetMouseDelta()
     {
         ImGuiIO& io = ImGui::GetIO();
-        return glm::vec2(io.MouseDelta.x, io.MouseDelta.y);
+        return io.MouseDelta;
     }
 
     float Input::GetScrollDelta()
