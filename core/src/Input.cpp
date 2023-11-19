@@ -1,6 +1,8 @@
 #include "StdInclude.hpp"
 #include "Input.hpp"
 
+#include "Mod.hpp"
+
 namespace IWXMVM
 {
     const std::map<ImGuiKey, ImGuiMouseButton> mouseButtonMap = {{ImGuiKey_MouseLeft, ImGuiMouseButton_Left},
@@ -14,6 +16,9 @@ namespace IWXMVM
 
     bool Input::KeyDown(ImGuiKey key)
     {
+        if (Mod::GetGameInterface()->IsConsoleOpen())
+            return false;
+
         if (IsMouseButton(key))
             return ImGui::IsMouseClicked(mouseButtonMap.at(key));
         return ImGui::IsKeyPressed(key);
@@ -21,6 +26,9 @@ namespace IWXMVM
 
     bool Input::KeyUp(ImGuiKey key)
     {
+        if (Mod::GetGameInterface()->IsConsoleOpen())
+            return false;
+
         if (IsMouseButton(key))
             return ImGui::IsMouseReleased(mouseButtonMap.at(key));
         return ImGui::IsKeyReleased(key);
@@ -28,6 +36,9 @@ namespace IWXMVM
 
     bool Input::KeyHeld(ImGuiKey key)
     {
+        if (Mod::GetGameInterface()->IsConsoleOpen())
+            return false;
+
         if (IsMouseButton(key))
             return ImGui::IsMouseDown(mouseButtonMap.at(key));
         return ImGui::IsKeyDown(key);
@@ -35,12 +46,18 @@ namespace IWXMVM
 
     ImVec2 Input::GetMouseDelta()
     {
+        if (Mod::GetGameInterface()->IsConsoleOpen())
+            return ImVec2(0, 0);
+
         ImGuiIO& io = ImGui::GetIO();
         return io.MouseDelta;
     }
 
     float Input::GetScrollDelta()
     {
+        if (Mod::GetGameInterface()->IsConsoleOpen())
+            return 0;
+
         return mouseWheelDelta;
     }
 

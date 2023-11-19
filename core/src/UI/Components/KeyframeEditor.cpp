@@ -90,7 +90,7 @@ namespace IWXMVM::UI
     void SortKeyframes(std::vector<Types::Keyframe>& keyframes)
     {
         std::sort(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) { return a.tick < b.tick; });
-	}
+    }
 
     std::optional<int32_t> selectedKeyframeId = std::nullopt;
     std::optional<int32_t> selectedKeyframeValueIndex = std::nullopt;
@@ -171,16 +171,16 @@ namespace IWXMVM::UI
 
             if (selectedKeyframeId == k.id)
             {
-				auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick);
-				k.tick = tick;
-				SortKeyframes(keyframes);
+                auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick);
+                k.tick = tick;
+                SortKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
                 {
-					selectedKeyframeId = std::nullopt;
+                    selectedKeyframeId = std::nullopt;
                     selectedKeyframeValueIndex = std::nullopt;
-				}
-			}
+                }
+            }
 
             ++it;
         }

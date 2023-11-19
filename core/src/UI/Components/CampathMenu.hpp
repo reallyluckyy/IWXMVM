@@ -12,6 +12,5 @@ namespace IWXMVM::UI
 
        private:
         void RenderHotkeyOverlay();
-        void DrawCampath();
     };
 }  // namespace IWXMVM::UI

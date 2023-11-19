@@ -42,6 +42,11 @@ namespace IWXMVM::IW3::Structures
         return (GfxWorld*)GetGameAddresses().gfxWorld();
     }
 
+    clientUIActive_t* GetClientUIActives()
+    {
+        return (clientUIActive_t*)GetGameAddresses().clientUIActives();
+    }
+
     dvar_s* FindDvar(const std::string_view name)
     {
         const char* _name = name.data();
@@ -89,9 +94,9 @@ namespace IWXMVM::IW3::Structures
 
         __asm
         {
-			mov eax, commandString
-			mov ecx, 0
-			call Cbuf_AddText_Address
+            mov eax, commandString
+            mov ecx, 0
+            call Cbuf_AddText_Address
         }
     }
 }  // namespace IWXMVM::IW3::Structures

@@ -18,9 +18,9 @@ namespace IWXMVM::Components
         auto& activeCamera = CameraManager::Get().GetActiveCamera();
 
         // TODO: There should be better feedback for making it clear to the user that they can place nodes (from their
-        // current camera position) TOOD: while in modes that are not the usual freecam. Its a bit unintuitive being
+        // current camera position) while in modes that are not the usual freecam. Its a bit unintuitive being
         // able to place nodes while in POV for example.
-        if (UI::UIManager::Get().GetSelectedTab() == UI::Tab::Camera && activeCamera->GetMode() != Camera::Mode::Dolly)
+        if (activeCamera->GetMode() != Camera::Mode::Dolly)
         {
             const auto& property = KeyframeManager::Get().GetProperty(Types::KeyframeablePropertyType::CampathCamera);
 

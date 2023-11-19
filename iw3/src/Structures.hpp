@@ -990,6 +990,17 @@ namespace IWXMVM::IW3::Structures
         bool mouseInitialized;
     };
 
+    struct clientUIActive_t
+    {
+        bool active;
+        bool isRunning;
+        bool cgameInitialized;
+        bool cgameInitCalled;
+        int keyCatchers;
+        bool displayHUDWithKeycatchUI;
+        // ...
+    };
+
     clientConnection_t* GetClientConnection();
     clientStatic_t* GetClientStatic();
     clientActive_t* GetClientActive();
@@ -997,6 +1008,7 @@ namespace IWXMVM::IW3::Structures
     cg_s* GetClientGlobals();
     WinMouseVars_t* GetMouseVars();
     GfxWorld* GetGfxWorld();
+    clientUIActive_t* GetClientUIActives();
 
     dvar_s* FindDvar(const std::string_view name);
 

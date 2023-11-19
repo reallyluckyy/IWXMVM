@@ -131,6 +131,11 @@ namespace IWXMVM::IW3
             return isPlaybackPaused;
         }
 
+        bool IsConsoleOpen() final
+        {
+            return (Structures::GetClientUIActives()->keyCatchers & 1) != 0;
+		}
+
         void InitializeGameAddresses() final
         {
             GetGameAddresses();

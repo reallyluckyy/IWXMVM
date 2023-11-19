@@ -32,6 +32,9 @@ namespace IWXMVM::Components
                                                       const std::vector<Types::Keyframe>& keyframes,
                                                       const float tick) const
     {
+        if (keyframes.empty())
+            return Types::KeyframeValue(0.0f);
+
         if (tick < keyframes.front().tick)
             return keyframes.front().value;
         if (tick > keyframes.back().tick)
