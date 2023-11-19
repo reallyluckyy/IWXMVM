@@ -82,8 +82,8 @@ namespace IWXMVM::UI
         POINT cursorPosition;
         GetCursorPos(&cursorPosition);
 
-        ImVec2 viewportCenter = ImVec2(windowPosition.x + GetPosition().x + GetSize().x / 2,
-                                       windowPosition.y + GetPosition().y + GetSize().y / 2);
+        ImVec2 viewportCenter = ImVec2(glm::floor(windowPosition.x + GetPosition().x + GetSize().x / 2),
+                                       glm::floor(windowPosition.y + GetPosition().y + GetSize().y / 2));
         ImGui::GetIO().MousePosPrev += ImVec2(viewportCenter.x - cursorPosition.x, viewportCenter.y - cursorPosition.y);
         SetCursorPos(viewportCenter.x, viewportCenter.y);
     }
