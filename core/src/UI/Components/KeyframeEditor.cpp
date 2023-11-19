@@ -304,6 +304,11 @@ namespace IWXMVM::UI
                     GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
 
                 k.tick = tick;
+
+                auto currentValue = k.value.GetByIndex(keyframeValueIndex);
+                auto maxNewValue = glm::min(glm::abs(currentValue) * 1.25f + 1, glm::abs(currentValue) + 5.0f);
+                if (glm::abs(value.floatingPoint) > maxNewValue)
+                    value.floatingPoint = glm::sign(value.floatingPoint) * maxNewValue;
                 k.value.SetByIndex(keyframeValueIndex, glm::fclamp(value.floatingPoint, -100'000.0f, 100'000.0f));
                 SortKeyframes(keyframes);
 
