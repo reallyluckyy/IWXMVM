@@ -58,8 +58,25 @@ namespace IWXMVM::Components
 
         Events::RegisterListener(EventType::OnFrame, [&]() { UpdateCameraFrame(); });
 
-        Events::RegisterListener(EventType::OnDemoLoad, []() {
-            // TODO: set initial coordinates of "free"-type cameras based on map
+        Events::RegisterListener(EventType::OnDemoLoad, [&]() { SetActiveCamera(Camera::Mode::FirstPerson); });
+
+        Events::RegisterListener(EventType::OnCameraChanged, [&]() {
+            auto& activeCamera = GetActiveCamera();
+
+            auto& firstPersonCamera = GetCamera(Camera::Mode::FirstPerson);
+            switch (activeCamera->GetMode())
+            {
+                case Camera::Mode::Free:
+                {
+                    activeCamera->GetPosition() =
+                        firstPersonCamera->GetPosition() - firstPersonCamera->GetForwardVector() * 100;
+                    activeCamera->GetRotation() = firstPersonCamera->GetRotation();
+                    break;
+                }
+                default:
+                    break;
+            }
+
         });
     }
 

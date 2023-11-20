@@ -19,9 +19,8 @@ namespace IWXMVM
             defaults[Action::FreeCameraReset]      = Bind{ImGuiKey_MouseMiddle, "FreeCameraReset"};
             defaults[Action::FreeCameraRight]      = Bind{ImGuiKey_D, "FreeCameraRight"};
             defaults[Action::FreeCameraUp]         = Bind{ImGuiKey_E, "FreeCameraUp"};
-            defaults[Action::OrbitCameraMove]      = Bind{ImGuiKey_MouseRight, "OrbitCameraMove"};
             defaults[Action::OrbitCameraReset]     = Bind{ImGuiKey_F4, "OrbitCameraReset"};
-            defaults[Action::OrbitCameraRotate]    = Bind{ImGuiKey_MouseMiddle, "OrbitCameraRotate"};
+            defaults[Action::OrbitCameraRotate]    = Bind{ImGuiKey_MouseRight, "OrbitCameraRotate"};
             defaults[Action::PlaybackFaster]       = Bind{ImGuiKey_UpArrow, "PlaybackFaster"};
             defaults[Action::PlaybackSkipBackward] = Bind{ImGuiKey_LeftArrow, "PlaybackSkipBackward"};
             defaults[Action::PlaybackSkipForward]  = Bind{ImGuiKey_RightArrow, "PlaybackSkipForward"};
