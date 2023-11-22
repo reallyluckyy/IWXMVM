@@ -40,9 +40,9 @@ namespace IWXMVM::Components
         if (tick > keyframes.back().tick)
             return keyframes.back().value;
 
-        // TODO: proper fallback?
+        // TODO: interpolation selection in the future
         if (keyframes.size() < 4)
-            return keyframes.front().value;
+            return LinearlyInterpolate(property.valueType, keyframes, tick);
 
         return CubicInterpolate(property.valueType, keyframes, tick);
     }
