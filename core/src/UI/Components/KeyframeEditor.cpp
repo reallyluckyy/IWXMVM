@@ -358,12 +358,13 @@ namespace IWXMVM::UI
 
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
-            // TODO: fix this for keyframes that are not 1d
-            auto [tick, value] =
+            auto [tick, valueAtMouse] =
                 GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
             if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
                 keyframes.end())
             {
+                auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
+                value.SetByIndex(keyframeValueIndex, valueAtMouse.floatingPoint);
                 keyframes.emplace_back(property, tick, value);
                 SortKeyframes(keyframes);
             }
