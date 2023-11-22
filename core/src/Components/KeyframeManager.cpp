@@ -60,9 +60,13 @@ namespace IWXMVM::Components
         switch (valueType)
         {
             case Types::KeyframeValueType::FloatingPoint:
-                throw std::exception("Not implemented");
+                return MathUtils::InterpolateCubicSpline(keyframes, 0, tick);
             case Types::KeyframeValueType::Vector3:
-                throw std::exception("Not implemented");
+                return glm::vec3(
+                    MathUtils::InterpolateCubicSpline(keyframes, 0, tick),
+                    MathUtils::InterpolateCubicSpline(keyframes, 1, tick),
+                    MathUtils::InterpolateCubicSpline(keyframes, 2, tick)
+                );
             case Types::KeyframeValueType::CameraData:
             {
                 return Types::KeyframeValue(
