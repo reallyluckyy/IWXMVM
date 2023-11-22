@@ -40,7 +40,7 @@ namespace IWXMVM::Components
         if (tick > keyframes.back().tick)
             return keyframes.back().value;
 
-        // TODO: generalize
+        // TODO: proper fallback?
         if (keyframes.size() < 4)
             return keyframes.front().value;
 

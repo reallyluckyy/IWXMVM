@@ -29,5 +29,7 @@ namespace IWXMVM::UI
         void DrawKeyframeSlider(const Types::KeyframeableProperty& property);
 
         int32_t displayStartTick, displayEndTick;
+
+        std::map<Types::KeyframeableProperty, bool> propertyVisible;
     };
 }  // namespace IWXMVM::UI

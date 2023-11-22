@@ -367,6 +367,9 @@ namespace IWXMVM::UI
             displayStartTick = 0;
             displayEndTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
         });
+
+        for (const auto& pair : Components::KeyframeManager::Get().GetKeyframes())
+            propertyVisible[pair.first] = false;
     }
 
     void KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
@@ -437,14 +440,14 @@ namespace IWXMVM::UI
 
                 ImGui::TableSetupColumn("Properties", ImGuiTableColumnFlags_NoSort, firstColumnSize);
                 ImGui::TableSetupColumn("Keyframes", ImGuiTableColumnFlags_NoSort, GetSize().x / 8 * 7);
-                ImGui::TableHeadersRow();
 
-                for (const auto& pair : Components::KeyframeManager::Get().GetKeyframes())
+                const auto& propertyKeyframes = Components::KeyframeManager::Get().GetKeyframes();
+                for (const auto& pair : propertyKeyframes)
                 {
                     const auto& property = pair.first;
                     const auto& keyframes = pair.second;
 
-                    if (keyframes.empty())
+                    if (!propertyVisible[property] && keyframes.empty())
                         continue;
 
                     ImGui::TableNextRow();
@@ -464,6 +467,29 @@ namespace IWXMVM::UI
                         ImGui::TreePop();
                     }
                 }
+
+                
+                ImGui::TableNextRow();
+
+                ImGui::TableSetColumnIndex(0);
+
+                constexpr auto POPUP_LABEL = "##selectKeyframedProperties";
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + GetSize().x / 28);
+                if (ImGui::Button(ICON_FA_PLUS " Add Property", ImVec2(GetSize().x / 14, 0)))
+                {
+                    ImGui::OpenPopup(POPUP_LABEL);
+                }
+
+                if (ImGui::BeginPopup(POPUP_LABEL))
+                {
+                    for (auto& [property, _] : propertyKeyframes)
+                    {
+                        ImGui::MenuItem(property.name.data(), "", &propertyVisible[property]);
+                    }
+
+                    ImGui::EndPopup();
+                }
+
                 ImGui::EndTable();
             }
 
