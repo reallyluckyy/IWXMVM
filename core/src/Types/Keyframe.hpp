@@ -44,6 +44,21 @@ namespace IWXMVM::Types
                 throw std::invalid_argument("Index for KeyframeValue out of range");    
             (&this->floatingPoint)[index] = value;
         }
+
+        static KeyframeValue GetDefaultValue(Types::KeyframeValueType valueType)
+        {
+            switch (valueType)
+            {
+                case Types::KeyframeValueType::FloatingPoint:
+					return KeyframeValue(0.0f);
+                case Types::KeyframeValueType::Vector3:
+					return KeyframeValue(glm::vec3(0.0f));
+                case Types::KeyframeValueType::CameraData:
+					return KeyframeValue(CameraData(glm::vec3(0.0f), glm::vec3(0.0f), 0.0f));
+				default:
+					throw std::invalid_argument("Invalid valueType");
+			}
+		}
     };
 
     struct Keyframe

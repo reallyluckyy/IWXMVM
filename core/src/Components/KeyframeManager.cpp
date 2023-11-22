@@ -33,7 +33,7 @@ namespace IWXMVM::Components
                                                       const float tick) const
     {
         if (keyframes.empty())
-            return Types::KeyframeValue(0.0f);
+            return Types::KeyframeValue::GetDefaultValue(property.valueType);
 
         if (tick < keyframes.front().tick)
             return keyframes.front().value;

@@ -198,9 +198,7 @@ namespace IWXMVM::UI
             if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
                 keyframes.end())
             {
-                // TODO: the value here should be the interpolated value between neighboring keyframes
-                keyframes.emplace_back(property, tick, Types::KeyframeValue(0));
-
+                keyframes.emplace_back(property, tick, Components::KeyframeManager::Get().Interpolate(property, tick));
                 SortKeyframes(keyframes);
             }
         }
@@ -277,8 +275,10 @@ namespace IWXMVM::UI
             valueBoundaries += ImVec2(-10, 10);
         }
 
-        for (auto& k : keyframes)
+        for (auto it = keyframes.begin(); it != keyframes.end();)
         {
+            auto& k = *it;
+
             const auto position = GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries, keyframeValueIndex);
 
             ImRect text_bb(ImVec2(position.x - textSize.x / 2, position.y - textSize.y / 2),
@@ -295,7 +295,7 @@ namespace IWXMVM::UI
 
             const ImU32 col = GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
-            window->DrawList->AddText(ImVec2(text_bb.Max.x, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
+            window->DrawList->AddText(ImVec2(text_bb.Max.x + 2, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
                                       std::format("{0:.0f}", k.value.GetByIndex(keyframeValueIndex)).c_str());
 
             if (selectedKeyframeId == k.id && selectedKeyframeValueIndex == keyframeValueIndex)
@@ -318,6 +318,14 @@ namespace IWXMVM::UI
                     selectedKeyframeValueIndex = std::nullopt;
                 }
             }
+
+            if (hovered && IsMouseClicked(ImGuiMouseButton_Right))
+            {
+                keyframes.erase(it);
+                break;
+            }
+
+            ++it;
         }
 
         if (!keyframes.empty())
@@ -350,6 +358,7 @@ namespace IWXMVM::UI
 
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
+            // TODO: fix this for keyframes that are not 1d
             auto [tick, value] =
                 GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
             if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
