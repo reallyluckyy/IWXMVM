@@ -7,6 +7,38 @@
 
 namespace ImGuiEx::Keyframeable
 {
+    void DrawTooltip()
+    {
+        if (ImGui::BeginItemTooltip())
+        {
+            ImGui::TextUnformatted("This property is being controlled by the keyframe editor");
+            ImGui::EndTooltip();
+        }
+    }
+
+    void DrawContextMenu(IWXMVM::Types::KeyframeablePropertyType propertyType)
+    {
+        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+            ImGui::OpenPopup("##keyframeablePropertyContextMenu");
+
+        if (ImGui::BeginPopupContextItem("##keyframeablePropertyContextMenu"))
+        {
+            if (ImGui::MenuItem("Add Keyframe"))
+            {
+                auto& keyframeManager = IWXMVM::Components::KeyframeManager::Get();
+                const auto& property = keyframeManager.GetProperty(propertyType);
+
+                keyframeManager.GetKeyframes(property).emplace_back(
+                    property,
+                    IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick, 
+                    IWXMVM::Types::KeyframeValue::GetDefaultValue(property.valueType)
+                );
+            }
+
+            ImGui::EndPopup();
+        }
+    }
+
     bool SliderFloat(const char* label, float* v, float v_min, float v_max, 
         IWXMVM::Types::KeyframeablePropertyType propertyType)
     {
@@ -20,29 +52,26 @@ namespace ImGuiEx::Keyframeable
 
         const auto& keyframes = keyframeManager.GetKeyframes(property);
 
+        bool result = true;
         if (keyframes.empty())
-            return ImGui::SliderFloat(label, v, v_min, v_max);
-
-        auto interpolatedValue =
-            keyframeManager.Interpolate(property, Mod::GetGameInterface()->GetDemoInfo().currentTick);
-
-        *v = interpolatedValue.floatingPoint;
-
-        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
-        ImGui::SliderFloat(label, v, v_min, v_max, "%.3f", ImGuiSliderFlags_NoInput);
-        ImGui::PopStyleVar();
-
-        if (ImGui::BeginItemTooltip())
         {
-            ImGui::TextUnformatted("This property is being controlled by the keyframe editor");
-            ImGui::EndTooltip();
+            result = ImGui::SliderFloat(label, v, v_min, v_max);
+        }
+        else
+        {
+            auto interpolatedValue =
+                keyframeManager.Interpolate(property, Mod::GetGameInterface()->GetDemoInfo().currentTick);
+
+            *v = interpolatedValue.floatingPoint;
+
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
+            ImGui::SliderFloat(label, v, v_min, v_max, "%.3f", ImGuiSliderFlags_NoInput);
+            ImGui::PopStyleVar();
+
+            DrawTooltip();
         }
 
-        // add circle next to slider
-        auto sliderHeight = ImGui::GetItemRectSize().y;
-        const auto circlePos = ImGui::GetItemRectMax() - ImVec2(ImGui::GetItemRectMax().x, ImGui::GetItemRectMin().y + sliderHeight / 2);
-        ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), ImGui::GetFontSize(), circlePos, ImGui::GetColorU32(ImGuiCol_Button), ICON_FA_DIAMOND);
-
-        return true;
+        DrawContextMenu(propertyType);
+        return result;
     }
 }

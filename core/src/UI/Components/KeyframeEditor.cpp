@@ -360,8 +360,6 @@ namespace IWXMVM::UI
 
             if (ImGui::BeginPopup(POPUP_LABEL.c_str()))
             {
-                LOG_INFO("Popup {2} for keyframe id {0} and {1}", k.id, keyframeValueIndex, POPUP_LABEL);
-                
                 auto currentValue = k.value.GetByIndex(keyframeValueIndex);
 
                 ImGui::Text("Edit keyframe value:");
