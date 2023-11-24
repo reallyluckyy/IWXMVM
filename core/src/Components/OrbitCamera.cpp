@@ -4,7 +4,7 @@
 #include "Input.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "UI/UIManager.hpp"
-#include "UI/ImGuiExtensions.hpp"
+#include "UI/ImGuiEx/ImGuiExtensions.hpp"
 #include "Events.hpp"
 #include "Components/CameraManager.hpp"
 

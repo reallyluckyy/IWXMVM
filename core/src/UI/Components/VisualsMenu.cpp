@@ -3,6 +3,7 @@
 #include "Mod.hpp"
 
 #include "UI/UIManager.hpp"
+#include "UI/ImGuiEx/KeyframeableControls.hpp"
 #include "Events.hpp"
 
 namespace IWXMVM::UI
@@ -29,7 +30,7 @@ namespace IWXMVM::UI
                        dof.nearEnd,
                        dof.bias,
                        glm::make_vec3(sun.color),
-                       glm::make_vec3(sun.position),
+                       glm::make_vec3(sun.direction),
                        0,  // TODO: initialize pitch and yaw
                        0,
                        sun.brightness};
@@ -96,7 +97,8 @@ namespace IWXMVM::UI
         if (ImGui::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI)))
             UpdateSun();
 
-        if (ImGui::SliderFloat("Brightness", &visuals.sunBrightness, 0, 4))
+        if (ImGuiEx::Keyframeable::SliderFloat("Brightness", &visuals.sunBrightness, 0, 4,
+                                             Types::KeyframeablePropertyType::SunLightBrightness))
             UpdateSun();
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
@@ -110,13 +112,13 @@ namespace IWXMVM::UI
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
-        if (ImGui::SliderFloat("X", glm::value_ptr(visuals.sunPositionUI), -1, 1))
+        if (ImGui::SliderFloat("X", glm::value_ptr(visuals.sunDirectionUI), -1, 1))
             UpdateSun();
 
-        if (ImGui::SliderFloat("Y", &(glm::value_ptr(visuals.sunPositionUI)[1]), -1, 1))
+        if (ImGui::SliderFloat("Y", &(glm::value_ptr(visuals.sunDirectionUI)[1]), -1, 1))
             UpdateSun();
 
-        if (ImGui::SliderFloat("Z", &(glm::value_ptr(visuals.sunPositionUI)[2]), -1, 1))
+        if (ImGui::SliderFloat("Z", &(glm::value_ptr(visuals.sunDirectionUI)[2]), -1, 1))
             UpdateSun();
 
         ImGui::Separator();
@@ -131,7 +133,7 @@ namespace IWXMVM::UI
 
     void VisualsMenu::UpdateSun()
     {
-        IWXMVM::Types::Sun sunSettings = {glm::make_vec3(visuals.sunColorUI), glm::make_vec3(visuals.sunPositionUI),
+        IWXMVM::Types::Sun sunSettings = {glm::make_vec3(visuals.sunColorUI), glm::make_vec3(visuals.sunDirectionUI),
                                           visuals.sunBrightness};
         Mod::GetGameInterface()->SetSun(sunSettings);
     }
@@ -142,9 +144,9 @@ namespace IWXMVM::UI
         float radius = 1;
         glm::vec3 rotation = {visuals.sunPitch, visuals.sunYaw, 0};
 
-        visuals.sunPositionUI.x = origin + radius * glm::cos(rotation.y) * glm::cos(rotation.x);
-        visuals.sunPositionUI.y = origin + radius * glm::sin(rotation.y) * glm::cos(rotation.z);
-        visuals.sunPositionUI.z = -(origin + radius * glm::sin(rotation.x));
+        visuals.sunDirectionUI.x = origin + radius * glm::cos(rotation.y) * glm::cos(rotation.x);
+        visuals.sunDirectionUI.y = origin + radius * glm::sin(rotation.y) * glm::cos(rotation.z);
+        visuals.sunDirectionUI.z = -(origin + radius * glm::sin(rotation.x));
 
         UpdateSun();
     }

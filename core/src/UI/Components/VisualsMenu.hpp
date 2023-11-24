@@ -28,7 +28,7 @@ namespace IWXMVM::UI
 
             // SUN
             glm::vec3 sunColorUI;
-            glm::vec3 sunPositionUI;
+            glm::vec3 sunDirectionUI;
             float sunPitch;
             float sunYaw;
             float sunBrightness = 1;

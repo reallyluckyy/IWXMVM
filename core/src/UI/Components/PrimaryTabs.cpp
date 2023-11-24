@@ -68,6 +68,10 @@ namespace IWXMVM::UI
 
     void HandleTabsInput()
     {
+        // Only handle input if no text input is active
+        if (ImGui::GetIO().WantTextInput)
+			return;
+
         if (Input::KeyDown(ImGuiKey_1))
         {
 			UIManager::Get().SelectTab(Tab::Demos);

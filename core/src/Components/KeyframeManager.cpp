@@ -8,13 +8,15 @@ namespace IWXMVM::Components
 {
     Types::KeyframeableProperty campathCameraProperty(ICON_FA_VIDEO " Campath Camera",
                                                         Types::KeyframeValueType::CameraData);
-    Types::KeyframeableProperty testProperty(ICON_FA_CAMPGROUND " Test Property",
+    Types::KeyframeableProperty sunLightBrightnessProperty(ICON_FA_SUN " Sun Light Brightness",
                                              Types::KeyframeValueType::FloatingPoint);
 
     void KeyframeManager::Initialize()
     {
-        keyframes[campathCameraProperty] = std::vector<Types::Keyframe>();
-        keyframes[testProperty] = std::vector<Types::Keyframe>();
+        auto InitializeProperty = [&](auto property) { keyframes[property] = std::vector<Types::Keyframe>(); }; 
+        
+        InitializeProperty(campathCameraProperty);
+        InitializeProperty(sunLightBrightnessProperty);
     }
 
     const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const
@@ -23,8 +25,8 @@ namespace IWXMVM::Components
         {
             case Types::KeyframeablePropertyType::CampathCamera:
                 return campathCameraProperty;
-            case Types::KeyframeablePropertyType::TestProperty:
-                return testProperty;
+            case Types::KeyframeablePropertyType::SunLightBrightness:
+                return sunLightBrightnessProperty;
         }
     }
 
@@ -94,6 +96,8 @@ namespace IWXMVM::Components
     Types::KeyframeValue KeyframeManager::LinearlyInterpolate(Types::KeyframeValueType valueType, const auto& keyframes,
                                                               const float tick) const
     {
+        if (keyframes.size() == 1)
+			return keyframes.front().value;
 
         std::int32_t p0Idx = 0, p1Idx = 1;
         for (std::size_t i = 0; i < keyframes.size() - 1; i++)

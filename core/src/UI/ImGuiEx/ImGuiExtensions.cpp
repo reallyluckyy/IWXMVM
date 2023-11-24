@@ -8,7 +8,7 @@
 #endif
 
 
-#include "UIManager.hpp"
+#include "../UIManager.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "Components/CameraManager.hpp"
 

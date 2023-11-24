@@ -3,7 +3,7 @@
 
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
-#include "UI/ImGuiExtensions.hpp"
+#include "UI/ImGuiEx/ImGuiExtensions.hpp"
 #include "Components/CameraManager.hpp"
 #include "Input.hpp"
 #include "Events.hpp"

@@ -59,6 +59,49 @@ namespace IWXMVM::Types
 					throw std::invalid_argument("Invalid valueType");
 			}
 		}
+
+        static std::string_view GetValueIndexName(Types::KeyframeValueType valueType, uint32_t index)
+        {
+            switch (valueType)
+            {
+				case Types::KeyframeValueType::FloatingPoint:
+					return "Value";
+				case Types::KeyframeValueType::Vector3:
+                    switch (index)
+                    {
+						case 0:
+							return "X";
+						case 1:
+							return "Y";
+						case 2:
+							return "Z";
+						default:
+							throw std::invalid_argument("Invalid index for Vector3");
+					}
+				case Types::KeyframeValueType::CameraData:
+                    switch (index)
+                    {
+						case 0:
+							return "X";
+						case 1:
+							return "Y";
+						case 2:
+							return "Z";
+                        case 3:
+                            return "Pitch";
+                        case 4:
+                            return "Yaw";
+                        case 5:
+                            return "Roll";
+                        case 6:
+                            return "FOV";
+						default:
+							throw std::invalid_argument("Invalid index for CameraData");
+					}
+				default:
+					throw std::invalid_argument("Invalid valueType");
+			}
+		}
     };
 
     struct Keyframe

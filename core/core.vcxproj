@@ -135,7 +135,7 @@
     <ClCompile Include="src\UI\Components\CaptureMenu.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
     <ClCompile Include="src\UI\Components\KeyframeEditor.cpp" />
-    <ClCompile Include="src\UI\ImGuiExtensions.cpp" />
+    <ClCompile Include="src\UI\ImGuiEx\ImGuiExtensions.cpp" />
     <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
     <ClCompile Include="src\Events.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -149,6 +149,7 @@
     <ClCompile Include="src\UI\Components\MenuBar.cpp" />
     <ClCompile Include="src\UI\Components\PrimaryTabs.cpp" />
     <ClCompile Include="src\UI\Components\VisualsMenu.cpp" />
+    <ClCompile Include="src\UI\ImGuiEx\KeyframeableControls.cpp" />
     <ClCompile Include="src\UI\UIImage.cpp" />
     <ClCompile Include="src\UI\UIManager.cpp" />
     <ClCompile Include="src\Utilities\HookManager.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="src\UI\Components\CampathMenu.hpp" />
     <ClInclude Include="src\UI\Components\KeyframeEditor.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
+    <ClInclude Include="src\UI\ImGuiEx\KeyframeableControls.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />
     <ClInclude Include="src\Utilities\MathUtils.hpp" />
     <ClCompile Include="src\WindowsConsole.cpp" />
@@ -191,7 +193,7 @@
     <ClInclude Include="src\UI\Components\Background.hpp" />
     <ClInclude Include="src\UI\Components\CaptureMenu.hpp" />
     <ClInclude Include="src\UI\Components\ControlBar.hpp" />
-    <ClInclude Include="src\UI\ImGuiExtensions.hpp" />
+    <ClInclude Include="src\UI\ImGuiEx\ImGuiExtensions.hpp" />
     <ClInclude Include="src\UI\Components\DebugPanel.hpp" />
     <ClInclude Include="src\UI\Components\DemoLoader.hpp" />
     <ClInclude Include="src\UI\Components\GameView.hpp" />

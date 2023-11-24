@@ -203,7 +203,7 @@ namespace IWXMVM::IW3
 
             Types::Sun sun;
             sun.color = glm::make_vec3(gfxWorld->sunLight->color);
-            sun.position = glm::make_vec3(gfxWorld->sunLight->dir);
+            sun.direction = glm::make_vec3(gfxWorld->sunLight->dir);
             sun.brightness = 1;
             return sun;
         }
@@ -230,7 +230,7 @@ namespace IWXMVM::IW3
             for (int i = 0; i < 3; ++i)
             {
                 gfxWorld->sunLight->color[i] = glm::value_ptr(sun.color)[i] * sun.brightness;
-                gfxWorld->sunLight->dir[i] = glm::value_ptr(sun.position)[i];
+                gfxWorld->sunLight->dir[i] = glm::value_ptr(sun.direction)[i];
             }
         }
 
