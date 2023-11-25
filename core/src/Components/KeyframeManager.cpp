@@ -8,15 +8,24 @@ namespace IWXMVM::Components
 {
     Types::KeyframeableProperty campathCameraProperty(ICON_FA_VIDEO " Campath Camera",
                                                         Types::KeyframeValueType::CameraData);
+    Types::KeyframeableProperty sunLightColorProperty(ICON_FA_SUN " Sun Light Color",
+                                             Types::KeyframeValueType::Vector3);
     Types::KeyframeableProperty sunLightBrightnessProperty(ICON_FA_SUN " Sun Light Brightness",
-                                             Types::KeyframeValueType::FloatingPoint);
+                                                           Types::KeyframeValueType::FloatingPoint);
+    Types::KeyframeableProperty sunLightPitchProperty(ICON_FA_SUN " Sun Light Pitch",
+                                                      Types::KeyframeValueType::FloatingPoint);
+    Types::KeyframeableProperty sunLightYawProperty(ICON_FA_SUN " Sun Light Yaw",
+                                                      Types::KeyframeValueType::FloatingPoint);
 
     void KeyframeManager::Initialize()
     {
         auto InitializeProperty = [&](auto property) { keyframes[property] = std::vector<Types::Keyframe>(); }; 
         
         InitializeProperty(campathCameraProperty);
+        InitializeProperty(sunLightColorProperty);
         InitializeProperty(sunLightBrightnessProperty);
+        InitializeProperty(sunLightPitchProperty);
+        InitializeProperty(sunLightYawProperty);
     }
 
     const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const
@@ -25,8 +34,14 @@ namespace IWXMVM::Components
         {
             case Types::KeyframeablePropertyType::CampathCamera:
                 return campathCameraProperty;
+            case Types::KeyframeablePropertyType::SunLightColor:
+                return sunLightColorProperty;
             case Types::KeyframeablePropertyType::SunLightBrightness:
                 return sunLightBrightnessProperty;
+            case Types::KeyframeablePropertyType::SunLightPitch:
+                return sunLightPitchProperty;
+            case Types::KeyframeablePropertyType::SunLightYaw:
+                return sunLightYawProperty;
         }
     }
 

@@ -44,6 +44,13 @@ namespace IWXMVM::UI
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
         if (ImGui::Begin("Visuals", NULL, flags))
         {
+            if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
+            {
+				ImGui::Text("Load a demo to control visual settings");
+				ImGui::End();
+				return;
+            }
+
             RenderDOF();
             RenderSun();
 
@@ -94,7 +101,8 @@ namespace IWXMVM::UI
 
         ImGui::Text("Sun");
 
-        if (ImGui::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI)))
+        if (ImGuiEx::Keyframeable::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI),
+                                              Types::KeyframeablePropertyType::SunLightColor))
             UpdateSun();
 
         if (ImGuiEx::Keyframeable::SliderFloat("Brightness", &visuals.sunBrightness, 0, 4,
@@ -104,12 +112,15 @@ namespace IWXMVM::UI
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
         // ImGui::SliderAngle sets sun angles in radians but displays them as degrees
-        if (ImGui::SliderAngle("Pitch", &visuals.sunPitch, 0, 360))
+        if (ImGuiEx::Keyframeable::SliderAngle("Pitch", &visuals.sunPitch, 0, 360,
+                                               Types::KeyframeablePropertyType::SunLightPitch))
             UpdateSunAngle();
 
-        if (ImGui::SliderAngle("Yaw", &visuals.sunYaw, 0, 360))
+        if (ImGuiEx::Keyframeable::SliderAngle("Yaw", &visuals.sunYaw, 0, 360,
+                                               Types::KeyframeablePropertyType::SunLightYaw))
             UpdateSunAngle();
 
+        /*
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
         if (ImGui::SliderFloat("X", glm::value_ptr(visuals.sunDirectionUI), -1, 1))
@@ -120,6 +131,7 @@ namespace IWXMVM::UI
 
         if (ImGui::SliderFloat("Z", &(glm::value_ptr(visuals.sunDirectionUI)[2]), -1, 1))
             UpdateSun();
+        */
 
         ImGui::Separator();
     }

@@ -517,7 +517,10 @@ namespace IWXMVM::UI
                     const auto& property = pair.first;
                     const auto& keyframes = pair.second;
 
-                    if (!propertyVisible[property] && keyframes.empty())
+                    if (!keyframes.empty() && !propertyVisible[property])
+						propertyVisible[property] = true;
+
+                    if (!propertyVisible[property])
                         continue;
 
                     ImGui::TableNextRow();

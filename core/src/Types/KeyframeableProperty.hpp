@@ -5,7 +5,10 @@ namespace IWXMVM::Types
     enum class KeyframeablePropertyType
     {
         CampathCamera,
-        SunLightBrightness
+        SunLightColor,
+        SunLightBrightness,
+        SunLightPitch,
+        SunLightYaw
     };
 
     enum class KeyframeValueType
