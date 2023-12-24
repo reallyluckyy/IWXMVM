@@ -331,16 +331,7 @@ namespace IWXMVM::UI
 
                 k.tick = tick;
 
-                auto step =
-                    glm::max(glm::abs(valueBoundaries.y - valueBoundaries.x) * 0.1f, 1.0f) * Input::GetDeltaTime();
-                auto maxNewValue = glm::abs(currentValue) + step;
-
-                ImVec2 range = ImVec2(valueBoundaries.x > 0 ? valueBoundaries.x / 0.8 : valueBoundaries.x * 0.8, valueBoundaries.y > 0 ? valueBoundaries.y * 0.8 : valueBoundaries.y / 0.8);
-                if (glm::abs(value.floatingPoint) > maxNewValue &&
-                    (value.floatingPoint >= range.y || value.floatingPoint <= range.x))
-                {
-                    value.floatingPoint = glm::sign(value.floatingPoint) * maxNewValue;
-                }
+                value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
                 k.value.SetByIndex(keyframeValueIndex,
                                    glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
                 SortKeyframes(keyframes);
