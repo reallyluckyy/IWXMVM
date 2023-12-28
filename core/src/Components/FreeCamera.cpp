@@ -123,8 +123,8 @@ namespace IWXMVM::Components
             this->GetFov() = 90.0f;
         }
 
-        this->GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED;
-        this->GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED;
+        this->GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED * this->GetFov() / 90;
+        this->GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED * this->GetFov() / 90;
 
         this->GetRotation()[0] = glm::clamp(this->GetRotation()[0], -89.9f, 89.9f);
 
