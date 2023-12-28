@@ -3,6 +3,7 @@
 #include "Components/CameraManager.hpp"
 #include "Components/CampathManager.hpp"
 #include "Components/KeyframeManager.hpp"
+#include "Components/CaptureManager.hpp"
 
 namespace IWXMVM
 {
