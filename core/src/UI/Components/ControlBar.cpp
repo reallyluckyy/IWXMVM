@@ -197,7 +197,7 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(progressBarWidth);
             static std::int32_t tickValue{};
 
-            auto keyframeEditor = UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor));
+            auto keyframeEditor = UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
             auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
             if (!DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick))
                 tickValue = demoInfo.currentTick;
