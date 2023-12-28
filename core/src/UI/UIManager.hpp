@@ -14,6 +14,7 @@
 #include "Components/VisualsMenu.hpp"
 #include "Components/CampathMenu.hpp"
 #include "Components/KeyframeEditor.hpp"
+#include "Components/ControlsMenu.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -38,6 +39,7 @@ namespace IWXMVM::UI
             ControlBar,
             DebugPanel,
             KeyframeEditor,
+            ControlsMenu,
 
             Count,
         };
@@ -79,6 +81,12 @@ namespace IWXMVM::UI
             return uiComponents[component];
         }
 
+        template <typename T>
+        T* const& GetUIComponent(Component::Component component) const
+        {
+            return dynamic_cast<T*>(uiComponents[component].get());
+        }
+
         std::array<std::unique_ptr<UIComponent>, Component::Count> const& GetUIComponents() const
         {
             return uiComponents;
@@ -118,7 +126,7 @@ namespace IWXMVM::UI
             std::make_unique<Background>(),  std::make_unique<MenuBar>(),     std::make_unique<GameView>(),
             std::make_unique<PrimaryTabs>(), std::make_unique<DemoLoader>(),  std::make_unique<CampathMenu>(),
             std::make_unique<VisualsMenu>(), std::make_unique<CaptureMenu>(), std::make_unique<ControlBar>(),
-            std::make_unique<DebugPanel>(),  std::make_unique<KeyframeEditor>(),
+            std::make_unique<DebugPanel>(),  std::make_unique<KeyframeEditor>(), std::make_unique<ControlsMenu>()
         };
 
         Tab selectedTab = Tab::Demos;

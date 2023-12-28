@@ -69,6 +69,7 @@ namespace IWXMVM::UI
                 GetUIComponent(Component::GameView)->Render();
                 GetUIComponent(Component::PrimaryTabs)->Render();
                 GetUIComponent(Component::ControlBar)->Render();
+                GetUIComponent(Component::ControlsMenu)->Render();
             }
 
             if (showImGuiDemo)

@@ -25,6 +25,7 @@ namespace IWXMVM::UI
                 }
                 if (ImGui::MenuItem("Controls"))
                 {
+                    UIManager::Get().GetUIComponent<ControlsMenu>(Component::ControlsMenu)->ToggleVisibility();
                 }
                 if (ImGui::MenuItem("Exit"))
                 {

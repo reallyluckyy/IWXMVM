@@ -76,6 +76,12 @@ namespace IWXMVM
         return actionToBindMap[action].key;
     }
 
+    void InputConfiguration::SetKeyBinding(Action action, ImGuiKey key) noexcept
+    {
+		actionToBindMap[action].key = key;
+        Configuration::Get().Write();
+	}
+
     std::string_view InputConfiguration::ActionToString(Action action) const noexcept
     {
         return actionToBindMap[action].actionName;

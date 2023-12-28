@@ -47,6 +47,8 @@ namespace IWXMVM
         std::ofstream configFile(GetUserConfigPath());
         configFile << config.dump(4);
         configFile.close();
+
+        LOG_INFO("Wrote config to {}", GetUserConfigPath().string());
     }
 
     std::filesystem::path Configuration::GetUserConfigPath()

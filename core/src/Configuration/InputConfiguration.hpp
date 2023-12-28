@@ -41,8 +41,9 @@ namespace IWXMVM
         void Deserialize(const nlohmann::json& j);
         void Serialize(nlohmann::json& j) const;
 
-        ImGuiKey GetBoundKey(Action bind) const noexcept;
-        std::string_view ActionToString(Action bind) const noexcept;
+        ImGuiKey GetBoundKey(Action action) const noexcept;
+        void SetKeyBinding(Action action, ImGuiKey key) noexcept;
+        std::string_view ActionToString(Action action) const noexcept;
 
        private:
         InputConfiguration();

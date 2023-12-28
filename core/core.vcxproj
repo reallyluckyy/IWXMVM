@@ -134,6 +134,7 @@
     <ClCompile Include="src\UI\Components\CampathMenu.cpp" />
     <ClCompile Include="src\UI\Components\CaptureMenu.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
+    <ClCompile Include="src\UI\Components\ControlsMenu.cpp" />
     <ClCompile Include="src\UI\Components\KeyframeEditor.cpp" />
     <ClCompile Include="src\UI\ImGuiEx\ImGuiExtensions.cpp" />
     <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="src\Types\Sun.hpp" />
     <ClInclude Include="src\Types\Vertex.hpp" />
     <ClInclude Include="src\UI\Components\CampathMenu.hpp" />
+    <ClInclude Include="src\UI\Components\ControlsMenu.hpp" />
     <ClInclude Include="src\UI\Components\KeyframeEditor.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
     <ClInclude Include="src\UI\ImGuiEx\KeyframeableControls.hpp" />
