@@ -486,6 +486,7 @@ namespace IWXMVM::UI
         const auto padding = ImGui::GetStyle().WindowPadding;
 
         auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        const auto& propertyKeyframes = Components::KeyframeManager::Get().GetKeyframes();
 
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
                                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollWithMouse;
@@ -502,7 +503,6 @@ namespace IWXMVM::UI
                 ImGui::TableSetupColumn("Properties", ImGuiTableColumnFlags_NoSort, firstColumnSize);
                 ImGui::TableSetupColumn("Keyframes", ImGuiTableColumnFlags_NoSort, GetSize().x / 8 * 7);
 
-                const auto& propertyKeyframes = Components::KeyframeManager::Get().GetKeyframes();
                 for (const auto& pair : propertyKeyframes)
                 {
                     const auto& property = pair.first;
@@ -562,14 +562,14 @@ namespace IWXMVM::UI
 
                 ImGui::TableSetColumnIndex(0);
 
-                constexpr auto POPUP_LABEL = "##selectKeyframedProperties";
+                constexpr auto PROPERTY_SELECT_POPUP__LABEL = "##selectKeyframedProperties";
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() + GetSize().x / 28);
                 if (ImGui::Button(ICON_FA_PLUS " Add Property", ImVec2(GetSize().x / 14, 0)))
                 {
-                    ImGui::OpenPopup(POPUP_LABEL);
+                    ImGui::OpenPopup(PROPERTY_SELECT_POPUP__LABEL);
                 }
 
-                if (ImGui::BeginPopup(POPUP_LABEL))
+                if (ImGui::BeginPopup(PROPERTY_SELECT_POPUP__LABEL))
                 {
                     for (auto& [property, _] : propertyKeyframes)
                     {
@@ -580,6 +580,44 @@ namespace IWXMVM::UI
                 }
 
                 ImGui::EndTable();
+            }
+
+            if (std::any_of(propertyKeyframes.begin(), propertyKeyframes.end(),
+                [](const auto& pair) { return !pair.second.empty(); }))
+            {
+                constexpr auto CLEAR_KEYFRAMES_POPUP_LABEL = "Clear all keyframes?##clearKeyframes";
+                auto miscButtonsY = ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2 - padding.y;
+                if (miscButtonsY > ImGui::GetCursorPosY())
+                {
+                    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2 - padding.y);
+                    if (ImGui::Button(ICON_FA_FILE_ARROW_DOWN " Export", ImVec2(GetSize().x / 20, 0)))
+                    {
+                        // TODO:
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button(ICON_FA_TRASH_CAN " Clear", ImVec2(GetSize().x / 20, 0)))
+                    {
+                        ImGui::OpenPopup(CLEAR_KEYFRAMES_POPUP_LABEL);
+                    }
+                }
+
+                if (ImGui::BeginPopupModal(CLEAR_KEYFRAMES_POPUP_LABEL, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    if (ImGui::Button("Delete Keyframes"))
+                    {
+						Components::KeyframeManager::Get().ClearKeyframes();
+						ImGui::CloseCurrentPopup();
+					}
+
+                    ImGui::SetItemDefaultFocus();
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel"))
+                    {
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::EndPopup();
+                }
             }
 
             ImGui::PopStyleVar();

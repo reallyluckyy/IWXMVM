@@ -33,6 +33,8 @@ namespace IWXMVM::Components
 
         const Types::KeyframeableProperty& GetProperty(const Types::KeyframeablePropertyType property) const;
 
+        void ClearKeyframes();
+
        private:
         KeyframeManager()
         {

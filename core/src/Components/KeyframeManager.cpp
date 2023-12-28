@@ -45,6 +45,14 @@ namespace IWXMVM::Components
         }
     }
 
+    void KeyframeManager::ClearKeyframes()
+    {
+        for (auto& [p, k] : keyframes)
+        {
+            k.clear();
+        }
+    }
+
     Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property,
                                                       const std::vector<Types::Keyframe>& keyframes,
                                                       const float tick) const
