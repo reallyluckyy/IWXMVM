@@ -231,29 +231,40 @@ namespace IWXMVM::UI
             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
             {
                 auto idx = i + demos.first;
-                auto demoName = demoPaths[idx].filename().string();
-
-                if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
-                    Mod::GetGameInterface()->GetDemoInfo().name == demoName)
+                try
                 {
-                    if (ImGui::Button(std::format(ICON_FA_STOP " STOP##{0}", demoName).c_str(),
-                                      ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+                    auto demoName = demoPaths[idx].filename().string();
+
+                    if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
+                        Mod::GetGameInterface()->GetDemoInfo().name == demoName)
                     {
-                        Mod::GetGameInterface()->Disconnect();
+                        if (ImGui::Button(std::format(ICON_FA_STOP " STOP##{0}", demoName).c_str(),
+                                          ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+                        {
+                            Mod::GetGameInterface()->Disconnect();
+                        }
                     }
+                    else
+                    {
+                        if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(),
+                                          ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+                        {
+                            Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+                        }
+                    }
+
+                    ImGui::SameLine();
+
+                    ImGui::Text("%s", demoName.c_str());
                 }
-                else
+                catch (std::exception& ex)
                 {
-                    if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(),
-                                      ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
-                    {
-                        Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
-                    }
+                    ImGui::BeginDisabled();
+                    ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION " ERROR");
+                    ImGui::SameLine();
+                    ImGui::Text("<invalid demo name>");
+                    ImGui::EndDisabled();
                 }
-
-                ImGui::SameLine();
-
-                ImGui::Text("%s", demoName.c_str());
             }
         }
     }
