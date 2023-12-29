@@ -136,7 +136,7 @@ namespace IWXMVM::UI
 
     void DemoLoader::SearchDir(std::size_t dirIdx)
     {
-        if (demoDirectories[dirIdx].path.string().find(DEMO_TEMP_DIRECTORY) != std::string::npos)
+        if (demoDirectories[dirIdx].path.wstring().find(stringToWide((std::string)DEMO_TEMP_DIRECTORY)) != std::string::npos)
         {
             demoDirectories[dirIdx].relevant = false;
             return;
@@ -231,49 +231,69 @@ namespace IWXMVM::UI
             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
             {
                 auto idx = i + demos.first;
-                auto demoName = demoPaths[idx].filename().string();
-
-                if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
-                    Mod::GetGameInterface()->GetDemoInfo().name == demoName)
+                try
                 {
-                    if (ImGui::Button(std::format(ICON_FA_STOP " STOP##{0}", demoName).c_str(),
-                                      ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+                    auto demoName = demoPaths[idx].filename().string();
+
+                    if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
+                        Mod::GetGameInterface()->GetDemoInfo().name == demoName)
                     {
-                        Mod::GetGameInterface()->Disconnect();
+                        if (ImGui::Button(std::format(ICON_FA_STOP " STOP##{0}", demoName).c_str(),
+                                          ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+                        {
+                            Mod::GetGameInterface()->Disconnect();
+                        }
                     }
+                    else
+                    {
+                        if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(),
+                                          ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+                        {
+                            Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+                        }
+                    }
+
+                    ImGui::SameLine();
+
+                    ImGui::Text("%s", demoName.c_str());
                 }
-                else
+                catch (std::exception& ex)
                 {
-                    if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(),
-                                      ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
-                    {
-                        Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
-                    }
+                    ImGui::BeginDisabled();
+                    ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION " ERROR");
+                    ImGui::SameLine();
+                    ImGui::Text("<invalid demo name>");
+                    ImGui::EndDisabled();
                 }
-
-                ImGui::SameLine();
-
-                ImGui::Text("%s", demoName.c_str());
             }
         }
     }
 
     void DemoLoader::RenderDir(const DemoDirectory& dir)
     {
-        if (ImGui::TreeNode(dir.path.filename().string().c_str()))
+        try
         {
-            for (auto i = dir.subdirectories.first; i < dir.subdirectories.second; i++)
+            if (ImGui::TreeNode(dir.path.filename().string().c_str()))
             {
-                if (demoDirectories[i].relevant)
+                for (auto i = dir.subdirectories.first; i < dir.subdirectories.second; i++)
                 {
-                    RenderDir(demoDirectories[i]);
+                    if (demoDirectories[i].relevant)
+                    {
+                        RenderDir(demoDirectories[i]);
+                    }
                 }
+
+                RenderDemos(dir.demos);
+
+                ImGui::TreePop();
             }
-
-            RenderDemos(dir.demos);
-
-            ImGui::TreePop();
         }
+        catch (std::exception& ex)
+        {
+			ImGui::BeginDisabled();
+			ImGui::TreeNode("<invalid directory name>");
+			ImGui::EndDisabled();
+		}
     }
 
     void DemoLoader::RenderSearchPaths()
@@ -363,6 +383,14 @@ namespace IWXMVM::UI
 
             ImGui::End();
         }
+    }
+
+    std::wstring DemoLoader::stringToWide(const std::string& str)
+    {
+        int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+        std::wstring wstr(size_needed, 0);
+        MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size_needed);
+        return wstr;
     }
 
     void DemoLoader::Release()
