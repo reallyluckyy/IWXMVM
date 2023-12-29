@@ -136,7 +136,7 @@ namespace IWXMVM::UI
 
     void DemoLoader::SearchDir(std::size_t dirIdx)
     {
-        if (demoDirectories[dirIdx].path.string().find(DEMO_TEMP_DIRECTORY) != std::string::npos)
+        if (demoDirectories[dirIdx].path.wstring().find(stringToWide((std::string)DEMO_TEMP_DIRECTORY)) != std::string::npos)
         {
             demoDirectories[dirIdx].relevant = false;
             return;
@@ -363,6 +363,14 @@ namespace IWXMVM::UI
 
             ImGui::End();
         }
+    }
+
+    std::wstring DemoLoader::stringToWide(const std::string& str)
+    {
+        int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+        std::wstring wstr(size_needed, 0);
+        MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size_needed);
+        return wstr;
     }
 
     void DemoLoader::Release()

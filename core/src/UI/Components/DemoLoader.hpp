@@ -33,6 +33,7 @@ namespace IWXMVM::UI
         void RenderDemos(const std::pair<std::size_t, std::size_t>& demos);
         void RenderDir(const DemoDirectory& dir);  // Recursive render function
         void RenderSearchPaths();
+        std::wstring stringToWide(const std::string& str);
 
         std::pair<std::size_t, std::size_t> searchPaths;  // Pair of indices representing the [first, second) interval
                                                           // of search paths in the 'demoDirectories' vector
