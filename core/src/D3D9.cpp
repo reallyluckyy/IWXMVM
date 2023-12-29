@@ -19,6 +19,7 @@ namespace IWXMVM::D3D9
 
     typedef HRESULT(__stdcall* EndScene_t)(IDirect3DDevice9* pDevice);
     EndScene_t EndScene;
+    EndScene_t ReshadeOriginalEndScene;
     typedef HRESULT(__stdcall* Reset_t)(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
     Reset_t Reset;
     typedef HRESULT(__stdcall* CreateDevice_t)(IDirect3D9* pInterface, UINT Adapter, D3DDEVTYPE DeviceType,
@@ -84,6 +85,9 @@ namespace IWXMVM::D3D9
         return hr;
     }
 
+    std::optional<uintptr_t> reshadeOriginalEndSceneAddress;
+
+    bool calledByEndscene = false;
     HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
     {
         const std::uintptr_t returnAddress = reinterpret_cast<std::uintptr_t>(_ReturnAddress());
@@ -103,9 +107,26 @@ namespace IWXMVM::D3D9
         {
             GFX::GraphicsManager::Get().Render();
         }
-        UI::UIManager::Get().RunImGuiFrame();
 
+        if (!reshadeOriginalEndSceneAddress.has_value())
+        {
+            UI::UIManager::Get().RunImGuiFrame();
+		}
+
+        calledByEndscene = true;
         return EndScene(pDevice);
+    }
+
+    // This is only called if reshade is present
+    HRESULT __stdcall ReshadeOriginalEndScene_Hook(IDirect3DDevice9* pDevice)
+    {
+        if (calledByEndscene)
+        {
+			calledByEndscene = false;
+			return ReshadeOriginalEndScene(pDevice);
+		}
+        UI::UIManager::Get().RunImGuiFrame();
+        return ReshadeOriginalEndScene(pDevice);
     }
 
     HRESULT __stdcall Reset_Hook(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -169,6 +190,23 @@ namespace IWXMVM::D3D9
 
         LOG_DEBUG("Created dummy D3D device");
 
+        // Witchcraft hackery to determine if reshade is present
+        // and get the address of the "real" EndScene function.
+        // This is not necessarily the most robust way to ensure reshade is present.
+        uintptr_t deviceAddress = (uintptr_t)dummyDevice;
+        uintptr_t* originalDevice = *(uintptr_t**)(deviceAddress + 0x10);
+        if (originalDevice != nullptr)
+        {
+            uintptr_t* table = *(uintptr_t**)(originalDevice);
+            reshadeOriginalEndSceneAddress = table[42];
+
+            LOG_DEBUG("Detected reshade presence; real EndScene address: {0:x}", reshadeOriginalEndSceneAddress.value());
+        }
+        else
+        {
+            reshadeOriginalEndSceneAddress = std::nullopt;
+        }
+
         dummyDevice->Release();
         d3dObj->Release();
     }
@@ -187,6 +225,12 @@ namespace IWXMVM::D3D9
                                 (std::uintptr_t*)&Reset);
         HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[42], (std::uintptr_t)EndScene_Hook,
                                 (std::uintptr_t*)&EndScene);
+        
+        if (reshadeOriginalEndSceneAddress.has_value())
+        {
+            HookManager::CreateHook(reshadeOriginalEndSceneAddress.value(), (std::uintptr_t)ReshadeOriginalEndScene_Hook,
+                                    (std::uintptr_t*)&ReshadeOriginalEndScene);
+        }
     }
 
     void Initialize()
