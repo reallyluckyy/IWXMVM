@@ -271,20 +271,29 @@ namespace IWXMVM::UI
 
     void DemoLoader::RenderDir(const DemoDirectory& dir)
     {
-        if (ImGui::TreeNode(dir.path.filename().string().c_str()))
+        try
         {
-            for (auto i = dir.subdirectories.first; i < dir.subdirectories.second; i++)
+            if (ImGui::TreeNode(dir.path.filename().string().c_str()))
             {
-                if (demoDirectories[i].relevant)
+                for (auto i = dir.subdirectories.first; i < dir.subdirectories.second; i++)
                 {
-                    RenderDir(demoDirectories[i]);
+                    if (demoDirectories[i].relevant)
+                    {
+                        RenderDir(demoDirectories[i]);
+                    }
                 }
+
+                RenderDemos(dir.demos);
+
+                ImGui::TreePop();
             }
-
-            RenderDemos(dir.demos);
-
-            ImGui::TreePop();
         }
+        catch (std::exception& ex)
+        {
+			ImGui::BeginDisabled();
+			ImGui::TreeNode("<invalid directory name>");
+			ImGui::EndDisabled();
+		}
     }
 
     void DemoLoader::RenderSearchPaths()
