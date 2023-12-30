@@ -5,6 +5,7 @@
 #include "UI/UIManager.hpp"
 #include "UI/ImGuiEx/KeyframeableControls.hpp"
 #include "Events.hpp"
+#include "Resources.hpp"
 
 namespace IWXMVM::UI
 {
@@ -39,6 +40,114 @@ namespace IWXMVM::UI
         });
     }
 
+    void RenderConfigSection()
+    {
+        if (ImGui::BeginCombo("##configCombo", "Default"))
+        {
+            if (ImGui::Selectable(ICON_FA_CHESS_KING " Default Config", true))
+            {
+                // TODO: Restore default settings
+            }
+
+            ImGui::Separator();
+            ImGui::Selectable(ICON_FA_ARROW_ROTATE_RIGHT " config1.cfg", false);
+            ImGui::Selectable(ICON_FA_ARROW_ROTATE_RIGHT " config2.cfg", false);
+            
+            ImGui::Separator();
+            if (ImGui::Selectable(ICON_FA_FOLDER_OPEN " Load from file", false))
+            {
+                // TODO: open file browse dialog
+            }
+
+            ImGui::EndCombo();
+        }
+
+        static bool configModified = false;
+        if (!configModified)
+            ImGui::BeginDisabled();
+
+        ImGui::SameLine();
+
+        if (ImGui::Button(ICON_FA_FLOPPY_DISK " Save"))
+        {
+            // TODO: save changed to current config
+        }
+
+        if (!configModified)
+            ImGui::EndDisabled();
+
+        ImGui::Separator();
+    }
+
+    void RenderMiscSection()
+    {
+        ImGui::Dummy(ImVec2(0.0f, 10.0f));
+        ImGui::Text("Misc");
+        ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Remove HUD");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        static bool removeHud;
+        ImGui::Checkbox("##removeHudCheckbox", &removeHud);
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Remove Hitmarker");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        static bool removeHitmarker;
+        ImGui::Checkbox("##removeHitmarkerCheckbox", &removeHitmarker);
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Remove Score");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        static bool removeScore;
+        ImGui::Checkbox("##removeScoreCheckbox", &removeScore);
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Remove Flashbang");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        static bool removeFlashbang;
+        ImGui::Checkbox("##removeFlashbangCheckbox", &removeFlashbang);
+
+        ImGui::Dummy(ImVec2(0.0f, 20.0f));
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Remove Killfeed");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        static bool removeKillfeed;
+        ImGui::Checkbox("##removeKillfeedCheckbox", &removeKillfeed);
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Team 1 Color");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        static glm::vec3 team1Color;
+        ImGui::ColorEdit3("##team1Color", glm::value_ptr(team1Color));
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Team 2 Color");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        static glm::vec3 team2Color;
+        ImGui::ColorEdit3("##team2Color", glm::value_ptr(team2Color));
+
+        ImGui::Dummy(ImVec2(0.0f, 20.0f));
+
+        ImGui::Separator();
+    }
+
     void VisualsMenu::Render()
     {
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
@@ -46,10 +155,13 @@ namespace IWXMVM::UI
         {
             if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
             {
-				ImGui::Text("Load a demo to control visual settings");
-				ImGui::End();
-				return;
+                ImGui::Text("Load a demo to control visual settings");
+                ImGui::End();
+                return;
             }
+
+            RenderConfigSection();
+            RenderMiscSection();
 
             RenderDOF();
             RenderSun();
