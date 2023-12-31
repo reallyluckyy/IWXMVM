@@ -67,6 +67,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -174,6 +175,7 @@
     <ClInclude Include="src\Types\DemoInfo.hpp" />
     <ClInclude Include="src\Types\Dof.hpp" />
     <ClInclude Include="src\Types\Dvar.hpp" />
+    <ClInclude Include="src\Types\Filmtweaks.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
     <ClInclude Include="src\Types\Keyframe.hpp" />

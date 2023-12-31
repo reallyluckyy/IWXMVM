@@ -2,6 +2,7 @@
 #include "UI/UIComponent.hpp"
 #include "glm/vec3.hpp"
 #include "Types/dof.hpp"
+#include "Types/Filmtweaks.hpp"
 
 namespace IWXMVM::UI
 {
@@ -32,15 +33,28 @@ namespace IWXMVM::UI
             float sunPitch;
             float sunYaw;
             float sunBrightness = 1;
+
+            // FILMTWEAKS
+            bool filmtweaksActive;
+            float filmtweaksBrightness;
+            float filmtweaksContrast;
+            float filmtweaksDesaturation;
+            glm::vec3 filmtweaksTintLight;
+            glm::vec3 filmtweaksTintDark;
+            bool filmtweaksInvert;
         };
 
         void Initialize() final;
+        void RenderConfigSection();
+        void RenderMiscSection();
         void RenderDOF();
         void RenderSun();
+        void RenderFilmtweaks();
 
         void UpdateDof();
         void UpdateSun();
         void UpdateSunAngle();
+        void UpdateFilmtweaks();
 
         Visuals visuals;
         bool visualsInitialized = false;

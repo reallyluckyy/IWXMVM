@@ -21,6 +21,7 @@ namespace IWXMVM::UI
 
             auto dof = Mod::GetGameInterface()->GetDof();
             auto sun = Mod::GetGameInterface()->GetSun();
+            auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
 
             visuals = {dof.enabled,
                        dof.farBlur,
@@ -34,13 +35,43 @@ namespace IWXMVM::UI
                        glm::make_vec3(sun.direction),
                        0,  // TODO: initialize pitch and yaw
                        0,
-                       sun.brightness};
+                       sun.brightness,
+            filmtweaks.enabled,
+            filmtweaks.brightness,
+            filmtweaks.contrast,
+            filmtweaks.desaturation,
+            glm::make_vec3(filmtweaks.tintLight),
+            glm::make_vec3(filmtweaks.tintDark),
+            filmtweaks.invert};
 
             visualsInitialized = true;
         });
     }
 
-    void RenderConfigSection()
+    void VisualsMenu::Render()
+    {
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
+        if (ImGui::Begin("Visuals", NULL, flags))
+        {
+            if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
+            {
+                ImGui::Text("Load a demo to control visual settings");
+                ImGui::End();
+                return;
+            }
+
+            RenderConfigSection();
+            RenderMiscSection();
+
+            RenderSun();
+            RenderFilmtweaks();
+            RenderDOF();
+
+            ImGui::End();
+        }
+    }
+
+    void VisualsMenu::RenderConfigSection()
     {
         if (ImGui::BeginCombo("##configCombo", "Default"))
         {
@@ -79,7 +110,7 @@ namespace IWXMVM::UI
         ImGui::Separator();
     }
 
-    void RenderMiscSection()
+    void VisualsMenu::RenderMiscSection()
     {
         ImGui::Dummy(ImVec2(0.0f, 10.0f));
         ImGui::Text("Misc");
@@ -148,26 +179,41 @@ namespace IWXMVM::UI
         ImGui::Separator();
     }
 
-    void VisualsMenu::Render()
+    void VisualsMenu::RenderFilmtweaks()
     {
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
-        if (ImGui::Begin("Visuals", NULL, flags))
-        {
-            if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
-            {
-                ImGui::Text("Load a demo to control visual settings");
-                ImGui::End();
-                return;
-            }
+        ImGui::AlignTextToFramePadding();
 
-            RenderConfigSection();
-            RenderMiscSection();
+        ImGui::Text("Filmtweaks");
 
-            RenderDOF();
-            RenderSun();
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Enable Filmtweaks");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        if(ImGui::Checkbox("##enableFilmtweaksCheckbox", &visuals.filmtweaksActive))
+            UpdateFilmtweaks();
 
-            ImGui::End();
-        }
+        // TODO: Make these all keyframable
+        if (ImGui::SliderFloat("Brightness", &visuals.filmtweaksBrightness, -1, 1))
+            UpdateFilmtweaks();
+        if (ImGui::SliderFloat("Contrast", &visuals.filmtweaksContrast, 0, 4))
+            UpdateFilmtweaks();
+        if (ImGui::SliderFloat("Desaturation", &visuals.filmtweaksDesaturation, 0, 4))
+            UpdateFilmtweaks();
+        if (ImGui::ColorEdit3("Tint Light", glm::value_ptr(visuals.filmtweaksTintLight)))
+            UpdateFilmtweaks();
+        if (ImGui::ColorEdit3("Tint Dark", glm::value_ptr(visuals.filmtweaksTintDark)))
+            UpdateFilmtweaks();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Invert");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        if(ImGui::Checkbox("##invertFilmtweaksCheckbox", &visuals.filmtweaksInvert))
+            UpdateFilmtweaks();
+
+        ImGui::Separator();
     }
 
     void VisualsMenu::RenderDOF()
@@ -273,6 +319,14 @@ namespace IWXMVM::UI
         visuals.sunDirectionUI.z = -(origin + radius * glm::sin(rotation.x));
 
         UpdateSun();
+    }
+
+    void VisualsMenu::UpdateFilmtweaks()
+    {
+        
+        Types::Filmtweaks filmtweakSettings = {visuals.filmtweaksActive, visuals.filmtweaksBrightness, visuals.filmtweaksContrast, 
+            visuals.filmtweaksDesaturation, visuals.filmtweaksTintLight, visuals.filmtweaksTintDark, visuals.filmtweaksInvert};
+        Mod::GetGameInterface()->SetFilmtweaks(filmtweakSettings);
     }
 
     void VisualsMenu::Release()
