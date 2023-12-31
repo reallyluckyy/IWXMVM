@@ -61,7 +61,7 @@ namespace IWXMVM::UI
         void ShutdownImGui();
         void RunImGuiFrame();
 
-        bool ViewportShouldLockMouse();
+        bool IsFreecamSelected();
 
         ImVec2 GetWindowSize(HWND hwnd);
         ImVec2 GetWindowPosition(HWND hwnd);

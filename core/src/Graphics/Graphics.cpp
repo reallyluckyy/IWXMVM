@@ -2,12 +2,14 @@
 
 #include "Graphics.hpp"
 
+#include "UI/UIManager.hpp"
 #include "Components/CameraManager.hpp"
 #include "Components/CampathManager.hpp"
 #include "Graphics/Resource.hpp"
 #include "Input.hpp"
 #include "Mod.hpp"
 #include "Types/Vertex.hpp"
+#include "Utilities/MathUtils.hpp"
 
 namespace IWXMVM::GFX
 {
@@ -104,13 +106,13 @@ namespace IWXMVM::GFX
         BufferManager::Get().BindBuffers();
 
         // Only draw nodes if in free/orbit mode
-        const auto currentCameraMode = Components::CameraManager::Get().GetActiveCamera()->GetMode();
+        const auto& activeCam = Components::CameraManager::Get().GetActiveCamera();
+        const auto currentCameraMode = activeCam->GetMode();
         if (currentCameraMode == Components::Camera::Mode::Free || currentCameraMode == Components::Camera::Mode::Orbit)
         {
             // Draw axis when in orbit mode
             if (currentCameraMode == Components::Camera::Mode::Orbit)
             {
-                const auto& activeCam = Components::CameraManager::Get().GetActiveCamera();
                 const auto* orbitCam = reinterpret_cast<const Components::OrbitCamera*>(activeCam.get());
 
                 const auto translate = glm::translate(orbitCam->GetOrigin());
@@ -132,7 +134,19 @@ namespace IWXMVM::GFX
                 const auto rotate = glm::eulerAngleZYX(glm::radians(node.value.cameraData.rotation.y),
                                        glm::radians(node.value.cameraData.rotation.x),
                                                        glm::radians(node.value.cameraData.rotation.z));
+                
+                const auto& gameView = UI::UIManager::Get().GetUIComponent<UI::GameView>(UI::Component::Component::GameView);
+                if (node.id == gameView->GetHoveredCampathNodeId())
+                    camera.fillMode = D3DFILL_WIREFRAME;
+                else
+                    camera.fillMode = D3DFILL_SOLID;
                 BufferManager::Get().DrawMesh(camera, translate * rotate);
+
+                if (node.id == UI::UIManager::Get()
+                    .GetUIComponent<UI::GameView>(UI::Component::Component::GameView)->GetSelectedCampathNodeId())
+                {
+                    BufferManager::Get().DrawMesh(axis, translate * rotate * glm::scale(glm::vec3(1, 1, 1) * 10));
+                }
             }
 
             // Drawing the path

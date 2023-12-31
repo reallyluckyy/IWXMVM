@@ -105,7 +105,7 @@ namespace IWXMVM::UI
     HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         auto& gameView = UIManager::Get().GetUIComponent(UI::Component::GameView);
-        if (gameView->HasFocus() && UIManager::Get().ViewportShouldLockMouse())
+        if (gameView->HasFocus() && UIManager::Get().IsFreecamSelected())
         {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         }
@@ -118,7 +118,7 @@ namespace IWXMVM::UI
         return CallWindowProc(UIManager::Get().GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
     }
 
-    bool UIManager::ViewportShouldLockMouse()
+    bool UIManager::IsFreecamSelected()
     {
         return Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free;
     }
