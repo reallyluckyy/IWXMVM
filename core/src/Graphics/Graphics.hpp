@@ -11,6 +11,7 @@ namespace IWXMVM::GFX
     INCBIN_EXTERN(CAMERA_MODEL);
     INCBIN_EXTERN(ICOSPHERE_MODEL);
     INCBIN_EXTERN(GIZMO_TRANSLATE_MODEL);
+    INCBIN_EXTERN(GIZMO_ROTATE_MODEL);
 
     class GraphicsManager
     {
@@ -34,13 +35,17 @@ namespace IWXMVM::GFX
               icosphere(ICOSPHERE_MODEL_data, ICOSPHERE_MODEL_size),
               gizmo_translate_x(GIZMO_TRANSLATE_MODEL_data, GIZMO_TRANSLATE_MODEL_size),
               gizmo_translate_y(GIZMO_TRANSLATE_MODEL_data, GIZMO_TRANSLATE_MODEL_size),
-              gizmo_translate_z(GIZMO_TRANSLATE_MODEL_data, GIZMO_TRANSLATE_MODEL_size)
+              gizmo_translate_z(GIZMO_TRANSLATE_MODEL_data, GIZMO_TRANSLATE_MODEL_size),
+              gizmo_rotate_x(GIZMO_ROTATE_MODEL_data, GIZMO_ROTATE_MODEL_size),
+              gizmo_rotate_y(GIZMO_ROTATE_MODEL_data, GIZMO_ROTATE_MODEL_size),
+              gizmo_rotate_z(GIZMO_ROTATE_MODEL_data, GIZMO_ROTATE_MODEL_size)
         {
         }
 
-        void DrawTranslateGizmoArrow(Mesh& mesh, glm::mat4 model, int32_t axisIndex);
         bool MouseIntersects(ImVec2 mousePos, Mesh& mesh, glm::mat4 model);
+        void DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex);
         void DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation);
+        void DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation);
 
         void SetupRenderState() const noexcept;
 
@@ -50,5 +55,8 @@ namespace IWXMVM::GFX
         Mesh gizmo_translate_x;
         Mesh gizmo_translate_y;
         Mesh gizmo_translate_z;
+        Mesh gizmo_rotate_x;
+        Mesh gizmo_rotate_y;
+        Mesh gizmo_rotate_z;
     };
 }  // namespace IWXMVM

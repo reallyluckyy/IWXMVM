@@ -29,7 +29,16 @@ namespace IWXMVM::GFX
         BufferManager::Get().AddMesh(&gizmo_translate_x);
         BufferManager::Get().AddMesh(&gizmo_translate_y);
         BufferManager::Get().AddMesh(&gizmo_translate_z);
-        //icosphere.fillMode = D3DFILL_WIREFRAME;
+
+        for (int i = 0; i < gizmo_rotate_x.vertices.size(); i++)
+        {
+            gizmo_rotate_x.vertices[i].col = D3DCOLOR_COLORVALUE(1, 0, 0, 1);
+            gizmo_rotate_y.vertices[i].col = D3DCOLOR_COLORVALUE(0, 1, 0, 1);
+            gizmo_rotate_z.vertices[i].col = D3DCOLOR_COLORVALUE(0, 0, 1, 1);
+        }
+        BufferManager::Get().AddMesh(&gizmo_rotate_x);
+        BufferManager::Get().AddMesh(&gizmo_rotate_y);
+        BufferManager::Get().AddMesh(&gizmo_rotate_z);
     }
 
     void GraphicsManager::Uninitialize()
@@ -167,17 +176,17 @@ namespace IWXMVM::GFX
 
     std::optional<int32_t> heldAxis = std::nullopt;
 
-    void GraphicsManager::DrawTranslateGizmoArrow(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
+    void GraphicsManager::DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
     {
         bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, mesh, model);
-        if (mouseIntersects)
+        if (heldAxis.has_value() && heldAxis.value() == axisIndex)
+		{
+            model = model * glm::scale(glm::vec3(1, 1, 1) * 1.2f);
+        }
+        else if (!heldAxis.has_value() && mouseIntersects)
         {
 			model = model * glm::scale(glm::vec3(1, 1, 1) * 1.1f);
 		}
-        else if (heldAxis.has_value() && heldAxis.value() == axisIndex)
-		{
-            model = model * glm::scale(glm::vec3(1, 1, 1) * 1.5f);
-        }
 
         if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft))
         {
@@ -187,7 +196,8 @@ namespace IWXMVM::GFX
         BufferManager::Get().DrawMesh(mesh, model);
     }
 
-    void GraphicsManager::DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation)
+    void GraphicsManager::DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation,
+                                               glm::mat4 rotation)
     {
         auto scaledModel = translation * rotation * glm::scale(glm::vec3(1, 1, 1) * 3);
 
@@ -197,22 +207,48 @@ namespace IWXMVM::GFX
         }
 
         auto rotatedX = glm::rotate(scaledModel, glm::radians(-90.0f), glm::vec3(0, 0, 1));
-        DrawTranslateGizmoArrow(gizmo_translate_x, rotatedX, 0);
+        DrawGizmoComponent(gizmo_translate_x, rotatedX, 0);
 
-        DrawTranslateGizmoArrow(gizmo_translate_y, scaledModel, 1);
+        DrawGizmoComponent(gizmo_translate_y, scaledModel, 1);
 
         auto rotatedZ = glm::rotate(scaledModel, glm::radians(90.0f), glm::vec3(1, 0, 0));
-        DrawTranslateGizmoArrow(gizmo_translate_z, rotatedZ, 2);
+        DrawGizmoComponent(gizmo_translate_z, rotatedZ, 2);
 
         if (heldAxis.has_value())
         {
             auto amountX = ImGui::GetIO().MouseDelta.x * 0.1f;
             auto amountY = ImGui::GetIO().MouseDelta.y * 0.1f;
-            position += glm::vec3(
-                rotation[heldAxis.value()][0] * amountX, 
-                rotation[heldAxis.value()][1] * amountX, 
-                rotation[heldAxis.value()][2] * amountY
-            );
+            auto delta = glm::vec3(0, 0, 0);
+            delta[heldAxis.value()] = amountX + amountY;
+            delta = glm::vec3(rotation * glm::vec4(delta, 1.0f));
+            position += delta;
+        }
+    }
+
+    void GraphicsManager::DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation)
+    {
+        auto scaledModel = translation * glm::scale(glm::vec3(1, 1, 1) * 25);
+
+        if (Input::KeyUp(ImGuiKey_MouseLeft))
+        {
+            heldAxis = std::nullopt;
+        }
+
+        auto rotatedX = glm::rotate(scaledModel, glm::radians(-90.0f), glm::vec3(0, 0, 1));
+        DrawGizmoComponent(gizmo_rotate_x, rotatedX, 0);
+
+        DrawGizmoComponent(gizmo_rotate_y, scaledModel, 1);
+
+        auto rotatedZ = glm::rotate(scaledModel, glm::radians(90.0f), glm::vec3(1, 0, 0));
+        DrawGizmoComponent(gizmo_rotate_z, rotatedZ, 2);
+
+        if (heldAxis.has_value())
+        {
+            auto amountX = ImGui::GetIO().MouseDelta.x * 0.1f;
+            auto amountY = ImGui::GetIO().MouseDelta.y * 0.1f;
+            auto delta = glm::vec3(0, 0, 0);
+            delta[heldAxis.value()] = amountX + amountY;
+            rotation += delta;
         }
     }
 
@@ -305,11 +341,20 @@ namespace IWXMVM::GFX
                     gizmoMode = static_cast<GizmoMode>((gizmoMode + 1) % GizmoMode::Count);
                 }
 
-                if (selectedNodeId == node.id && 
-                    (gizmoMode == GizmoMode::TranslateGlobal || gizmoMode == GizmoMode::TranslateLocal))
+                if (selectedNodeId == node.id)
                 {
-                    DrawTranslationGizmo(node.value.cameraData.position, translate,
-                                         gizmoMode == GizmoMode::TranslateLocal ? rotate : glm::eulerAngleZYX(.0f, .0f, .0f));
+                    switch (gizmoMode)
+                    {
+                        case TranslateGlobal:
+                        case TranslateLocal:
+                            DrawTranslationGizmo(
+                                node.value.cameraData.position, translate,
+                                gizmoMode == GizmoMode::TranslateLocal ? rotate : glm::eulerAngleZYX(.0f, .0f, .0f));
+                			break;
+                        case Rotate:
+                            DrawRotationGizmo(node.value.cameraData.rotation, translate);
+							break;
+                    }
                 }
             }
 
