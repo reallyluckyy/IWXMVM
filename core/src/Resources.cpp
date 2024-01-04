@@ -13,4 +13,5 @@ namespace IWXMVM::Resources
     INCBIN(AXIS_MODEL, "resources/axis.obj");
     INCBIN(CAMERA_MODEL, "resources/camera.obj");
     INCBIN(ICOSPHERE_MODEL, "resources/icosphere.obj");
+    INCBIN(GIZMO_TRANSLATE_MODEL, "resources/gizmo_translate.obj");
 };  // namespace IWXMVM::Resources

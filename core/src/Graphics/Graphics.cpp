@@ -19,6 +19,16 @@ namespace IWXMVM::GFX
         BufferManager::Get().AddMesh(&axis);
         BufferManager::Get().AddMesh(&camera);
         BufferManager::Get().AddMesh(&icosphere);
+
+        for (int i = 0; i < gizmo_translate_x.vertices.size(); i++)
+        {
+            gizmo_translate_x.vertices[i].col = D3DCOLOR_COLORVALUE(1, 0, 0, 1);
+            gizmo_translate_y.vertices[i].col = D3DCOLOR_COLORVALUE(0, 1, 0, 1);
+            gizmo_translate_z.vertices[i].col = D3DCOLOR_COLORVALUE(0, 0, 1, 1);
+        }
+        BufferManager::Get().AddMesh(&gizmo_translate_x);
+        BufferManager::Get().AddMesh(&gizmo_translate_y);
+        BufferManager::Get().AddMesh(&gizmo_translate_z);
         //icosphere.fillMode = D3DFILL_WIREFRAME;
     }
 
@@ -74,6 +84,149 @@ namespace IWXMVM::GFX
         device->SetTransform(D3DTS_PROJECTION, reinterpret_cast<const D3DMATRIX*>(&projection));
     }
 
+    glm::vec3 GetMouseRay(ImVec2 mousePos, glm::mat4 projection, glm::mat4 view)
+    {
+        ImVec2 viewportTopLeft = 
+            UI::UIManager::Get().GetUIComponent<UI::GameView>(UI::Component::Component::GameView)->GetViewportPosition();
+        ImVec2 viewportSize =
+            UI::UIManager::Get().GetUIComponent<UI::GameView>(UI::Component::Component::GameView)->GetViewportSize();
+
+        mousePos.x -= viewportTopLeft.x;
+        mousePos.y -= viewportTopLeft.y;
+
+        glm::vec4 mouseClipSpace(
+            mousePos.x / viewportSize.x * 2.0f - 1.0f,
+            (viewportSize.y - mousePos.y) / viewportSize.y * 2.0f - 1.0f,
+            -1.0f,
+            1.0f
+        );
+
+        glm::vec4 mouseViewSpace = glm::inverse(projection) * mouseClipSpace;
+        mouseViewSpace.z = -1.0f;
+        mouseViewSpace.w = 0.0f;
+
+        glm::vec3 mouseWorldSpace = glm::inverse(view) * mouseViewSpace;
+        glm::vec3 mouseRayDirection = glm::normalize(mouseWorldSpace);
+        return mouseRayDirection;
+    }
+
+    bool GraphicsManager::MouseIntersects(ImVec2 mousePos, Mesh& mesh, glm::mat4 model)
+    {
+        const auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        const auto view = glm::lookAt(camera->GetPosition(), camera->GetPosition() + camera->GetForwardVector(),
+                                      glm::rotateY(glm::vec3(0, 0, 1), glm::radians(camera->GetRotation().z)));
+        const auto aspectRatio = ImGui::GetMainViewport()->Size.x / ImGui::GetMainViewport()->Size.y;
+        const auto tanHalfFovX = glm::tan(glm::radians(camera->GetFov()) * 0.5f);
+        const auto tanHalfFovY = tanHalfFovX * (1.0f / aspectRatio);
+        const auto fovY = glm::atan(tanHalfFovY) * 2.0f;
+        const auto znear = Mod::GetGameInterface()->GetDvar("r_znear").value().value->floating_point;
+        const auto projection = glm::perspective(fovY, aspectRatio, znear, 10000.0f);
+        const auto mouseRayDirection = GetMouseRay(mousePos, projection, view);
+        auto minDistance = std::numeric_limits<float>::max();
+
+        for (int i = 0; i < mesh.indices.size(); i += 3)
+        {
+            const auto i1 = mesh.indices[i];
+            const auto i2 = mesh.indices[i+1];
+            const auto i3 = mesh.indices[i+2];
+            const auto a = glm::vec3(model * glm::vec4(mesh.vertices[i1].pos, 1.0f));
+            const auto b = glm::vec3(model * glm::vec4(mesh.vertices[i2].pos, 1.0f));
+            const auto c = glm::vec3(model * glm::vec4(mesh.vertices[i3].pos, 1.0f));
+
+            // Calculate the normal of the triangle
+            const auto ab = b - a;
+            const auto ac = c - a;
+            const auto bc = c - b;
+            const auto ca = a - c;
+            const auto normal = glm::normalize(glm::cross(ab, ac));
+            // Calculate the distance from the camera to the plane of the triangle
+            const auto distance = glm::dot(normal, a);
+            // Calculate the distance from the mouse ray to the plane of the triangle
+            const auto rayDistance = (distance - glm::dot(normal, camera->GetPosition())) /
+                                     glm::dot(normal, mouseRayDirection);
+            if (rayDistance < 0.0f)
+            {
+                // The triangle is behind the camera
+                continue;
+            }
+            // Calculate the intersection point
+            const auto intersection = camera->GetPosition() + rayDistance * mouseRayDirection;
+            // Check if the intersection point is inside the triangle
+            const auto abp = intersection - a;
+            const auto bcp = intersection - b;
+            const auto cap = intersection - c;
+            if (glm::dot(normal, glm::cross(ab, abp)) >= 0.0f &&
+                glm::dot(normal, glm::cross(bc, bcp)) >= 0.0f &&
+                glm::dot(normal, glm::cross(ca, cap)) >= 0.0f)
+            {
+                minDistance = std::min(minDistance, rayDistance);
+            }
+        }
+        return minDistance < std::numeric_limits<float>::max();
+    }
+
+    std::optional<int32_t> heldAxis = std::nullopt;
+
+    void GraphicsManager::DrawTranslateGizmoArrow(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
+    {
+        bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, mesh, model);
+        if (mouseIntersects)
+        {
+			model = model * glm::scale(glm::vec3(1, 1, 1) * 1.1f);
+		}
+        else if (heldAxis.has_value() && heldAxis.value() == axisIndex)
+		{
+            model = model * glm::scale(glm::vec3(1, 1, 1) * 1.5f);
+        }
+
+        if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft))
+        {
+			heldAxis = axisIndex;
+		}
+
+        BufferManager::Get().DrawMesh(mesh, model);
+    }
+
+    void GraphicsManager::DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation)
+    {
+        auto scaledModel = translation * rotation * glm::scale(glm::vec3(1, 1, 1) * 3);
+
+        if (Input::KeyUp(ImGuiKey_MouseLeft))
+        {
+            heldAxis = std::nullopt;
+        }
+
+        auto rotatedX = glm::rotate(scaledModel, glm::radians(-90.0f), glm::vec3(0, 0, 1));
+        DrawTranslateGizmoArrow(gizmo_translate_x, rotatedX, 0);
+
+        DrawTranslateGizmoArrow(gizmo_translate_y, scaledModel, 1);
+
+        auto rotatedZ = glm::rotate(scaledModel, glm::radians(90.0f), glm::vec3(1, 0, 0));
+        DrawTranslateGizmoArrow(gizmo_translate_z, rotatedZ, 2);
+
+        if (heldAxis.has_value())
+        {
+            auto amountX = ImGui::GetIO().MouseDelta.x * 0.1f;
+            auto amountY = ImGui::GetIO().MouseDelta.y * 0.1f;
+            position += glm::vec3(
+                rotation[heldAxis.value()][0] * amountX, 
+                rotation[heldAxis.value()][1] * amountX, 
+                rotation[heldAxis.value()][2] * amountY
+            );
+        }
+    }
+
+    enum GizmoMode
+    {
+        TranslateLocal,
+        TranslateGlobal,
+        Rotate,
+        Count
+    };
+
+    std::optional<int32_t> selectedNodeId = std::nullopt;
+    GizmoMode gizmoMode = GizmoMode::TranslateLocal;
+
     void GraphicsManager::Render()
     {
         if (ImGui::GetMainViewport()->Size.x == 0.0f || ImGui::GetMainViewport()->Size.y == 0.0f)
@@ -125,27 +278,38 @@ namespace IWXMVM::GFX
 
             auto& keyframeManager = Components::KeyframeManager::Get();
             const auto& property = keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera);
-            const auto& nodes = keyframeManager.GetKeyframes(property);
+            auto& nodes = keyframeManager.GetKeyframes(property);
 
             // Iterate through all nodes and draw the camera model
-            for (const auto& node : nodes)
+            for (auto& node : nodes)
             {
                 const auto translate = glm::translate(node.value.cameraData.position);
                 const auto rotate = glm::eulerAngleZYX(glm::radians(node.value.cameraData.rotation.y),
                                        glm::radians(node.value.cameraData.rotation.x),
                                                        glm::radians(node.value.cameraData.rotation.z));
+                auto scale = glm::scale(glm::vec3(1, 1, 1));
                 
-                const auto& gameView = UI::UIManager::Get().GetUIComponent<UI::GameView>(UI::Component::Component::GameView);
-                if (node.id == gameView->GetHoveredCampathNodeId())
-                    camera.fillMode = D3DFILL_WIREFRAME;
-                else
-                    camera.fillMode = D3DFILL_SOLID;
-                BufferManager::Get().DrawMesh(camera, translate * rotate);
+                bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, camera, translate * rotate);
+                if (mouseIntersects)
+                   scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
+                BufferManager::Get().DrawMesh(camera, translate * rotate * scale);
 
-                if (node.id == UI::UIManager::Get()
-                    .GetUIComponent<UI::GameView>(UI::Component::Component::GameView)->GetSelectedCampathNodeId())
+                if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft) && selectedNodeId != node.id)
                 {
-                    BufferManager::Get().DrawMesh(axis, translate * rotate * glm::scale(glm::vec3(1, 1, 1) * 10));
+                   selectedNodeId = node.id;
+                   gizmoMode = GizmoMode::TranslateLocal;
+                }
+
+                if (mouseIntersects && selectedNodeId == node.id && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                {
+                    gizmoMode = static_cast<GizmoMode>((gizmoMode + 1) % GizmoMode::Count);
+                }
+
+                if (selectedNodeId == node.id && 
+                    (gizmoMode == GizmoMode::TranslateGlobal || gizmoMode == GizmoMode::TranslateLocal))
+                {
+                    DrawTranslationGizmo(node.value.cameraData.position, translate,
+                                         gizmoMode == GizmoMode::TranslateLocal ? rotate : glm::eulerAngleZYX(.0f, .0f, .0f));
                 }
             }
 

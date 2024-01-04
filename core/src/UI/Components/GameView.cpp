@@ -78,41 +78,24 @@ namespace IWXMVM::UI
     bool IsBoxHovered(glm::vec3 point, ImVec2 boxSize)
     {
         const auto& activeCam = Components::CameraManager::Get().GetActiveCamera();
-        const auto distance = glm::distance(point, activeCam->GetPosition());
+        const auto distance = glm::max(glm::distance(point, activeCam->GetPosition()), 1.0f);
         const auto objScreenPos = MathUtils::WorldToScreenPoint(point, *activeCam);
         if (objScreenPos.has_value())
         {
             const auto mousePos = ImGui::GetIO().MousePos;
             const auto boxTopLeft = objScreenPos.value() - (boxSize / 2) * (100.0f / distance);
             const auto boxBottomRight = objScreenPos.value() + (boxSize / 2) * (100.0f / distance);
+            if (boxTopLeft.x > 0)
+                ImGui::GetForegroundDrawList()->AddRect(boxTopLeft, boxBottomRight, IM_COL32(255, 0, 0, 255));
             return mousePos.x >= boxTopLeft.x && mousePos.x <= boxBottomRight.x && mousePos.y >= boxTopLeft.y &&
                    mousePos.y <= boxBottomRight.y;
         }
         return false;
     }
 
-    bool GameView::HandleCampathNodeInteraction()
+    void GameView::HandleCampathNodeInteraction()
     {
-        hoveredCampathNodeId = -1;
 
-        auto& keyframeManager = Components::KeyframeManager::Get();
-        const auto& property = keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera);
-        const auto& nodes = keyframeManager.GetKeyframes(property);
-        for (auto& node : nodes)
-        {
-            if (IsBoxHovered(node.value.cameraData.position, ImVec2(20, 20) * ImGui::GetFontSize()))
-            {
-                hoveredCampathNodeId = node.id;
-				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-                if (Input::KeyDown(ImGuiKey_MouseLeft))
-                {
-                    selectedCampathNodeId = node.id;
-                    return true;
-				}
-			}
-		}
-
-        return false;
     }
 
     void GameView::LockMouse()
@@ -187,7 +170,7 @@ namespace IWXMVM::UI
             if (HasFocus())
                 ImGui::Text("Press ESC to unlock mouse");
             else
-				ImGui::Text("Press %s to move freecam", ImGui::GetKeyName(InputConfiguration::Get().GetBoundKey(Action::FreeCameraActivate)));
+                ImGui::Text("Press %s to move freecam", ImGui::GetKeyName(InputConfiguration::Get().GetBoundKey(Action::FreeCameraActivate)));
         }
 
         auto demoLabel = Mod::GetGameInterface()->GetDemoInfo().name;
@@ -266,10 +249,10 @@ namespace IWXMVM::UI
                                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
                                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
                                    ImGuiWindowFlags_NoScrollbar);
+        this->viewportPosition = ImGui::GetCurrentWindow()->DC.CursorPos;
+        this->viewportSize = textureSize;
         ImGui::Image((void*)texture, textureSize);
-
         Events::Invoke(EventType::OnRenderGameView);
-
         ImGui::EndChildFrame();
 
         ImGui::PopStyleVar();
