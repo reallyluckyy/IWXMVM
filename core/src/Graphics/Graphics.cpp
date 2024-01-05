@@ -178,12 +178,13 @@ namespace IWXMVM::GFX
 
     void GraphicsManager::DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
     {
-        bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, mesh, model);
-        if (heldAxis.has_value() && heldAxis.value() == axisIndex)
+        if (heldAxis.has_value() && heldAxis.value() != axisIndex)
 		{
-            model = model * glm::scale(glm::vec3(1, 1, 1) * 1.2f);
-        }
-        else if (!heldAxis.has_value() && mouseIntersects)
+			return;
+		}
+
+        bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, mesh, model);
+        if (!heldAxis.has_value() && mouseIntersects)
         {
 			model = model * glm::scale(glm::vec3(1, 1, 1) * 1.1f);
 		}
@@ -326,7 +327,7 @@ namespace IWXMVM::GFX
                 auto scale = glm::scale(glm::vec3(1, 1, 1));
                 
                 bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, camera, translate * rotate);
-                if (mouseIntersects)
+                if (mouseIntersects && !heldAxis.has_value())
                    scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
                 BufferManager::Get().DrawMesh(camera, translate * rotate * scale);
 
