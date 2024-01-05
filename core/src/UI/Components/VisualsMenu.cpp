@@ -33,16 +33,18 @@ namespace IWXMVM::UI
                        dof.bias,
                        glm::make_vec3(sun.color),
                        glm::make_vec3(sun.direction),
-                       0,  // TODO: initialize pitch and yaw
+                       0,  
                        0,
                        sun.brightness,
-            filmtweaks.enabled,
-            filmtweaks.brightness,
-            filmtweaks.contrast,
-            filmtweaks.desaturation,
-            glm::make_vec3(filmtweaks.tintLight),
-            glm::make_vec3(filmtweaks.tintDark),
-            filmtweaks.invert};
+                       filmtweaks.enabled,
+                       filmtweaks.brightness,
+                       filmtweaks.contrast,
+                       filmtweaks.desaturation,
+                       glm::make_vec3(filmtweaks.tintLight),
+                       glm::make_vec3(filmtweaks.tintDark),
+                       filmtweaks.invert};
+
+            SetAngleFromPosition(sun.direction);
 
             visualsInitialized = true;
         });
@@ -121,32 +123,28 @@ namespace IWXMVM::UI
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeHud;
-        ImGui::Checkbox("##removeHudCheckbox", &removeHud);
+        ImGui::Checkbox("##removeHudCheckbox", &visuals.removeHud);
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Remove Hitmarker");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeHitmarker;
-        ImGui::Checkbox("##removeHitmarkerCheckbox", &removeHitmarker);
+        ImGui::Checkbox("##removeHitmarkerCheckbox", &visuals.removeHitmarker);
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Remove Score");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeScore;
-        ImGui::Checkbox("##removeScoreCheckbox", &removeScore);
+        ImGui::Checkbox("##removeScoreCheckbox", &visuals.removeScore);
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Remove Flashbang");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeFlashbang;
-        ImGui::Checkbox("##removeFlashbangCheckbox", &removeFlashbang);
+        ImGui::Checkbox("##removeFlashbangCheckbox", &visuals.removeFlashbang);
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
@@ -155,8 +153,7 @@ namespace IWXMVM::UI
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeKillfeed;
-        ImGui::Checkbox("##removeKillfeedCheckbox", &removeKillfeed);
+        ImGui::Checkbox("##removeKillfeedCheckbox", &visuals.removeKillfeed);
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Team 1 Color");
@@ -319,6 +316,17 @@ namespace IWXMVM::UI
         visuals.sunDirectionUI.z = -(origin + radius * glm::sin(rotation.x));
 
         UpdateSun();
+    }
+
+    void VisualsMenu::SetAngleFromPosition(glm::vec3 pos)
+    {
+        auto norm = glm::normalize(pos);
+
+        float pitch = glm::asin(norm.y);
+        float yaw = glm::atan(norm.z, norm.x);
+
+        visuals.sunPitch = glm::mod(pitch + 2.0f * glm::pi<float>(), 2.0f * glm::pi<float>());
+        visuals.sunYaw = glm::mod(yaw + 2.0f * glm::pi<float>(), 2.0f * glm::pi<float>());
     }
 
     void VisualsMenu::UpdateFilmtweaks()

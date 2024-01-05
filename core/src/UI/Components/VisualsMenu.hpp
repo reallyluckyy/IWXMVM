@@ -42,6 +42,14 @@ namespace IWXMVM::UI
             glm::vec3 filmtweaksTintLight;
             glm::vec3 filmtweaksTintDark;
             bool filmtweaksInvert;
+
+            // MISC
+            bool removeHud;
+            bool removeHitmarker;
+            bool removeScore;
+            bool removeFlashbang;
+            bool removeKillfeed;
+
         };
 
         void Initialize() final;
@@ -53,6 +61,7 @@ namespace IWXMVM::UI
 
         void UpdateDof();
         void UpdateSun();
+        void SetAngleFromPosition(glm::vec3);
         void UpdateSunAngle();
         void UpdateFilmtweaks();
 
