@@ -12,8 +12,7 @@ namespace IWXMVM::UI
     void VisualsMenu::Initialize()
     {
         // TODO: Come up with a proper plan on when we want to initialize the UI values from the games values
-        // TODO: Ideally we dont want to ever overwrite a users custom settings, but what if the map changes,
-        // TODO: the user hasnt edited the sun settings yet, and suddenly the sun is in a different position?
+        // TODO: Ideally we dont want to ever overwrite a users custom settings, but what if the map changes
 
         Events::RegisterListener(EventType::OnDemoLoad, [&]() {
             if (visualsInitialized)
@@ -89,7 +88,9 @@ namespace IWXMVM::UI
             ImGui::Separator();
             if (ImGui::Selectable(ICON_FA_FOLDER_OPEN " Load from file", false))
             {
-                // TODO: open file browse dialog
+                std::string path = OpenFileDialog();
+                if (path != "")
+                    LoadConfig(path);
             }
 
             ImGui::EndCombo();
@@ -209,6 +210,8 @@ namespace IWXMVM::UI
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
         if(ImGui::Checkbox("##invertFilmtweaksCheckbox", &visuals.filmtweaksInvert))
             UpdateFilmtweaks();
+
+        
 
         ImGui::Separator();
     }
@@ -335,6 +338,129 @@ namespace IWXMVM::UI
         Types::Filmtweaks filmtweakSettings = {visuals.filmtweaksActive, visuals.filmtweaksBrightness, visuals.filmtweaksContrast, 
             visuals.filmtweaksDesaturation, visuals.filmtweaksTintLight, visuals.filmtweaksTintDark, visuals.filmtweaksInvert};
         Mod::GetGameInterface()->SetFilmtweaks(filmtweakSettings);
+    }
+
+    std::string VisualsMenu::OpenFileDialog()
+    {
+        OPENFILENAMEA ofn;
+        CHAR szFile[1024] = {0}; // TODO: Do something about this.
+
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = "Config\0*.cfg\0All Files\0*.*\0";
+        ofn.nFilterIndex = 1;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+        if (GetOpenFileNameA(&ofn) == TRUE)
+            return (std::string)szFile;
+        else
+            return "";
+    }
+
+    void VisualsMenu::LoadConfig(std::string path)
+    {
+        std::ifstream in(path);
+        if (!in.is_open())
+        {
+            //LOG_ERROR("Cannot open preset file from {0:x}", path);
+            return;
+        }
+        
+        std::string dvar;
+        std::string value;
+        
+
+        while (!in.eof())
+        {
+            in >> dvar;
+            in >> value;
+
+            value.erase(std::remove_if(value.begin(), value.end(), [](char c) { return c == '\"'; }),
+                        value.end());  // remove all occurences of speech marks
+
+            // TODO: Add error handling for invalid configs.
+            // DOF
+            if (dvar == "r_dof_enable")
+                visuals.dofActive = std::stof(value);
+            else if (dvar == "r_dof_farBlur")
+                visuals.dofFarBlur = std::stof(value);
+            else if (dvar == "r_dof_farStart")
+                visuals.dofFarStart = std::stof(value);
+            else if (dvar == "r_dof_farEnd")
+                visuals.dofFarEnd = std::stof(value);
+            else if (dvar == "r_dof_nearBlur")
+                visuals.dofNearBlur = std::stof(value);
+            else if (dvar == "r_dof_nearStart")
+                visuals.dofNearStart = std::stof(value);
+            else if (dvar == "r_dof_nearEnd")
+                visuals.dofNearEnd = std::stof(value);
+
+            // SUN
+            else if (dvar == "r_lightTweakSunColor")
+            {
+                std::string g, b, a;
+                float r = std::stof(value);
+                in >> g;
+                in >> b;
+                in >> a;
+                g.erase(std::remove_if(g.begin(), g.end(), [](char c) { return c == '\"'; }), g.end());
+                b.erase(std::remove_if(b.begin(), b.end(), [](char c) { return c == '\"'; }), b.end());
+                visuals.sunColorUI = glm::vec3(r, std::stof(g), std::stof(b));
+            }
+            else if (dvar == "r_lightTweakSunDirection")
+            {
+                std::string y, z;
+                float x = std::stof(value);
+                in >> y;
+                in >> z;
+                y.erase(std::remove_if(y.begin(), y.end(), [](char c) { return c == '\"'; }), y.end());
+                z.erase(std::remove_if(z.begin(), z.end(), [](char c) { return c == '\"'; }), z.end());
+                visuals.sunDirectionUI = glm::vec3(x, std::stof(y), std::stof(z));
+            }
+            else if (dvar == "r_lightTweakSunLight")
+                visuals.sunBrightness = std::stof(value);
+
+            // FILMTWEAKS
+            else if (dvar == "r_filmTweakEnable")
+                visuals.filmtweaksActive = std::stof(value);
+            else if (dvar == "r_filmTweakBrightness")
+                visuals.filmtweaksBrightness = std::stof(value);
+            else if (dvar == "r_filmTweakContrast")
+                visuals.filmtweaksContrast = std::stof(value);
+            else if (dvar == "r_filmTweakDesaturation")
+                visuals.filmtweaksDesaturation = std::stof(value);
+            else if (dvar == "r_filmTweakLightTint")
+            {
+                std::string g, b, a;
+                float r = std::stof(value);
+                in >> g;
+                in >> b;
+                in >> a;
+                g.erase(std::remove_if(g.begin(), g.end(), [](char c) { return c == '\"'; }), g.end());
+                b.erase(std::remove_if(b.begin(), b.end(), [](char c) { return c == '\"'; }), b.end());
+                visuals.filmtweaksTintLight = glm::vec3(r, std::stof(g), std::stof(b));
+            }
+            else if (dvar == "r_filmTweakLightDark")
+            {
+                std::string g, b, a;
+                float r = std::stof(value);
+                in >> g;
+                in >> b;
+                in >> a;
+                g.erase(std::remove_if(g.begin(), g.end(), [](char c) { return c == '\"'; }), g.end());
+                b.erase(std::remove_if(b.begin(), b.end(), [](char c) { return c == '\"'; }), b.end());
+                visuals.filmtweaksTintDark = glm::vec3(r, std::stof(g), std::stof(b));
+            }
+            else if (dvar == "r_filmTweakInvert")
+                visuals.filmtweaksInvert = std::stof(value);
+        }
+
+        UpdateDof();
+        UpdateSun();
+        SetAngleFromPosition(visuals.sunDirectionUI);
+        UpdateFilmtweaks();
     }
 
     void VisualsMenu::Release()

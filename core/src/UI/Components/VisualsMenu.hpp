@@ -49,6 +49,8 @@ namespace IWXMVM::UI
             bool removeScore;
             bool removeFlashbang;
             bool removeKillfeed;
+            glm::vec3 team1Color;
+            glm::vec3 team2Color;
 
         };
 
@@ -64,6 +66,9 @@ namespace IWXMVM::UI
         void SetAngleFromPosition(glm::vec3);
         void UpdateSunAngle();
         void UpdateFilmtweaks();
+
+        std::string OpenFileDialog();
+        void LoadConfig(std::string);
 
         Visuals visuals;
         bool visualsInitialized = false;
