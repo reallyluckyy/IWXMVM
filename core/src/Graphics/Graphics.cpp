@@ -206,12 +206,12 @@ namespace IWXMVM::GFX
             heldAxis = std::nullopt;
         }
 
-        auto rotatedX = glm::rotate(scaledModel, glm::radians(-90.0f), glm::vec3(0, 0, 1));
-        DrawGizmoComponent(gizmo_translate_x, rotatedX, 0);
+        DrawGizmoComponent(gizmo_translate_x, scaledModel, 0);
 
-        DrawGizmoComponent(gizmo_translate_y, scaledModel, 1);
+        auto rotatedY = glm::rotate(scaledModel, glm::radians(90.0f), glm::vec3(0, 0, 1));
+        DrawGizmoComponent(gizmo_translate_y, rotatedY, 1);
 
-        auto rotatedZ = glm::rotate(scaledModel, glm::radians(90.0f), glm::vec3(1, 0, 0));
+        auto rotatedZ = glm::rotate(scaledModel, glm::radians(-90.0f), glm::vec3(0, 1, 0));
         DrawGizmoComponent(gizmo_translate_z, rotatedZ, 2);
 
         if (heldAxis.has_value())
@@ -237,10 +237,10 @@ namespace IWXMVM::GFX
         auto rotatedX = glm::rotate(scaledModel, glm::radians(-90.0f), glm::vec3(0, 0, 1));
         DrawGizmoComponent(gizmo_rotate_x, rotatedX, 0);
 
-        DrawGizmoComponent(gizmo_rotate_y, scaledModel, 1);
+        DrawGizmoComponent(gizmo_rotate_y, scaledModel, 2);
 
         auto rotatedZ = glm::rotate(scaledModel, glm::radians(90.0f), glm::vec3(1, 0, 0));
-        DrawGizmoComponent(gizmo_rotate_z, rotatedZ, 2);
+        DrawGizmoComponent(gizmo_rotate_z, rotatedZ, 1);
 
         if (heldAxis.has_value())
         {
