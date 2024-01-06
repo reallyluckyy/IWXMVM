@@ -46,6 +46,8 @@ namespace IWXMVM::UI
 
             SetAngleFromPosition(sun.direction);
 
+            defaultVisuals = visuals;
+            currentPreset = {"Default"};
             visualsInitialized = true;
         });
     }
@@ -75,20 +77,25 @@ namespace IWXMVM::UI
 
     void VisualsMenu::RenderConfigSection()
     {
-        if (ImGui::BeginCombo("##configCombo", "Default"))
+        if (ImGui::BeginCombo("##configCombo", currentPreset.name.c_str()))
         {
-            if (ImGui::Selectable(ICON_FA_CHESS_KING " Default Config", true))
+            if (ImGui::Selectable(ICON_FA_CHESS_KING " Default Preset", currentPreset.name == "Default"))
             {
-                // TODO: Restore default settings
+                visuals = defaultVisuals;
+                UpdateDof();
+                UpdateSun();
+                SetAngleFromPosition(visuals.sunDirectionUI);
+                UpdateFilmtweaks();
+                currentPreset = {"Default"};
             }
 
             ImGui::Separator();
             
             
-            for (auto& preset : recentPresets) // display presets in reverse order, most recent at the top
+            for (auto& preset : recentPresets)
             {
                 if (ImGui::Selectable((std::string(ICON_FA_ARROW_ROTATE_RIGHT) + " " + preset.name + "##" + preset.path).c_str(),
-                                      false))
+                                      currentPreset.name == preset.name))
                     LoadConfig(preset);
             }
             
@@ -369,9 +376,9 @@ namespace IWXMVM::UI
             return {};
     }
 
-    void VisualsMenu::LoadConfig(Preset cfg)
+    void VisualsMenu::LoadConfig(Preset preset)
     {
-        std::ifstream in(cfg.path);
+        std::ifstream in(preset.path);
         if (!in.is_open())
         {
             //LOG_ERROR("Cannot open preset file from {0:x}", path);
@@ -392,7 +399,7 @@ namespace IWXMVM::UI
 
             // TODO: Add error handling for invalid configs.
             // TODO: Make it non case sensitive?
-            // 
+            
             // DOF
             if (dvar == "r_dof_enable")
                 visuals.dofActive = std::stof(value);
@@ -474,7 +481,8 @@ namespace IWXMVM::UI
         SetAngleFromPosition(visuals.sunDirectionUI);
         UpdateFilmtweaks();
 
-        AddPresetToRecent(cfg);
+        AddPresetToRecent(preset);
+        currentPreset = preset;
     }
 
     void VisualsMenu::AddPresetToRecent(Preset newPreset)

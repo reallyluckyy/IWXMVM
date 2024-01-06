@@ -76,7 +76,10 @@ namespace IWXMVM::UI
         void LoadConfig(Preset);
         void AddPresetToRecent(Preset);
 
+
         Visuals visuals;
+        Visuals defaultVisuals;
         bool visualsInitialized = false;
+        Preset currentPreset;
     };
 }  // namespace IWXMVM::UI
