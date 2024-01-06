@@ -42,6 +42,7 @@ namespace IWXMVM::UI
                        glm::make_vec3(filmtweaks.tintLight),
                        glm::make_vec3(filmtweaks.tintDark),
                        filmtweaks.invert};
+            recentPresets = {};
 
             SetAngleFromPosition(sun.direction);
 
@@ -82,8 +83,14 @@ namespace IWXMVM::UI
             }
 
             ImGui::Separator();
-            ImGui::Selectable(ICON_FA_ARROW_ROTATE_RIGHT " config1.cfg", false);
-            ImGui::Selectable(ICON_FA_ARROW_ROTATE_RIGHT " config2.cfg", false);
+            
+            
+            for (auto& preset : recentPresets) // display presets in reverse order, most recent at the top
+            {
+                if (ImGui::Selectable((std::string(ICON_FA_ARROW_ROTATE_RIGHT) + " " + preset.name + "##" + preset.path).c_str(),
+                                      false))
+                    LoadConfig(preset);
+            }
             
             ImGui::Separator();
             if (ImGui::Selectable(ICON_FA_FOLDER_OPEN " Load from file", false))
@@ -385,6 +392,7 @@ namespace IWXMVM::UI
 
             // TODO: Add error handling for invalid configs.
             // TODO: Make it non case sensitive?
+            // 
             // DOF
             if (dvar == "r_dof_enable")
                 visuals.dofActive = std::stof(value);
@@ -465,6 +473,22 @@ namespace IWXMVM::UI
         UpdateSun();
         SetAngleFromPosition(visuals.sunDirectionUI);
         UpdateFilmtweaks();
+
+        AddPresetToRecent(cfg);
+    }
+
+    void VisualsMenu::AddPresetToRecent(Preset newPreset)
+    {
+        for (int i = 0; i < recentPresets.size(); ++i)
+        {
+            Preset preset = recentPresets[i];
+            if (preset.path == newPreset.path)
+            {
+                recentPresets.erase(recentPresets.begin() + i);
+                break;
+            }
+        }
+        recentPresets.push_back(newPreset);
     }
 
     void VisualsMenu::Release()

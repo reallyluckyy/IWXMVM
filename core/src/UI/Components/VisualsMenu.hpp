@@ -56,8 +56,8 @@ namespace IWXMVM::UI
             bool removeKillfeed;
             glm::vec3 team1Color;
             glm::vec3 team2Color;
-
         };
+        std::vector<Preset> recentPresets;
 
         void Initialize() final;
         void RenderConfigSection();
@@ -74,6 +74,7 @@ namespace IWXMVM::UI
 
         Preset OpenFileDialog();
         void LoadConfig(Preset);
+        void AddPresetToRecent(Preset);
 
         Visuals visuals;
         bool visualsInitialized = false;
