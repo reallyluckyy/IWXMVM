@@ -88,9 +88,9 @@ namespace IWXMVM::UI
             ImGui::Separator();
             if (ImGui::Selectable(ICON_FA_FOLDER_OPEN " Load from file", false))
             {
-                std::string path = OpenFileDialog();
-                if (path != "")
-                    LoadConfig(path);
+                Preset preset = OpenFileDialog();
+                if (preset.path != "")
+                    LoadConfig(preset);
             }
 
             ImGui::EndCombo();
@@ -340,7 +340,7 @@ namespace IWXMVM::UI
         Mod::GetGameInterface()->SetFilmtweaks(filmtweakSettings);
     }
 
-    std::string VisualsMenu::OpenFileDialog()
+    VisualsMenu::Preset VisualsMenu::OpenFileDialog()
     {
         OPENFILENAMEA ofn;
         CHAR szFile[1024] = {0}; // TODO: Do something about this.
@@ -354,14 +354,17 @@ namespace IWXMVM::UI
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
         if (GetOpenFileNameA(&ofn) == TRUE)
-            return (std::string)szFile;
+        {
+            std::string path = (std::string)szFile;
+            return {path.substr(path.find_last_of("/\\") + 1), path};
+        }
         else
-            return "";
+            return {};
     }
 
-    void VisualsMenu::LoadConfig(std::string path)
+    void VisualsMenu::LoadConfig(Preset cfg)
     {
-        std::ifstream in(path);
+        std::ifstream in(cfg.path);
         if (!in.is_open())
         {
             //LOG_ERROR("Cannot open preset file from {0:x}", path);
@@ -371,16 +374,17 @@ namespace IWXMVM::UI
         std::string dvar;
         std::string value;
         
-
+        // TODO: Refactor all this
         while (!in.eof())
         {
             in >> dvar;
             in >> value;
 
             value.erase(std::remove_if(value.begin(), value.end(), [](char c) { return c == '\"'; }),
-                        value.end());  // remove all occurences of speech marks
+                        value.end());  // removes all occurences of quotes
 
             // TODO: Add error handling for invalid configs.
+            // TODO: Make it non case sensitive?
             // DOF
             if (dvar == "r_dof_enable")
                 visuals.dofActive = std::stof(value);

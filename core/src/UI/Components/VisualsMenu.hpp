@@ -13,6 +13,11 @@ namespace IWXMVM::UI
         void Release() final;
 
        private:
+        struct Preset
+        {
+            std::string name;
+            std::string path;
+        };
         struct Visuals
         {
             // DOF
@@ -67,8 +72,8 @@ namespace IWXMVM::UI
         void UpdateSunAngle();
         void UpdateFilmtweaks();
 
-        std::string OpenFileDialog();
-        void LoadConfig(std::string);
+        Preset OpenFileDialog();
+        void LoadConfig(Preset);
 
         Visuals visuals;
         bool visualsInitialized = false;
