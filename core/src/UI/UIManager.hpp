@@ -117,6 +117,12 @@ namespace IWXMVM::UI
             showDebugPanel = !showDebugPanel;
         }
 
+        std::recursive_mutex& GetMutex()
+        {
+            static std::recursive_mutex mutex;
+            return mutex;
+        }
+
        private:
         UIManager()
         {
