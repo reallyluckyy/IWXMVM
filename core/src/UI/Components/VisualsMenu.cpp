@@ -94,7 +94,7 @@ namespace IWXMVM::UI
             
             for (auto& preset : recentPresets)
             {
-                if (ImGui::Selectable((std::string(ICON_FA_ARROW_ROTATE_RIGHT) + " " + preset.name + "##" + preset.path).c_str(),
+                if (ImGui::Selectable((std::string(ICON_FA_ARROW_ROTATE_RIGHT) + " " + preset.name + "##" + preset.path.string()).c_str(),
                                       currentPreset.name == preset.name))
                     LoadConfig(preset);
             }
@@ -369,8 +369,8 @@ namespace IWXMVM::UI
 
         if (GetOpenFileNameA(&ofn) == TRUE)
         {
-            std::string path = (std::string)szFile;
-            return {path.substr(path.find_last_of("/\\") + 1), path};
+            auto path = std::filesystem::u8path(szFile);
+            return {path.filename().string(), path};
         }
         else
             return {};
@@ -392,6 +392,11 @@ namespace IWXMVM::UI
         while (!in.eof())
         {
             in >> dvar;
+
+            dvar.erase(std::remove_if(dvar.begin(), dvar.end(), [](char c) { return c == '\"'; }), dvar.end());
+            if (dvar == "seta")
+                continue;
+
             in >> value;
 
             value.erase(std::remove_if(value.begin(), value.end(), [](char c) { return c == '\"'; }),

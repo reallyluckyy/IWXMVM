@@ -16,7 +16,7 @@ namespace IWXMVM::UI
         struct Preset
         {
             std::string name;
-            std::string path;
+            std::filesystem::path path;
         };
         struct Visuals
         {
