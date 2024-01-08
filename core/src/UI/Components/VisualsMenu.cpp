@@ -491,7 +491,7 @@ namespace IWXMVM::UI
                     continue;
                 visuals.filmtweaksTintLight = glm::vec3(r, g, b);
             }
-            else if (dvar == "r_filmtweaklightdark")
+            else if (dvar == "r_filmtweakdarktint")
             {
                 std::string sg, sb;
                 float r = value;
