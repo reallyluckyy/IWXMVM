@@ -18,6 +18,25 @@ namespace IWXMVM::UI
             if (visualsInitialized)
                 return;
 
+            validDvars = {"r_dof_enable",
+                          "r_dof_farblur",
+                          "r_dof_farstart",
+                          "r_dof_farend",
+                          "r_dof_nearblur",
+                          "r_dof_nearstart",
+                          "r_dof_nearEnd",
+                          "r_filmtweakenable",
+                          "r_filmtweakbrightness",
+                          "r_filmtweakcontrast",
+                          "r_filmtweakdesaturation",
+                          "r_filmtweaklighttint",
+                          "r_filmtweakdarktint",
+                          "r_filmtweakinvert",       
+                          "r_lighttweaksuncolor", 
+                          "r_lighttweaksundirection",
+                          "r_lighttweaksunlight"
+            };
+
             auto dof = Mod::GetGameInterface()->GetDof();
             auto sun = Mod::GetGameInterface()->GetSun();
             auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
@@ -386,99 +405,107 @@ namespace IWXMVM::UI
         }
         
         std::string dvar;
-        std::string value;
+        std::string strValue;
         
-        // TODO: Refactor all this
-        while (!in.eof())
+        
+        while (!in.eof() || tokenBacklog != "")
         {
-            in >> dvar;
+            dvar = GetNextToken(in);
 
-            dvar.erase(std::remove_if(dvar.begin(), dvar.end(), [](char c) { return c == '\"'; }), dvar.end());
-            if (dvar == "seta")
+            if (validDvars.find(dvar) == validDvars.end())
                 continue;
 
-            in >> value;
+            strValue = GetNextToken(in);
+            float value;
+            if (!ConvertStringToFloat(strValue, value))
+                continue;
 
-            value.erase(std::remove_if(value.begin(), value.end(), [](char c) { return c == '\"'; }),
-                        value.end());  // removes all occurences of quotes
-
-            // TODO: Add error handling for invalid configs.
-            // TODO: Make it non case sensitive?
-            
             // DOF
             if (dvar == "r_dof_enable")
-                visuals.dofActive = std::stof(value);
-            else if (dvar == "r_dof_farBlur")
-                visuals.dofFarBlur = std::stof(value);
-            else if (dvar == "r_dof_farStart")
-                visuals.dofFarStart = std::stof(value);
-            else if (dvar == "r_dof_farEnd")
-                visuals.dofFarEnd = std::stof(value);
-            else if (dvar == "r_dof_nearBlur")
-                visuals.dofNearBlur = std::stof(value);
-            else if (dvar == "r_dof_nearStart")
-                visuals.dofNearStart = std::stof(value);
-            else if (dvar == "r_dof_nearEnd")
-                visuals.dofNearEnd = std::stof(value);
+                visuals.dofActive = value;
+            else if (dvar == "r_dof_farblur")
+                visuals.dofFarBlur = value;
+            else if (dvar == "r_dof_farstart")
+                visuals.dofFarStart = value;
+            else if (dvar == "r_dof_farend")
+                visuals.dofFarEnd = value;
+            else if (dvar == "r_dof_nearblur")
+                visuals.dofNearBlur = value;
+            else if (dvar == "r_dof_nearstart")
+                visuals.dofNearStart = value;
+            else if (dvar == "r_dof_nearend")
+                visuals.dofNearEnd = value;
 
             // SUN
-            else if (dvar == "r_lightTweakSunColor")
+            else if (dvar == "r_lighttweaksuncolor")
             {
-                std::string g, b, a;
-                float r = std::stof(value);
-                in >> g;
-                in >> b;
-                in >> a;
-                g.erase(std::remove_if(g.begin(), g.end(), [](char c) { return c == '\"'; }), g.end());
-                b.erase(std::remove_if(b.begin(), b.end(), [](char c) { return c == '\"'; }), b.end());
-                visuals.sunColorUI = glm::vec3(r, std::stof(g), std::stof(b));
+                std::string sg, sb, sa;
+                float r = value;
+                float g, b, a;
+                sg = GetNextToken(in);
+                if (!ConvertStringToFloat(sg, g))
+                    continue;
+                sb = GetNextToken(in);
+                if (!ConvertStringToFloat(sb, b))
+                    continue;
+                sa = GetNextToken(in);
+                if (!ConvertStringToFloat(sa, a))
+                    continue;
+                visuals.sunColorUI = glm::vec3(r, g, b);
             }
-            else if (dvar == "r_lightTweakSunDirection")
+            else if (dvar == "r_lighttweaksundirection")
             {
-                std::string y, z;
-                float x = std::stof(value);
-                in >> y;
-                in >> z;
-                y.erase(std::remove_if(y.begin(), y.end(), [](char c) { return c == '\"'; }), y.end());
-                z.erase(std::remove_if(z.begin(), z.end(), [](char c) { return c == '\"'; }), z.end());
-                visuals.sunDirectionUI = glm::vec3(x, std::stof(y), std::stof(z));
+                std::string sy, sz;
+                float x = value;
+                float y, z;
+                sy = GetNextToken(in);
+                if (!ConvertStringToFloat(sy, y))
+                    continue;
+                sz = GetNextToken(in);
+                if (!ConvertStringToFloat(sz, z))
+                    continue;
+                visuals.sunDirectionUI = glm::vec3(x, y, z);
             }
-            else if (dvar == "r_lightTweakSunLight")
-                visuals.sunBrightness = std::stof(value);
+            else if (dvar == "r_lighttweaksunlight")
+                visuals.sunBrightness = value;
 
             // FILMTWEAKS
-            else if (dvar == "r_filmTweakEnable")
-                visuals.filmtweaksActive = std::stof(value);
-            else if (dvar == "r_filmTweakBrightness")
-                visuals.filmtweaksBrightness = std::stof(value);
-            else if (dvar == "r_filmTweakContrast")
-                visuals.filmtweaksContrast = std::stof(value);
-            else if (dvar == "r_filmTweakDesaturation")
-                visuals.filmtweaksDesaturation = std::stof(value);
-            else if (dvar == "r_filmTweakLightTint")
+            else if (dvar == "r_filmtweakenable")
+                visuals.filmtweaksActive = value;
+            else if (dvar == "r_filmtweakbrightness")
+                visuals.filmtweaksBrightness = value;
+            else if (dvar == "r_filmtweakcontrast")
+                visuals.filmtweaksContrast = value;
+            else if (dvar == "r_filmtweakdesaturation")
+                visuals.filmtweaksDesaturation = value;
+            else if (dvar == "r_filmtweaklighttint")
             {
-                std::string g, b, a;
-                float r = std::stof(value);
-                in >> g;
-                in >> b;
-                in >> a;
-                g.erase(std::remove_if(g.begin(), g.end(), [](char c) { return c == '\"'; }), g.end());
-                b.erase(std::remove_if(b.begin(), b.end(), [](char c) { return c == '\"'; }), b.end());
-                visuals.filmtweaksTintLight = glm::vec3(r, std::stof(g), std::stof(b));
+                std::string sg, sb;
+                float r = value;
+                float g, b;
+                sg = GetNextToken(in);
+                if (!ConvertStringToFloat(sg, g))
+                    continue;
+                sb = GetNextToken(in);
+                if (!ConvertStringToFloat(sb, b))
+                    continue;
+                visuals.filmtweaksTintLight = glm::vec3(r, g, b);
             }
-            else if (dvar == "r_filmTweakLightDark")
+            else if (dvar == "r_filmtweaklightdark")
             {
-                std::string g, b, a;
-                float r = std::stof(value);
-                in >> g;
-                in >> b;
-                in >> a;
-                g.erase(std::remove_if(g.begin(), g.end(), [](char c) { return c == '\"'; }), g.end());
-                b.erase(std::remove_if(b.begin(), b.end(), [](char c) { return c == '\"'; }), b.end());
-                visuals.filmtweaksTintDark = glm::vec3(r, std::stof(g), std::stof(b));
+                std::string sg, sb;
+                float r = value;
+                float g, b;
+                sg = GetNextToken(in);
+                if (!ConvertStringToFloat(sg, g))
+                    continue;
+                sb = GetNextToken(in);
+                if (!ConvertStringToFloat(sb, b))
+                    continue;
+                visuals.filmtweaksTintDark = glm::vec3(r, g, b);
             }
-            else if (dvar == "r_filmTweakInvert")
-                visuals.filmtweaksInvert = std::stof(value);
+            else if (dvar == "r_filmtweakinvert")
+                visuals.filmtweaksInvert = value;
         }
 
         UpdateDof();
@@ -488,6 +515,68 @@ namespace IWXMVM::UI
 
         AddPresetToRecent(preset);
         currentPreset = preset;
+    }
+
+    std::string VisualsMenu::GetNextToken(std::ifstream& in)
+    {
+        if (tokenBacklog != "")
+        {
+            std::string token = tokenBacklog;
+            tokenBacklog = "";
+            if (token != "set" && token != "seta" && token != "sets")
+                return token;
+        }
+        while (!in.eof())
+        {
+            std::string token;
+            in >> token;
+
+            if (ProcessString(token))
+                return token;
+        }
+        return "";
+    }
+
+    bool VisualsMenu::ProcessString(std::string& str)
+    {
+        str.erase(std::remove_if(str.begin(), str.end(), [](char c) { return c == '\"'; }),
+                  str.end());  // remove quotes
+
+        std::string lowerStr{};
+        for (char c : str)
+            lowerStr += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+
+        if (lowerStr == "set" || lowerStr == "seta" || lowerStr == "sets")
+            return false;
+
+        // at most, the string stores `value;nextdvar` without whitespace
+        int semicolonPos = lowerStr.find(';');
+        if (semicolonPos != std::string::npos)
+        {
+            str = lowerStr.substr(0, semicolonPos);
+            tokenBacklog = lowerStr.substr(semicolonPos + 1);
+            return true;
+        }
+
+        str = lowerStr;
+        return true;
+    }
+
+    bool VisualsMenu::ConvertStringToFloat(std::string& str, float& val)
+    {
+        try
+        {
+            val = std::stof(str); // is there a method like this for string_view ?
+            return true;
+        }
+        catch (const std::invalid_argument&)
+        {
+            return false;
+        }
+        catch (const std::out_of_range&)
+        {
+            false;
+        }
     }
 
     void VisualsMenu::AddPresetToRecent(Preset newPreset)

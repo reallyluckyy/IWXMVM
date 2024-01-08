@@ -3,6 +3,7 @@
 #include "glm/vec3.hpp"
 #include "Types/dof.hpp"
 #include "Types/Filmtweaks.hpp"
+#include <unordered_set>
 
 namespace IWXMVM::UI
 {
@@ -58,6 +59,7 @@ namespace IWXMVM::UI
             glm::vec3 team2Color;
         };
         std::vector<Preset> recentPresets;
+        std::unordered_set<std::string> validDvars;
 
         void Initialize() final;
         void RenderConfigSection();
@@ -74,12 +76,16 @@ namespace IWXMVM::UI
 
         Preset OpenFileDialog();
         void LoadConfig(Preset);
+        std::string GetNextToken(std::ifstream&);
         void AddPresetToRecent(Preset);
+        bool ProcessString(std::string&);
+        bool ConvertStringToFloat(std::string&, float&);
 
 
         Visuals visuals;
         Visuals defaultVisuals;
         bool visualsInitialized = false;
         Preset currentPreset;
+        std::string tokenBacklog;
     };
 }  // namespace IWXMVM::UI
