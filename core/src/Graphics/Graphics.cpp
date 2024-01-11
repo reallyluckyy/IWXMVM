@@ -232,7 +232,7 @@ namespace IWXMVM::GFX
 
     void GraphicsManager::DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation)
     {
-        auto scaledModel = translation * glm::scale(glm::vec3(1, 1, 1) * 25);
+        auto scaledModel = translation * glm::scale(glm::vec3(1, 1, 1) * 3);
 
         if (Input::KeyUp(ImGuiKey_MouseLeft))
         {
