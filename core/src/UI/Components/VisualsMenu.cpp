@@ -399,7 +399,7 @@ namespace IWXMVM::UI
         std::ifstream in(preset.path);
         if (!in.is_open())
         {
-            //LOG_ERROR("Cannot open preset file from {0:x}", path);
+            LOG_ERROR("Failed to load config file: {}", preset.path.string());
             return;
         }
         
