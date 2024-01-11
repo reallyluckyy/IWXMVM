@@ -375,10 +375,9 @@ namespace IWXMVM::UI
 
     VisualsMenu::Preset VisualsMenu::OpenFileDialog()
     {
-        OPENFILENAMEA ofn;
         CHAR szFile[1024] = {0}; // TODO: Do something about this.
 
-        ZeroMemory(&ofn, sizeof(ofn));
+        OPENFILENAMEA ofn = {};
         ofn.lStructSize = sizeof(ofn);
         ofn.lpstrFile = szFile;
         ofn.nMaxFile = sizeof(szFile);
@@ -523,7 +522,7 @@ namespace IWXMVM::UI
         {
             std::string token = tokenBacklog;
             tokenBacklog = "";
-            if (token != "set" && token != "seta" && token != "sets")
+            if (token != "set" && token != "seta" && token != "sets" && token != "setu")
                 return token;
         }
         while (!in.eof())
@@ -575,7 +574,7 @@ namespace IWXMVM::UI
         }
         catch (const std::out_of_range&)
         {
-            false;
+            return false;
         }
     }
 
