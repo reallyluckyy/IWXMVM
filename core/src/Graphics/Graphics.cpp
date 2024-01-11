@@ -46,6 +46,25 @@ namespace IWXMVM::GFX
         BufferManager::Get().Uninitialize();
     }
 
+    glm::mat4 GetViewMatrix()
+    {
+        auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        return glm::lookAt(camera->GetPosition(), camera->GetPosition() + camera->GetForwardVector(), 
+            glm::rotateY(glm::vec3(0, 0, 1), glm::radians(camera->GetRotation().z)));
+    }
+
+    glm::mat4 GetProjectionMatrix()
+    {
+        auto& camera = Components::CameraManager::Get().GetActiveCamera();
+
+        const auto aspectRatio = ImGui::GetMainViewport()->Size.x / ImGui::GetMainViewport()->Size.y;
+        const auto tanHalfFovX = glm::tan(glm::radians(camera->GetFov()) * 0.5f);
+        const auto tanHalfFovY = tanHalfFovX * (1.0f / aspectRatio);
+        const auto fovY = glm::atan(tanHalfFovY) * 2.0f;
+        const auto znear = Mod::GetGameInterface()->GetDvar("r_znear").value().value->floating_point;
+        return glm::perspective(fovY, aspectRatio, znear, 10000.0f);
+    }
+
     void GraphicsManager::SetupRenderState() const noexcept
     {
         IDirect3DDevice9* device = D3D9::GetDevice();
@@ -77,17 +96,8 @@ namespace IWXMVM::GFX
         device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
         device->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
-        auto& camera = Components::CameraManager::Get().GetActiveCamera();
-        
-        const auto view = glm::lookAt(camera->GetPosition(), camera->GetPosition() + camera->GetForwardVector(),
-                                      glm::rotateY(glm::vec3(0, 0, 1), glm::radians(camera->GetRotation().z)));
-
-        const auto aspectRatio = ImGui::GetMainViewport()->Size.x / ImGui::GetMainViewport()->Size.y;
-        const auto tanHalfFovX = glm::tan(glm::radians(camera->GetFov()) * 0.5f);
-        const auto tanHalfFovY = tanHalfFovX * (1.0f / aspectRatio);
-        const auto fovY = glm::atan(tanHalfFovY) * 2.0f;
-        const auto znear = Mod::GetGameInterface()->GetDvar("r_znear").value().value->floating_point;
-        const auto projection = glm::perspective(fovY, aspectRatio, znear, 10000.0f);
+        const auto view = GetViewMatrix();
+        const auto projection = GetProjectionMatrix();
 
         device->SetTransform(D3DTS_VIEW, reinterpret_cast<const D3DMATRIX*>(&view));
         device->SetTransform(D3DTS_PROJECTION, reinterpret_cast<const D3DMATRIX*>(&projection));
@@ -121,15 +131,9 @@ namespace IWXMVM::GFX
 
     bool GraphicsManager::MouseIntersects(ImVec2 mousePos, Mesh& mesh, glm::mat4 model)
     {
-        const auto& camera = Components::CameraManager::Get().GetActiveCamera();
-        const auto view = glm::lookAt(camera->GetPosition(), camera->GetPosition() + camera->GetForwardVector(),
-                                      glm::rotateY(glm::vec3(0, 0, 1), glm::radians(camera->GetRotation().z)));
-        const auto aspectRatio = ImGui::GetMainViewport()->Size.x / ImGui::GetMainViewport()->Size.y;
-        const auto tanHalfFovX = glm::tan(glm::radians(camera->GetFov()) * 0.5f);
-        const auto tanHalfFovY = tanHalfFovX * (1.0f / aspectRatio);
-        const auto fovY = glm::atan(tanHalfFovY) * 2.0f;
-        const auto znear = Mod::GetGameInterface()->GetDvar("r_znear").value().value->floating_point;
-        const auto projection = glm::perspective(fovY, aspectRatio, znear, 10000.0f);
+        auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        const auto view = GetViewMatrix();
+        const auto projection = GetProjectionMatrix();
         const auto mouseRayDirection = GetMouseRay(mousePos, projection, view);
         auto minDistance = std::numeric_limits<float>::max();
 
