@@ -223,6 +223,21 @@ namespace IWXMVM::IW3
             return dof;
         }
 
+        Types::Filmtweaks GetFilmtweaks()
+        {
+            Types::Filmtweaks filmtweaks = {
+                Structures::FindDvar("r_filmUseTweaks")->current.enabled &&
+                    Structures::FindDvar("r_filmTweakEnable")->current.enabled,
+                Structures::FindDvar("r_filmTweakBrightness")->current.value,
+                Structures::FindDvar("r_filmTweakContrast")->current.value,
+                Structures::FindDvar("r_filmTweakDesaturation")->current.value,
+                glm::make_vec3(Structures::FindDvar("r_filmTweakLightTint")->current.vector),
+                glm::make_vec3(Structures::FindDvar("r_filmTweakDarkTint")->current.vector),
+                Structures::FindDvar("r_filmTweakInvert")->current.enabled};
+
+            return filmtweaks;
+        }
+
         void SetSun(Types::Sun sun) final
         {
             auto gfxWorld = Structures::GetGfxWorld();
@@ -245,6 +260,21 @@ namespace IWXMVM::IW3
             Structures::FindDvar("r_dof_nearStart")->current.value = dof.nearStart;
             Structures::FindDvar("r_dof_nearEnd")->current.value = dof.nearEnd;
             Structures::FindDvar("r_dof_bias")->current.value = dof.bias;
+        }
+
+        void SetFilmtweaks(Types::Filmtweaks filmtweaks) final
+        {
+            Structures::FindDvar("r_filmUseTweaks")->current.enabled = filmtweaks.enabled;
+            Structures::FindDvar("r_filmTweakEnable")->current.enabled = filmtweaks.enabled;
+            Structures::FindDvar("r_filmTweakBrightness")->current.value = filmtweaks.brightness;
+            Structures::FindDvar("r_filmTweakContrast")->current.value = filmtweaks.contrast;
+            Structures::FindDvar("r_filmTweakDesaturation")->current.value = filmtweaks.desaturation;
+            for (int i = 0; i < 3; ++i)
+            {
+                Structures::FindDvar("r_filmTweakLightTint")->current.vector[i] = glm::value_ptr(filmtweaks.tintLight)[i];
+                Structures::FindDvar("r_filmTweakDarkTint")->current.vector[i] = glm::value_ptr(filmtweaks.tintDark)[i];
+            }
+            Structures::FindDvar("r_filmTweakInvert")->current.enabled = filmtweaks.invert;
         }
 
         std::atomic<std::int32_t> tick;

@@ -12,15 +12,34 @@ namespace IWXMVM::UI
     void VisualsMenu::Initialize()
     {
         // TODO: Come up with a proper plan on when we want to initialize the UI values from the games values
-        // TODO: Ideally we dont want to ever overwrite a users custom settings, but what if the map changes,
-        // TODO: the user hasnt edited the sun settings yet, and suddenly the sun is in a different position?
+        // TODO: Ideally we dont want to ever overwrite a users custom settings, but what if the map changes
 
         Events::RegisterListener(EventType::OnDemoLoad, [&]() {
             if (visualsInitialized)
                 return;
 
+            validDvars = {"r_dof_enable",
+                          "r_dof_farblur",
+                          "r_dof_farstart",
+                          "r_dof_farend",
+                          "r_dof_nearblur",
+                          "r_dof_nearstart",
+                          "r_dof_nearEnd",
+                          "r_filmtweakenable",
+                          "r_filmtweakbrightness",
+                          "r_filmtweakcontrast",
+                          "r_filmtweakdesaturation",
+                          "r_filmtweaklighttint",
+                          "r_filmtweakdarktint",
+                          "r_filmtweakinvert",       
+                          "r_lighttweaksuncolor", 
+                          "r_lighttweaksundirection",
+                          "r_lighttweaksunlight"
+            };
+
             auto dof = Mod::GetGameInterface()->GetDof();
             auto sun = Mod::GetGameInterface()->GetSun();
+            auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
 
             visuals = {dof.enabled,
                        dof.farBlur,
@@ -32,31 +51,79 @@ namespace IWXMVM::UI
                        dof.bias,
                        glm::make_vec3(sun.color),
                        glm::make_vec3(sun.direction),
-                       0,  // TODO: initialize pitch and yaw
+                       0,  
                        0,
-                       sun.brightness};
+                       sun.brightness,
+                       filmtweaks.enabled,
+                       filmtweaks.brightness,
+                       filmtweaks.contrast,
+                       filmtweaks.desaturation,
+                       glm::make_vec3(filmtweaks.tintLight),
+                       glm::make_vec3(filmtweaks.tintDark),
+                       filmtweaks.invert};
+            recentPresets = {};
 
+            SetAngleFromPosition(sun.direction);
+
+            defaultVisuals = visuals;
+            currentPreset = {"Default"};
             visualsInitialized = true;
         });
     }
 
-    void RenderConfigSection()
+    void VisualsMenu::Render()
     {
-        if (ImGui::BeginCombo("##configCombo", "Default"))
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
+        if (ImGui::Begin("Visuals", NULL, flags))
         {
-            if (ImGui::Selectable(ICON_FA_CHESS_KING " Default Config", true))
+            if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
             {
-                // TODO: Restore default settings
+                ImGui::Text("Load a demo to control visual settings");
+                ImGui::End();
+                return;
+            }
+
+            RenderConfigSection();
+            RenderMiscSection();
+
+            RenderSun();
+            RenderFilmtweaks();
+            RenderDOF();
+
+            ImGui::End();
+        }
+    }
+
+    void VisualsMenu::RenderConfigSection()
+    {
+        if (ImGui::BeginCombo("##configCombo", currentPreset.name.c_str()))
+        {
+            if (ImGui::Selectable(ICON_FA_CHESS_KING " Default Preset", currentPreset.name == "Default"))
+            {
+                visuals = defaultVisuals;
+                UpdateDof();
+                UpdateSun();
+                SetAngleFromPosition(visuals.sunDirectionUI);
+                UpdateFilmtweaks();
+                currentPreset = {"Default"};
             }
 
             ImGui::Separator();
-            ImGui::Selectable(ICON_FA_ARROW_ROTATE_RIGHT " config1.cfg", false);
-            ImGui::Selectable(ICON_FA_ARROW_ROTATE_RIGHT " config2.cfg", false);
+            
+            
+            for (auto& preset : recentPresets)
+            {
+                if (ImGui::Selectable((std::string(ICON_FA_ARROW_ROTATE_RIGHT) + " " + preset.name + "##" + preset.path.string()).c_str(),
+                                      currentPreset.name == preset.name))
+                    LoadConfig(preset);
+            }
             
             ImGui::Separator();
             if (ImGui::Selectable(ICON_FA_FOLDER_OPEN " Load from file", false))
             {
-                // TODO: open file browse dialog
+                Preset preset = OpenFileDialog();
+                if (preset.path != "")
+                    LoadConfig(preset);
             }
 
             ImGui::EndCombo();
@@ -79,7 +146,7 @@ namespace IWXMVM::UI
         ImGui::Separator();
     }
 
-    void RenderMiscSection()
+    void VisualsMenu::RenderMiscSection()
     {
         ImGui::Dummy(ImVec2(0.0f, 10.0f));
         ImGui::Text("Misc");
@@ -90,32 +157,28 @@ namespace IWXMVM::UI
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeHud;
-        ImGui::Checkbox("##removeHudCheckbox", &removeHud);
+        ImGui::Checkbox("##removeHudCheckbox", &visuals.removeHud);
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Remove Hitmarker");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeHitmarker;
-        ImGui::Checkbox("##removeHitmarkerCheckbox", &removeHitmarker);
+        ImGui::Checkbox("##removeHitmarkerCheckbox", &visuals.removeHitmarker);
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Remove Score");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeScore;
-        ImGui::Checkbox("##removeScoreCheckbox", &removeScore);
+        ImGui::Checkbox("##removeScoreCheckbox", &visuals.removeScore);
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Remove Flashbang");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeFlashbang;
-        ImGui::Checkbox("##removeFlashbangCheckbox", &removeFlashbang);
+        ImGui::Checkbox("##removeFlashbangCheckbox", &visuals.removeFlashbang);
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
@@ -124,8 +187,7 @@ namespace IWXMVM::UI
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static bool removeKillfeed;
-        ImGui::Checkbox("##removeKillfeedCheckbox", &removeKillfeed);
+        ImGui::Checkbox("##removeKillfeedCheckbox", &visuals.removeKillfeed);
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Team 1 Color");
@@ -148,26 +210,43 @@ namespace IWXMVM::UI
         ImGui::Separator();
     }
 
-    void VisualsMenu::Render()
+    void VisualsMenu::RenderFilmtweaks()
     {
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
-        if (ImGui::Begin("Visuals", NULL, flags))
-        {
-            if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
-            {
-                ImGui::Text("Load a demo to control visual settings");
-                ImGui::End();
-                return;
-            }
+        ImGui::AlignTextToFramePadding();
 
-            RenderConfigSection();
-            RenderMiscSection();
+        ImGui::Text("Filmtweaks");
 
-            RenderDOF();
-            RenderSun();
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Enable Filmtweaks");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        if(ImGui::Checkbox("##enableFilmtweaksCheckbox", &visuals.filmtweaksActive))
+            UpdateFilmtweaks();
 
-            ImGui::End();
-        }
+        // TODO: Make these all keyframable
+        if (ImGui::SliderFloat("Brightness", &visuals.filmtweaksBrightness, -1, 1))
+            UpdateFilmtweaks();
+        if (ImGui::SliderFloat("Contrast", &visuals.filmtweaksContrast, 0, 4))
+            UpdateFilmtweaks();
+        if (ImGui::SliderFloat("Desaturation", &visuals.filmtweaksDesaturation, 0, 4))
+            UpdateFilmtweaks();
+        if (ImGui::ColorEdit3("Tint Light", glm::value_ptr(visuals.filmtweaksTintLight)))
+            UpdateFilmtweaks();
+        if (ImGui::ColorEdit3("Tint Dark", glm::value_ptr(visuals.filmtweaksTintDark)))
+            UpdateFilmtweaks();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Invert");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+        if(ImGui::Checkbox("##invertFilmtweaksCheckbox", &visuals.filmtweaksInvert))
+            UpdateFilmtweaks();
+
+        
+
+        ImGui::Separator();
     }
 
     void VisualsMenu::RenderDOF()
@@ -273,6 +352,244 @@ namespace IWXMVM::UI
         visuals.sunDirectionUI.z = -(origin + radius * glm::sin(rotation.x));
 
         UpdateSun();
+    }
+
+    void VisualsMenu::SetAngleFromPosition(glm::vec3 pos)
+    {
+        auto norm = glm::normalize(pos);
+
+        float pitch = glm::asin(norm.y);
+        float yaw = glm::atan(norm.z, norm.x);
+
+        visuals.sunPitch = glm::mod(pitch + 2.0f * glm::pi<float>(), 2.0f * glm::pi<float>());
+        visuals.sunYaw = glm::mod(yaw + 2.0f * glm::pi<float>(), 2.0f * glm::pi<float>());
+    }
+
+    void VisualsMenu::UpdateFilmtweaks()
+    {
+        
+        Types::Filmtweaks filmtweakSettings = {visuals.filmtweaksActive, visuals.filmtweaksBrightness, visuals.filmtweaksContrast, 
+            visuals.filmtweaksDesaturation, visuals.filmtweaksTintLight, visuals.filmtweaksTintDark, visuals.filmtweaksInvert};
+        Mod::GetGameInterface()->SetFilmtweaks(filmtweakSettings);
+    }
+
+    VisualsMenu::Preset VisualsMenu::OpenFileDialog()
+    {
+        CHAR szFile[1024] = {0}; // TODO: Do something about this.
+
+        OPENFILENAMEA ofn = {};
+        ofn.lStructSize = sizeof(ofn);
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = "Config\0*.cfg\0All Files\0*.*\0";
+        ofn.nFilterIndex = 1;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+        if (GetOpenFileNameA(&ofn) == TRUE)
+        {
+            auto path = std::filesystem::u8path(szFile);
+            return {path.filename().string(), path};
+        }
+        else
+            return {};
+    }
+
+    void VisualsMenu::LoadConfig(Preset preset)
+    {
+        std::ifstream in(preset.path);
+        if (!in.is_open())
+        {
+            //LOG_ERROR("Cannot open preset file from {0:x}", path);
+            return;
+        }
+        
+        std::string dvar;
+        std::string strValue;
+        
+        
+        while (!in.eof() || tokenBacklog != "")
+        {
+            dvar = GetNextToken(in);
+
+            if (validDvars.find(dvar) == validDvars.end())
+                continue;
+
+            strValue = GetNextToken(in);
+            float value;
+            if (!ConvertStringToFloat(strValue, value))
+                continue;
+
+            // DOF
+            if (dvar == "r_dof_enable")
+                visuals.dofActive = value;
+            else if (dvar == "r_dof_farblur")
+                visuals.dofFarBlur = value;
+            else if (dvar == "r_dof_farstart")
+                visuals.dofFarStart = value;
+            else if (dvar == "r_dof_farend")
+                visuals.dofFarEnd = value;
+            else if (dvar == "r_dof_nearblur")
+                visuals.dofNearBlur = value;
+            else if (dvar == "r_dof_nearstart")
+                visuals.dofNearStart = value;
+            else if (dvar == "r_dof_nearend")
+                visuals.dofNearEnd = value;
+
+            // SUN
+            else if (dvar == "r_lighttweaksuncolor")
+            {
+                std::string sg, sb, sa;
+                float r = value;
+                float g, b, a;
+                sg = GetNextToken(in);
+                if (!ConvertStringToFloat(sg, g))
+                    continue;
+                sb = GetNextToken(in);
+                if (!ConvertStringToFloat(sb, b))
+                    continue;
+                sa = GetNextToken(in);
+                if (!ConvertStringToFloat(sa, a))
+                    continue;
+                visuals.sunColorUI = glm::vec3(r, g, b);
+            }
+            else if (dvar == "r_lighttweaksundirection")
+            {
+                std::string sy, sz;
+                float x = value;
+                float y, z;
+                sy = GetNextToken(in);
+                if (!ConvertStringToFloat(sy, y))
+                    continue;
+                sz = GetNextToken(in);
+                if (!ConvertStringToFloat(sz, z))
+                    continue;
+                visuals.sunDirectionUI = glm::vec3(x, y, z);
+            }
+            else if (dvar == "r_lighttweaksunlight")
+                visuals.sunBrightness = value;
+
+            // FILMTWEAKS
+            else if (dvar == "r_filmtweakenable")
+                visuals.filmtweaksActive = value;
+            else if (dvar == "r_filmtweakbrightness")
+                visuals.filmtweaksBrightness = value;
+            else if (dvar == "r_filmtweakcontrast")
+                visuals.filmtweaksContrast = value;
+            else if (dvar == "r_filmtweakdesaturation")
+                visuals.filmtweaksDesaturation = value;
+            else if (dvar == "r_filmtweaklighttint")
+            {
+                std::string sg, sb;
+                float r = value;
+                float g, b;
+                sg = GetNextToken(in);
+                if (!ConvertStringToFloat(sg, g))
+                    continue;
+                sb = GetNextToken(in);
+                if (!ConvertStringToFloat(sb, b))
+                    continue;
+                visuals.filmtweaksTintLight = glm::vec3(r, g, b);
+            }
+            else if (dvar == "r_filmtweakdarktint")
+            {
+                std::string sg, sb;
+                float r = value;
+                float g, b;
+                sg = GetNextToken(in);
+                if (!ConvertStringToFloat(sg, g))
+                    continue;
+                sb = GetNextToken(in);
+                if (!ConvertStringToFloat(sb, b))
+                    continue;
+                visuals.filmtweaksTintDark = glm::vec3(r, g, b);
+            }
+            else if (dvar == "r_filmtweakinvert")
+                visuals.filmtweaksInvert = value;
+        }
+
+        UpdateDof();
+        UpdateSun();
+        SetAngleFromPosition(visuals.sunDirectionUI);
+        UpdateFilmtweaks();
+
+        AddPresetToRecent(preset);
+        currentPreset = preset;
+    }
+
+    std::string VisualsMenu::GetNextToken(std::ifstream& in)
+    {
+        if (tokenBacklog != "")
+        {
+            std::string token = tokenBacklog;
+            tokenBacklog = "";
+            if (token != "set" && token != "seta" && token != "sets" && token != "setu")
+                return token;
+        }
+        while (!in.eof())
+        {
+            std::string token;
+            in >> token;
+
+            if (ProcessString(token))
+                return token;
+        }
+        return "";
+    }
+
+    bool VisualsMenu::ProcessString(std::string& str)
+    {
+        str.erase(std::remove_if(str.begin(), str.end(), [](char c) { return c == '\"'; }),
+                  str.end());  // remove quotes
+
+        std::string lowerStr{};
+        for (char c : str)
+            lowerStr += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+
+        if (lowerStr == "set" || lowerStr == "seta" || lowerStr == "sets")
+            return false;
+
+        // at most, the string stores `value;nextdvar` without whitespace
+        int semicolonPos = lowerStr.find(';');
+        if (semicolonPos != std::string::npos)
+        {
+            str = lowerStr.substr(0, semicolonPos);
+            tokenBacklog = lowerStr.substr(semicolonPos + 1);
+            return true;
+        }
+
+        str = lowerStr;
+        return true;
+    }
+
+    bool VisualsMenu::ConvertStringToFloat(std::string& str, float& val)
+    {
+        try
+        {
+            val = std::stof(str); // is there a method like this for string_view ?
+            return true;
+        }
+        catch (const std::invalid_argument&)
+        {
+            return false;
+        }
+        catch (const std::out_of_range&)
+        {
+            return false;
+        }
+    }
+
+    void VisualsMenu::AddPresetToRecent(Preset newPreset)
+    {
+        for (int i = 0; i < recentPresets.size(); ++i)
+        {
+            Preset preset = recentPresets[i];
+            if (preset.path == newPreset.path)
+            {
+                recentPresets.erase(recentPresets.begin() + i);
+                break;
+            }
+        }
+        recentPresets.push_back(newPreset);
     }
 
     void VisualsMenu::Release()
