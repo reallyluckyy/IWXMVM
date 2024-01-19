@@ -277,17 +277,6 @@ namespace IWXMVM::GFX
         }
     }
 
-    enum GizmoMode
-    {
-        TranslateLocal,
-        TranslateGlobal,
-        Rotate,
-        Count
-    };
-
-    std::optional<int32_t> selectedNodeId = std::nullopt;
-    GizmoMode gizmoMode = GizmoMode::TranslateLocal;
-
     void GraphicsManager::Render()
     {
         if (ImGui::GetMainViewport()->Size.x == 0.0f || ImGui::GetMainViewport()->Size.y == 0.0f)

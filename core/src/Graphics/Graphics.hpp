@@ -13,6 +13,14 @@ namespace IWXMVM::GFX
     INCBIN_EXTERN(GIZMO_TRANSLATE_MODEL);
     INCBIN_EXTERN(GIZMO_ROTATE_MODEL);
 
+    enum GizmoMode
+    {
+        TranslateLocal,
+        TranslateGlobal,
+        Rotate,
+        Count
+    };
+
     class GraphicsManager
     {
        public:
@@ -28,6 +36,10 @@ namespace IWXMVM::GFX
         void Initialize();
         void Uninitialize();
         void Render();
+
+        std::optional<int32_t> GetSelectedNodeId() const { return selectedNodeId; }
+        GizmoMode GetGizmoMode() const { return gizmoMode; }
+        void SetGizmoMode(GizmoMode mode) { gizmoMode = mode; }
        private:
         GraphicsManager()
             : axis(AXIS_MODEL_data, AXIS_MODEL_size),
@@ -58,5 +70,8 @@ namespace IWXMVM::GFX
         Mesh gizmo_rotate_x;
         Mesh gizmo_rotate_y;
         Mesh gizmo_rotate_z;
+
+        std::optional<int32_t> selectedNodeId = std::nullopt;
+        GizmoMode gizmoMode = GizmoMode::TranslateLocal;
     };
 }  // namespace IWXMVM

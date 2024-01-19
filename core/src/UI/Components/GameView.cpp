@@ -8,6 +8,7 @@
 #include "Utilities/MathUtils.hpp"
 #include "Events.hpp"
 #include "Input.hpp"
+#include "Graphics/Graphics.hpp"
 
 namespace IWXMVM::UI
 {
@@ -75,27 +76,43 @@ namespace IWXMVM::UI
         return ImVec2(window.x, window.y);
     }
 
-    bool IsBoxHovered(glm::vec3 point, ImVec2 boxSize)
+    void DrawGizmoButton(const char* label, ImVec2 size, GFX::GizmoMode gizmoMode)
     {
-        const auto& activeCam = Components::CameraManager::Get().GetActiveCamera();
-        const auto distance = glm::max(glm::distance(point, activeCam->GetPosition()), 1.0f);
-        const auto objScreenPos = MathUtils::WorldToScreenPoint(point, *activeCam);
-        if (objScreenPos.has_value())
+        auto& graphicsManager = GFX::GraphicsManager::Get();
+        if (graphicsManager.GetGizmoMode() == gizmoMode)
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+        if (ImGui::Button(label, size))
         {
-            const auto mousePos = ImGui::GetIO().MousePos;
-            const auto boxTopLeft = objScreenPos.value() - (boxSize / 2) * (100.0f / distance);
-            const auto boxBottomRight = objScreenPos.value() + (boxSize / 2) * (100.0f / distance);
-            if (boxTopLeft.x > 0)
-                ImGui::GetForegroundDrawList()->AddRect(boxTopLeft, boxBottomRight, IM_COL32(255, 0, 0, 255));
-            return mousePos.x >= boxTopLeft.x && mousePos.x <= boxBottomRight.x && mousePos.y >= boxTopLeft.y &&
-                   mousePos.y <= boxBottomRight.y;
+            if (graphicsManager.GetGizmoMode() == gizmoMode)
+                ImGui::PopStyleColor();
+
+            graphicsManager.SetGizmoMode(gizmoMode);
         }
-        return false;
+        else
+        {
+            if (graphicsManager.GetGizmoMode() == gizmoMode)
+                ImGui::PopStyleColor();
+        }
     }
 
-    void GameView::HandleCampathNodeInteraction()
+    void GameView::DrawGizmoControls()
     {
+        auto& graphicsManager = GFX::GraphicsManager::Get();
+        if (!graphicsManager.GetSelectedNodeId().has_value())
+        {
+            return;
+        }
 
+        ImGui::SetCursorPos(ImVec2(20, 20));
+
+        auto buttonSize = ImVec2(50, 50);
+        auto buttonSpacing = ImVec2(5, 5);
+        
+        DrawGizmoButton(ICON_FA_MAXIMIZE, buttonSize, GFX::GizmoMode::TranslateLocal);
+        ImGui::SameLine(0, buttonSpacing.x);
+        DrawGizmoButton(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT, buttonSize, GFX::GizmoMode::TranslateGlobal);
+        ImGui::SameLine(0, buttonSpacing.x);
+        DrawGizmoButton(ICON_FA_ROTATE, buttonSize, GFX::GizmoMode::Rotate);
     }
 
     void GameView::LockMouse()
@@ -183,8 +200,6 @@ namespace IWXMVM::UI
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
 
-        HandleCampathNodeInteraction();
-
         if (HasFocus() && UIManager::Get().IsFreecamSelected())
             LockMouse();
 
@@ -253,9 +268,12 @@ namespace IWXMVM::UI
         this->viewportSize = textureSize;
         ImGui::Image((void*)texture, textureSize);
         Events::Invoke(EventType::OnRenderGameView);
+        DrawGizmoControls();
+
         ImGui::EndChildFrame();
 
         ImGui::PopStyleVar();
+
 
         ImGui::End();
 
