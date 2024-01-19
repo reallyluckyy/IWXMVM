@@ -85,6 +85,7 @@ namespace IWXMVM::UI
         Visuals visuals;
         Visuals defaultVisuals;
         bool visualsInitialized = false;
+        Preset defaultPreset;
         Preset currentPreset;
         std::string tokenBacklog;
     };

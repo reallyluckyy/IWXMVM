@@ -11,6 +11,7 @@
 #include "../UIManager.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "Components/CameraManager.hpp"
+#include "Components/CaptureManager.hpp"
 
 namespace ImGuiEx
 {
@@ -43,30 +44,43 @@ namespace ImGuiEx
         }
     }
 
-    constexpr std::size_t MARKER_DISTANCE = 5000;
-
-    void DemoProgressBarLines(const ImRect rect, uint32_t currentTick, uint32_t displayStartTick, uint32_t displayEndTick)
+    void DrawProgressLineAtTick(const ImRect rect, uint32_t tick, ImU32 color, float thickness,
+                                uint32_t displayStartTick,
+                                uint32_t displayEndTick)
     {
         using namespace ImGui;
 
         ImGuiWindow* window = GetCurrentWindow();
-
         const auto barLength = rect.Max.x - rect.Min.x;
+
+        const auto percentage =
+            static_cast<float>(tick - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
+        const auto x = rect.Min.x + percentage * barLength;
+
+        if (x > rect.Max.x)
+            return;
+
+        window->DrawList->AddRectFilled(ImVec2(x, rect.Min.y), ImVec2(x + thickness, rect.Max.y), color);
+	}
+
+    constexpr std::size_t MARKER_DISTANCE = 5000;
+    void DemoProgressBarLines(const ImRect rect, uint32_t currentTick, uint32_t displayStartTick, uint32_t displayEndTick)
+    {
+        using namespace ImGui;
 
         for (uint32_t i = displayStartTick; i < currentTick; i++)
         {
             if (i % MARKER_DISTANCE == 0)
             {
-                const auto percentage = static_cast<float>(i - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
-                const auto x = rect.Min.x + percentage * barLength;
-
-                if (x > rect.Max.x)
-					break;
-
-                window->DrawList->AddRectFilled(ImVec2(x, rect.Min.y), ImVec2(x + 2, rect.Max.y),
-                                                GetColorU32(ImGuiCol_Button));
+                DrawProgressLineAtTick(rect, i, GetColorU32(ImGuiCol_Button), 2, displayStartTick, displayEndTick);
             }
         }
+
+        auto captureSettings = IWXMVM::Components::CaptureManager::Get().GetCaptureSettings();
+        DrawProgressLineAtTick(rect, captureSettings.startTick, GetColorU32(ImVec4(1, 0, 0, 1)), 2, displayStartTick,
+                               displayEndTick);
+        DrawProgressLineAtTick(rect, captureSettings.endTick, GetColorU32(ImVec4(1, 0, 0, 1)), 2, displayStartTick,
+                               displayEndTick);
     }
 
     bool TimescaleSliderInternal(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min,

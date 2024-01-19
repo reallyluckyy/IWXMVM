@@ -18,55 +18,60 @@ namespace IWXMVM::UI
             if (visualsInitialized)
                 return;
 
-            validDvars = {"r_dof_enable",
-                          "r_dof_farblur",
-                          "r_dof_farstart",
-                          "r_dof_farend",
-                          "r_dof_nearblur",
-                          "r_dof_nearstart",
-                          "r_dof_nearEnd",
-                          "r_filmtweakenable",
-                          "r_filmtweakbrightness",
-                          "r_filmtweakcontrast",
-                          "r_filmtweakdesaturation",
-                          "r_filmtweaklighttint",
-                          "r_filmtweakdarktint",
-                          "r_filmtweakinvert",       
-                          "r_lighttweaksuncolor", 
-                          "r_lighttweaksundirection",
-                          "r_lighttweaksunlight"
+            validDvars = {
+                "r_dof_enable",
+                "r_dof_farblur",
+                "r_dof_farstart",
+                "r_dof_farend",
+                "r_dof_nearblur",
+                "r_dof_nearstart",
+                "r_dof_nearEnd",
+                "r_filmtweakenable",
+                "r_filmtweakbrightness",
+                "r_filmtweakcontrast",
+                "r_filmtweakdesaturation",
+                "r_filmtweaklighttint",
+                "r_filmtweakdarktint",
+                "r_filmtweakinvert",       
+                "r_lighttweaksuncolor", 
+                "r_lighttweaksundirection",
+                "r_lighttweaksunlight"
             };
 
             auto dof = Mod::GetGameInterface()->GetDof();
             auto sun = Mod::GetGameInterface()->GetSun();
             auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
 
-            visuals = {dof.enabled,
-                       dof.farBlur,
-                       dof.farStart,
-                       dof.farEnd,
-                       dof.nearBlur,
-                       dof.nearStart,
-                       dof.nearEnd,
-                       dof.bias,
-                       glm::make_vec3(sun.color),
-                       glm::make_vec3(sun.direction),
-                       0,  
-                       0,
-                       sun.brightness,
-                       filmtweaks.enabled,
-                       filmtweaks.brightness,
-                       filmtweaks.contrast,
-                       filmtweaks.desaturation,
-                       glm::make_vec3(filmtweaks.tintLight),
-                       glm::make_vec3(filmtweaks.tintDark),
-                       filmtweaks.invert};
+            visuals = {
+                dof.enabled,
+                dof.farBlur,
+                dof.farStart,
+                dof.farEnd,
+                dof.nearBlur,
+                dof.nearStart,
+                dof.nearEnd,
+                dof.bias,
+                glm::make_vec3(sun.color),
+                glm::make_vec3(sun.direction),
+                0,  
+                0,
+                sun.brightness,
+                filmtweaks.enabled,
+                filmtweaks.brightness,
+                filmtweaks.contrast,
+                filmtweaks.desaturation,
+                glm::make_vec3(filmtweaks.tintLight),
+                glm::make_vec3(filmtweaks.tintDark),
+                filmtweaks.invert
+            };
             recentPresets = {};
 
             SetAngleFromPosition(sun.direction);
 
             defaultVisuals = visuals;
-            currentPreset = {"Default"};
+            defaultPreset = {"Default"};
+            currentPreset = defaultPreset;
+
             visualsInitialized = true;
         });
     }
@@ -101,11 +106,12 @@ namespace IWXMVM::UI
             if (ImGui::Selectable(ICON_FA_CHESS_KING " Default Preset", currentPreset.name == "Default"))
             {
                 visuals = defaultVisuals;
+                currentPreset = defaultPreset;
+
                 UpdateDof();
                 UpdateSun();
                 SetAngleFromPosition(visuals.sunDirectionUI);
                 UpdateFilmtweaks();
-                currentPreset = {"Default"};
             }
 
             ImGui::Separator();
@@ -113,9 +119,11 @@ namespace IWXMVM::UI
             
             for (auto& preset : recentPresets)
             {
-                if (ImGui::Selectable((std::string(ICON_FA_ARROW_ROTATE_RIGHT) + " " + preset.name + "##" + preset.path.string()).c_str(),
-                                      currentPreset.name == preset.name))
+                auto label = std::string(ICON_FA_ARROW_ROTATE_RIGHT) + " " + preset.name + "##" + preset.path.string();
+                if (ImGui::Selectable(label.c_str(), currentPreset.name == preset.name))
+                {
                     LoadConfig(preset);
+                }
             }
             
             ImGui::Separator();
@@ -129,9 +137,9 @@ namespace IWXMVM::UI
             ImGui::EndCombo();
         }
 
-        static bool configModified = false;
-        if (!configModified)
-            ImGui::BeginDisabled();
+        //static bool configModified = false;
+        //if (!configModified)
+        //    ImGui::BeginDisabled();
 
         ImGui::SameLine();
 
@@ -140,8 +148,8 @@ namespace IWXMVM::UI
             // TODO: save changed to current config
         }
 
-        if (!configModified)
-            ImGui::EndDisabled();
+        //if (!configModified)
+        //    ImGui::EndDisabled();
 
         ImGui::Separator();
     }

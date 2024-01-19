@@ -7,6 +7,7 @@ namespace IWXMVM::Components
     {
         Video,
         CameraData,
+        ImageSequence,
 
         Count
     };

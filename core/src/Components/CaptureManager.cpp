@@ -11,6 +11,8 @@ namespace IWXMVM::Components
                 return "Video (.avi)";
             case OutputFormat::CameraData:
                 return "Camera Data (.csv)";
+            case OutputFormat::ImageSequence:
+                return "Image Sequence (.csv)";
             default:
                 return "Unknown Output Format";
         }
