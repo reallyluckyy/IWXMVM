@@ -227,12 +227,27 @@ namespace IWXMVM::GFX
             axisDirection = glm::vec3(rotation * glm::vec4(axisDirection, 1.0f));
             axisDirection = glm::normalize(axisDirection);
 
-            auto axisNormal = glm::vec3(0, 0, 0);
-            axisNormal[(heldAxis.value() + 1) % 3] = 1.0f;
-            axisNormal = glm::vec3(rotation * glm::vec4(axisNormal, 1.0f));
-            axisNormal = glm::normalize(axisNormal);
+            auto& camera = Components::CameraManager::Get().GetActiveCamera();
+            auto towardsCamera = glm::normalize(camera->GetPosition() - position);
 
-            auto intersection = GetMousePositionOnPlane(position, glm::normalize(axisNormal));
+            glm::vec3 bestPlaneNormal = glm::vec3(0);
+            float bestDotProduct = 0;
+            for (int i = 0; i < 2; i++)
+            {
+                auto axisNormal = glm::vec3(0, 0, 0);
+                axisNormal[(heldAxis.value() + i + 1) % 3] = 1.0f;
+                axisNormal = glm::vec3(rotation * glm::vec4(axisNormal, 1.0f));
+                axisNormal = glm::normalize(axisNormal);
+
+                auto dot = glm::abs(glm::dot(axisNormal, towardsCamera));
+                if (dot > bestDotProduct)
+                {
+                    bestDotProduct = dot;
+                    bestPlaneNormal = axisNormal;
+				}
+            }
+
+            auto intersection = GetMousePositionOnPlane(position, bestPlaneNormal);
             if (intersection.has_value())
             {
                 auto dot = glm::dot(glm::normalize(intersection.value() - position), axisDirection);
