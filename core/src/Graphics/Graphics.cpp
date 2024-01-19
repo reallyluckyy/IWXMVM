@@ -135,7 +135,6 @@ namespace IWXMVM::GFX
         const auto view = GetViewMatrix();
         const auto projection = GetProjectionMatrix();
         const auto mouseRayDirection = GetMouseRay(mousePos, projection, view);
-        auto minDistance = std::numeric_limits<float>::max();
 
         for (int i = 0; i < mesh.indices.size(); i += 3)
         {
@@ -145,60 +144,57 @@ namespace IWXMVM::GFX
             const auto a = glm::vec3(model * glm::vec4(mesh.vertices[i1].pos, 1.0f));
             const auto b = glm::vec3(model * glm::vec4(mesh.vertices[i2].pos, 1.0f));
             const auto c = glm::vec3(model * glm::vec4(mesh.vertices[i3].pos, 1.0f));
-
-            // Calculate the normal of the triangle
-            const auto ab = b - a;
-            const auto ac = c - a;
-            const auto bc = c - b;
-            const auto ca = a - c;
-            const auto normal = glm::normalize(glm::cross(ab, ac));
-            // Calculate the distance from the camera to the plane of the triangle
-            const auto distance = glm::dot(normal, a);
-            // Calculate the distance from the mouse ray to the plane of the triangle
-            const auto rayDistance = (distance - glm::dot(normal, camera->GetPosition())) /
-                                     glm::dot(normal, mouseRayDirection);
-            if (rayDistance < 0.0f)
+            
+            glm::vec2 baryPosition;
+            float distance = 0;
+            if (glm::intersectRayTriangle(camera->GetPosition(), glm::normalize(mouseRayDirection), a, b, c,
+                                          baryPosition, distance))
             {
-                // The triangle is behind the camera
-                continue;
-            }
-            // Calculate the intersection point
-            const auto intersection = camera->GetPosition() + rayDistance * mouseRayDirection;
-            // Check if the intersection point is inside the triangle
-            const auto abp = intersection - a;
-            const auto bcp = intersection - b;
-            const auto cap = intersection - c;
-            if (glm::dot(normal, glm::cross(ab, abp)) >= 0.0f &&
-                glm::dot(normal, glm::cross(bc, bcp)) >= 0.0f &&
-                glm::dot(normal, glm::cross(ca, cap)) >= 0.0f)
-            {
-                minDistance = std::min(minDistance, rayDistance);
+                return true;
             }
         }
-        return minDistance < std::numeric_limits<float>::max();
+        return false;
     }
 
     std::optional<int32_t> heldAxis = std::nullopt;
-
+    
     void GraphicsManager::DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
     {
         if (heldAxis.has_value() && heldAxis.value() != axisIndex)
-		{
-			return;
-		}
+        {
+            return;
+        }
 
         bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, mesh, model);
         if (!heldAxis.has_value() && mouseIntersects)
         {
-			model = model * glm::scale(glm::vec3(1, 1, 1) * 1.1f);
-		}
+            model = model * glm::scale(glm::vec3(1, 1, 1) * 1.1f);
+        }
 
         if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft))
         {
-			heldAxis = axisIndex;
-		}
+            heldAxis = axisIndex;
+        }
 
         BufferManager::Get().DrawMesh(mesh, model);
+    }
+
+    
+    std::optional<glm::vec3> GetMousePositionOnPlane(glm::vec3 origin, glm::vec3 normal)
+    {
+        auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        const auto view = GetViewMatrix();
+        const auto projection = GetProjectionMatrix();
+        const auto mouseRayDirection = GetMouseRay(ImGui::GetIO().MousePos, projection, view);
+
+        float intersectionDistance = 0;
+        if (glm::intersectRayPlane(camera->GetPosition(), glm::normalize(mouseRayDirection), origin,
+                                   glm::normalize(normal), intersectionDistance))
+        {
+            return camera->GetPosition() + intersectionDistance * mouseRayDirection;
+        }
+
+        return std::nullopt;
     }
 
     void GraphicsManager::DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation,
@@ -221,12 +217,31 @@ namespace IWXMVM::GFX
 
         if (heldAxis.has_value())
         {
-            auto amountX = ImGui::GetIO().MouseDelta.x * 0.1f;
-            auto amountY = ImGui::GetIO().MouseDelta.y * 0.1f;
-            auto delta = glm::vec3(0, 0, 0);
-            delta[heldAxis.value()] = amountX + amountY;
-            delta = glm::vec3(rotation * glm::vec4(delta, 1.0f));
-            position += delta;
+            auto axisDirection = glm::vec3(0, 0, 0);
+            axisDirection[heldAxis.value()] = 1.0f;
+            axisDirection = glm::vec3(rotation * glm::vec4(axisDirection, 1.0f));
+            axisDirection = glm::normalize(axisDirection);
+
+            auto axisNormal = glm::vec3(0, 0, 0);
+            axisNormal[(heldAxis.value() + 1) % 3] = 1.0f;
+            axisNormal = glm::vec3(rotation * glm::vec4(axisNormal, 1.0f));
+            axisNormal = glm::normalize(axisNormal);
+
+            auto intersection = GetMousePositionOnPlane(position, glm::normalize(axisNormal));
+            if (intersection.has_value())
+            {
+                auto dot = glm::dot(glm::normalize(intersection.value() - position), axisDirection);
+                auto distance = glm::distance(intersection.value(), position);
+                position = position + axisDirection * dot * distance;
+            }
+
+            // Draw axis
+            auto step = 10.0f;
+            for (int i = -2000; i < 2000; i += step)
+            {
+                BufferManager::Get().DrawMesh(
+                    icosphere, glm::translate(position + axisDirection * i) * glm::scale(glm::vec3(1, 1, 1) * 0.8f));
+            }
         }
     }
 
@@ -355,10 +370,10 @@ namespace IWXMVM::GFX
                             DrawTranslationGizmo(
                                 node.value.cameraData.position, translate,
                                 gizmoMode == GizmoMode::TranslateLocal ? rotate : glm::eulerAngleZYX(.0f, .0f, .0f));
-                			break;
+                            break;
                         case Rotate:
                             DrawRotationGizmo(node.value.cameraData.rotation, translate);
-							break;
+                            break;
                     }
                 }
             }
