@@ -274,7 +274,6 @@ namespace IWXMVM::UI
 
         ImGui::PopStyleVar();
 
-
         ImGui::End();
 
         ImGui::PopStyleVar();

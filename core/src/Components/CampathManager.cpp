@@ -31,8 +31,8 @@ namespace IWXMVM::Components
                 for (const auto& keyframe : KeyframeManager::Get().GetKeyframes(property))
                 {
                     if (keyframe.tick == tick)
-						return;
-				}
+                        return;
+                }
 
                 Types::CameraData node;
                 node.position = activeCamera->GetPosition();
