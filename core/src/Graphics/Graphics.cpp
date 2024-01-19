@@ -157,6 +157,7 @@ namespace IWXMVM::GFX
     }
 
     std::optional<int32_t> heldAxis = std::nullopt;
+    bool objectHoveredThisFrame = false;
     
     void GraphicsManager::DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
     {
@@ -164,16 +165,20 @@ namespace IWXMVM::GFX
         {
             return;
         }
-
-        bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, mesh, model);
-        if (!heldAxis.has_value() && mouseIntersects)
+        
+        if (!objectHoveredThisFrame)
         {
-            model = model * glm::scale(glm::vec3(1, 1, 1) * 1.1f);
-        }
+            bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, mesh, model);
+            objectHoveredThisFrame |= mouseIntersects;
+            if (!heldAxis.has_value() && mouseIntersects)
+            {
+                model = model * glm::scale(glm::vec3(1, 1, 1) * 1.1f);
+            }
 
-        if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft))
-        {
-            heldAxis = axisIndex;
+            if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft))
+            {
+                heldAxis = axisIndex;
+            }
         }
 
         BufferManager::Get().DrawMesh(mesh, model);
@@ -314,6 +319,8 @@ namespace IWXMVM::GFX
 
         BufferManager::Get().BindBuffers();
 
+        objectHoveredThisFrame = false;
+
         // Only draw nodes if in free/orbit mode
         const auto& activeCam = Components::CameraManager::Get().GetActiveCamera();
         const auto currentCameraMode = activeCam->GetMode();
@@ -346,6 +353,7 @@ namespace IWXMVM::GFX
                 auto scale = glm::scale(glm::vec3(1, 1, 1));
                 
                 bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, camera, translate * rotate);
+                objectHoveredThisFrame |= mouseIntersects;
                 if (mouseIntersects && !heldAxis.has_value())
                    scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
                 BufferManager::Get().DrawMesh(camera, translate * rotate * scale);
