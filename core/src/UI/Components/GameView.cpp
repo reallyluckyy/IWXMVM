@@ -5,8 +5,10 @@
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "Utilities/MathUtils.hpp"
 #include "Events.hpp"
 #include "Input.hpp"
+#include "Graphics/Graphics.hpp"
 
 namespace IWXMVM::UI
 {
@@ -74,6 +76,45 @@ namespace IWXMVM::UI
         return ImVec2(window.x, window.y);
     }
 
+    void DrawGizmoButton(const char* label, ImVec2 size, GFX::GizmoMode gizmoMode)
+    {
+        auto& graphicsManager = GFX::GraphicsManager::Get();
+        if (graphicsManager.GetGizmoMode() == gizmoMode)
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+        if (ImGui::Button(label, size))
+        {
+            if (graphicsManager.GetGizmoMode() == gizmoMode)
+                ImGui::PopStyleColor();
+
+            graphicsManager.SetGizmoMode(gizmoMode);
+        }
+        else
+        {
+            if (graphicsManager.GetGizmoMode() == gizmoMode)
+                ImGui::PopStyleColor();
+        }
+    }
+
+    void GameView::DrawGizmoControls()
+    {
+        auto& graphicsManager = GFX::GraphicsManager::Get();
+        if (!graphicsManager.GetSelectedNodeId().has_value())
+        {
+            return;
+        }
+
+        ImGui::SetCursorPos(ImVec2(20, 20));
+
+        auto buttonSize = ImVec2(50, 50);
+        auto buttonSpacing = ImVec2(5, 5);
+        
+        DrawGizmoButton(ICON_FA_MAXIMIZE, buttonSize, GFX::GizmoMode::TranslateLocal);
+        ImGui::SameLine(0, buttonSpacing.x);
+        DrawGizmoButton(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT, buttonSize, GFX::GizmoMode::TranslateGlobal);
+        ImGui::SameLine(0, buttonSpacing.x);
+        DrawGizmoButton(ICON_FA_ROTATE, buttonSize, GFX::GizmoMode::Rotate);
+    }
+
     void GameView::LockMouse()
     {
         // calling FindWindowHandle every frame here is probably not a good idea
@@ -139,10 +180,14 @@ namespace IWXMVM::UI
                          IM_ARRAYSIZE(playerCameraComboItems));
         }
 
-        if (HasFocus() && UIManager::Get().ViewportShouldLockMouse())
+        if (UIManager::Get().IsFreecamSelected())
         {
             ImGui::SameLine();
-            ImGui::Text("Press ESC to unlock mouse");
+
+            if (HasFocus())
+                ImGui::Text("Press ESC to unlock mouse");
+            else
+                ImGui::Text("Press %s to move freecam", ImGui::GetKeyName(InputConfiguration::Get().GetBoundKey(Action::FreeCameraActivate)));
         }
 
         auto demoLabel = Mod::GetGameInterface()->GetDemoInfo().name;
@@ -155,7 +200,7 @@ namespace IWXMVM::UI
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
 
-        if (HasFocus() && UIManager::Get().ViewportShouldLockMouse())
+        if (HasFocus() && UIManager::Get().IsFreecamSelected())
             LockMouse();
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
@@ -165,11 +210,14 @@ namespace IWXMVM::UI
         ImGui::Begin("GameView", NULL, flags);
 
         auto isGameFocused = D3D9::FindWindowHandle() == GetForegroundWindow();
-        if (HasFocus() && (Input::KeyDown(ImGuiKey_Escape) || !isGameFocused))
+        if (HasFocus() && (Input::KeyDown(ImGuiKey_Escape) || Input::BindDown(Action::FreeCameraActivate) || !isGameFocused))
         {
-            ImGui::SetWindowFocus(NULL);
             SetHasFocus(false);
             ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
+        }
+        else
+        {
+            SetHasFocus(HasFocus() || Input::BindDown(Action::FreeCameraActivate));
         }
 
         auto currentPos = ImGui::GetWindowPos();
@@ -216,11 +264,12 @@ namespace IWXMVM::UI
                                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
                                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
                                    ImGuiWindowFlags_NoScrollbar);
+        this->viewportPosition = ImGui::GetCurrentWindow()->DC.CursorPos;
+        this->viewportSize = textureSize;
         ImGui::Image((void*)texture, textureSize);
-
         Events::Invoke(EventType::OnRenderGameView);
+        DrawGizmoControls();
 
-        SetHasFocus(ImGui::IsWindowFocused());
         ImGui::EndChildFrame();
 
         ImGui::PopStyleVar();

@@ -1,6 +1,8 @@
 #include "StdInclude.hpp"
 #include "MathUtils.hpp"
 
+#include "UI/UIManager.hpp"
+
 namespace IWXMVM::MathUtils
 {
     glm::vec3 ForwardVectorFromAngles(glm::vec3 eulerAngles)
@@ -17,8 +19,13 @@ namespace IWXMVM::MathUtils
         return glm::vec3(glm::degrees(pitch), glm::degrees(yaw), 0.0f);
     }
 
-    std::optional<ImVec2> WorldToScreenPoint(glm::vec3 point, Components::Camera& camera, glm::vec4 viewport)
+    std::optional<ImVec2> WorldToScreenPoint(glm::vec3 point, Components::Camera& camera)
     {
+        auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
+        auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y,
+                                  gameView->GetPosition().x + gameView->GetSize().x,
+                                  gameView->GetPosition().y + gameView->GetSize().y);
+
         auto lookat =
             glm::lookAtLH(camera.GetPosition(), camera.GetPosition() + camera.GetForwardVector(), glm::vector3::up);
 

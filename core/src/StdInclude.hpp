@@ -36,6 +36,7 @@
 #include "glm/gtx/vector_angle.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/spline.hpp"
+#include "glm/gtx/intersect.hpp"
 #include "Utilities/GLMExtensions.hpp"
 
 #pragma warning(push, 0)

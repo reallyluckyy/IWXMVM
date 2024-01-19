@@ -26,11 +26,19 @@ namespace IWXMVM::Components
 
             if (Input::BindDown(Action::DollyAddNode))
             {
+                const auto tick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+                
+                for (const auto& keyframe : KeyframeManager::Get().GetKeyframes(property))
+                {
+                    if (keyframe.tick == tick)
+                        return;
+                }
+
                 Types::CameraData node;
                 node.position = activeCamera->GetPosition();
                 node.rotation = activeCamera->GetRotation();
                 node.fov = activeCamera->GetFov();
-                const auto tick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+
                 KeyframeManager::Get().GetKeyframes(property).push_back(
                     Types::Keyframe(property, Mod::GetGameInterface()->GetDemoInfo().currentTick, node));
 

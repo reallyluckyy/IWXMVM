@@ -19,13 +19,8 @@ namespace ImGuiEx
         using namespace IWXMVM;
 
         const auto& camera = Components::CameraManager::Get().GetActiveCamera();
-
-        auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
-        auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y,
-                                  gameView->GetPosition().x + gameView->GetSize().x,
-                                  gameView->GetPosition().y + gameView->GetSize().y);
-        auto screenPosition1 = MathUtils::WorldToScreenPoint(from, *camera, viewport);
-        auto screenPosition2 = MathUtils::WorldToScreenPoint(to, *camera, viewport);
+        auto screenPosition1 = MathUtils::WorldToScreenPoint(from, *camera);
+        auto screenPosition2 = MathUtils::WorldToScreenPoint(to, *camera);
 
         if (screenPosition1.has_value() && screenPosition2.has_value())
         {
@@ -39,12 +34,7 @@ namespace ImGuiEx
         using namespace IWXMVM;
 
         const auto& camera = Components::CameraManager::Get().GetActiveCamera();
-
-        auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
-        auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y,
-                                  gameView->GetPosition().x + gameView->GetSize().x,
-                                  gameView->GetPosition().y + gameView->GetSize().y);
-        auto screenPosition = MathUtils::WorldToScreenPoint(point, *camera, viewport);
+        auto screenPosition = MathUtils::WorldToScreenPoint(point, *camera);
 
         if (screenPosition.has_value())
         {

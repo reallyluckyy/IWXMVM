@@ -61,7 +61,7 @@ namespace IWXMVM::UI
         void ShutdownImGui();
         void RunImGuiFrame();
 
-        bool ViewportShouldLockMouse();
+        bool IsFreecamSelected();
 
         ImVec2 GetWindowSize(HWND hwnd);
         ImVec2 GetWindowPosition(HWND hwnd);
@@ -115,6 +115,12 @@ namespace IWXMVM::UI
         void ToggleDebugPanel()
         {
             showDebugPanel = !showDebugPanel;
+        }
+
+        std::recursive_mutex& GetMutex()
+        {
+            static std::recursive_mutex mutex;
+            return mutex;
         }
 
        private:
