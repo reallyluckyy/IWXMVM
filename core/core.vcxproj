@@ -121,6 +121,7 @@
     <ClCompile Include="src\Components\KeyframeManager.cpp" />
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
     <ClCompile Include="src\Components\CaptureManager.cpp" />
+    <ClCompile Include="src\Components\VisualConfiguration.cpp" />
     <ClCompile Include="src\Configuration\Configuration.cpp" />
     <ClCompile Include="src\Configuration\InputConfiguration.cpp" />
     <ClCompile Include="src\D3D9.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\Components\KeyframeManager.hpp" />
     <ClInclude Include="src\Components\OrbitCamera.hpp" />
     <ClInclude Include="src\Components\CaptureManager.hpp" />
+    <ClInclude Include="src\Components\VisualConfiguration.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
     <ClInclude Include="src\Configuration\InputConfiguration.hpp" />
     <ClInclude Include="src\Graphics\Graphics.hpp" />
