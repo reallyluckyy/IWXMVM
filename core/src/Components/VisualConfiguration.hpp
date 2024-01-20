@@ -46,5 +46,6 @@ namespace IWXMVM::Components
         };
 
         static std::optional<Settings> Load(std::filesystem::path file);
+        static void Save(std::filesystem::path file, Settings settings);
     };
 }

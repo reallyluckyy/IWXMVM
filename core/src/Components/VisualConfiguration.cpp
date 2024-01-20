@@ -206,4 +206,42 @@ namespace IWXMVM::Components
 
         return visuals;
     }
+
+    void VisualConfiguration::Save(std::filesystem::path file, VisualConfiguration::Settings settings)
+    {
+        std::ofstream out(file);
+        if (!out.is_open())
+        {
+            LOG_ERROR("Failed to save config file: {}", file.string());
+            return;
+        }
+
+        // DOF
+        out << "r_dof_enable " << settings.dofActive << "\n";
+        out << "r_dof_farblur " << settings.dofFarBlur << "\n";
+        out << "r_dof_farstart " << settings.dofFarStart << "\n";
+        out << "r_dof_farend " << settings.dofFarEnd << "\n";
+        out << "r_dof_nearblur " << settings.dofNearBlur << "\n";
+        out << "r_dof_nearstart " << settings.dofNearStart << "\n";
+        out << "r_dof_nearend " << settings.dofNearEnd << "\n";
+
+        // SUN
+        out << "r_lighttweaksuncolor " << settings.sunColorUI.r << " " << settings.sunColorUI.g << " "
+            << settings.sunColorUI.b << " 1\n";
+        out << "r_lighttweaksundirection " << settings.sunDirectionUI.x << " " << settings.sunDirectionUI.y << " "
+            << settings.sunDirectionUI.z << "\n";
+        out << "r_lighttweaksunlight " << settings.sunBrightness << "\n";
+
+        // FILMTWEAKS
+        out << "r_filmtweakenable " << settings.filmtweaksActive << "\n";
+        out << "r_filmtweakbrightness " << settings.filmtweaksBrightness << "\n";
+        out << "r_filmtweakcontrast " << settings.filmtweaksContrast << "\n";
+        out << "r_filmtweakdesaturation " << settings.filmtweaksDesaturation << "\n";
+        out << "r_filmtweaklighttint " << settings.filmtweaksTintLight.r << " " << settings.filmtweaksTintLight.g << " "
+            << settings.filmtweaksTintLight.b << "\n";
+        out << "r_filmtweakdarktint " << settings.filmtweaksTintDark.r << " " << settings.filmtweaksTintDark.g << " "
+            << settings.filmtweaksTintDark.b << "\n";
+        out << "r_filmtweakinvert " << settings.filmtweaksInvert << "\n";
+        out.close();
+    }
 }

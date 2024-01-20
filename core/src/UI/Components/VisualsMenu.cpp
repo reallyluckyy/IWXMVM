@@ -109,27 +109,30 @@ namespace IWXMVM::UI
             ImGui::Separator();
             if (ImGui::Selectable(ICON_FA_FOLDER_OPEN " Load from file", false))
             {
-                Preset preset = OpenFileDialog();
-                if (preset.path != "")
+                auto path = OpenFileDialog();
+                if (path.has_value())
+                {
+                    Preset preset;
+                    preset.name = path.value().filename().string();
+                    preset.path = path.value();
                     LoadPreset(preset);
+                }
             }
 
             ImGui::EndCombo();
         }
 
-        //static bool configModified = false;
-        //if (!configModified)
-        //    ImGui::BeginDisabled();
-
         ImGui::SameLine();
 
         if (ImGui::Button(ICON_FA_FLOPPY_DISK " Save"))
         {
-            // TODO: save changed to current config
+            auto path = OpenFileDialog(true);
+            if (path.has_value())
+            {
+                Components::VisualConfiguration::Save(path.value(), visuals);
+                AddPresetToRecent({path.value().filename().string(), path.value()});
+            }
         }
-
-        //if (!configModified)
-        //    ImGui::EndDisabled();
 
         ImGui::Separator();
     }
@@ -361,7 +364,7 @@ namespace IWXMVM::UI
         Mod::GetGameInterface()->SetFilmtweaks(filmtweakSettings);
     }
 
-    VisualsMenu::Preset VisualsMenu::OpenFileDialog()
+    std::optional<std::filesystem::path> VisualsMenu::OpenFileDialog(bool saveDialog)
     {
         CHAR szFile[1024] = {0}; // TODO: Do something about this.
 
@@ -371,15 +374,30 @@ namespace IWXMVM::UI
         ofn.nMaxFile = sizeof(szFile);
         ofn.lpstrFilter = "Config\0*.cfg\0All Files\0*.*\0";
         ofn.nFilterIndex = 1;
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-        if (GetOpenFileNameA(&ofn) == TRUE)
+        if (saveDialog)
         {
-            auto path = std::filesystem::u8path(szFile);
-            return {path.filename().string(), path};
+            ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
+            ofn.lpstrDefExt = "cfg";         
         }
         else
-            return {};
+        {
+            ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
+        }
+
+        BOOL result;
+        if (saveDialog)
+            result = GetSaveFileNameA(&ofn);
+        else
+            result = GetOpenFileNameA(&ofn);
+
+        if (result == TRUE)
+        {
+            return std::filesystem::u8path(szFile);
+        }
+        else
+        {
+            return std::nullopt;
+        }
     }
 
     void VisualsMenu::LoadPreset(Preset preset)
