@@ -4,8 +4,9 @@
 #include "Utilities/HookManager.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "../Structures.hpp"
-#include "Mod.hpp"
+#include "../Functions.hpp"
 #include "../Addresses.hpp"
+#include "Mod.hpp"
 
 namespace IWXMVM::IW3::Hooks::Camera
 {
@@ -38,7 +39,8 @@ namespace IWXMVM::IW3::Hooks::Camera
 
         R_SetViewParmsForScene();
 
-        __asm popad __asm jmp R_SetViewParmsForScene_Trampoline
+        __asm popad 
+        __asm jmp R_SetViewParmsForScene_Trampoline
     }
 
     void AnglesToAxis(float* angles)
@@ -61,11 +63,13 @@ namespace IWXMVM::IW3::Hooks::Camera
     {
         static float* angles;
 
-        __asm pushad __asm mov angles, esi
+        __asm pushad 
+        __asm mov angles, esi
 
-                                           AnglesToAxis(angles);
+        AnglesToAxis(angles);
 
-        __asm popad __asm jmp AnglesToAxis_Address
+        __asm popad 
+        __asm jmp AnglesToAxis_Address
     }
 
     void FX_SetupCamera()
@@ -88,7 +92,8 @@ namespace IWXMVM::IW3::Hooks::Camera
 
         FX_SetupCamera();
 
-        __asm popad __asm jmp FX_SetupCamera_Trampoline
+        __asm popad
+        __asm jmp FX_SetupCamera_Trampoline
     }
 
     uint32_t CG_DObjGetWorldTagMatrix_Trampoline;
@@ -97,14 +102,18 @@ namespace IWXMVM::IW3::Hooks::Camera
         static float* tempEDI;
         static float dummyViewAxis[9];
 
-        __asm mov tempEDI, edi __asm pushad
+        __asm mov tempEDI, edi 
+        __asm pushad
 
         {
-            if (Components::CameraManager::Get().GetActiveCamera()->IsModControlledCameraMode())
+            if (Components::CameraManager::Get().GetActiveCamera()->IsModControlledCameraMode() &&
+                Components::CameraManager::Get().GetActiveCamera()->GetMode() != Components::Camera::Mode::Bone)
                 tempEDI = dummyViewAxis;
         }
 
-        __asm popad __asm mov edi, tempEDI __asm jmp CG_DObjGetWorldTagMatrix_Trampoline
+        __asm popad
+        __asm mov edi, tempEDI 
+        __asm jmp CG_DObjGetWorldTagMatrix_Trampoline
     }
 
     void Install()
@@ -135,16 +144,16 @@ namespace IWXMVM::IW3::Hooks::Camera
         auto& camera = Components::CameraManager::Get().GetActiveCamera();
         auto isFreeCamera = camera->IsModControlledCameraMode();
 
-        Structures::FindDvar("cg_thirdperson")->current.enabled =
+        Functions::FindDvar("cg_thirdperson")->current.enabled =
             (camera->GetMode() == Components::Camera::Mode::ThirdPerson || isFreeCamera) ? 1 : 0;
-        Structures::FindDvar("cg_draw2d")->current.enabled = (isFreeCamera) ? 0 : 1;
-        Structures::FindDvar("cg_drawShellshock")->current.enabled = (isFreeCamera) ? 0 : 1;
+        Functions::FindDvar("cg_draw2d")->current.enabled = (isFreeCamera) ? 0 : 1;
+        Functions::FindDvar("cg_drawShellshock")->current.enabled = (isFreeCamera) ? 0 : 1;
 
         // TODO: hide / show killcam 'YOU' marker by placing / removing an absolute jump at 0x444B6B
         // TODO: hide / show class menu when watching demos and using free / orbit camera by placing / removing an
         // absolute jump at 0x474E20
         constexpr int32_t LODBIAS = -40000;
-        Structures::FindDvar("r_lodBiasRigid")->current.value = LODBIAS;
-        Structures::FindDvar("r_lodBiasSkinned")->current.value = LODBIAS;
+        Functions::FindDvar("r_lodBiasRigid")->current.value = LODBIAS;
+        Functions::FindDvar("r_lodBiasSkinned")->current.value = LODBIAS;
     }
 }  // namespace IWXMVM::IW3::Hooks::Camera

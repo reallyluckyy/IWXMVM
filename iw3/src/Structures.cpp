@@ -47,56 +47,19 @@ namespace IWXMVM::IW3::Structures
         return (clientUIActive_t*)GetGameAddresses().clientUIActives();
     }
 
-    dvar_s* FindDvar(const std::string_view name)
+    centity_s* GetEntities()
     {
-        const char* _name = name.data();
-
-        typedef dvar_s*(__cdecl * Dvar_FindVar_t)();
-        Dvar_FindVar_t Dvar_FindVar_Internal = (Dvar_FindVar_t)GetGameAddresses().Dvar_FindMalleableVar();
-
-        __asm {
-            mov edi, _name
-        }
-
-        return Dvar_FindVar_Internal();
+        return (centity_s*)GetGameAddresses().cg_entities();
     }
 
-    std::string GetFilePath(const std::string_view demoName)
+    uint16_t* GetClientObjectMap()
     {
-        auto searchpath = (searchpath_s*)GetGameAddresses().fs_searchpaths();
-        while (searchpath->next)
-        {
-            searchpath = searchpath->next;
-            if (!searchpath->dir)
-                continue;
-
-            auto path = std::filesystem::path(searchpath->dir->path);
-            path.append(searchpath->dir->gamedir);
-            path.append("demos");
-            path.append(demoName);
-
-            if (std::filesystem::exists(path))
-                return path.string();
-        }
-
-        return "";
+        return (uint16_t*)GetGameAddresses().clientObjMap();
     }
 
-    // TODO: now this should really not belong in a file called "Structures.cpp"...
-    void Cbuf_AddText(std::string command)
+    DObj_s* GetObjBuf()
     {
-        LOG_DEBUG("Executing command \"{0}\"", command);
-
-        command.append("\n");
-
-        const char* commandString = command.c_str();
-        const auto Cbuf_AddText_Address = GetGameAddresses().Cbuf_AddText();
-
-        __asm
-        {
-            mov eax, commandString
-            mov ecx, 0
-            call Cbuf_AddText_Address
-        }
+        return (DObj_s*)GetGameAddresses().objBuf();
     }
+
 }  // namespace IWXMVM::IW3::Structures

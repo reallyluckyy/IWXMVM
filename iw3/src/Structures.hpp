@@ -1001,6 +1001,63 @@ namespace IWXMVM::IW3::Structures
         // ...
     };
 
+    struct cpose_t
+    {
+        unsigned __int16 lightingHandle;
+        char eType;
+        char eTypeUnion;
+        char localClientNum;
+        int cullIn;
+        char isRagdoll;
+        int ragdollHandle;
+        int killcamRagdollHandle;
+        int physObjId;
+        float origin[3];
+        float angles[3];
+        // ...
+    };
+
+    struct DSkelPartBits
+    {
+        int anim[4];
+        int control[4];
+        int skel[4];
+    };
+
+    struct DSkel
+    {
+        DSkelPartBits partBits;
+        int timeStamp;
+        void* mat; // DObjAnimMat
+    };
+
+    struct XModel
+    {
+        const char* name;
+        char numBones;
+        char numRootBones;
+        char numsurfs;
+        char lodRampType;
+        unsigned __int16* boneNames;
+        // ...
+    };
+
+    struct DObj_s
+    {
+        void* tree; // XAnimTree_s*
+        unsigned __int16 duplicateParts;
+        unsigned __int16 entnum;
+        char duplicatePartsSize;
+        char numModels;
+        char numBones;
+        unsigned int ignoreCollision;
+        volatile int locked;
+        DSkel skel;
+        float radius;
+        unsigned int hidePartBits[4];
+        XModel** models;  // XModel**
+    };
+
     clientConnection_t* GetClientConnection();
     clientStatic_t* GetClientStatic();
     clientActive_t* GetClientActive();
@@ -1009,10 +1066,7 @@ namespace IWXMVM::IW3::Structures
     WinMouseVars_t* GetMouseVars();
     GfxWorld* GetGfxWorld();
     clientUIActive_t* GetClientUIActives();
-
-    dvar_s* FindDvar(const std::string_view name);
-
-    std::string GetFilePath(const std::string_view demoName);
-
-    void Cbuf_AddText(std::string command);
+    centity_s* GetEntities();
+    uint16_t* GetClientObjectMap();
+    DObj_s* GetObjBuf();
 }  // namespace IWXMVM::IW3::Structures

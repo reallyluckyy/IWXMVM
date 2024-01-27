@@ -179,6 +179,100 @@ namespace IWXMVM::UI
             ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems,
                          IM_ARRAYSIZE(playerCameraComboItems));
         }
+        else if (currentCamera->GetMode() == Components::Camera::Mode::Bone)
+        {
+            ImGui::SameLine();
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Entity");
+            ImGui::SameLine();
+
+            auto boneCamera = static_cast<Components::BoneCamera*>(currentCamera.get());
+            ImGui::SetNextItemWidth(200);
+            auto entities = Mod::GetGameInterface()->GetEntities();
+            if (ImGui::BeginCombo("##gameViewBoneCameraTargetCombo", entities[boneCamera->GetEntityId()].ToString().c_str()))
+            {
+                for (int i = 0; i < entities.size(); i++)
+                {
+                    if (entities[i].type == Types::EntityType::Unsupported)
+                        continue;
+
+                    bool isSelected = boneCamera->GetEntityId() == i;
+                    if (ImGui::Selectable(entities[i].ToString().c_str(), boneCamera->GetEntityId() == i))
+                    {
+                        boneCamera->GetEntityId() = i;
+                    }
+
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::SameLine();
+
+            const auto& supportedBoneNames = Mod::GetGameInterface()->GetSupportedBoneNames();
+
+            ImGui::SetNextItemWidth(200);
+            if (ImGui::BeginCombo("##gameViewBoneCameraBoneCombo",
+                                  supportedBoneNames[boneCamera->GetBoneIndex()].c_str()))
+            {
+                for (int i = 0; i < supportedBoneNames.size(); i++)
+                {
+                    bool isSelected = boneCamera->GetBoneIndex() == i;
+                    if (ImGui::Selectable(supportedBoneNames[i].data(), boneCamera->GetBoneIndex() == i))
+                    {
+                        boneCamera->GetBoneIndex() = i;
+                    }
+
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+
+            ImGui::SameLine();
+
+            const auto& boneData = Mod::GetGameInterface()->GetBoneData(
+                boneCamera->GetEntityId(), supportedBoneNames.at(boneCamera->GetBoneIndex()));
+            if (boneData.id == -1)
+            {
+                ImGui::Text(ICON_FA_TRIANGLE_EXCLAMATION " Bone not found on entity");
+            }
+            else
+            {
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Offset");
+                ImGui::SameLine();
+
+                ImGui::SetNextItemWidth(200);
+                ImGui::DragFloat3("##gameViewBoneCameraOffset", &boneCamera->GetPositionOffset().x, 1, -10000, 10000,
+                                  "%.1f");
+
+                ImGui::SameLine();
+
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Rotation");
+                ImGui::SameLine();
+
+                ImGui::SetNextItemWidth(200);
+                ImGui::DragFloat3("##gameViewBoneCameraRotation", &boneCamera->GetRotationOffset().x, 1, -180, 180,
+                                  "%.1f");
+
+                ImGui::SameLine();
+
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("FOV");
+                ImGui::SameLine();
+
+                ImGui::SetNextItemWidth(50);
+                ImGui::DragFloat("##gameViewBoneCameraFOV", &boneCamera->GetFov(), 1, 1, 180, "%.0f");
+            }
+        }
+
 
         if (UIManager::Get().IsFreecamSelected())
         {

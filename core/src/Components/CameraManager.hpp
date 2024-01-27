@@ -4,6 +4,7 @@
 #include "DollyCamera.hpp"
 #include "FreeCamera.hpp"
 #include "OrbitCamera.hpp"
+#include "BoneCamera.hpp"
 
 namespace IWXMVM::Components
 {
@@ -47,7 +48,7 @@ namespace IWXMVM::Components
             tmp.push_back(std::make_unique<FreeCamera>(FreeCamera()));
             tmp.push_back(std::make_unique<OrbitCamera>(OrbitCamera()));
             tmp.push_back(std::make_unique<DollyCamera>(DollyCamera()));
-            tmp.push_back(std::make_unique<DefaultCamera>(DefaultCamera(Camera::Mode::Bone)));
+            tmp.push_back(std::make_unique<BoneCamera>(BoneCamera()));
 
             if (tmp.size() != (int)Camera::Mode::Count)
             {

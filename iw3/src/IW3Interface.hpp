@@ -3,6 +3,7 @@
 #include "GameInterface.hpp"
 
 #include "Structures.hpp"
+#include "Functions.hpp"
 #include "Hooks.hpp"
 #include "Events.hpp"
 #include "DemoParser.hpp"
@@ -35,7 +36,7 @@ namespace IWXMVM::IW3
             Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
 
             Events::RegisterListener(EventType::OnDemoLoad,
-                                     []() { Structures::FindDvar("sv_cheats")->current.enabled = true; });
+                                     []() { Functions::FindDvar("sv_cheats")->current.enabled = true; });
         }
 
         uintptr_t GetWndProc() final
@@ -50,7 +51,7 @@ namespace IWXMVM::IW3
 
         Types::GameState GetGameState() final
         {
-            if (!Structures::FindDvar("cl_ingame")->current.enabled)
+            if (!Functions::FindDvar("cl_ingame")->current.enabled)
                 return Types::GameState::MainMenu;
 
             if (Structures::GetClientConnection()->demoplaying)
@@ -70,7 +71,7 @@ namespace IWXMVM::IW3
 
             std::string str = static_cast<std::string>(Structures::GetClientStatic()->servername);
             str += (str.ends_with(".dm_1")) ? "" : ".dm_1";
-            demoInfo.path = Structures::GetFilePath(std::move(str));
+            demoInfo.path = Functions::GetFilePath(std::move(str));
 
             demoInfo.currentTick = Structures::GetClientActive()->serverTime - DemoParser::demoStartTick;
             demoInfo.endTick = DemoParser::demoEndTick - DemoParser::demoStartTick;
@@ -105,7 +106,7 @@ namespace IWXMVM::IW3
 
                 std::filesystem::copy(demoPath, targetPath);
 
-                Structures::Cbuf_AddText(
+                Functions::Cbuf_AddText(
                     std::format(R"(demo "{0}/{1}")", DEMO_TEMP_DIRECTORY, targetPath.filename().string()));
             }
             catch (std::filesystem::filesystem_error& e)
@@ -116,7 +117,7 @@ namespace IWXMVM::IW3
 
         void Disconnect()
         {
-            Structures::Cbuf_AddText("disconnect");
+            Functions::Cbuf_AddText("disconnect");
         }
 
         bool isPlaybackPaused = false;
@@ -134,7 +135,7 @@ namespace IWXMVM::IW3
         bool IsConsoleOpen() final
         {
             return (Structures::GetClientUIActives()->keyCatchers & 1) != 0;
-		}
+        }
 
         void InitializeGameAddresses() final
         {
@@ -185,7 +186,7 @@ namespace IWXMVM::IW3
 
         std::optional<Types::Dvar> GetDvar(const std::string_view name) final
         {
-            const auto iw3Dvar = Structures::FindDvar(name);
+            const auto iw3Dvar = Functions::FindDvar(name);
 
             if (!iw3Dvar)
                 return std::nullopt;
@@ -210,15 +211,18 @@ namespace IWXMVM::IW3
 
         Types::DoF GetDof()
         {
-            Types::DoF dof = {Structures::FindDvar("r_dof_tweak")->current.enabled &&
-                                  Structures::FindDvar("r_dof_enable")->current.enabled,
-                              Structures::FindDvar("r_dof_farBlur")->current.value,
-                              Structures::FindDvar("r_dof_farStart")->current.value,
-                              Structures::FindDvar("r_dof_farEnd")->current.value,
-                              Structures::FindDvar("r_dof_nearBlur")->current.value,
-                              Structures::FindDvar("r_dof_nearStart")->current.value,
-                              Structures::FindDvar("r_dof_nearEnd")->current.value,
-                              Structures::FindDvar("r_dof_bias")->current.value};
+            Types::DoF dof = 
+            {
+                Functions::FindDvar("r_dof_tweak")->current.enabled &&
+                    Functions::FindDvar("r_dof_enable")->current.enabled,
+                Functions::FindDvar("r_dof_farBlur")->current.value,
+                Functions::FindDvar("r_dof_farStart")->current.value,
+                Functions::FindDvar("r_dof_farEnd")->current.value,
+                Functions::FindDvar("r_dof_nearBlur")->current.value,
+                Functions::FindDvar("r_dof_nearStart")->current.value,
+                Functions::FindDvar("r_dof_nearEnd")->current.value,
+                Functions::FindDvar("r_dof_bias")->current.value
+            };
 
             return dof;
         }
@@ -226,14 +230,15 @@ namespace IWXMVM::IW3
         Types::Filmtweaks GetFilmtweaks()
         {
             Types::Filmtweaks filmtweaks = {
-                Structures::FindDvar("r_filmUseTweaks")->current.enabled &&
-                    Structures::FindDvar("r_filmTweakEnable")->current.enabled,
-                Structures::FindDvar("r_filmTweakBrightness")->current.value,
-                Structures::FindDvar("r_filmTweakContrast")->current.value,
-                Structures::FindDvar("r_filmTweakDesaturation")->current.value,
-                glm::make_vec3(Structures::FindDvar("r_filmTweakLightTint")->current.vector),
-                glm::make_vec3(Structures::FindDvar("r_filmTweakDarkTint")->current.vector),
-                Structures::FindDvar("r_filmTweakInvert")->current.enabled};
+                Functions::FindDvar("r_filmUseTweaks")->current.enabled &&
+                    Functions::FindDvar("r_filmTweakEnable")->current.enabled,
+                Functions::FindDvar("r_filmTweakBrightness")->current.value,
+                Functions::FindDvar("r_filmTweakContrast")->current.value,
+                Functions::FindDvar("r_filmTweakDesaturation")->current.value,
+                glm::make_vec3(Functions::FindDvar("r_filmTweakLightTint")->current.vector),
+                glm::make_vec3(Functions::FindDvar("r_filmTweakDarkTint")->current.vector),
+                Functions::FindDvar("r_filmTweakInvert")->current.enabled
+            };
 
             return filmtweaks;
         }
@@ -251,30 +256,31 @@ namespace IWXMVM::IW3
 
         void SetDof(Types::DoF dof) final
         {
-            Structures::FindDvar("r_dof_tweak")->current.enabled = dof.enabled;
-            Structures::FindDvar("r_dof_enable")->current.enabled = dof.enabled;
-            Structures::FindDvar("r_dof_farBlur")->current.value = dof.farBlur;
-            Structures::FindDvar("r_dof_farStart")->current.value = dof.farStart;
-            Structures::FindDvar("r_dof_farEnd")->current.value = dof.farEnd;
-            Structures::FindDvar("r_dof_nearBlur")->current.value = dof.nearBlur;
-            Structures::FindDvar("r_dof_nearStart")->current.value = dof.nearStart;
-            Structures::FindDvar("r_dof_nearEnd")->current.value = dof.nearEnd;
-            Structures::FindDvar("r_dof_bias")->current.value = dof.bias;
+            Functions::FindDvar("r_dof_tweak")->current.enabled = dof.enabled;
+            Functions::FindDvar("r_dof_enable")->current.enabled = dof.enabled;
+            Functions::FindDvar("r_dof_farBlur")->current.value = dof.farBlur;
+            Functions::FindDvar("r_dof_farStart")->current.value = dof.farStart;
+            Functions::FindDvar("r_dof_farEnd")->current.value = dof.farEnd;
+            Functions::FindDvar("r_dof_nearBlur")->current.value = dof.nearBlur;
+            Functions::FindDvar("r_dof_nearStart")->current.value = dof.nearStart;
+            Functions::FindDvar("r_dof_nearEnd")->current.value = dof.nearEnd;
+            Functions::FindDvar("r_dof_bias")->current.value = dof.bias;
         }
 
         void SetFilmtweaks(Types::Filmtweaks filmtweaks) final
         {
-            Structures::FindDvar("r_filmUseTweaks")->current.enabled = filmtweaks.enabled;
-            Structures::FindDvar("r_filmTweakEnable")->current.enabled = filmtweaks.enabled;
-            Structures::FindDvar("r_filmTweakBrightness")->current.value = filmtweaks.brightness;
-            Structures::FindDvar("r_filmTweakContrast")->current.value = filmtweaks.contrast;
-            Structures::FindDvar("r_filmTweakDesaturation")->current.value = filmtweaks.desaturation;
+            Functions::FindDvar("r_filmUseTweaks")->current.enabled = filmtweaks.enabled;
+            Functions::FindDvar("r_filmTweakEnable")->current.enabled = filmtweaks.enabled;
+            Functions::FindDvar("r_filmTweakBrightness")->current.value = filmtweaks.brightness;
+            Functions::FindDvar("r_filmTweakContrast")->current.value = filmtweaks.contrast;
+            Functions::FindDvar("r_filmTweakDesaturation")->current.value = filmtweaks.desaturation;
             for (int i = 0; i < 3; ++i)
             {
-                Structures::FindDvar("r_filmTweakLightTint")->current.vector[i] = glm::value_ptr(filmtweaks.tintLight)[i];
-                Structures::FindDvar("r_filmTweakDarkTint")->current.vector[i] = glm::value_ptr(filmtweaks.tintDark)[i];
+                Functions::FindDvar("r_filmTweakLightTint")->current.vector[i] =
+                    glm::value_ptr(filmtweaks.tintLight)[i];
+                Functions::FindDvar("r_filmTweakDarkTint")->current.vector[i] = glm::value_ptr(filmtweaks.tintDark)[i];
             }
-            Structures::FindDvar("r_filmTweakInvert")->current.enabled = filmtweaks.invert;
+            Functions::FindDvar("r_filmTweakInvert")->current.enabled = filmtweaks.invert;
         }
 
         std::atomic<std::int32_t> tick;
@@ -290,6 +296,130 @@ namespace IWXMVM::IW3
                 Structures::GetClientStatic()->realtime += value;
             else if (value < 0)
                 tick.store(value);
+        }
+
+        std::vector<Types::Entity> GetEntities() final
+        {
+            std::vector<Types::Entity> entities;
+            
+            auto cg_entities = Structures::GetEntities();
+
+            auto ToEntityType = [](char eType) -> Types::EntityType {
+                switch (eType)
+                {
+                    case Structures::entityType_t::ET_PLAYER:
+                        return Types::EntityType::Player;
+                    case Structures::entityType_t::ET_PLAYER_CORPSE:
+                        return Types::EntityType::Corpse;
+                    case Structures::entityType_t::ET_ITEM:
+                        return Types::EntityType::Item;
+                    case Structures::entityType_t::ET_MISSILE:
+                        return Types::EntityType::Missile;
+                    case Structures::entityType_t::ET_HELICOPTER:
+                        return Types::EntityType::Helicopter;
+                    default:
+                        return Types::EntityType::Unsupported;
+                }
+            };
+
+            for (int i = 0; i < 256; i++)
+            {
+                auto pose = (Structures::cpose_t*)(&cg_entities[i]);
+                if (pose->eType)
+                {
+                    entities.push_back(
+                        Types::Entity
+                        {
+                            .id = i, 
+                            .type = ToEntityType(pose->eType)
+                        }
+                    );
+                }
+            }
+
+            return entities;
+		}
+
+        auto FindBoneIndex(Structures::DObj_s* dobj, uint16_t boneName)
+        {
+            if (!dobj->models || !dobj->numModels)
+                return -1;
+
+            auto boneIndex = -1;
+
+            auto totalBones = 0;
+            for (int m = 0; m < dobj->numModels; m++)
+            {
+                auto model = dobj->models[m];
+                if (!model || !model->numBones)
+                    return -1;
+                for (int b = 0; b < model->numBones; b++)
+                {
+                    auto bone = model->boneNames[b];
+                    if (bone == boneName)
+                    {
+                        boneIndex = totalBones + b;
+                    }
+                }
+                totalBones += model->numBones;
+            }
+
+            return boneIndex;
+        }
+
+        Types::BoneData GetBoneData(int32_t entityId, const std::string& name) final
+        {
+            uint16_t* clientObjMap = Structures::GetClientObjectMap();
+            Structures::DObj_s* objBuf = Structures::GetObjBuf();
+
+            uint16_t dobjIndex = clientObjMap[entityId];
+            Structures::DObj_s* dobj = &objBuf[dobjIndex];
+
+            auto entities = Structures::GetEntities();
+            auto entity = &entities[entityId];
+            auto boneName = Functions::SL_GetStringOfSize(name.c_str(), 1, name.size() + 1);
+
+            auto boneIndex = FindBoneIndex(dobj, boneName);
+            if (boneIndex == -1)
+            {
+                //LOG_ERROR("Bone {0} was not found in {1} models", boneName, (int)dobj->numModels);
+                return {.id = -1};
+            }
+
+            float rotationMatrix[3 * 3];
+            float origin[3];
+            auto result =
+                Functions::CG_DObjGetWorldBoneMatrix(entity, boneIndex, (float*)rotationMatrix, dobj, origin);
+
+            if (!result)
+            {
+                LOG_ERROR("Call to CG_DObjGetWorldTagMatrix failed");
+                return {.id = -1};
+            }
+
+            Types::BoneData boneData;
+            boneData.id = boneIndex;
+            boneData.position = glm::make_vec3(origin);
+            boneData.rotation = glm::make_mat3(rotationMatrix);
+            return boneData;
+        }
+
+        constexpr std::vector<std::string> GetSupportedBoneNames()
+        {
+            return
+            {
+                "tag_weapon", 
+                "tag_flash",     
+                "tag_clip",      
+                "tag_brass",
+                "j_head",
+                "j_wrist_le",
+                "j_wrist_ri",
+                "j_shoulder_le",
+                "j_shoulder_ri",
+                "j_ankle_le",
+                "j_ankle_ri"
+            };
         }
     };
 }  // namespace IWXMVM::IW3

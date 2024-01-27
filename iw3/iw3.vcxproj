@@ -108,6 +108,7 @@
   <ItemGroup>
     <ClCompile Include="src\DemoParser.cpp" />
     <ClCompile Include="src\Entrypoint.cpp" />
+    <ClCompile Include="src\Functions.cpp" />
     <ClCompile Include="src\Hooks.cpp" />
     <ClCompile Include="src\Hooks\Commands.cpp" />
     <ClCompile Include="src\Hooks\Camera.cpp" />
@@ -122,6 +123,7 @@
   <ItemGroup>
     <ClInclude Include="src\Addresses.hpp" />
     <ClInclude Include="src\DemoParser.hpp" />
+    <ClInclude Include="src\Functions.hpp" />
     <ClInclude Include="src\Hooks.hpp" />
     <ClInclude Include="src\Hooks\Commands.hpp" />
     <ClInclude Include="src\Hooks\Camera.hpp" />
