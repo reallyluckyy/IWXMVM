@@ -115,6 +115,38 @@ namespace IWXMVM::UI
         DrawGizmoButton(ICON_FA_ROTATE, buttonSize, GFX::GizmoMode::Rotate);
     }
 
+    void GameView::DrawKeybinds()
+    {
+        ImGui::SetCursorPos(ImVec2(20, ImGui::GetWindowSize().y - 40));
+
+        auto spacing = 30;
+
+        if (Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free)
+        {
+            auto& config = InputConfiguration::Get();
+            if (HasFocus())
+            {
+                ImGui::Text("%s%s%s%s - Move Camera",
+                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraForward)),
+                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraLeft)),
+                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraBackward)),
+                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraRight)));
+                ImGui::SameLine(0, spacing);
+                ImGui::Text("%s/%s - Up/Down", ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraUp)),
+                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)));
+                ImGui::SameLine(0, spacing);
+                ImGui::Text("MWheel - Change FOV");
+                ImGui::SameLine(0, spacing);
+                ImGui::Text("Alt + MWheel - Roll Camera");
+
+                ImGui::SameLine(0, spacing);
+                ImGui::Text("%s - Place Campath Node", ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)));
+                ImGui::SameLine(0, spacing);
+                ImGui::Text("%s - Delete Campath", ImGui::GetKeyName(config.GetBoundKey(Action::DollyClearNodes)));
+            }
+        }
+    }
+
     void GameView::LockMouse()
     {
         // calling FindWindowHandle every frame here is probably not a good idea
@@ -363,6 +395,7 @@ namespace IWXMVM::UI
         ImGui::Image((void*)texture, textureSize);
         Events::Invoke(EventType::OnRenderGameView);
         DrawGizmoControls();
+        DrawKeybinds();
 
         ImGui::EndChildFrame();
 
