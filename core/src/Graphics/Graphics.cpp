@@ -11,86 +11,8 @@
 #include "Types/Vertex.hpp"
 #include "Utilities/MathUtils.hpp"
 
-// clang-format off
-
-const char* vertexShaderCode = "\
-struct VS_INPUT\
-{\
-	float3 position : POSITION;\
-	float3 normal: NORMAL;\
-    float3 color: COLOR;\
-};\
-\
-struct VS_OUTPUT\
-{\
-	float4 position : POSITION;\
-    float3 normalWorld : NORMAL0;\
-    float3 positionWorld: NORMAL1;\
-	float3 color : COLOR;\
-};\
-\
-cbuffer Matrices : register(c0)\
-{\
-    matrix viewProjectionMatrix : register(c0);\
-    matrix modelMatrix : register(c4);\
-};\
-\
-\
-VS_OUTPUT main(VS_INPUT input)\
-{\
-	VS_OUTPUT output;\
-\
-    output.position = mul(modelMatrix, float4(input.position, 1));\
-    output.position = mul(viewProjectionMatrix, output.position);\
-    output.normalWorld = normalize(mul(modelMatrix, float4(input.normal, 0))).xyz;\
-    output.positionWorld = mul(modelMatrix, float4(input.position, 1)).xyz;\
-	output.color = input.color;\
-\
-	return output;\
-}\
-";
-
-const char* pixelShaderCode = "\
-struct PS_INPUT\
-{\
-    float4 position : POSITION1;\
-    float3 normalWorld : NORMAL0;\
-    float3 positionWorld : NORMAL1;\
-	float3 color : COLOR;\
-};\
-\
-cbuffer LightInfo : register(c12)\
-{\
-    float4 lightColor : register(c12);\
-    float4 lightDirection : register(c13);\
-    float4 camPosition : register(c14);\
-    float4 filmtweaksParams : register(c15);\
-};\
-\
-float4 main(PS_INPUT input) : COLOR\
-{\
-    float4 ambient = float4(0.45, 0.45, 0.45, 1.0);\
-    float4 diffuse = max(dot(lightDirection.xyz, input.normalWorld), 0) * lightColor;\
-    float specularLight = 1;\
-    float3 viewDirection = normalize(camPosition.xyz - input.positionWorld);\
-    float3 reflectionDirection = reflect(-lightDirection.xyz, input.normalWorld);\
-    float specularAmount = pow(max(dot(viewDirection, reflectionDirection), 0), 16);\
-    float specular = specularAmount * specularLight;\
-\
-    float4 outputColor = float4(input.color, 0) * (diffuse + ambient + specular);\
-\
-    float3 coeff = float3(0.2125, 0.7154, 0.0721);\
-    outputColor.rgb = (outputColor.rgb - 0.5) * filmtweaksParams[1] + 0.5;\
-    outputColor.rgb = outputColor.rgb * filmtweaksParams[3];\
-    outputColor.rgb = outputColor.rgb + filmtweaksParams[0];\
-    float intensity = dot(outputColor.rgb, coeff);\
-    outputColor.rgb = lerp(intensity, outputColor.rgb, 1 - filmtweaksParams[2]);\
-\
-	return outputColor;\
-}\
-";
-
-// clang-format on
+INCBIN_EXTERN(VERTEX_SHADER);
+INCBIN_EXTERN(PIXEL_SHADER);
 
 namespace IWXMVM::GFX
 {
@@ -100,7 +22,9 @@ namespace IWXMVM::GFX
         ID3DXBuffer* errorMessageBuffer = nullptr;
 
         ID3DXBuffer* vertexShaderBuffer = nullptr;
-        HRESULT result = D3DXCompileShader(vertexShaderCode, strlen(vertexShaderCode), nullptr, NULL, "main", "vs_3_0", NULL,
+        HRESULT result = D3DXCompileShader((LPCSTR)VERTEX_SHADER_data, VERTEX_SHADER_size, nullptr, NULL, "main",
+                                           "vs_3_0",
+                                           NULL,
                                    &vertexShaderBuffer, &errorMessageBuffer, nullptr);
         if (result != D3D_OK)
         {
@@ -118,7 +42,7 @@ namespace IWXMVM::GFX
         }
 
         ID3DXBuffer* pixelShaderBuffer = nullptr;
-        result = D3DXCompileShader(pixelShaderCode, strlen(pixelShaderCode), nullptr, NULL, "main", "ps_3_0",
+        result = D3DXCompileShader((LPCSTR)PIXEL_SHADER_data, PIXEL_SHADER_size, nullptr, NULL, "main", "ps_3_0",
                                            NULL, &pixelShaderBuffer, &errorMessageBuffer, nullptr);
         if (result != D3D_OK)
         {
@@ -429,7 +353,7 @@ namespace IWXMVM::GFX
                 {
                     bestDotProduct = dot;
                     bestPlaneNormal = axisNormal;
-				}
+                }
             }
 
             auto intersection = GetMousePositionOnPlane(position, bestPlaneNormal);
