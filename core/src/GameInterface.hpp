@@ -11,6 +11,8 @@
 #include "Types/Sun.hpp"
 #include "Types/Dof.hpp"
 #include "Types/Filmtweaks.hpp"
+#include "Types/BoneData.hpp"
+#include "Types/Entity.hpp"
 
 namespace IWXMVM
 {
@@ -69,6 +71,10 @@ namespace IWXMVM
         virtual void SetSun(Types::Sun) = 0;
         virtual void SetDof(Types::DoF) = 0;
         virtual void SetFilmtweaks(Types::Filmtweaks) = 0;
+
+        virtual std::vector<Types::Entity> GetEntities() = 0;
+        virtual Types::BoneData GetBoneData(int32_t entityId, const std::string& name) = 0;
+        virtual constexpr std::vector<std::string> GetSupportedBoneNames() = 0;
 
        private:
         Types::Game game;

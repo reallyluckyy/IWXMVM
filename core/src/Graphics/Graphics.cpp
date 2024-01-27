@@ -414,6 +414,19 @@ namespace IWXMVM::GFX
                 }
             }
         }
+        
+        if (currentCameraMode == Components::Camera::Mode::Bone)
+        {
+            auto& boneCamera = dynamic_cast<Components::BoneCamera&>(*activeCam);
+			const auto& bones = Mod::GetGameInterface()->GetSupportedBoneNames();
+			const std::string& selectedBoneName = bones.at(boneCamera.GetBoneIndex());
+			const auto selectedPlayer = boneCamera.GetEntityId();
+			const auto& boneData = Mod::GetGameInterface()->GetBoneData(selectedPlayer, selectedBoneName);
+
+			const auto translate = glm::translate(boneData.position);
+			const auto scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
+			BufferManager::Get().DrawMesh(axis, translate * glm::mat4x4(boneData.rotation) * scale);
+        }
 
         // Restore the DX9 transform
         device->SetTransform(D3DTS_WORLD, &last_world);

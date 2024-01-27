@@ -113,6 +113,7 @@
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Components\BoneCamera.cpp" />
     <ClCompile Include="src\Components\Camera.cpp" />
     <ClCompile Include="src\Components\CameraManager.cpp" />
     <ClCompile Include="src\Components\CampathManager.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="src\Utilities\MemoryUtils.cpp" />
     <ClCompile Include="src\Utilities\PathUtils.cpp" />
     <ClCompile Include="src\Utilities\MathUtils.cpp" />
+    <ClInclude Include="src\Components\BoneCamera.hpp" />
     <ClInclude Include="src\Components\CameraManager.hpp" />
     <ClInclude Include="src\Components\CampathManager.hpp" />
     <ClInclude Include="src\Components\DefaultCamera.hpp" />
@@ -174,9 +176,11 @@
     <ClInclude Include="src\Graphics\Graphics.hpp" />
     <ClInclude Include="src\Graphics\Resource.hpp" />
     <ClInclude Include="src\Input.hpp" />
+    <ClInclude Include="src\Types\BoneData.hpp" />
     <ClInclude Include="src\Types\DemoInfo.hpp" />
     <ClInclude Include="src\Types\Dof.hpp" />
     <ClInclude Include="src\Types\Dvar.hpp" />
+    <ClInclude Include="src\Types\Entity.hpp" />
     <ClInclude Include="src\Types\Filmtweaks.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />

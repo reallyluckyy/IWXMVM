@@ -47,6 +47,11 @@ namespace IWXMVM::IW3::Signatures
         Sig("68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 68 C8 02 00 00", GAType::Data, 1, Lambda::DereferenceAddress) > gfxWorld;
         Sig("?? ?? ?? ?? ?? 81 EC ?? ?? ?? ?? 8D 80 ?? ?? ?? ?? 8D 54 24 ?? 56", GAType::Code, 22) > CG_RegisterItems;
         Sig("C6 05 ?? ?? ?? ?? 01 88 9E", GAType::Data, 2, Lambda::DereferenceAddress) > clientUIActives;
+        Sig("5C 24 20 55 56 8B 74 24 20", GAType::Code, -5) > SL_GetStringOfSize;
+        Sig("69 C9 00 70 07 00 83 C4 0C 68 00 70 07 00 81", GAType::Data, 16, Lambda::DereferenceAddress) > cg_entities;
+        Sig("5C 24 38 55 8B 6C 24 40 57 8B F9", GAType::Code, -5) > CG_DObjGetWorldBoneMatrix;
+        Sig("03 44 24 04 0F B7 04 45", GAType::Data, 8, Lambda::DereferenceAddress) > clientObjMap;
+        Sig("0F BF F0 6B F6 64 81 C6", GAType::Data, 8, Lambda::DereferenceAddress) > objBuf;
 
         // cod4x
         using MType = Types::ModuleType;

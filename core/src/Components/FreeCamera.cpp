@@ -57,8 +57,11 @@ namespace IWXMVM::Components
         if (!UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->HasFocus())
             return;
 
-        auto& cameraPosition = this->GetPosition();
+        HandleFreecamInput(this->position, this->rotation, this->fov, this->GetForwardVector(), this->GetRightVector());
+    }
 
+    void FreeCamera::HandleFreecamInput(glm::vec3& position, glm::vec3& rotation, float& fov, glm::vec3 forward, glm::vec3 right)
+    {
         // TODO: make this configurable
         constexpr float FREECAM_SPEED = 300;
         constexpr float MOUSE_SPEED = 0.1f;
@@ -77,27 +80,27 @@ namespace IWXMVM::Components
 
         if (Input::BindHeld(Action::FreeCameraForward))
         {
-            cameraPosition += this->GetForwardVector() * cameraMovementSpeed;
+            position += forward * cameraMovementSpeed;
         }
 
         if (Input::BindHeld(Action::FreeCameraBackward))
         {
-            cameraPosition -= this->GetForwardVector() * cameraMovementSpeed;
+            position -= forward * cameraMovementSpeed;
         }
 
         if (Input::BindHeld(Action::FreeCameraLeft))
         {
-            cameraPosition += this->GetRightVector() * cameraMovementSpeed;
+            position += right * cameraMovementSpeed;
         }
 
         if (Input::BindHeld(Action::FreeCameraRight))
         {
-            cameraPosition -= this->GetRightVector() * cameraMovementSpeed;
+            position -= right * cameraMovementSpeed;
         }
 
         if (Input::KeyHeld(ImGuiKey_LeftAlt))
         {
-            this->GetRotation()[2] += Input::GetScrollDelta();
+            rotation[2] += Input::GetScrollDelta();
             rotationDisplayTimer = PROPERTY_DISPLAY_TIME;
         }
         else
@@ -106,8 +109,8 @@ namespace IWXMVM::Components
 
             if (scrollDelta < SCROLL_LOWER_BOUNDARY || scrollDelta > SCROLL_UPPER_BOUNDARY)
             {
-                this->GetFov() += scrollDelta * Input::GetDeltaTime() * 32.0f;
-                this->GetFov() = glm::clamp(this->GetFov(), 1.0f, 179.0f);
+                fov += scrollDelta * Input::GetDeltaTime() * 32.0f;
+                fov = glm::clamp(fov, 1.0f, 179.0f);
                 scrollDelta *= SMOOTHING_FACTOR;
                 fovDisplayTimer = PROPERTY_DISPLAY_TIME;
             }
@@ -119,19 +122,19 @@ namespace IWXMVM::Components
 
         if (Input::BindHeld(Action::FreeCameraReset))
         {
-            this->GetRotation() = {};
-            this->GetFov() = 90.0f;
+            rotation = {};
+            fov = 90.0f;
         }
 
-        this->GetRotation()[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED * this->GetFov() / 90;
-        this->GetRotation()[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED * this->GetFov() / 90;
-
-        this->GetRotation()[0] = glm::clamp(this->GetRotation()[0], -89.9f, 89.9f);
+        rotation[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED * fov / 90;
+        rotation[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED * fov / 90;
+        
+        rotation[0] = glm::clamp(rotation[0], -89.9f, 89.9f);
 
         if (Input::BindHeld(Action::FreeCameraUp))
-            cameraPosition[2] += cameraHeightSpeed;
+            position[2] += cameraHeightSpeed;
 
         if (Input::BindHeld(Action::FreeCameraDown))
-            cameraPosition[2] -= cameraHeightSpeed;
+            position[2] -= cameraHeightSpeed;
     }
 }  // namespace IWXMVM::Components
