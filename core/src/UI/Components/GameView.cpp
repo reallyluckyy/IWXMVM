@@ -115,34 +115,59 @@ namespace IWXMVM::UI
         DrawGizmoButton(ICON_FA_ROTATE, buttonSize, GFX::GizmoMode::Rotate);
     }
 
+    void DrawKey(const char* keyName)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5);
+        ImGui::Button(keyName, ImVec2(ImGui::CalcTextSize(keyName).x + 10, ImGui::GetTextLineHeight()));
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor();
+    }
+
+    void DrawKeybindEntry(const char* keyName, const char* label)
+	{
+        DrawKey(keyName);
+        ImGui::SameLine(0, 12);
+        ImGui::Text(label);
+	}
+
     void GameView::DrawKeybinds()
     {
         ImGui::SetCursorPos(ImVec2(20, ImGui::GetWindowSize().y - 40));
 
         auto spacing = 30;
-
+        auto smallSpacing = 5;
         if (Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free)
         {
             auto& config = InputConfiguration::Get();
             if (HasFocus())
             {
-                ImGui::Text("%s%s%s%s - Move Camera",
-                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraForward)),
-                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraLeft)),
-                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraBackward)),
-                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraRight)));
-                ImGui::SameLine(0, spacing);
-                ImGui::Text("%s/%s - Up/Down", ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraUp)),
-                            ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)));
-                ImGui::SameLine(0, spacing);
-                ImGui::Text("MWheel - Change FOV");
-                ImGui::SameLine(0, spacing);
-                ImGui::Text("Alt + MWheel - Roll Camera");
+                DrawKey(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraForward)));
+                ImGui::SameLine(0, smallSpacing);
+                DrawKey(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraLeft)));
+                ImGui::SameLine(0, smallSpacing);
+                DrawKey(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraBackward)));
+                ImGui::SameLine(0, smallSpacing);
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraRight)), "Move Camera");
 
                 ImGui::SameLine(0, spacing);
-                ImGui::Text("%s - Place Campath Node", ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)));
+                DrawKey(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraUp)));
+                ImGui::SameLine(0, smallSpacing);
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)), "Up/Down");
+
                 ImGui::SameLine(0, spacing);
-                ImGui::Text("%s - Delete Campath", ImGui::GetKeyName(config.GetBoundKey(Action::DollyClearNodes)));
+                DrawKeybindEntry("Scroll", "Change FOV");
+
+                ImGui::SameLine(0, spacing);
+                DrawKey("Alt");
+                ImGui::SameLine(0, smallSpacing);
+                DrawKeybindEntry("Scroll", "Roll Camera");
+
+                ImGui::SameLine(0, spacing);
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)), "Place Campath Node");
+
+                ImGui::SameLine(0, spacing);
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyClearNodes)), "Delete Campath");
             }
         }
     }
