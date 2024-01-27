@@ -11,11 +11,143 @@
 #include "Types/Vertex.hpp"
 #include "Utilities/MathUtils.hpp"
 
+// clang-format off
+
+const char* vertexShaderCode = "\
+struct VS_INPUT\
+{\
+	float3 position : POSITION;\
+	float3 normal: NORMAL;\
+    float3 color: COLOR;\
+};\
+\
+struct VS_OUTPUT\
+{\
+	float4 position : POSITION;\
+    float3 normalWorld : NORMAL0;\
+    float3 positionWorld: NORMAL1;\
+	float3 color : COLOR;\
+};\
+\
+cbuffer Matrices : register(c0)\
+{\
+    matrix viewProjectionMatrix : register(c0);\
+    matrix modelMatrix : register(c4);\
+};\
+\
+\
+VS_OUTPUT main(VS_INPUT input)\
+{\
+	VS_OUTPUT output;\
+\
+    output.position = mul(modelMatrix, float4(input.position, 1));\
+    output.position = mul(viewProjectionMatrix, output.position);\
+    output.normalWorld = normalize(mul(modelMatrix, float4(input.normal, 0))).xyz;\
+    output.positionWorld = mul(modelMatrix, float4(input.position, 1)).xyz;\
+	output.color = input.color;\
+\
+	return output;\
+}\
+";
+
+const char* pixelShaderCode = "\
+struct PS_INPUT\
+{\
+    float4 position : POSITION1;\
+    float3 normalWorld : NORMAL0;\
+    float3 positionWorld : NORMAL1;\
+	float3 color : COLOR;\
+};\
+\
+cbuffer LightInfo : register(c12)\
+{\
+    float4 lightColor : register(c12);\
+    float4 lightDirection : register(c13);\
+    float4 camPosition : register(c14);\
+    float4 filmtweaksParams : register(c15);\
+};\
+\
+float4 main(PS_INPUT input) : COLOR\
+{\
+    float4 ambient = float4(0.45, 0.45, 0.45, 1.0);\
+    float4 diffuse = max(dot(lightDirection.xyz, input.normalWorld), 0) * lightColor;\
+    float specularLight = 1;\
+    float3 viewDirection = normalize(camPosition.xyz - input.positionWorld);\
+    float3 reflectionDirection = reflect(-lightDirection.xyz, input.normalWorld);\
+    float specularAmount = pow(max(dot(viewDirection, reflectionDirection), 0), 16);\
+    float specular = specularAmount * specularLight;\
+\
+    float4 outputColor = float4(input.color, 0) * (diffuse + ambient + specular);\
+\
+    float3 coeff = float3(0.2125, 0.7154, 0.0721);\
+    outputColor.rgb = (outputColor.rgb - 0.5) * filmtweaksParams[1] + 0.5;\
+    outputColor.rgb = outputColor.rgb * filmtweaksParams[3];\
+    outputColor.rgb = outputColor.rgb + filmtweaksParams[0];\
+    float intensity = dot(outputColor.rgb, coeff);\
+    outputColor.rgb = lerp(intensity, outputColor.rgb, 1 - filmtweaksParams[2]);\
+\
+	return outputColor;\
+}\
+";
+
+// clang-format on
+
 namespace IWXMVM::GFX
 {
     void GraphicsManager::Initialize()
     {
+        IDirect3DDevice9* device = D3D9::GetDevice();
+        ID3DXBuffer* errorMessageBuffer = nullptr;
+
+        ID3DXBuffer* vertexShaderBuffer = nullptr;
+        HRESULT result = D3DXCompileShader(vertexShaderCode, strlen(vertexShaderCode), nullptr, NULL, "main", "vs_3_0", NULL,
+                                   &vertexShaderBuffer, &errorMessageBuffer, nullptr);
+        if (result != D3D_OK)
+        {
+            LOG_ERROR("Failed to compile vertex shader: {}",
+                      reinterpret_cast<const char*>(errorMessageBuffer->GetBufferPointer()));
+            errorMessageBuffer->Release();
+            return;
+        }
+
+        result = device->CreateVertexShader(reinterpret_cast<const DWORD*>(vertexShaderBuffer->GetBufferPointer()),
+                                            &vertexShader);
+        if (result != D3D_OK)
+        {
+            LOG_ERROR("Failed to create vertex shader");
+        }
+
+        ID3DXBuffer* pixelShaderBuffer = nullptr;
+        result = D3DXCompileShader(pixelShaderCode, strlen(pixelShaderCode), nullptr, NULL, "main", "ps_3_0",
+                                           NULL, &pixelShaderBuffer, &errorMessageBuffer, nullptr);
+        if (result != D3D_OK)
+        {
+            LOG_ERROR("Failed to compile pixel shader: {}",
+                      reinterpret_cast<const char*>(errorMessageBuffer->GetBufferPointer()));
+            errorMessageBuffer->Release();
+            return;
+        }
+        result = device->CreatePixelShader(reinterpret_cast<const DWORD*>(pixelShaderBuffer->GetBufferPointer()),
+                                           &pixelShader);
+        if (result != D3D_OK)
+        {
+            LOG_ERROR("Failed to create pixel shader");
+        }
+
+        D3DVERTEXELEMENT9 decl[] = {
+            {0, offsetof(Types::Vertex, pos), D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+            {0, offsetof(Types::Vertex, normal), D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0},
+            {0, offsetof(Types::Vertex, col), D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
+            D3DDECL_END(),
+        };
+        result = device->CreateVertexDeclaration(decl, &vertexDeclaration);
+        if (result != D3D_OK)
+        {
+            LOG_ERROR("Failed to create vertex declaration");
+        }
+
         BufferManager::Get().Initialize();
+
         BufferManager::Get().AddMesh(&axis);
         BufferManager::Get().AddMesh(&camera);
         BufferManager::Get().AddMesh(&icosphere);
@@ -43,34 +175,58 @@ namespace IWXMVM::GFX
 
     void GraphicsManager::Uninitialize()
     {
+        vertexDeclaration->Release();
+        pixelShader->Release();
+        vertexShader->Release();
         BufferManager::Get().Uninitialize();
     }
 
     glm::mat4 GetViewMatrix()
     {
-        auto& camera = Components::CameraManager::Get().GetActiveCamera();
-        return glm::lookAt(camera->GetPosition(), camera->GetPosition() + camera->GetForwardVector(), 
-            glm::rotateY(glm::vec3(0, 0, 1), glm::radians(camera->GetRotation().z)));
+        const auto& camera = Components::CameraManager::Get().GetActiveCamera();
+
+        const auto& position = camera->GetPosition();
+        const auto& rotation = camera->GetRotation();
+
+        const auto rotationMatrix =
+            glm::eulerAngleZYX(glm::radians(rotation.y), glm::radians(rotation.x), glm::radians(rotation.z));
+        const glm::vec3 forwardVector = {
+            rotationMatrix[0][0],
+            rotationMatrix[0][1],
+            rotationMatrix[0][2],
+        };
+        const glm::vec3 upVector = {
+            rotationMatrix[2][0],
+            rotationMatrix[2][1],
+            rotationMatrix[2][2],
+        };
+
+        auto view = glm::lookAtLH(position, position + forwardVector, upVector);
+        view[0][0] *= -1.0f;
+        view[1][0] *= -1.0f;
+        view[2][0] *= -1.0f;
+        view[3][0] *= -1.0f;
+
+        return view;
     }
 
     glm::mat4 GetProjectionMatrix()
     {
-        auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        const auto& camera = Components::CameraManager::Get().GetActiveCamera();
 
         const auto aspectRatio = ImGui::GetMainViewport()->Size.x / ImGui::GetMainViewport()->Size.y;
         const auto tanHalfFovX = glm::tan(glm::radians(camera->GetFov()) * 0.5f);
         const auto tanHalfFovY = tanHalfFovX * (1.0f / aspectRatio);
         const auto fovY = glm::atan(tanHalfFovY) * 2.0f;
         const auto znear = Mod::GetGameInterface()->GetDvar("r_znear").value().value->floating_point;
-        return glm::perspective(fovY, aspectRatio, znear, 10000.0f);
+
+        return glm::perspectiveLH_ZO(fovY, aspectRatio, znear, 100000.0f);
     }
 
     void GraphicsManager::SetupRenderState() const noexcept
     {
         IDirect3DDevice9* device = D3D9::GetDevice();
 
-        device->SetPixelShader(nullptr);
-        device->SetVertexShader(nullptr);
         device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
         device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
         device->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
@@ -94,13 +250,42 @@ namespace IWXMVM::GFX
         device->SetRenderState(D3DRS_COLORVERTEX, TRUE);
         device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
         device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-        device->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
-        const auto view = GetViewMatrix();
-        const auto projection = GetProjectionMatrix();
+        const auto identityMatrix = glm::identity<glm::mat4>();
+        device->SetTransform(D3DTS_WORLD, reinterpret_cast<const D3DMATRIX*>(&identityMatrix));
+        device->SetTransform(D3DTS_VIEW, reinterpret_cast<const D3DMATRIX*>(&identityMatrix));
+        device->SetTransform(D3DTS_PROJECTION, reinterpret_cast<const D3DMATRIX*>(&identityMatrix));
 
-        device->SetTransform(D3DTS_VIEW, reinterpret_cast<const D3DMATRIX*>(&view));
-        device->SetTransform(D3DTS_PROJECTION, reinterpret_cast<const D3DMATRIX*>(&projection));
+        const auto viewProjectionMatrix = GetProjectionMatrix() * GetViewMatrix();
+
+        device->SetVertexDeclaration(vertexDeclaration);
+        device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(&viewProjectionMatrix), 4);
+        device->SetVertexShader(vertexShader);
+
+
+        const auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        const auto sun = Mod::GetGameInterface()->GetSun();
+        const auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
+        const glm::vec4 sunLightColor = {sun.color.x, sun.color.y, sun.color.z, 0.0f};
+        const glm::vec4 sunLightDirection = {sun.direction.x, sun.direction.y, sun.direction.z, 0.0f};
+        const glm::vec4 cameraPosition = glm::vec4(camera->GetPosition(), 0);
+
+        glm::vec4 filmtweaksParams = {};
+        if (filmtweaks.enabled)
+        {
+            filmtweaksParams = {filmtweaks.brightness, filmtweaks.contrast, filmtweaks.desaturation,
+                                filmtweaks.invert ? -1.0f : 1.0f};
+        }
+        else
+        {
+            filmtweaksParams = {0.0f, 1.0f, 0.0f, 1.0f};
+        }
+
+        device->SetPixelShaderConstantF(12, reinterpret_cast<const float*>(&sunLightColor), 1);
+        device->SetPixelShaderConstantF(13, reinterpret_cast<const float*>(&sunLightDirection), 1);
+        device->SetPixelShaderConstantF(14, reinterpret_cast<const float*>(&cameraPosition), 1);
+        device->SetPixelShaderConstantF(15, reinterpret_cast<const float*>(&filmtweaksParams), 1);
+        device->SetPixelShader(pixelShader);
     }
 
     glm::vec3 GetMouseRay(ImVec2 mousePos, glm::mat4 projection, glm::mat4 view)
@@ -300,14 +485,13 @@ namespace IWXMVM::GFX
         }
 
         IDirect3DDevice9* device = D3D9::GetDevice();
-        HRESULT result = {};
 
         // Variables used for backing up and restoring D3D9 state
         IDirect3DStateBlock9* d3d9_state_block = nullptr;
         D3DMATRIX last_world = {}, last_view = {}, last_projection = {};
 
         // Backup the DX9 state
-        result = device->CreateStateBlock(D3DSBT_ALL, &d3d9_state_block);
+        HRESULT result = device->CreateStateBlock(D3DSBT_ALL, &d3d9_state_block);
         if (FAILED(result))
         {
             throw std::runtime_error("Failed to get the D3D9 state block");
@@ -352,7 +536,7 @@ namespace IWXMVM::GFX
             {
                 const auto translate = glm::translate(node.value.cameraData.position);
                 const auto rotate = glm::eulerAngleZYX(glm::radians(node.value.cameraData.rotation.y),
-                                       glm::radians(node.value.cameraData.rotation.x),
+                                                       glm::radians(node.value.cameraData.rotation.x),
                                                        glm::radians(node.value.cameraData.rotation.z));
                 auto scale = glm::scale(glm::vec3(1, 1, 1));
                 

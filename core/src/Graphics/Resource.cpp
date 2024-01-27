@@ -5,8 +5,24 @@
 #include "D3D9.hpp"
 #include "Types/Vertex.hpp"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
+
+namespace std
+{
+    template <>
+    struct hash<IWXMVM::Types::Vertex>
+    {
+        size_t operator()(IWXMVM::Types::Vertex const& vertex) const
+        {
+            return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.normal) << 1)) >> 1) ^
+                   (hash<D3DCOLOR>()(vertex.col) << 1);
+        }
+    };
+}  // namespace std
 
 namespace IWXMVM::GFX
 {
@@ -36,31 +52,37 @@ namespace IWXMVM::GFX
 
         auto& attrib = reader.GetAttrib();
         auto& shapes = reader.GetShapes();
-        auto& materials = reader.GetMaterials();
 
-        vertices.resize(attrib.vertices.size() / 3);
-        for (std::size_t i = 0; i < attrib.vertices.size() / 3; i++)
-        {
-            vertices[i].pos = {attrib.vertices[i * 3], attrib.vertices[i * 3 + 1], attrib.vertices[i * 3 + 2]};
-            vertices[i].col =
-                D3DCOLOR_COLORVALUE(attrib.colors[i * 3], attrib.colors[i * 3 + 1], attrib.colors[i * 3 + 2], 1.0f);
-        }
+        vertices.reserve(attrib.vertices.size() / 3);
 
         // Loop over shapes
-        for (std::size_t s = 0; s < shapes.size(); s++)
+        std::unordered_map<Types::Vertex, std::uint32_t> uniqueVertices;
+        for (const auto& shape : shapes)
         {
-            // Loop over faces
-            std::size_t index_offset = 0;
-            for (std::size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
+            for (const auto& index : shape.mesh.indices)
             {
-                std::size_t fv = std::size_t(shapes[s].mesh.num_face_vertices[f]);
-                // Loop over vertices in the face
-                for (std::size_t v = 0; v < fv; v++)
+                Types::Vertex vertex = {};
+                vertex.pos = {
+                    attrib.vertices[index.vertex_index * 3 + 0],
+                    attrib.vertices[index.vertex_index * 3 + 1],
+                    attrib.vertices[index.vertex_index * 3 + 2],
+                };
+                vertex.normal = {
+                    attrib.normals[index.normal_index * 3 + 0],
+                    attrib.normals[index.normal_index * 3 + 1],
+                    attrib.normals[index.normal_index * 3 + 2],
+                };
+                vertex.col = D3DCOLOR_COLORVALUE(attrib.colors[index.vertex_index * 3 + 0],
+                                                 attrib.colors[index.vertex_index * 3 + 1],
+                                                 attrib.colors[index.vertex_index * 3 + 2], 1.0f);
+                
+                if (uniqueVertices.count(vertex) == 0)
                 {
-                    tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
-                    indices.push_back(idx.vertex_index);
+                    uniqueVertices[vertex] = static_cast<std::uint32_t>(vertices.size());
+                    vertices.push_back(vertex);
                 }
-                index_offset += fv;
+
+                indices.push_back(uniqueVertices[vertex]);
             }
         }
     }
@@ -97,8 +119,7 @@ namespace IWXMVM::GFX
 
         HRESULT result = D3D_OK;
 
-        device->SetRenderState(D3DRS_FILLMODE, mesh.fillMode);
-        device->SetTransform(D3DTS_WORLD, reinterpret_cast<const D3DMATRIX*>(&model));
+        device->SetVertexShaderConstantF(4, reinterpret_cast<const float*>(&model), 4);
 
         result = device->DrawIndexedPrimitive(
             D3DPT_TRIANGLELIST, meshes[mesh.index].vertexBufferOffset, 0, static_cast<UINT>(mesh.indices.size()),

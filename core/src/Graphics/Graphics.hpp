@@ -61,6 +61,10 @@ namespace IWXMVM::GFX
 
         void SetupRenderState() const noexcept;
 
+        IDirect3DPixelShader9* pixelShader = nullptr;
+        IDirect3DVertexShader9* vertexShader = nullptr;
+        IDirect3DVertexDeclaration9* vertexDeclaration = nullptr;
+
         Mesh axis;
         Mesh camera;
         Mesh icosphere;
