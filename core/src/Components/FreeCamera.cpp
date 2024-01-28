@@ -6,6 +6,7 @@
 #include "Resources.hpp"
 #include "UI/UIManager.hpp"
 #include "Components/CameraManager.hpp"
+#include "Configuration/PreferencesConfiguration.hpp"
 
 namespace IWXMVM::Components
 {
@@ -62,9 +63,8 @@ namespace IWXMVM::Components
 
     void FreeCamera::HandleFreecamInput(glm::vec3& position, glm::vec3& rotation, float& fov, glm::vec3 forward, glm::vec3 right)
     {
-        // TODO: make this configurable
-        constexpr float FREECAM_SPEED = 300;
-        constexpr float MOUSE_SPEED = 0.1f;
+        auto& preferences = PreferencesConfiguration::Get();
+
         constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
         constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
         const float SMOOTHING_FACTOR = glm::clamp(1.0f - 15.0f * Input::GetDeltaTime(), 0.0f, 1.0f);
@@ -74,7 +74,7 @@ namespace IWXMVM::Components
         auto speedModifier = Input::KeyHeld(ImGuiKey_LeftCtrl) ? 0.1f : 1.0f;
         speedModifier *= Input::KeyHeld(ImGuiKey_LeftShift) ? 3.0f : 1.0f;
 
-        const auto cameraBaseSpeed = Input::GetDeltaTime() * FREECAM_SPEED;
+        const auto cameraBaseSpeed = Input::GetDeltaTime() * preferences.freecamSpeed;
         const auto cameraMovementSpeed = cameraBaseSpeed * speedModifier;
         const auto cameraHeightSpeed = cameraMovementSpeed;
 
@@ -126,8 +126,8 @@ namespace IWXMVM::Components
             fov = 90.0f;
         }
 
-        rotation[0] += Input::GetMouseDelta()[1] * MOUSE_SPEED * fov / 90;
-        rotation[1] -= Input::GetMouseDelta()[0] * MOUSE_SPEED * fov / 90;
+        rotation[0] += Input::GetMouseDelta()[1] * preferences.freecamMouseSpeed * fov / 90;
+        rotation[1] -= Input::GetMouseDelta()[0] * preferences.freecamMouseSpeed * fov / 90;
         
         rotation[0] = glm::clamp(rotation[0], -89.9f, 89.9f);
 

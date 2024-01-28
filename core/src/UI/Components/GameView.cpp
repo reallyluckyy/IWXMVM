@@ -9,6 +9,7 @@
 #include "Events.hpp"
 #include "Input.hpp"
 #include "Graphics/Graphics.hpp"
+#include "Configuration/PreferencesConfiguration.hpp"
 
 namespace IWXMVM::UI
 {
@@ -145,7 +146,7 @@ namespace IWXMVM::UI
         auto initialPos = ImGui::GetCursorPos();
         ImGui::SetCursorPos(ImVec2(0, ImGui::GetCursorPosY() - spacing * 0.5f));
 
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.1, 0.1, 0.1, 0.3f));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.1, 0.1, 0.1, 0.4f));
         ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 1.0f);
 
         ImGui::BeginDisabled();
@@ -160,6 +161,9 @@ namespace IWXMVM::UI
 
     void GameView::DrawKeybinds()
     {
+        if (!PreferencesConfiguration::Get().showKeybindHints)
+			return;
+
         auto offsetX = ImGui::GetFontSize() * 0.833f; 
         auto offsetY = ImGui::GetWindowSize().y - offsetX * 2;
         ImGui::SetCursorPos(ImVec2(offsetX, offsetY));

@@ -125,6 +125,7 @@
     <ClCompile Include="src\Components\VisualConfiguration.cpp" />
     <ClCompile Include="src\Configuration\Configuration.cpp" />
     <ClCompile Include="src\Configuration\InputConfiguration.cpp" />
+    <ClCompile Include="src\Configuration\PreferencesConfiguration.cpp" />
     <ClCompile Include="src\D3D9.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
     <ClCompile Include="src\Graphics\Resource.cpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
     <ClCompile Include="src\UI\Components\ControlsMenu.cpp" />
     <ClCompile Include="src\UI\Components\KeyframeEditor.cpp" />
+    <ClCompile Include="src\UI\Components\Preferences.cpp" />
     <ClCompile Include="src\UI\ImGuiEx\ImGuiExtensions.cpp" />
     <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
     <ClCompile Include="src\Events.cpp" />
@@ -173,6 +175,7 @@
     <ClInclude Include="src\Components\VisualConfiguration.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
     <ClInclude Include="src\Configuration\InputConfiguration.hpp" />
+    <ClInclude Include="src\Configuration\PreferencesConfiguration.hpp" />
     <ClInclude Include="src\Graphics\Graphics.hpp" />
     <ClInclude Include="src\Graphics\Resource.hpp" />
     <ClInclude Include="src\Input.hpp" />
@@ -192,6 +195,7 @@
     <ClInclude Include="src\UI\Components\CampathMenu.hpp" />
     <ClInclude Include="src\UI\Components\ControlsMenu.hpp" />
     <ClInclude Include="src\UI\Components\KeyframeEditor.hpp" />
+    <ClInclude Include="src\UI\Components\Preferences.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
     <ClInclude Include="src\UI\ImGuiEx\KeyframeableControls.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />

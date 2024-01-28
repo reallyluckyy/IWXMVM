@@ -7,8 +7,6 @@ namespace IWXMVM::UI
 {
     void ControlsMenu::Initialize()
     {
-        SetPosition(0, 0);
-        SetSize(ImGui::GetIO().DisplaySize.x, ImGui::GetFrameHeight());
     }
 
     Action selectedAction = Action::Count;
