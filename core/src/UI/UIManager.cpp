@@ -159,9 +159,12 @@ namespace IWXMVM::UI
 
     INCBIN_EXTERN(IBMPLEX_FONT);
     INCBIN_EXTERN(TASA_ORBITER_FONT);
+    INCBIN_EXTERN(TASA_ORBITER_BOLD_FONT);
     INCBIN_EXTERN(RUBIK_FONT);
+    INCBIN_EXTERN(RUBIK_BOLD_FONT);
     INCBIN_EXTERN(WORK_SANS_FONT);
     INCBIN_EXTERN(FA_ICONS_FONT);
+
     void UIManager::Initialize(IDirect3DDevice9* device, HWND hwnd)
     {
         try
@@ -215,10 +218,12 @@ namespace IWXMVM::UI
                                                &icons_config, icons_ranges);
             };
 
+            RegisterFont("RubikRegular", RUBIK_FONT_data, RUBIK_FONT_size, fontSize);
+            RegisterFont("RubikBold", RUBIK_BOLD_FONT_data, RUBIK_BOLD_FONT_size, fontSize);
             RegisterFont("WorkSansRegular", WORK_SANS_FONT_data, WORK_SANS_FONT_size, fontSize);
             RegisterFont("IBMPlexSans", IBMPLEX_FONT_data, IBMPLEX_FONT_size, fontSize);
             RegisterFont("TASAOrbiterDisplay", TASA_ORBITER_FONT_data, TASA_ORBITER_FONT_size, fontSize);
-            RegisterFont("RubikRegular", RUBIK_FONT_data, RUBIK_FONT_size, fontSize);
+            RegisterFont("TASAOrbiterDisplayBold", TASA_ORBITER_BOLD_FONT_data, TASA_ORBITER_BOLD_FONT_size, fontSize);
 
             SetImGuiStyle(fontSize);
 

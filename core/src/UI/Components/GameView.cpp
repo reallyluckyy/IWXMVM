@@ -103,10 +103,12 @@ namespace IWXMVM::UI
             return;
         }
 
-        ImGui::SetCursorPos(ImVec2(20, 20));
+        auto offset = ImGui::GetFontSize() * 0.833f;
+        ImGui::SetCursorPos(ImVec2(offset, offset));
 
-        auto buttonSize = ImVec2(50, 50);
-        auto buttonSpacing = ImVec2(5, 5);
+        auto size = ImGui::GetFontSize() * 2;
+        auto buttonSize = ImVec2(size, size);
+        auto buttonSpacing = ImVec2(size / 10, size / 10);
         
         DrawGizmoButton(ICON_FA_MAXIMIZE, buttonSize, GFX::GizmoMode::TranslateLocal);
         ImGui::SameLine(0, buttonSpacing.x);
@@ -115,60 +117,114 @@ namespace IWXMVM::UI
         DrawGizmoButton(ICON_FA_ROTATE, buttonSize, GFX::GizmoMode::Rotate);
     }
 
-    void DrawKey(const char* keyName)
+    void DrawKeyBox(const char* keyName)
     {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.1, 0.1, 0.1, 1.0f));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5);
-        ImGui::Button(keyName, ImVec2(ImGui::CalcTextSize(keyName).x + 10, ImGui::GetTextLineHeight()));
+        ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 1.0f);
+
+        auto padding = ImGui::GetFontSize() * 0.4f;
+        ImGui::BeginDisabled();
+        ImGui::Button(keyName, ImVec2(ImGui::CalcTextSize(keyName).x + padding, ImGui::GetTextLineHeight()));
+        ImGui::EndDisabled();
+
+        ImGui::PopStyleVar();
         ImGui::PopStyleVar();
         ImGui::PopStyleColor();
     }
 
     void DrawKeybindEntry(const char* keyName, const char* label)
 	{
-        DrawKey(keyName);
-        ImGui::SameLine(0, 12);
+        DrawKeyBox(keyName);
+        ImGui::SameLine(0, ImGui::GetFontSize() * 0.5f);
         ImGui::Text(label);
 	}
 
+    void DrawKeybindsBackground(auto spacing)
+    {
+        auto initialPos = ImGui::GetCursorPos();
+        ImGui::SetCursorPos(ImVec2(0, ImGui::GetCursorPosY() - spacing * 0.5f));
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.1, 0.1, 0.1, 0.3f));
+        ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 1.0f);
+
+        ImGui::BeginDisabled();
+        ImGui::Button("##gameViewKeybindsBackground", ImVec2(ImGui::GetWindowSize().x, spacing * 2));
+        ImGui::EndDisabled();
+        
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor();
+
+        ImGui::SetCursorPos(initialPos);
+    }
+
     void GameView::DrawKeybinds()
     {
-        ImGui::SetCursorPos(ImVec2(20, ImGui::GetWindowSize().y - 40));
+        auto offsetX = ImGui::GetFontSize() * 0.833f; 
+        auto offsetY = ImGui::GetWindowSize().y - offsetX * 2;
+        ImGui::SetCursorPos(ImVec2(offsetX, offsetY));
 
-        auto spacing = 30;
-        auto smallSpacing = 5;
+        auto spacing = ImGui::GetFontSize() * 1.25f;
+        auto smallSpacing = ImGui::GetFontSize() * 0.2f;
+        auto& config = InputConfiguration::Get();
+
         if (Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free)
         {
-            auto& config = InputConfiguration::Get();
+            DrawKeybindsBackground(spacing);
             if (HasFocus())
             {
-                DrawKey(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraForward)));
+                // TODO: what do we do if this exceeds the window?
+
+                DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraForward)));
                 ImGui::SameLine(0, smallSpacing);
-                DrawKey(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraLeft)));
+                DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraLeft)));
                 ImGui::SameLine(0, smallSpacing);
-                DrawKey(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraBackward)));
+                DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraBackward)));
                 ImGui::SameLine(0, smallSpacing);
-                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraRight)), "Move Camera");
+                DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraRight)));
+                ImGui::SameLine(0, smallSpacing);
+                DrawKeybindEntry(ICON_FA_COMPUTER_MOUSE, "Move Camera");
 
                 ImGui::SameLine(0, spacing);
-                DrawKey(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraUp)));
+                DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraUp)));
                 ImGui::SameLine(0, smallSpacing);
                 DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)), "Up/Down");
 
                 ImGui::SameLine(0, spacing);
-                DrawKeybindEntry("Scroll", "Change FOV");
+                DrawKeybindEntry("Scroll", "Field of View");
 
                 ImGui::SameLine(0, spacing);
-                DrawKey("Alt");
+                DrawKeyBox("Alt");
                 ImGui::SameLine(0, smallSpacing);
                 DrawKeybindEntry("Scroll", "Roll Camera");
 
-                ImGui::SameLine(0, spacing);
+                ImGui::SameLine(0, spacing * 1.5);
                 DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)), "Place Campath Node");
 
                 ImGui::SameLine(0, spacing);
                 DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyClearNodes)), "Delete Campath");
+
+                ImGui::SameLine(0, spacing * 1.5);
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Unlock Mouse");
             }
+            else
+            {
+            	DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Activate Freecam Controls");
+			}
+        }
+        else if (Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Orbit)
+        {
+            DrawKeybindsBackground(spacing);
+
+            DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::OrbitCameraRotate)), "Rotate Camera");
+
+            ImGui::SameLine(0, spacing);
+            DrawKeyBox("Shift");
+            ImGui::SameLine(0, smallSpacing);
+            DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::OrbitCameraRotate)), "Move Camera");
+
+            ImGui::SameLine(0, spacing);
+            DrawKeybindEntry("Scroll", "Zoom");
         }
     }
 
@@ -193,6 +249,14 @@ namespace IWXMVM::UI
         SetPosition(0, UIManager::Get().GetUIComponent(UI::Component::MenuBar)->GetSize().y);
         SetSize(ImGui::GetIO().DisplaySize.x * scaleFactor, ImGui::GetIO().DisplaySize.y * scaleFactor);
         LOG_DEBUG("Initializing GameView. size.x: {}; size.y: {}", GetSize().x, GetSize().y);
+
+        Events::RegisterListener(EventType::OnCameraChanged, [&]() {
+            auto& currentCamera = Components::CameraManager::Get().GetActiveCamera();
+			if (currentCamera->GetMode() == Components::Camera::Mode::Free)
+			{
+                SetHasFocus(false);
+			}
+		});
     }
 
     void GameView::DrawTopBar()
@@ -330,17 +394,6 @@ namespace IWXMVM::UI
             }
         }
 
-
-        if (UIManager::Get().IsFreecamSelected())
-        {
-            ImGui::SameLine();
-
-            if (HasFocus())
-                ImGui::Text("Press ESC to unlock mouse");
-            else
-                ImGui::Text("Press %s to move freecam", ImGui::GetKeyName(InputConfiguration::Get().GetBoundKey(Action::FreeCameraActivate)));
-        }
-
         auto demoLabel = Mod::GetGameInterface()->GetDemoInfo().name;
         ImGui::SameLine(GetSize().x - ImGui::CalcTextSize(demoLabel.c_str()).x - PADDING);
         ImGui::Text(demoLabel.c_str());
@@ -368,7 +421,13 @@ namespace IWXMVM::UI
         }
         else
         {
-            SetHasFocus(HasFocus() || Input::BindDown(Action::FreeCameraActivate));
+            const auto& camera = Components::CameraManager::Get().GetActiveCamera();
+            bool shouldHaveFocus = false;
+            if (camera->GetMode() == Components::Camera::Mode::Free)
+                shouldHaveFocus = Input::BindDown(Action::FreeCameraActivate);
+            else
+            	shouldHaveFocus = ImGui::IsWindowFocused();
+            SetHasFocus(HasFocus() || shouldHaveFocus);
         }
 
         auto currentPos = ImGui::GetWindowPos();
@@ -419,9 +478,11 @@ namespace IWXMVM::UI
         this->viewportSize = textureSize;
         ImGui::Image((void*)texture, textureSize);
         Events::Invoke(EventType::OnRenderGameView);
-        DrawGizmoControls();
-        DrawKeybinds();
-
+        if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo)
+        {
+            DrawGizmoControls();
+            DrawKeybinds();
+        }
         ImGui::EndChildFrame();
 
         ImGui::PopStyleVar();
