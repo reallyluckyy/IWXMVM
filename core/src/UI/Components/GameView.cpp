@@ -403,6 +403,40 @@ namespace IWXMVM::UI
         ImGui::Text(demoLabel.c_str());
     }
 
+    void HandleInput()
+    {
+        // Only handle input if no text input is active
+        if (ImGui::GetIO().WantTextInput)
+            return;
+
+        auto& cameraManager = Components::CameraManager::Get();
+
+        if (Input::KeyDown(ImGuiKey_1))
+        {
+            cameraManager.SetActiveCamera(Components::Camera::Mode::FirstPerson);
+        }
+        else if (Input::KeyDown(ImGuiKey_2))
+        {
+            cameraManager.SetActiveCamera(Components::Camera::Mode::ThirdPerson);
+        }
+        else if (Input::KeyDown(ImGuiKey_3))
+        {
+            cameraManager.SetActiveCamera(Components::Camera::Mode::Free);
+        }
+        else if (Input::KeyDown(ImGuiKey_4))
+        {
+            cameraManager.SetActiveCamera(Components::Camera::Mode::Orbit);
+        }
+        else if (Input::KeyDown(ImGuiKey_5))
+        {
+            cameraManager.SetActiveCamera(Components::Camera::Mode::Dolly);
+        }
+        else if (Input::KeyDown(ImGuiKey_6))
+        {
+            cameraManager.SetActiveCamera(Components::Camera::Mode::Bone);
+        }
+    }
+
     void GameView::Render()
     {
         ImGui::SetNextWindowPos(GetPosition());
@@ -410,6 +444,8 @@ namespace IWXMVM::UI
 
         if (HasFocus() && UIManager::Get().IsFreecamSelected())
             LockMouse();
+
+        HandleInput();
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
 
