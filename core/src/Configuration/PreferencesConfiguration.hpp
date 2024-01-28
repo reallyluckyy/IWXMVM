@@ -30,5 +30,13 @@ namespace IWXMVM
 
        private:
         PreferencesConfiguration();
+
+        const std::string_view NODE_SHOW_KEYBIND_HINTS = "showKeybindHints";
+        const std::string_view NODE_FREECAM_SPEED = "freecamSpeed";
+        const std::string_view NODE_FREECAM_MOUSE_SPEED = "freecamMouseSpeed";
+        const std::string_view NODE_ORBIT_ROTATION_SPEED = "orbitRotationSpeed";
+        const std::string_view NODE_ORBIT_MOVE_SPEED = "orbitMoveSpeed";
+        const std::string_view NODE_ORBIT_ZOOM_SPEED = "orbitZoomSpeed";
+
     };
 }  // namespace IWXMVM
