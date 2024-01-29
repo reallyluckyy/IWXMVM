@@ -150,7 +150,7 @@ namespace IWXMVM::UI
         ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 1.0f);
 
         ImGui::BeginDisabled();
-        ImGui::Button("##gameViewKeybindsBackground", ImVec2(ImGui::GetWindowSize().x, spacing * 2));
+        ImGui::Button("##gameViewKeybindsBackground", ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y - ImGui::GetCursorPosY()));
         ImGui::EndDisabled();
         
         ImGui::PopStyleVar();
