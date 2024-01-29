@@ -3,6 +3,7 @@
 
 #include "Utilities/PathUtils.hpp"
 #include "InputConfiguration.hpp"
+#include "PreferencesConfiguration.hpp"
 
 namespace IWXMVM
 {
@@ -25,6 +26,7 @@ namespace IWXMVM
         {
             nlohmann::json config = nlohmann::json::parse(configFile);
             InputConfiguration::Get().Deserialize(config[NODE_KEYBINDS]);
+            PreferencesConfiguration::Get().Deserialize(config[NODE_PREFERENCES]);
         }
         catch (const std::exception& e)
         {
@@ -43,6 +45,7 @@ namespace IWXMVM
         json config;
 
         InputConfiguration::Get().Serialize(config[NODE_KEYBINDS]);
+        PreferencesConfiguration::Get().Serialize(config[NODE_PREFERENCES]);
 
         std::ofstream configFile(GetUserConfigPath());
         configFile << config.dump(4);

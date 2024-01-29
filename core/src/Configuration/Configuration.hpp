@@ -26,5 +26,6 @@ namespace IWXMVM
         std::filesystem::path GetUserConfigPath();
 
         const std::string_view NODE_KEYBINDS = "keybinds";
+        const std::string_view NODE_PREFERENCES = "preferences";
     };
 }  // namespace IWXMVM

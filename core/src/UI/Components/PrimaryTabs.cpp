@@ -66,34 +66,8 @@ namespace IWXMVM::UI
         }
     }
 
-    void HandleTabsInput()
-    {
-        // Only handle input if no text input is active
-        if (ImGui::GetIO().WantTextInput)
-			return;
-
-        if (Input::KeyDown(ImGuiKey_1))
-        {
-			UIManager::Get().SelectTab(Tab::Demos);
-		}
-        else if (Input::KeyDown(ImGuiKey_2))
-        {
-			UIManager::Get().SelectTab(Tab::Camera);
-		}
-        else if (Input::KeyDown(ImGuiKey_3))
-        {
-			UIManager::Get().SelectTab(Tab::Visuals);
-		}
-        else if (Input::KeyDown(ImGuiKey_4))
-        {
-			UIManager::Get().SelectTab(Tab::Record);
-		}
-    }
-
     void PrimaryTabs::Render()
     {
-        HandleTabsInput();
-        
         SetPosition(UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().x,
                     UIManager::Get().GetUIComponent(UI::Component::MenuBar)->GetSize().y);
         SetSize(ImGui::GetIO().DisplaySize.x - GetPosition().x, ImGui::GetFrameHeight() * 2.4f);

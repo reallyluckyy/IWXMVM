@@ -7,6 +7,7 @@
 #include "UI/ImGuiEx/ImGuiExtensions.hpp"
 #include "Events.hpp"
 #include "Components/CameraManager.hpp"
+#include "Configuration/PreferencesConfiguration.hpp"
 
 namespace IWXMVM::Components
 {
@@ -27,11 +28,8 @@ namespace IWXMVM::Components
             return;
 
         auto& cameraPosition = this->GetPosition();
+        auto& preferences = PreferencesConfiguration::Get();
 
-        constexpr float BASE_SPEED = 0.1f;
-        constexpr float ROTATION_SPEED = BASE_SPEED * 1.5f;
-        constexpr float TRANSLATION_SPEED = BASE_SPEED * 3.0f;
-        constexpr float ZOOM_SPEED = BASE_SPEED * 8.0f;
         constexpr float HEIGHT_CEILING = 250.0f;
         constexpr float HEIGHT_MULTIPLIER = 1.5f;
         constexpr float SCROLL_LOWER_BOUNDARY = -0.001f;
@@ -40,7 +38,7 @@ namespace IWXMVM::Components
         const float SMOOTHING_FACTOR = glm::clamp(1.0f - 10.0f * Input::GetDeltaTime(), 0.0f, 1.0f);
 
         static double scrollDelta = 0.0;
-        scrollDelta -= Input::GetScrollDelta() * ZOOM_SPEED;
+        scrollDelta -= Input::GetScrollDelta() * preferences.orbitZoomSpeed;
 
         // bump camera out of origin if it's at the origin
         if (cameraPosition == orbitCameraOrigin)
@@ -58,12 +56,12 @@ namespace IWXMVM::Components
 
         if (Input::BindHeld(Action::OrbitCameraRotate) && !Input::KeyHeld(ImGuiKey_LeftShift))
         {
-            auto horizontalDelta = -Input::GetMouseDelta()[0] * ROTATION_SPEED;
+            auto horizontalDelta = -Input::GetMouseDelta()[0] * preferences.orbitRotationSpeed;
             cameraPosition -= orbitCameraOrigin;
             cameraPosition = glm::rotateZ(cameraPosition, glm::radians(horizontalDelta));
             cameraPosition += orbitCameraOrigin;
 
-            auto verticalDelta = Input::GetMouseDelta()[1] * ROTATION_SPEED;
+            auto verticalDelta = Input::GetMouseDelta()[1] * preferences.orbitRotationSpeed;
             cameraPosition -= orbitCameraOrigin;
             cameraPosition = glm::rotate(cameraPosition, glm::radians(verticalDelta),
                                          glm::cross(glm::vector3::up, this->GetForwardVector()));
@@ -73,9 +71,8 @@ namespace IWXMVM::Components
         if (Input::BindHeld(Action::OrbitCameraRotate) && Input::KeyHeld(ImGuiKey_LeftShift))
         {
             // use the height value to move faster around at higher altitude
-            const float translationSpeed = TRANSLATION_SPEED + HEIGHT_MULTIPLIER *
-                                                                   (std::abs(cameraPosition[2]) / HEIGHT_CEILING) *
-                                                                   TRANSLATION_SPEED;
+            const float translationSpeed =
+                preferences.orbitMoveSpeed + HEIGHT_MULTIPLIER * (std::abs(cameraPosition[2]) / HEIGHT_CEILING) * preferences.orbitMoveSpeed;
 
             glm::vec3 forward2D = glm::normalize(this->GetForwardVector());
             forward2D.z = 0;

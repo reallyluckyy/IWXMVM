@@ -26,6 +26,7 @@ namespace IWXMVM::UI
         void LockMouse();
 
         void DrawGizmoControls();
+        void DrawKeybinds();
 
         IDirect3DTexture9* texture = NULL;
         ImVec2 textureSize = ImVec2(0, 0);
