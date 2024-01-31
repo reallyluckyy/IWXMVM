@@ -235,7 +235,7 @@ namespace IWXMVM::GFX
 
         glm::vec3 mouseWorldSpace = glm::inverse(view) * mouseViewSpace;
         glm::vec3 mouseRayDirection = glm::normalize(mouseWorldSpace);
-        return mouseRayDirection;
+        return -mouseRayDirection;
     }
 
     bool GraphicsManager::MouseIntersects(ImVec2 mousePos, Mesh& mesh, glm::mat4 model)
