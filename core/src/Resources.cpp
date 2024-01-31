@@ -19,4 +19,7 @@ namespace IWXMVM::Resources
     INCBIN(ICOSPHERE_MODEL, "resources/icosphere.obj");
     INCBIN(GIZMO_TRANSLATE_MODEL, "resources/gizmo_translate.obj");
     INCBIN(GIZMO_ROTATE_MODEL, "resources/gizmo_rotate.obj");
+
+    INCBIN(VERTEX_SHADER, "resources/shaders/vertex.hlsl");
+    INCBIN(PIXEL_SHADER, "resources/shaders/pixel.hlsl");
 };  // namespace IWXMVM::Resources
