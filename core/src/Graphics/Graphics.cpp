@@ -223,8 +223,8 @@ namespace IWXMVM::GFX
         mousePos.y -= viewportTopLeft.y;
 
         glm::vec4 mouseClipSpace(
-            mousePos.x / viewportSize.x * 2.0f - 1.0f,
-            (viewportSize.y - mousePos.y) / viewportSize.y * 2.0f - 1.0f,
+            1.0f - mousePos.x / viewportSize.x * 2.0f,
+            1.0f - (viewportSize.y - mousePos.y) / viewportSize.y * 2.0f,
             -1.0f,
             1.0f
         );
