@@ -106,12 +106,13 @@ namespace IWXMVM::Components
             return isCapturing;
         }
 
+        int32_t OnGameFrame();
+
        private:
         CaptureManager()
         {
         }
 
-        void OnGameFrame();
         void OnRenderFrame();
 
         CaptureSettings captureSettings;

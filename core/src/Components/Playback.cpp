@@ -53,12 +53,10 @@ namespace IWXMVM::Components::Playback
 
     std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec)
     {
-        Events::Invoke(EventType::OnGameFrame);
-        
         auto& captureManager = Components::CaptureManager::Get();
         if (captureManager.IsCapturing())
         {
-            return 1000 / captureManager.GetCaptureSettings().framerate;
+            return captureManager.OnGameFrame();
         }
 
         // always return 0 msec when pausing demo playback

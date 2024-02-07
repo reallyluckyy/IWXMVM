@@ -31,7 +31,6 @@ namespace IWXMVM::UI
 
     void UIManager::RunImGuiFrame()
     {
-        LOG_DEBUG("Running ImGui frame on thread {}", GetCurrentThreadId());
         try
         {
             std::scoped_lock lock(GetMutex());

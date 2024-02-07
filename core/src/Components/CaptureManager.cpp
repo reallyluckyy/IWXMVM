@@ -67,12 +67,10 @@ namespace IWXMVM::Components
             }
         });
 
-        Events::RegisterListener(EventType::OnGameFrame, [&]() { OnGameFrame(); });
         Events::RegisterListener(EventType::OnFrame, [&]() { OnRenderFrame(); });
     }
 
     std::atomic<std::int32_t> sync;
-    std::atomic_int numCaptured;
 
     void CaptureManager::OnRenderFrame()
     {
@@ -81,9 +79,7 @@ namespace IWXMVM::Components
 
         if (sync.load() == -1)
         {
-            LOG_DEBUG("Capturing frame {}", numCaptured++);
-
-            /*if (!D3D9::CaptureBackBuffer(captureTexture))
+            if (!D3D9::CaptureBackBuffer(captureTexture))
             {
                 LOG_ERROR("Failed to capture back buffer");
                 StopCapture();
@@ -109,7 +105,7 @@ namespace IWXMVM::Components
                     LOG_ERROR("Output format not supported yet");
                     break;
             }
-            */
+            
 
             auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
             if (currentTick > captureSettings.endTick)
@@ -118,25 +114,17 @@ namespace IWXMVM::Components
             }
 
             sync.store(1);
-            sync.notify_one();
-        }
-        else
-        {
-            LOG_DEBUG("Skipping frame"); 
         }
     }
 
-    void CaptureManager::OnGameFrame()
+    int32_t CaptureManager::OnGameFrame()
     {
-        if (!isCapturing)
-        {
-            return;
-        }
-
-        LOG_DEBUG("Intending to capture next frame");
+        // wait until frame is captured
+        if (sync.load() == -1)
+            return 0;
 
         sync.store(-1);
-        sync.wait(-1);
+        return 1000 / GetCaptureSettings().framerate;
     }
 
     void CaptureManager::ToggleCapture()
@@ -205,7 +193,6 @@ namespace IWXMVM::Components
         if (sync.load() == -1)
         {
 			sync.store(1);
-			sync.notify_one();
         }
 
         if (captureTexture)
