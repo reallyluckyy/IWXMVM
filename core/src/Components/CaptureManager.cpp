@@ -8,6 +8,10 @@
 
 namespace IWXMVM::Components
 {
+    std::atomic<std::int32_t> captureLock;
+    constexpr int32_t SHOULD_CAPTURE_FRAME = -1;
+    constexpr int32_t FINISHED_CAPTURE = 1;
+
     std::string_view CaptureManager::GetOutputFormatLabel(OutputFormat outputFormat)
     {
         switch (outputFormat)
@@ -70,14 +74,12 @@ namespace IWXMVM::Components
         Events::RegisterListener(EventType::OnFrame, [&]() { OnRenderFrame(); });
     }
 
-    std::atomic<std::int32_t> sync;
-
     void CaptureManager::OnRenderFrame()
     {
         if (!isCapturing)
             return;
 
-        if (sync.load() == -1)
+        if (captureLock.load() == SHOULD_CAPTURE_FRAME)
         {
             if (!D3D9::CaptureBackBuffer(captureTexture))
             {
@@ -113,17 +115,17 @@ namespace IWXMVM::Components
                 StopCapture();
             }
 
-            sync.store(1);
+            captureLock.store(FINISHED_CAPTURE);
         }
     }
 
     int32_t CaptureManager::OnGameFrame()
     {
         // wait until frame is captured
-        if (sync.load() == -1)
+        if (captureLock.load() == SHOULD_CAPTURE_FRAME)
             return 0;
 
-        sync.store(-1);
+        captureLock.store(SHOULD_CAPTURE_FRAME);
         return 1000 / GetCaptureSettings().framerate;
     }
 
@@ -190,9 +192,9 @@ namespace IWXMVM::Components
         LOG_INFO("Stopping capture");
         isCapturing = false;
 
-        if (sync.load() == -1)
+        if (captureLock.load() == SHOULD_CAPTURE_FRAME)
         {
-			sync.store(1);
+            captureLock.store(FINISHED_CAPTURE);
         }
 
         if (captureTexture)
