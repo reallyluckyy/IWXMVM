@@ -3,6 +3,7 @@
 
 #include "Mod.hpp"
 #include "Components/CameraManager.hpp"
+#include "Components/Playback.hpp"
 #include "UI/ImGuiEx/ImGuiExtensions.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
@@ -25,7 +26,7 @@ namespace IWXMVM::UI
 
         if (Input::BindDown(Action::PlaybackToggle))
         {
-            Mod::GetGameInterface()->ToggleDemoPlaybackState();
+            Components::Playback::TogglePaused();
         }
 
         if (Input::BindDown(Action::PlaybackFaster))
@@ -176,11 +177,11 @@ namespace IWXMVM::UI
             auto pauseButtonSize = ImVec2(ImGui::GetFontSize() * 1.4f, ImGui::GetFontSize() * 1.4f);
 
             auto image = UIImage::FromResource(
-                Mod::GetGameInterface()->IsDemoPlaybackPaused() ? IMG_PLAY_BUTTON_data : IMG_PAUSE_BUTTON_data,
-                Mod::GetGameInterface()->IsDemoPlaybackPaused() ? IMG_PLAY_BUTTON_size : IMG_PAUSE_BUTTON_size);
+                Components::Playback::IsPaused() ? IMG_PLAY_BUTTON_data : IMG_PAUSE_BUTTON_data,
+                Components::Playback::IsPaused() ? IMG_PLAY_BUTTON_size : IMG_PAUSE_BUTTON_size);
 
             if (ImGui::ImageButton(image.GetTextureID(), pauseButtonSize, ImVec2(0, 0), ImVec2(1, 1), 1))
-                Mod::GetGameInterface()->ToggleDemoPlaybackState();
+                Components::Playback::TogglePaused();
 
             const auto playbackSpeedSliderWidth = GetSize().x / 8;
 

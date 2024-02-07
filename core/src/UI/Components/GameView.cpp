@@ -13,52 +13,6 @@
 
 namespace IWXMVM::UI
 {
-    bool CreateTexture(IDirect3DTexture9*& texture, ImVec2 size)
-    {
-        if (texture != NULL)
-            texture->Release();
-
-        auto device = D3D9::GetDevice();
-
-        auto result = D3DXCreateTexture(device, size.x, size.y, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8,
-                                        D3DPOOL_DEFAULT, &texture);
-        if (FAILED(result))
-            return false;
-
-        return true;
-    }
-
-    bool CaptureBackBuffer(IDirect3DTexture9* texture)
-    {
-        auto device = D3D9::GetDevice();
-
-        IDirect3DSurface9* RenderTarget = NULL;
-        auto result = device->GetRenderTarget(0, &RenderTarget);
-        if (FAILED(result))
-            return false;
-
-        IDirect3DSurface9* textureSurface;
-        result = texture->GetSurfaceLevel(0, &textureSurface);
-        if (FAILED(result))
-        {
-            textureSurface->Release();
-            RenderTarget->Release();
-            return false;
-        }
-
-        result = device->StretchRect(RenderTarget, NULL, textureSurface, NULL, D3DTEXF_LINEAR);
-        if (FAILED(result))
-        {
-            textureSurface->Release();
-            RenderTarget->Release();
-            return false;
-        }
-
-        textureSurface->Release();
-        RenderTarget->Release();
-        return true;
-    }
-
     ImVec2 ClampImage(ImVec2 window)  // Clamp for texture/image
     {
         float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y;
@@ -498,10 +452,10 @@ namespace IWXMVM::UI
         if (textureSize.x != newTextureSize.x || textureSize.y != newTextureSize.y)
         {
             textureSize = newTextureSize;
-            CreateTexture(texture, textureSize);
+            D3D9::CreateTexture(texture, textureSize);
         }
 
-        if (!CaptureBackBuffer(texture))
+        if (!D3D9::CaptureBackBuffer(texture))
         {
             throw std::exception("Failed to capture game view");
         }
