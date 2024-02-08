@@ -89,11 +89,11 @@ namespace IWXMVM::UI
     }
 
     void DrawKeybindEntry(const char* keyName, const char* label)
-	{
+    {
         DrawKeyBox(keyName);
         ImGui::SameLine(0, ImGui::GetFontSize() * 0.5f);
         ImGui::Text(label);
-	}
+    }
 
     void DrawKeybindsBackground(auto spacing)
     {
@@ -116,7 +116,7 @@ namespace IWXMVM::UI
     void GameView::DrawKeybinds()
     {
         if (!PreferencesConfiguration::Get().showKeybindHints)
-			return;
+            return;
 
         auto offsetX = ImGui::GetFontSize() * 0.833f; 
         auto offsetY = ImGui::GetWindowSize().y - offsetX * 2;
@@ -167,8 +167,8 @@ namespace IWXMVM::UI
             }
             else
             {
-            	DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Activate Freecam Controls");
-			}
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Activate Freecam Controls");
+            }
         }
         else if (Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Orbit)
         {
@@ -210,11 +210,11 @@ namespace IWXMVM::UI
 
         Events::RegisterListener(EventType::OnCameraChanged, [&]() {
             auto& currentCamera = Components::CameraManager::Get().GetActiveCamera();
-			if (currentCamera->GetMode() == Components::Camera::Mode::Free)
-			{
+            if (currentCamera->GetMode() == Components::Camera::Mode::Free)
+            {
                 SetHasFocus(false);
-			}
-		});
+            }
+        });
     }
 
     void GameView::DrawTopBar()
@@ -223,8 +223,16 @@ namespace IWXMVM::UI
         auto& currentCamera = cameraManager.GetActiveCamera();
 
         const auto PADDING = 10;
-
         ImGui::SetCursorPos(ImVec2(PADDING, PADDING));
+
+        if (Components::CaptureManager::Get().IsCapturing())
+        {
+            ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(PADDING, PADDING * 0.5f));
+            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+            ImGui::Text(ICON_FA_CIRCLE " Recording...");
+            ImGui::PopFont();
+            return;
+        }
 
         ImGui::SetNextItemWidth(300);
 
@@ -420,7 +428,7 @@ namespace IWXMVM::UI
             if (camera->GetMode() == Components::Camera::Mode::Free)
                 shouldHaveFocus = Input::BindDown(Action::FreeCameraActivate);
             else
-            	shouldHaveFocus = ImGui::IsWindowFocused();
+                shouldHaveFocus = ImGui::IsWindowFocused();
             SetHasFocus(HasFocus() || shouldHaveFocus);
         }
 

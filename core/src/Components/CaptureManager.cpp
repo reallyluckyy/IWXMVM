@@ -63,6 +63,10 @@ namespace IWXMVM::Components
         outputDirectory = std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "recordings";
 
         Events::RegisterListener(EventType::OnDemoLoad, [&]() {
+            // for now we'll force the resolution to the current window size
+            // TODO: remove when we support resolution selection
+            captureSettings.resolution = Resolution(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
+
             if (captureSettings.startTick == -1 || captureSettings.endTick == -1)
             {
                 auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
@@ -93,7 +97,7 @@ namespace IWXMVM::Components
                 case OutputFormat::ImageSequence:
                 {
                     std::string filename =
-                        std::format("{0}/{1}_{2}.tga", imageSequenceDirectory.string(), "frame", imageSequenceFrame++);
+                        std::format("{0}/{1}_{2}.tga", imageSequenceDirectory.string(), "frame", capturedFrameCount);
                     auto hresult = D3DXSaveTextureToFileA(filename.c_str(), D3DXIFF_TGA, captureTexture, NULL);
                     if (hresult != D3D_OK)
                     {
@@ -107,7 +111,8 @@ namespace IWXMVM::Components
                     LOG_ERROR("Output format not supported yet");
                     break;
             }
-            
+
+            capturedFrameCount++;
 
             auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
             if (currentTick > captureSettings.endTick)
@@ -156,9 +161,12 @@ namespace IWXMVM::Components
         }
 
         // TODO: skip to start tick
-
+        
+        // TODO: support arbitrary resolutions (somehow)
+        
         Components::CameraManager::Get().SetActiveCamera(captureSettings.cameraMode);
 
+        capturedFrameCount = 0;
         if (!D3D9::CreateTexture(captureTexture,
                                  ImVec2(captureSettings.resolution.width, captureSettings.resolution.height)))
         {
@@ -167,7 +175,7 @@ namespace IWXMVM::Components
         }
 
 
-        LOG_INFO("Starting capture");
+        LOG_INFO("Starting capture at {0} ({1} fps)", captureSettings.resolution.ToString(), captureSettings.framerate);
 
         switch (captureSettings.outputFormat)
         {
@@ -177,7 +185,6 @@ namespace IWXMVM::Components
                 {
                     std::filesystem::create_directories(imageSequenceDirectory);
                 }
-                imageSequenceFrame = 0;
                 break;
             default:
                 LOG_ERROR("Output format not supported yet");
@@ -189,7 +196,7 @@ namespace IWXMVM::Components
 
     void CaptureManager::StopCapture()
     {
-        LOG_INFO("Stopping capture");
+        LOG_INFO("Stopped capture (wrote {0} frames)", capturedFrameCount);
         isCapturing = false;
 
         if (captureLock.load() == SHOULD_CAPTURE_FRAME)

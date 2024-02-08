@@ -96,14 +96,24 @@ namespace IWXMVM::Components
             };
         }
 
-        std::array<int32_t, 3> GetSupportedFramerates()
+        std::array<int32_t, 6> GetSupportedFramerates()
         {
-            return { 250, 500, 1000 };
+            return { 50, 100, 125, 250, 500, 1000 };
         }
 
         bool IsCapturing() const
         {
             return isCapturing;
+        }
+
+        void SetOutputDirectory(const std::filesystem::path& path)
+        {
+            outputDirectory = path;
+        }
+
+        std::filesystem::path GetOutputDirectory() const
+        {
+            return outputDirectory;
         }
 
         int32_t OnGameFrame();
@@ -121,7 +131,7 @@ namespace IWXMVM::Components
 
         // internal capture state
         IDirect3DTexture9* captureTexture = nullptr;
+        std::int32_t capturedFrameCount = 0;
         std::filesystem::path imageSequenceDirectory;
-        std::int32_t imageSequenceFrame = 0;
     };
 }  // namespace IWXMVM::Components

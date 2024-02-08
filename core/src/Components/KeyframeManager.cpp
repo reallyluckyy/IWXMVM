@@ -120,7 +120,7 @@ namespace IWXMVM::Components
                                                               const float tick) const
     {
         if (keyframes.size() == 1)
-			return keyframes.front().value;
+            return keyframes.front().value;
 
         std::int32_t p0Idx = 0, p1Idx = 1;
         for (std::size_t i = 0; i < keyframes.size() - 1; i++)

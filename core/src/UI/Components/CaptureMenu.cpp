@@ -6,6 +6,7 @@
 #include "UI/UIManager.hpp"
 #include "Components/CaptureManager.hpp"
 #include "Components/CameraManager.hpp"
+#include "Utilities/PathUtils.hpp"
 
 namespace IWXMVM::UI
 {
@@ -33,8 +34,10 @@ namespace IWXMVM::UI
 
             const auto fieldLayoutPercentage = 0.4f;
 
+            ImGui::BeginDisabled(captureManager.IsCapturing());
+
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Camera:");
+            ImGui::Text("Camera");
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) - ImGui::GetStyle().WindowPadding.x);
@@ -64,7 +67,7 @@ namespace IWXMVM::UI
             auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
 
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Timeframe:");
+            ImGui::Text("Timeframe");
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(halfWidth);
@@ -74,7 +77,7 @@ namespace IWXMVM::UI
             ImGui::DragInt("##endTickInput", &captureSettings.endTick, 10, captureSettings.startTick, endTick);
 
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Output Format:");
+            ImGui::Text("Output Format");
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
@@ -101,12 +104,12 @@ namespace IWXMVM::UI
 
             if (captureSettings.outputFormat == OutputFormat::Video)
             {
-				ImGui::AlignTextToFramePadding();
-				ImGui::Text("Video Codec:");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
-				ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
-                										ImGui::GetStyle().WindowPadding.x);
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Video Codec");
+                ImGui::SameLine();
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
+                ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
+                                                        ImGui::GetStyle().WindowPadding.x);
                 if (ImGui::BeginCombo("##captureMenuVideoCodecCombo",
                                         captureManager.GetVideoCodecLabel(captureSettings.videoCodec.value())
                                             .data()))
@@ -117,20 +120,22 @@ namespace IWXMVM::UI
                         if (ImGui::Selectable(captureManager.GetVideoCodecLabel((VideoCodec)videoCodec).data(),
                                 captureSettings.videoCodec == (VideoCodec)videoCodec))
                         {
-							captureSettings.videoCodec = (VideoCodec)videoCodec;
-						}
+                            captureSettings.videoCodec = (VideoCodec)videoCodec;
+                        }
 
                         if (isSelected)
                         {
-							ImGui::SetItemDefaultFocus();
-						}
-					}
-					ImGui::EndCombo();
-				}
-			}
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+            }
             
+            ImGui::BeginDisabled();
+
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Resolution:");
+            ImGui::Text("Resolution");
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
@@ -154,8 +159,10 @@ namespace IWXMVM::UI
                 ImGui::EndCombo();
             }
 
+            ImGui::EndDisabled();
+
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Framerate:");
+            ImGui::Text("Framerate");
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
@@ -179,20 +186,35 @@ namespace IWXMVM::UI
                 ImGui::EndCombo();
             }
 
+            ImGui::EndDisabled();
+
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetStyle().ItemSpacing.y * 5);
             auto label = captureManager.IsCapturing() ? ICON_FA_STOP " Stop" : ICON_FA_CIRCLE " Capture";
             if (ImGui::Button(label, ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 2)))
             {
                 if (captureManager.IsCapturing())
-					captureManager.StopCapture();
+                    captureManager.StopCapture();
                 else
                     captureManager.StartCapture();
             }
+
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_FOLDER_OPEN " Browse", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 2)))
+
+            ImGui::BeginDisabled(captureManager.IsCapturing());
+
+            if (ImGui::Button(ICON_FA_FOLDER_OPEN " Browse",
+                                ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 2)))
             {
-                // TODO: Open file browser
-			}
+                // open folder browse dialog using IFileDialog
+            }
+
+            ImGui::EndDisabled();
+
+            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+            ImGui::Text("Output Directory: ");
+            ImGui::PopFont();
+            ImGui::SameLine();
+            ImGui::TextWrapped(captureManager.GetOutputDirectory().string().c_str());
 
             ImGui::End();
         }

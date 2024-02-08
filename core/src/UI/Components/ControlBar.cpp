@@ -22,7 +22,8 @@ namespace IWXMVM::UI
 
     void HandlePlaybackInput()
     {
-        // this should probably go somewhere else eventually
+        if (Components::CaptureManager::Get().IsCapturing())
+            return;
 
         if (Input::BindDown(Action::PlaybackToggle))
         {
@@ -168,10 +169,13 @@ namespace IWXMVM::UI
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
 
+        ImGui::BeginDisabled(Components::CaptureManager::Get().IsCapturing());
+        
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
                                  ImGuiWindowFlags_NoTitleBar;
         if (ImGui::Begin("Playback Controls", nullptr, flags))
         {
+
             ImGui::SetCursorPosX(padding.x);
 
             auto pauseButtonSize = ImVec2(ImGui::GetFontSize() * 1.4f, ImGui::GetFontSize() * 1.4f);
@@ -210,6 +214,8 @@ namespace IWXMVM::UI
 
             ImGui::End();
         }
+
+        ImGui::EndDisabled();
 
         UIManager::Get().GetUIComponent(UI::Component::KeyframeEditor)->Render();
     }
