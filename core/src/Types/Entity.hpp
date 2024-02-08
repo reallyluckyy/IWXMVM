@@ -37,6 +37,7 @@ namespace IWXMVM::Types
                     case EntityType::Helicopter:
                         return "Helicopter";
                 }
+                throw std::runtime_error("Unhandled entity type");
             };
 
             return EntityTypeToString(type) + std::format(" {0}", id);

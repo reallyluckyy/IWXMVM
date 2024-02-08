@@ -43,6 +43,8 @@ namespace IWXMVM::Components
             case Types::KeyframeablePropertyType::SunLightYaw:
                 return sunLightYawProperty;
         }
+
+        throw std::runtime_error("Unhandled keyframeable property type");
     }
 
     void KeyframeManager::ClearKeyframes()
