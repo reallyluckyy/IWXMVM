@@ -2,6 +2,7 @@
 #include "Preferences.hpp"
 
 #include "Configuration/PreferencesConfiguration.hpp"
+#include "UI/UIManager.hpp"
 
 namespace IWXMVM::UI
 {
@@ -11,7 +12,7 @@ namespace IWXMVM::UI
 
     void DrawHeading(const char* label)
     {
-        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+        ImGui::PushFont(UIManager::Get().GetBoldFont());
         ImGui::Text(label);
         ImGui::PopFont();
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 5);

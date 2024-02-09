@@ -5,6 +5,7 @@
 #include "Input.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
+#include "Components/CaptureManager.hpp"
 
 namespace IWXMVM::UI
 {
@@ -83,6 +84,8 @@ namespace IWXMVM::UI
                                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar;
         if (ImGui::Begin("PrimaryTabs", nullptr, flags))
         {
+            ImGui::BeginDisabled(Components::CaptureManager::Get().IsCapturing());
+
             // Change these
             auto xMargin = GetSize().y / 9;
             auto yMargin = xMargin;
@@ -107,6 +110,8 @@ namespace IWXMVM::UI
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + xMargin);
             RenderTabButton(ICON_FA_CIRCLE "  RECORD", buttonSize, Tab::Record);
+
+            ImGui::EndDisabled();
         }
 
         ImGui::End();

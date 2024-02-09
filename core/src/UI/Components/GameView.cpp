@@ -13,52 +13,6 @@
 
 namespace IWXMVM::UI
 {
-    bool CreateTexture(IDirect3DTexture9*& texture, ImVec2 size)
-    {
-        if (texture != NULL)
-            texture->Release();
-
-        auto device = D3D9::GetDevice();
-
-        auto result = D3DXCreateTexture(device, size.x, size.y, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8,
-                                        D3DPOOL_DEFAULT, &texture);
-        if (FAILED(result))
-            return false;
-
-        return true;
-    }
-
-    bool CaptureBackBuffer(IDirect3DTexture9* texture)
-    {
-        auto device = D3D9::GetDevice();
-
-        IDirect3DSurface9* RenderTarget = NULL;
-        auto result = device->GetRenderTarget(0, &RenderTarget);
-        if (FAILED(result))
-            return false;
-
-        IDirect3DSurface9* textureSurface;
-        result = texture->GetSurfaceLevel(0, &textureSurface);
-        if (FAILED(result))
-        {
-            textureSurface->Release();
-            RenderTarget->Release();
-            return false;
-        }
-
-        result = device->StretchRect(RenderTarget, NULL, textureSurface, NULL, D3DTEXF_LINEAR);
-        if (FAILED(result))
-        {
-            textureSurface->Release();
-            RenderTarget->Release();
-            return false;
-        }
-
-        textureSurface->Release();
-        RenderTarget->Release();
-        return true;
-    }
-
     ImVec2 ClampImage(ImVec2 window)  // Clamp for texture/image
     {
         float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y;
@@ -135,11 +89,11 @@ namespace IWXMVM::UI
     }
 
     void DrawKeybindEntry(const char* keyName, const char* label)
-	{
+    {
         DrawKeyBox(keyName);
         ImGui::SameLine(0, ImGui::GetFontSize() * 0.5f);
         ImGui::Text(label);
-	}
+    }
 
     void DrawKeybindsBackground(auto spacing)
     {
@@ -162,7 +116,7 @@ namespace IWXMVM::UI
     void GameView::DrawKeybinds()
     {
         if (!PreferencesConfiguration::Get().showKeybindHints)
-			return;
+            return;
 
         auto offsetX = ImGui::GetFontSize() * 0.833f; 
         auto offsetY = ImGui::GetWindowSize().y - offsetX * 2;
@@ -213,8 +167,8 @@ namespace IWXMVM::UI
             }
             else
             {
-            	DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Activate Freecam Controls");
-			}
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Activate Freecam Controls");
+            }
         }
         else if (Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Orbit)
         {
@@ -256,11 +210,11 @@ namespace IWXMVM::UI
 
         Events::RegisterListener(EventType::OnCameraChanged, [&]() {
             auto& currentCamera = Components::CameraManager::Get().GetActiveCamera();
-			if (currentCamera->GetMode() == Components::Camera::Mode::Free)
-			{
+            if (currentCamera->GetMode() == Components::Camera::Mode::Free)
+            {
                 SetHasFocus(false);
-			}
-		});
+            }
+        });
     }
 
     void GameView::DrawTopBar()
@@ -269,8 +223,16 @@ namespace IWXMVM::UI
         auto& currentCamera = cameraManager.GetActiveCamera();
 
         const auto PADDING = 10;
-
         ImGui::SetCursorPos(ImVec2(PADDING, PADDING));
+
+        if (Components::CaptureManager::Get().IsCapturing())
+        {
+            ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(PADDING, PADDING * 0.5f));
+            ImGui::PushFont(UIManager::Get().GetBoldFont());
+            ImGui::TextColored(ImVec4(1, 0, 0, 1), ICON_FA_CIRCLE " Recording...");
+            ImGui::PopFont();
+            return;
+        }
 
         ImGui::SetNextItemWidth(300);
 
@@ -409,6 +371,9 @@ namespace IWXMVM::UI
         if (ImGui::GetIO().WantTextInput)
             return;
 
+        if (Components::CaptureManager::Get().IsCapturing())
+            return;
+
         auto& cameraManager = Components::CameraManager::Get();
 
         if (Input::KeyDown(ImGuiKey_1))
@@ -466,7 +431,7 @@ namespace IWXMVM::UI
             if (camera->GetMode() == Components::Camera::Mode::Free)
                 shouldHaveFocus = Input::BindDown(Action::FreeCameraActivate);
             else
-            	shouldHaveFocus = ImGui::IsWindowFocused();
+                shouldHaveFocus = ImGui::IsWindowFocused();
             SetHasFocus(HasFocus() || shouldHaveFocus);
         }
 
@@ -498,10 +463,10 @@ namespace IWXMVM::UI
         if (textureSize.x != newTextureSize.x || textureSize.y != newTextureSize.y)
         {
             textureSize = newTextureSize;
-            CreateTexture(texture, textureSize);
+            D3D9::CreateTexture(texture, textureSize);
         }
 
-        if (!CaptureBackBuffer(texture))
+        if (!D3D9::CaptureBackBuffer(texture))
         {
             throw std::exception("Failed to capture game view");
         }

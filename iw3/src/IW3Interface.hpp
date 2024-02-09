@@ -120,18 +120,6 @@ namespace IWXMVM::IW3
             Functions::Cbuf_AddText("disconnect");
         }
 
-        bool isPlaybackPaused = false;
-
-        void ToggleDemoPlaybackState() final
-        {
-            isPlaybackPaused = !isPlaybackPaused;
-        }
-
-        bool IsDemoPlaybackPaused() final
-        {
-            return isPlaybackPaused;
-        }
-
         bool IsConsoleOpen() final
         {
             return (Structures::GetClientUIActives()->keyCatchers & 1) != 0;

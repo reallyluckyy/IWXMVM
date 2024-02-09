@@ -3,7 +3,7 @@
 
 namespace IWXMVM::Components
 {
-    enum OutputFormat
+    enum class OutputFormat
     {
         Video,
         CameraData,
@@ -14,24 +14,39 @@ namespace IWXMVM::Components
 
     struct Resolution
     {
-		int32_t width, height;
+        int32_t width, height;
 
         bool operator==(const Resolution& other) const
         {
-			return width == other.width && height == other.height;
-		}
+            return width == other.width && height == other.height;
+        }
 
         std::string ToString() const
         {
-			return std::format("{0}x{1}", width, height);
-		}
-	};
+            return std::format("{0}x{1}", width, height);
+        }
+    };
+
+    enum class VideoCodec
+    {
+        Uncompressed,
+        Prores4444XQ,
+        Prores4444,
+        Prores422HQ,
+        Prores422,
+        Prores422LT,
+
+        Count
+    };
 
     struct CaptureSettings
     {
         Camera::Mode cameraMode;
         int32_t startTick, endTick;
+        
         OutputFormat outputFormat;
+        std::optional<VideoCodec> videoCodec;
+
         Resolution resolution;
         int32_t framerate;
     };
@@ -49,9 +64,12 @@ namespace IWXMVM::Components
         void operator=(CaptureManager const&) = delete;
 
         void Initialize();
+        void ToggleCapture();
         void StartCapture();
+        void StopCapture();
 
         std::string_view GetOutputFormatLabel(OutputFormat outputFormat);
+        std::string_view GetVideoCodecLabel(VideoCodec codec);
         
         CaptureSettings& GetCaptureSettings()
         {
@@ -74,20 +92,51 @@ namespace IWXMVM::Components
             {
                 Resolution{ 2560, 1440 },
                 Resolution{ 1920, 1080 },
-				Resolution{ 1280, 720 }
+                Resolution{ 1280, 720 }
             };
         }
 
-        std::array<int32_t, 3> GetSupportedFramerates()
+        std::array<int32_t, 6> GetSupportedFramerates()
         {
-            return { 250, 500, 1000 };
+            return { 50, 100, 125, 250, 500, 1000 };
         }
+
+        bool IsCapturing() const
+        {
+            return isCapturing;
+        }
+
+        void SetOutputDirectory(const std::filesystem::path& path)
+        {
+            outputDirectory = path;
+        }
+
+        std::filesystem::path GetOutputDirectory() const
+        {
+            return outputDirectory;
+        }
+
+        std::int32_t GetCapturedFrameCount() const
+		{
+			return capturedFrameCount;
+		}
+
+        int32_t OnGameFrame();
 
        private:
         CaptureManager()
         {
         }
 
+        void OnRenderFrame();
+
         CaptureSettings captureSettings;
+        std::filesystem::path outputDirectory;
+        std::atomic_bool isCapturing = false;
+
+        // internal capture state
+        IDirect3DTexture9* captureTexture = nullptr;
+        std::int32_t capturedFrameCount = 0;
+        std::filesystem::path imageSequenceDirectory;
     };
 }  // namespace IWXMVM::Components

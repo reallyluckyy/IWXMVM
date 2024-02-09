@@ -369,8 +369,8 @@ namespace IWXMVM::UI
 
                 if (ImGui::IsKeyPressed(ImGuiKey_Enter))
                 {
-					ImGui::CloseCurrentPopup();
-				}
+                    ImGui::CloseCurrentPopup();
+                }
 
                 ImGui::EndPopup();
             }
@@ -483,6 +483,9 @@ namespace IWXMVM::UI
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
 
+        if (Components::CaptureManager::Get().IsCapturing())
+            return;
+
         const auto padding = ImGui::GetStyle().WindowPadding;
 
         auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
@@ -509,7 +512,7 @@ namespace IWXMVM::UI
                     const auto& keyframes = pair.second;
 
                     if (!keyframes.empty() && !propertyVisible[property])
-						propertyVisible[property] = true;
+                        propertyVisible[property] = true;
 
                     if (!propertyVisible[property])
                         continue;
@@ -605,9 +608,9 @@ namespace IWXMVM::UI
                 {
                     if (ImGui::Button("Delete Keyframes"))
                     {
-						Components::KeyframeManager::Get().ClearKeyframes();
-						ImGui::CloseCurrentPopup();
-					}
+                        Components::KeyframeManager::Get().ClearKeyframes();
+                        ImGui::CloseCurrentPopup();
+                    }
 
                     ImGui::SetItemDefaultFocus();
                     ImGui::SameLine();

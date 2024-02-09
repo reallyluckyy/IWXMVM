@@ -3,6 +3,7 @@
 
 #include "Mod.hpp"
 #include "Components/CameraManager.hpp"
+#include "Components/Playback.hpp"
 #include "UI/ImGuiEx/ImGuiExtensions.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
@@ -21,11 +22,12 @@ namespace IWXMVM::UI
 
     void HandlePlaybackInput()
     {
-        // this should probably go somewhere else eventually
+        if (Components::CaptureManager::Get().IsCapturing())
+            return;
 
         if (Input::BindDown(Action::PlaybackToggle))
         {
-            Mod::GetGameInterface()->ToggleDemoPlaybackState();
+            Components::Playback::TogglePaused();
         }
 
         if (Input::BindDown(Action::PlaybackFaster))
@@ -167,20 +169,23 @@ namespace IWXMVM::UI
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
 
+        ImGui::BeginDisabled(Components::CaptureManager::Get().IsCapturing());
+        
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
                                  ImGuiWindowFlags_NoTitleBar;
         if (ImGui::Begin("Playback Controls", nullptr, flags))
         {
+
             ImGui::SetCursorPosX(padding.x);
 
             auto pauseButtonSize = ImVec2(ImGui::GetFontSize() * 1.4f, ImGui::GetFontSize() * 1.4f);
 
             auto image = UIImage::FromResource(
-                Mod::GetGameInterface()->IsDemoPlaybackPaused() ? IMG_PLAY_BUTTON_data : IMG_PAUSE_BUTTON_data,
-                Mod::GetGameInterface()->IsDemoPlaybackPaused() ? IMG_PLAY_BUTTON_size : IMG_PAUSE_BUTTON_size);
+                Components::Playback::IsPaused() ? IMG_PLAY_BUTTON_data : IMG_PAUSE_BUTTON_data,
+                Components::Playback::IsPaused() ? IMG_PLAY_BUTTON_size : IMG_PAUSE_BUTTON_size);
 
             if (ImGui::ImageButton(image.GetTextureID(), pauseButtonSize, ImVec2(0, 0), ImVec2(1, 1), 1))
-                Mod::GetGameInterface()->ToggleDemoPlaybackState();
+                Components::Playback::TogglePaused();
 
             const auto playbackSpeedSliderWidth = GetSize().x / 8;
 
@@ -209,6 +214,8 @@ namespace IWXMVM::UI
 
             ImGui::End();
         }
+
+        ImGui::EndDisabled();
 
         UIManager::Get().GetUIComponent(UI::Component::KeyframeEditor)->Render();
     }
