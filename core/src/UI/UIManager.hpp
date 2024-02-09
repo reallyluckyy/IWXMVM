@@ -125,6 +125,11 @@ namespace IWXMVM::UI
             return mutex;
         }
 
+        ImFont* GetBoldFont()
+		{
+			return ImGui::GetIO().Fonts->Fonts[1];
+		}
+
        private:
         UIManager()
         {

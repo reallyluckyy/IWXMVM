@@ -228,8 +228,8 @@ namespace IWXMVM::UI
         if (Components::CaptureManager::Get().IsCapturing())
         {
             ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(PADDING, PADDING * 0.5f));
-            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-            ImGui::Text(ICON_FA_CIRCLE " Recording...");
+            ImGui::PushFont(UIManager::Get().GetBoldFont());
+            ImGui::TextColored(ImVec4(1, 0, 0, 1), ICON_FA_CIRCLE " Recording...");
             ImGui::PopFont();
             return;
         }
@@ -369,6 +369,9 @@ namespace IWXMVM::UI
     {
         // Only handle input if no text input is active
         if (ImGui::GetIO().WantTextInput)
+            return;
+
+        if (Components::CaptureManager::Get().IsCapturing())
             return;
 
         auto& cameraManager = Components::CameraManager::Get();

@@ -36,6 +36,10 @@ namespace IWXMVM::UI
 
             ImGui::BeginDisabled(captureManager.IsCapturing());
 
+            ImGui::PushFont(UIManager::Get().GetBoldFont());
+            ImGui::Text("Capture Settings");
+            ImGui::PopFont();
+
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Camera");
             ImGui::SameLine();
@@ -210,11 +214,24 @@ namespace IWXMVM::UI
 
             ImGui::EndDisabled();
 
-            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-            ImGui::Text("Output Directory: ");
+            ImGui::Dummy(ImVec2(0, ImGui::GetStyle().ItemSpacing.y * 4));
+            ImGui::PushFont(UIManager::Get().GetBoldFont());
+            ImGui::Text("Output Directory");
             ImGui::PopFont();
-            ImGui::SameLine();
             ImGui::TextWrapped(captureManager.GetOutputDirectory().string().c_str());
+
+            if (captureManager.IsCapturing())
+            {
+                ImGui::Dummy(ImVec2(0, ImGui::GetStyle().ItemSpacing.y * 4));
+                ImGui::PushFont(UIManager::Get().GetBoldFont());
+                ImGui::Text("Progress");
+                ImGui::PopFont();
+                ImGui::Text("Captured %d frames", captureManager.GetCapturedFrameCount());
+                auto totalFrames = (captureSettings.endTick - captureSettings.startTick) * (captureSettings.framerate/1000.0f);
+                ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImGui::GetColorU32(ImGuiCol_Button));
+                ImGui::ProgressBar((float)captureManager.GetCapturedFrameCount() / totalFrames, ImVec2(-1, 0), "");
+                ImGui::PopStyleColor();
+            }
 
             ImGui::End();
         }

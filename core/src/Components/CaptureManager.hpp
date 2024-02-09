@@ -116,6 +116,11 @@ namespace IWXMVM::Components
             return outputDirectory;
         }
 
+        std::int32_t GetCapturedFrameCount() const
+		{
+			return capturedFrameCount;
+		}
+
         int32_t OnGameFrame();
 
        private:
