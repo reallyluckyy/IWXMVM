@@ -8,7 +8,7 @@
 #endif
 
 
-#include "../UIManager.hpp"
+#include "Components/Playback.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "Components/CameraManager.hpp"
 #include "Components/CaptureManager.hpp"
@@ -193,7 +193,7 @@ namespace ImGuiEx
     {
         auto ClampValue = [](void* p_data) {
             static constexpr double ROUNDING = 0.00000001;
-            static constexpr std::array TIMESCALE_STEPS = IWXMVM::UI::TIMESCALE_STEPS;
+            static constexpr std::array TIMESCALE_STEPS = IWXMVM::Components::Playback::TIMESCALE_STEPS;
 
             float* ptr = static_cast<float*>(p_data);
             const auto it = std::upper_bound(TIMESCALE_STEPS.begin(), TIMESCALE_STEPS.end(), *ptr - ROUNDING);

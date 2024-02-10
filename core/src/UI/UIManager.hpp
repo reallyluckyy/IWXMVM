@@ -21,10 +21,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace IWXMVM::UI
 {
-    static constexpr std::array TIMESCALE_STEPS{0.001f, 0.002f, 0.005f, 0.01f,  0.02f, 0.025f, 0.05f,  0.075f, 0.1f,
-                                                0.125f, 0.2f,   0.25f,  0.333f, 0.5f,  0.75f,  1.0f,   1.25f,  1.5f,
-                                                2.0f,   5.0f,   10.0f,  20.0f,  50.0f, 100.0f, 500.0f, 1000.0f};
-
     namespace Component
     {
         enum Component

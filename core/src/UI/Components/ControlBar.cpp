@@ -8,6 +8,7 @@
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
 #include "Input.hpp"
+#include "Components/Playback.hpp"
 
 namespace IWXMVM::UI
 {
@@ -24,6 +25,8 @@ namespace IWXMVM::UI
     {
         if (Components::CaptureManager::Get().IsCapturing())
             return;
+        
+        static constexpr std::array TIMESCALE_STEPS = IWXMVM::Components::Playback::TIMESCALE_STEPS;
 
         if (Input::BindDown(Action::PlaybackToggle))
         {
