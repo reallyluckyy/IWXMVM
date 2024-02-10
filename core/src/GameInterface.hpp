@@ -54,7 +54,6 @@ namespace IWXMVM
         virtual void PlayDemo(std::filesystem::path demoPath) = 0;
         virtual void Disconnect() = 0;
 
-        virtual std::atomic<std::int32_t>& GetTickDelta() = 0;
         virtual void SetTickDelta(std::int32_t) = 0;
 
         virtual bool IsConsoleOpen() = 0;

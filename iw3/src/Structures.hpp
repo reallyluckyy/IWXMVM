@@ -1058,6 +1058,29 @@ namespace IWXMVM::IW3::Structures
         XModel** models;  // XModel**
     };
 
+    union qfile_gus
+    {
+        _iobuf* o;
+        char* z;
+    };
+
+    struct qfile_us
+    {
+        qfile_gus file;
+        int iwdIsClone;
+    };
+
+    struct fileHandleData_t
+    {
+        qfile_us handleFiles;
+        int handleSync;
+        int fileSize;
+        int zipFilePos;
+        iwd_t* zipFile;
+        int streamed;
+        char name[256];
+    };
+
     clientConnection_t* GetClientConnection();
     clientStatic_t* GetClientStatic();
     clientActive_t* GetClientActive();

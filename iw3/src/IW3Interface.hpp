@@ -8,6 +8,7 @@
 #include "Events.hpp"
 #include "DemoParser.hpp"
 #include "Hooks/Camera.hpp"
+#include "Hooks/Playback.hpp"
 #include "Addresses.hpp"
 #include "Patches.hpp"
 
@@ -271,19 +272,12 @@ namespace IWXMVM::IW3
             Functions::FindDvar("r_filmTweakInvert")->current.enabled = filmtweaks.invert;
         }
 
-        std::atomic<std::int32_t> tick;
-
-        std::atomic<std::int32_t>& GetTickDelta() final
-        {
-            return tick;
-        }
-
         void SetTickDelta(std::int32_t value) final
         {
             if (value > 0)
                 Structures::GetClientStatic()->realtime += value;
-            else if (value < 0)
-                tick.store(value);
+            else if (value < 100)
+                Hooks::Playback::RequestRewindTo(value);
         }
 
         std::vector<Types::Entity> GetEntities() final

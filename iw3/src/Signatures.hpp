@@ -52,6 +52,10 @@ namespace IWXMVM::IW3::Signatures
         Sig("5C 24 38 55 8B 6C 24 40 57 8B F9", GAType::Code, -5) > CG_DObjGetWorldBoneMatrix;
         Sig("03 44 24 04 0F B7 04 45", GAType::Data, 8, Lambda::DereferenceAddress) > clientObjMap;
         Sig("0F BF F0 6B F6 64 81 C6", GAType::Data, 8, Lambda::DereferenceAddress) > objBuf;
+        Sig("EC 08 85 C0 53 8B 5C 24 10 55", GAType::Code, -5) > FS_Read;
+        Sig("89 86 ?? ?? ?? ?? E8 ?? ?? ?? ?? 88 9F FF 00 00 00", GAType::Data, 2, Lambda::DereferenceAddress) > fsh;
+        Sig("68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 83 C4 0C 88 1D", GAType::Data, 1,
+            Lambda::DereferenceAddress) > lastValidBasepath;
 
         // cod4x
         using MType = Types::ModuleType;

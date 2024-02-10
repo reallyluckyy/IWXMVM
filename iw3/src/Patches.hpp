@@ -17,6 +17,7 @@ namespace IWXMVM::IW3::Patches
         Patch<std::size(CG_RegisterItemsBytes)> CG_RegisterItems{GetGameAddresses().CG_RegisterItems(),
                                                                  CG_RegisterItemsBytes, PatchApplySetting::Immediately};
         ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
+        NopPatch<5> Con_TimeJumped{0x45C2A7, PatchApplySetting::Deferred}; // TODO: sig
     };
 
     inline IW3Patches& GetGamePatches()
