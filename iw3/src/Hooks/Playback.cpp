@@ -173,6 +173,13 @@ namespace IWXMVM::IW3::Hooks::Playback
                     LOG_DEBUG("Popping frame data with server time {}", g_frameData.top().serverTime);
                     g_frameData.pop();
                 }
+
+                if (g_frameData.top().serverTime > rewindTo)
+                {
+                    LOG_ERROR("Failed to rewind to before {}", rewindTo);
+                    __debugbreak();  // this shouldn't happen!
+                }
+                Structures::GetClientStatic()->realtime += rewindTo - g_frameData.top().serverTime;
             }
 
             rewindTo = -1;

@@ -276,7 +276,7 @@ namespace IWXMVM::IW3
         {
             if (value > 0)
                 Structures::GetClientStatic()->realtime += value;
-            else if (value < 100)
+            else if (value < -500)
                 Hooks::Playback::RequestRewindTo(value);
         }
 
