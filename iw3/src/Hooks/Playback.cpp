@@ -414,14 +414,13 @@ namespace IWXMVM::IW3::Hooks::Playback
         if (Components::Playback::IsPaused())
         {
             SkipForward(200);
-		}
+        }
     }
 
     void Install()
     {
         HookManager::CreateHook(GetGameAddresses().SV_Frame(), (std::uintptr_t)SV_Frame_Hook, nullptr);
 
-        // TODO: patch away errors
         HookManager::CreateHook(GetGameAddresses().FS_Read(), (std::uintptr_t)FS_Read_Hook, (uintptr_t*)&FS_Read_Trampoline);
     }
 }  // namespace IWXMVM::IW3::Hooks::Playback

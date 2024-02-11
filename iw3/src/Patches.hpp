@@ -17,7 +17,13 @@ namespace IWXMVM::IW3::Patches
         Patch<std::size(CG_RegisterItemsBytes)> CG_RegisterItems{GetGameAddresses().CG_RegisterItems(),
                                                                  CG_RegisterItemsBytes, PatchApplySetting::Immediately};
         ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
-        NopPatch<5> Con_TimeJumped{0x45C2A7, PatchApplySetting::Deferred}; // TODO: sig
+        
+         // TODO: sigs
+        NopPatch<5> Con_TimeJumped{0x45C2A7, PatchApplySetting::Deferred};
+        NopPatch<2> CL_SetCGameTime{0x45C511, PatchApplySetting::Immediately};
+        JumpPatch CL_CGameNeedsServerCommand{0x45B01A, PatchApplySetting::Immediately};
+        JumpPatch CG_ProcessSnapshots{0x44E4B0, PatchApplySetting::Immediately};
+        JumpPatch CG_ReadNextSnapshot{0x44E2C3, PatchApplySetting::Immediately};
     };
 
     inline IW3Patches& GetGamePatches()

@@ -276,7 +276,7 @@ namespace IWXMVM::IW3
         {
             if (value > 0)
                 Hooks::Playback::SkipForward(value);
-            else if (value < -500)
+            else if (value < -300)
                 Hooks::Playback::RewindBy(value);
         }
 
