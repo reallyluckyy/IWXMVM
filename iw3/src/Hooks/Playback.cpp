@@ -176,7 +176,8 @@ namespace IWXMVM::IW3::Hooks::Playback
 
                 if (g_frameData.top().serverTime > rewindTo)
                 {
-                    LOG_ERROR("Failed to rewind to before {}", rewindTo);
+                    LOG_ERROR("Failed to rewind to before {} (stack top is {})", rewindTo,
+                              g_frameData.top().serverTime);
                     __debugbreak();  // this shouldn't happen!
                 }
                 Structures::GetClientStatic()->realtime += rewindTo - g_frameData.top().serverTime;
@@ -397,10 +398,23 @@ namespace IWXMVM::IW3::Hooks::Playback
         return len;
     }
 
-    void RequestRewindTo(std::int32_t tick)
+    void SkipForward(std::int32_t ticks)
     {
-        LOG_DEBUG("Rewinding back {} ticks", tick);
-        rewindTo = *reinterpret_cast<int*>(cl.serverTime) + tick;
+        Structures::GetClientStatic()->realtime += ticks;
+    }
+
+    void RewindBy(std::int32_t ticks)
+    {
+        LOG_DEBUG("Rewinding back {} ticks", ticks);
+        rewindTo = *reinterpret_cast<int*>(cl.serverTime) + ticks;
+
+        // If playback is paused, skip forward a little bit to trigger
+        // a demo file read, which will restore the gamestate.
+        // This is admittedly a bit of a hack.
+        if (Components::Playback::IsPaused())
+        {
+            SkipForward(200);
+		}
     }
 
     void Install()

@@ -275,9 +275,9 @@ namespace IWXMVM::IW3
         void SetTickDelta(std::int32_t value) final
         {
             if (value > 0)
-                Structures::GetClientStatic()->realtime += value;
+                Hooks::Playback::SkipForward(value);
             else if (value < -500)
-                Hooks::Playback::RequestRewindTo(value);
+                Hooks::Playback::RewindBy(value);
         }
 
         std::vector<Types::Entity> GetEntities() final

@@ -50,7 +50,7 @@ namespace IWXMVM::IW3::Hooks::Playback
         Initialized
     };
 
-
-    void RequestRewindTo(std::int32_t tick);
+    void SkipForward(std::int32_t ticks);
+    void RewindBy(std::int32_t ticks);
     void Install();
 }
