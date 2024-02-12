@@ -52,12 +52,9 @@ namespace IWXMVM::IW3::Hooks::Playback
     }
 
     filestreamState g_fileStreamMode = Uninitialized;
-    std::stack<customSnapshot> g_frameData;
     std::ifstream g_file;
     uint32_t g_countBuffer = 0;
-    uint32_t g_snapshotCount = 0;
-    std::array<int, 20> g_serverTimes;
-    int rewindTime = 1000;
+    std::unique_ptr<customSnapshot> g_frameData;
     std::atomic<std::int32_t> rewindTo = -1;
 
     struct clientActive_t  // cl
@@ -68,13 +65,8 @@ namespace IWXMVM::IW3::Hooks::Playback
         uintptr_t oldFrameServerTime = 0xC628D8;
         uintptr_t serverTimeDelta = 0xC628DC;
         uintptr_t oldSnapServerTime = 0xC628E0;
-        uintptr_t parseMatchStateNum = dummyValue;
         uintptr_t parseEntitiesNum = 0xC84F58;
         uintptr_t parseClientsNum = 0xC84F5C;
-        uintptr_t snapshots = 0xCC9180;
-        uintptr_t parseMatchStates = dummyValue;
-        uintptr_t parseEntities = 0xD65400;
-        uintptr_t parseClients = 0xDE5EA4;
     };
     clientActive_t cl;
 
@@ -82,7 +74,7 @@ namespace IWXMVM::IW3::Hooks::Playback
     {
         uintptr_t serverCommandSequence = 0x914E20;
         uintptr_t lastExecutedServerCommand = 0x914E24;
-        uintptr_t demoplaying = 0x934E74;
+        //uintptr_t serverCommands = 0x914E28;
         uintptr_t timeDemoFrames = 0x934E88;
         uintptr_t timeDemoStart = 0x934E8C;
         uintptr_t timeDemoPrev = 0x934E90;
@@ -158,77 +150,60 @@ namespace IWXMVM::IW3::Hooks::Playback
         *reinterpret_cast<int*>(cg.latestSnapshotTime) = 0;
         *reinterpret_cast<int*>(cg.snap) = 0;
         *reinterpret_cast<int*>(cg.nextSnap) = 0;
+        *reinterpret_cast<int*>(cg.landTime) = 0;
     }
 
     void RestoreOldGamestate()
     {
-        if (g_frameData.size() > 1)
+        static std::int32_t latestRewindTo = 0;
+
+        if (latestRewindTo > 0)
         {
-            g_frameData.pop();
-
-            if (rewindTo > -1 && g_frameData.size() > 0)
+            if (Structures ::GetClientStatic()->realtime + 1000 >= latestRewindTo - g_frameData->serverTime)
             {
-                while (g_frameData.size() > 1 && g_frameData.top().serverTime > rewindTo)
-                {
-                    LOG_DEBUG("Popping frame data with server time {}", g_frameData.top().serverTime);
-                    g_frameData.pop();
-                }
-
-                if (g_frameData.top().serverTime > rewindTo)
-                {
-                    LOG_ERROR("Failed to rewind to before {} (stack top is {})", rewindTo,
-                              g_frameData.top().serverTime);
-                    __debugbreak();  // this shouldn't happen!
-                }
-                Structures::GetClientStatic()->realtime += rewindTo - g_frameData.top().serverTime;
+                // workaround so that we rewindTo won't be written to until the game has caught up
+                // probably requires some rethinking / rewriting
+                latestRewindTo = 0;
+                rewindTo = -1;
             }
 
-            rewindTo = -1;
-            g_serverTimes = {};
-            g_countBuffer = g_frameData.top().fileOffset;
+            return;
+        }
+
+        if (g_frameData != nullptr)
+        {
+            latestRewindTo = rewindTo.exchange(-2);
+            assert(latestRewindTo != -1);
+
+            if (latestRewindTo - g_frameData->serverTime <= 0)
+            {
+                // not sure why this happens yet, but this is an invalid value!
+                rewindTo = -1;
+                return;
+            }
+
+            ResetOldClientData(g_frameData->serverTime);
+            CL_FirstSnapshotWrapper();
+            Structures::GetClientStatic()->realtime = latestRewindTo - g_frameData->serverTime;
+         
+            //rewindTo = -1;
+
+            LOG_DEBUG("Rewinded and time is now: {}", latestRewindTo - g_frameData->serverTime);
+            g_countBuffer = g_frameData->fileOffset;
             g_file.seekg(g_countBuffer);
 
-            // TODO: *reinterpret_cast<int*>(g_addresses.data.clearMiniConsole) = 0;
-            // TODO: memset(reinterpret_cast<char*>(g_addresses.data.compassData), 0, g_dataSizes.compass);
-
-            ResetOldClientData(g_frameData.top().serverTime);
-            CL_FirstSnapshotWrapper();
-
-            *reinterpret_cast<int*>(cg.landTime) = g_frameData.top().landTime;
-
-            *reinterpret_cast<int*>(cl.parseEntitiesNum) = g_frameData.top().parseEntitiesNum;
-            *reinterpret_cast<int*>(cl.parseClientsNum) = g_frameData.top().parseClientsNum;
-
-            memcpy(reinterpret_cast<char*>(cl.snapshots), &g_frameData.top().snapshots,
-                   sizeof(customSnapshot::snapshots));
-            memcpy(reinterpret_cast<char*>(cl.parseEntities), &g_frameData.top().entities,
-                   sizeof(customSnapshot::entities));
-            memcpy(reinterpret_cast<char*>(cl.parseClients), &g_frameData.top().clients,
-                   sizeof(customSnapshot::clients));
-
-#if (gameID == CallofDuty4_MW)
-            *reinterpret_cast<int*>(clc.serverConfigDataSequence) =
-                g_frameData.top().serverConfigDataSequence;
-#elif (gameID == CallofDuty7_BO1)
-            *reinterpret_cast<int*>(g_addresses.data.cl.parseMatchStateNum) = g_frameData.top().parseMatchStateNum;
-            memcpy(reinterpret_cast<char*>(g_addresses.data.cl.parseMatchStates), &g_frameData.top().matchStates,
-                   sizeof(customSnapshot::matchStates));
-#endif
-
-#ifdef enableChatRestoration
-            *reinterpret_cast<int*>(g_addresses.data.clc.lastExecutedServerCommand) =
-                g_frameData.top().lastExecutedServerCommand;
-            *reinterpret_cast<int*>(g_addresses.data.clc.serverCommandSequence) =
-                g_frameData.top().serverCommandSequence1;
-            *reinterpret_cast<int*>(g_addresses.data.cgs.serverCommandSequence) =
-                g_frameData.top().serverCommandSequence2;
-            memcpy(reinterpret_cast<char*>(g_addresses.data.chat), &g_frameData.top().chat,
-                   sizeof(customSnapshot::chat));
-#endif
-#ifdef enableGamestateRestoration
-            memcpy(reinterpret_cast<char*>(g_addresses.data.gameState), &g_frameData.top().gameState,
-                   sizeof(customSnapshot::gameState));
-#endif
+            *reinterpret_cast<int*>(cl.parseEntitiesNum) = 0;
+            *reinterpret_cast<int*>(cl.parseClientsNum) = 0;
+            *reinterpret_cast<int*>(clc.serverConfigDataSequence) = g_frameData->serverConfigDataSequence;
+            *reinterpret_cast<int*>(clc.lastExecutedServerCommand) = g_frameData->lastExecutedServerCommand;
+            *reinterpret_cast<int*>(clc.serverCommandSequence) = g_frameData->serverCommandSequence1;
+            *reinterpret_cast<int*>(cgs.serverCommandSequence) = g_frameData->serverCommandSequence2;
+            *reinterpret_cast<int*>(0x8EEB50) = 0;
+            memset(reinterpret_cast<char*>(0x84F2D8), 0, g_dataSizes.centities);
+            //memset(reinterpret_cast<char*>(0x74B798), 0, g_dataSizes.chat);
+            //memset(reinterpret_cast<char*>(clc.serverCommands), 0, g_dataSizes.commands);
+            memset(reinterpret_cast<char*>(0x742B20), 0, g_dataSizes.compass);
+            memcpy(reinterpret_cast<char*>(0xC628EC), &g_frameData->gameState, g_dataSizes.gamestate);
         }
     }
 
@@ -243,109 +218,35 @@ namespace IWXMVM::IW3::Hooks::Playback
         return g_file.is_open();
     }
 
-    void StoreCurrentGamestate(int fps)
+    void StoreCurrentGamestate()
     {
-        // this function is executed in a hook that precedes snapshot parsing; so the data must be stored in the most
-        // recent entry on the std::stack (g_frameData)
-        if ((fps && g_snapshotCount > 4 && (g_snapshotCount - 1) % (rewindTime / fps) == 0) || g_snapshotCount == 4)
+        if (*reinterpret_cast<int*>(clc.serverCommandSequence) == 0)
         {
-            if (g_frameData.size() && g_frameData.top().fileOffset && !g_frameData.top().serverTime)
+            // first message with the gamestate; triggers the game to load a map
+            if (g_frameData != nullptr)
             {
-                g_frameData.top().populated = true;
-
-                g_frameData.top().serverTime = *reinterpret_cast<int*>(cl.snap_serverTime);
-                g_frameData.top().landTime = *reinterpret_cast<int*>(cg.landTime);
-
-#if (gameID == CallofDuty4_MW)
-                g_frameData.top().serverConfigDataSequence =
-                    *reinterpret_cast<int*>(clc.serverConfigDataSequence);
-#elif (gameID == CallofDuty7_BO1)
-                g_frameData.top().parseMatchStateNum = *reinterpret_cast<int*>(cl.parseMatchStateNum);
-                memcpy(&g_frameData.top().matchStates, reinterpret_cast<char*>(cl.parseMatchStates),
-                       sizeof(customSnapshot::matchStates));
-#endif
-
-                g_frameData.top().parseEntitiesNum = *reinterpret_cast<int*>(cl.parseEntitiesNum);
-                g_frameData.top().parseClientsNum = *reinterpret_cast<int*>(cl.parseClientsNum);
-
-                memcpy(&g_frameData.top().snapshots, reinterpret_cast<char*>(cl.snapshots),
-                       sizeof(customSnapshot::snapshots));
-                memcpy(&g_frameData.top().entities, reinterpret_cast<char*>(cl.parseEntities),
-                       sizeof(customSnapshot::entities));
-                memcpy(&g_frameData.top().clients, reinterpret_cast<char*>(cl.parseClients),
-                       sizeof(customSnapshot::clients));
-
-#ifdef enableChatRestoration
-                g_frameData.top().lastExecutedServerCommand =
-                    *reinterpret_cast<int*>(clc.lastExecutedServerCommand);
-                g_frameData.top().serverCommandSequence1 =
-                    *reinterpret_cast<int*>(clc.serverCommandSequence);
-                g_frameData.top().serverCommandSequence2 =
-                    *reinterpret_cast<int*>(cgs.serverCommandSequence);
-                memcpy(&g_frameData.top().chat, reinterpret_cast<char*>(g_addresses.data.chat),
-                       sizeof(customSnapshot::chat));
-#endif
-#ifdef enableGamestateRestoration
-                memcpy(&g_frameData.top().gameState, reinterpret_cast<char*>(g_addresses.data.gameState),
-                       sizeof(customSnapshot::gameState));
-#endif
+                // clear old data in case this not the first gamestate in the demo
+                g_frameData.reset();
             }
-        }
-
-        // don't start storing snapshots before the third one to avoid some glitch with the chat (some old chat would be
-        // restored with the first snapshot)
-        if ((fps && g_snapshotCount > 3 && g_snapshotCount % (rewindTime / fps) == 0) || g_snapshotCount == 3)
+        } 
+        else if (g_frameData == nullptr)
         {
-            if (g_frameData.size() == 0)
-                g_frameData.emplace();
-            else if (g_frameData.top()
-                         .populated)  // only create a new custom snapshot if the previous was actually used!
-                g_frameData.emplace();
-            else
-            {
-                [[maybe_unused]] int breakp = 1;  // this shouldn't happen!
-            }
+            // after gamestate before first snapshot
+            g_frameData = std::make_unique<customSnapshot>();
+            g_frameData->fileOffset = g_countBuffer - 9;
 
-            g_frameData.top().fileOffset =
-                g_countBuffer -
-                9;  // to account for message type (byte), server message index (int) and message size (int)
+            g_frameData->serverConfigDataSequence = *reinterpret_cast<int*>(clc.serverConfigDataSequence);
+            g_frameData->lastExecutedServerCommand = *reinterpret_cast<int*>(clc.lastExecutedServerCommand);
+            g_frameData->serverCommandSequence1 = *reinterpret_cast<int*>(clc.serverCommandSequence);
+            g_frameData->serverCommandSequence2 = *reinterpret_cast<int*>(cgs.serverCommandSequence);
+
+            memcpy(&g_frameData->gameState, reinterpret_cast<char*>(0xC628EC), g_dataSizes.gamestate);
         }
-    }
-
-    int DetermineFramerate(int serverTime)
-    {
-        // this function stores a small number of server times, and calculates the server framerate
-        if (!serverTime)
-            return 0;
-
-        if (g_serverTimes[(g_snapshotCount + g_serverTimes.size() - 1) % g_serverTimes.size()] > serverTime)
+        else if (!g_frameData->populated)
         {
-            g_serverTimes = {};
-            g_serverTimes[g_snapshotCount % g_serverTimes.size()] = serverTime;
-
-            return 0;
-        }
-        else
-        {
-            g_serverTimes[g_snapshotCount % g_serverTimes.size()] = serverTime;
-            std::unordered_map<int, int> frequency;
-
-            for (int i = g_snapshotCount; i < static_cast<int>(g_snapshotCount + g_serverTimes.size()); ++i)
-            {
-                int temp = g_serverTimes[i % g_serverTimes.size()] -
-                           g_serverTimes[((i + g_serverTimes.size() - 1) % g_serverTimes.size())];
-
-                if (temp >= 0 && temp <= 1000)
-                {
-                    // if (temp % 50 == 0)
-                    ++frequency[temp];
-                }
-            }
-
-            auto highestFrequency = std::max_element(std::begin(frequency), std::end(frequency),
-                                                     [](const auto& a, const auto& b) { return a.second < b.second; });
-
-            return highestFrequency->first;
+            // after first snapshot and before second snapshot
+            g_frameData->populated = true;
+            g_frameData->serverTime = *reinterpret_cast<int*>(cl.snap_serverTime);
         }
     }
 
@@ -387,8 +288,7 @@ namespace IWXMVM::IW3::Hooks::Playback
             RestoreOldGamestate();
         else if (len > 12)
         {  // to exclude client archives (and CoD4X protocol header)
-            ++g_snapshotCount;
-            StoreCurrentGamestate(DetermineFramerate(*reinterpret_cast<int*>(0xD90BCF8))); // TODO: replace with a sig
+            StoreCurrentGamestate();
         }
 
         g_file.read(reinterpret_cast<char*>(buffer), len);
@@ -400,13 +300,33 @@ namespace IWXMVM::IW3::Hooks::Playback
 
     void SkipForward(std::int32_t ticks)
     {
+        if (rewindTo.load() == -2)
+        {
+            LOG_DEBUG("Trying to skip forward unsynchronized.", ticks);
+            return;
+        }
+
+        if (ticks > 60'000)
+        {
+            // workaround to prevent the demo from ending prematurely
+            // by using this, we cannot skip forward by more than 1 minute
+            return;
+        }
+
         Structures::GetClientStatic()->realtime += ticks;
+        LOG_DEBUG("Skipping forward {} ticks, realtime: {}", ticks, Structures::GetClientStatic()->realtime);
     }
 
     void RewindBy(std::int32_t ticks)
     {
-        LOG_DEBUG("Rewinding back {} ticks", ticks);
-        rewindTo = *reinterpret_cast<int*>(cl.serverTime) + ticks;
+        // only set the rewind value if the main thread isn't using it
+        auto curRewindTo = rewindTo.load();
+        if (rewindTo == -2 ||
+            !rewindTo.compare_exchange_strong(curRewindTo, *reinterpret_cast<int*>(cl.serverTime) + ticks))
+        {
+            LOG_DEBUG("Attempted to rewind back {} ticks", ticks);
+            return;
+        }
 
         // If playback is paused, skip forward a little bit to trigger
         // a demo file read, which will restore the gamestate.
@@ -415,6 +335,8 @@ namespace IWXMVM::IW3::Hooks::Playback
         {
             SkipForward(200);
         }
+
+        LOG_DEBUG("Rewinding back {} ticks", ticks);
     }
 
     void Install()
