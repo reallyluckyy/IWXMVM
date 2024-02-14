@@ -400,6 +400,15 @@ namespace IWXMVM::UI
         {
             cameraManager.SetActiveCamera(Components::Camera::Mode::Bone);
         }
+
+        auto& graphicsManager = GFX::GraphicsManager::Get();
+
+        if (Input::KeyUp(ImGuiKey_MouseLeft) 
+            && !graphicsManager.WasObjectHoveredThisFrame() 
+            && !graphicsManager.WasObjectDraggedThisFrame())
+        {
+            graphicsManager.ResetSelection();
+        }
     }
 
     void GameView::Render()

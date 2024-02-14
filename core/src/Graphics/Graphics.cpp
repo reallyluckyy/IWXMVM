@@ -275,9 +275,6 @@ namespace IWXMVM::GFX
         float distance;
         return glm::intersectRaySphere(camera->GetPosition(), glm::normalize(mouseRayDirection), pos, radius * radius, distance);
     }
-
-    std::optional<int32_t> heldAxis = std::nullopt;
-    bool objectHoveredThisFrame = false;
     
     void GraphicsManager::DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
     {
