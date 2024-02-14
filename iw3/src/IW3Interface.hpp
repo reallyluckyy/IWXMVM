@@ -61,6 +61,7 @@ namespace IWXMVM::IW3
             return Types::GameState::InGame;
         }
 
+        uint32_t lastTick = 0;
         // TODO: cache this
         Types::DemoInfo GetDemoInfo() final
         {
@@ -74,7 +75,16 @@ namespace IWXMVM::IW3
             str += (str.ends_with(".dm_1")) ? "" : ".dm_1";
             demoInfo.path = Functions::GetFilePath(std::move(str));
 
-            demoInfo.currentTick = Structures::GetClientActive()->serverTime - DemoParser::demoStartTick;
+            if (IW3::Hooks::Playback::rewindTo.load() == -1)
+            {
+                demoInfo.currentTick = Structures::GetClientActive()->serverTime - DemoParser::demoStartTick;
+                lastTick = demoInfo.currentTick;
+            }
+            else
+            {
+                LOG_DEBUG("Rewinding, so returning last tick {}", lastTick);
+                demoInfo.currentTick = lastTick;
+            }
             demoInfo.endTick = DemoParser::demoEndTick - DemoParser::demoStartTick;
 
             return demoInfo;
