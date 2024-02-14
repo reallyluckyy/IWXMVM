@@ -298,7 +298,10 @@ namespace IWXMVM::GFX
             }
         }
 
+        IDirect3DDevice9* device = D3D9::GetDevice();
+        device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
         BufferManager::Get().DrawMesh(mesh, model);
+        device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
     }
 
     
@@ -370,14 +373,6 @@ namespace IWXMVM::GFX
                 auto dot = glm::dot(glm::normalize(intersection.value() - position), axisDirection);
                 auto distance = glm::distance(intersection.value(), position);
                 position = position + axisDirection * dot * distance;
-            }
-
-            // Draw axis
-            auto step = 10.0f;
-            for (int i = -2000; i < 2000; i += step)
-            {
-                BufferManager::Get().DrawMesh(
-                    icosphere, glm::translate(position + axisDirection * i) * glm::scale(glm::vec3(1, 1, 1) * 0.8f));
             }
         }
     }
