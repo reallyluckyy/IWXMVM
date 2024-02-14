@@ -488,7 +488,8 @@ namespace IWXMVM::UI
 
         const auto padding = ImGui::GetStyle().WindowPadding;
 
-        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        auto currentTick = demoInfo.currentTick;
         const auto& propertyKeyframes = Components::KeyframeManager::Get().GetKeyframes();
 
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |

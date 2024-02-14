@@ -114,8 +114,8 @@ namespace IWXMVM::Components
 
             capturedFrameCount++;
 
-            auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
-            if (currentTick > captureSettings.endTick)
+            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            if (!demoInfo.isRewinding && demoInfo.currentTick > captureSettings.endTick)
             {
                 StopCapture();
             }

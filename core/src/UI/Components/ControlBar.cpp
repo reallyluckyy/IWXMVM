@@ -209,10 +209,16 @@ namespace IWXMVM::UI
 
                 auto keyframeEditor = UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
                 auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
-                if (!DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick))
-                    tickValue = demoInfo.currentTick;
-                else
+                auto draggedProgresBar =
+                    DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick);
+                if (draggedProgresBar && !demoInfo.isRewinding)
+                {
                     Mod::GetGameInterface()->SetTickDelta(tickValue - demoInfo.currentTick);
+                }
+                else
+                {
+                    tickValue = demoInfo.currentTick;
+                }
 
                 ImGui::SameLine();
                 ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());

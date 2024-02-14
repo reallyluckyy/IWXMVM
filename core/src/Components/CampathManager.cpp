@@ -40,7 +40,7 @@ namespace IWXMVM::Components
                 node.fov = activeCamera->GetFov();
 
                 KeyframeManager::Get().GetKeyframes(property).push_back(
-                    Types::Keyframe(property, Mod::GetGameInterface()->GetDemoInfo().currentTick, node));
+                    Types::Keyframe(property, tick, node));
 
                 LOG_DEBUG("Placed node at (x: {}; y: {}; z: {}) with (pitch: {}; yaw: {}; roll: {}) at tick {}",
                           node.position.x, node.position.y, node.position.z, node.rotation.x, node.rotation.y,

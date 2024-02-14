@@ -11,7 +11,10 @@ namespace IWXMVM::Components
 
     void DollyCamera::Update()
     {
-        const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        if (demoInfo.isRewinding)
+            return;
+        const auto currentTick = demoInfo.currentTick;
         
         const auto& keyframeManager = KeyframeManager::Get();
         const auto interpolatedValue = keyframeManager.Interpolate(
