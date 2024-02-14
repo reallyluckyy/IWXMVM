@@ -265,6 +265,17 @@ namespace IWXMVM::GFX
         return false;
     }
 
+    bool GraphicsManager::MouseIntersectsSphereAt(ImVec2 mousePos, glm::vec3 pos, float radius)
+    {
+        auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        const auto view = GetViewMatrix();
+        const auto projection = GetProjectionMatrix();
+        const auto mouseRayDirection = GetMouseRay(mousePos, projection, view);
+
+        float distance;
+        return glm::intersectRaySphere(camera->GetPosition(), glm::normalize(mouseRayDirection), pos, radius * radius, distance);
+    }
+
     std::optional<int32_t> heldAxis = std::nullopt;
     bool objectHoveredThisFrame = false;
     
@@ -464,7 +475,7 @@ namespace IWXMVM::GFX
                                                        glm::radians(node.value.cameraData.rotation.z));
                 auto scale = glm::scale(glm::vec3(1, 1, 1));
                 
-                bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, camera, translate * rotate);
+                bool mouseIntersects = MouseIntersectsSphereAt(ImGui::GetIO().MousePos, node.value.cameraData.position, 20);
                 objectHoveredThisFrame |= mouseIntersects;
                 if (mouseIntersects && !heldAxis.has_value())
                    scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);

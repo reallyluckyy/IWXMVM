@@ -55,6 +55,7 @@ namespace IWXMVM::GFX
         }
 
         bool MouseIntersects(ImVec2 mousePos, Mesh& mesh, glm::mat4 model);
+        bool MouseIntersectsSphereAt(ImVec2 mousePos, glm::vec3 pos, float radius);
         void DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex);
         void DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation);
         void DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation);
