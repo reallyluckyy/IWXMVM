@@ -20,10 +20,10 @@ namespace IWXMVM::IW3::Hooks::Playback
 
         __asm
         {
-			pop ecx
-			pushad
-			mov msec, esi
-			mov ebxValue, ebx
+            pop ecx
+            pushad
+            mov msec, esi
+            mov ebxValue, ebx
         }
 
         if (ebxValue == *reinterpret_cast<std::int32_t*>(0x69136C))  // not true for CoD4X
@@ -31,9 +31,9 @@ namespace IWXMVM::IW3::Hooks::Playback
             SV_Frame_Internal(msec);
             __asm
             {
-				popad
-				mov eax, msec
-				ret
+                popad
+                mov eax, msec
+                ret
             }
         }
         else
@@ -41,9 +41,9 @@ namespace IWXMVM::IW3::Hooks::Playback
             SV_Frame_Internal(msec);
             __asm
             {
-				popad
-				mov ebx, msec
-				ret
+                popad
+                mov ebx, msec
+                ret
             }
         }
     }

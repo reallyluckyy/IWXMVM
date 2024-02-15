@@ -20,12 +20,14 @@ namespace IWXMVM::UI
 
         void DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                      uint32_t displayStartTick, uint32_t displayEndTick, const float width,
-                                     std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex);
+                                     std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex, 
+                                     uint32_t demoLength);
 
         void DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width);
 
         void DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
-                                        uint32_t displayStartTick, uint32_t displayEndTick, std::vector<Types::Keyframe>& keyframes);
+                                        uint32_t displayStartTick, uint32_t displayEndTick, 
+                                        std::vector<Types::Keyframe>& keyframes, uint32_t demoLength);
         void DrawKeyframeSlider(const Types::KeyframeableProperty& property);
 
         int32_t displayStartTick, displayEndTick;

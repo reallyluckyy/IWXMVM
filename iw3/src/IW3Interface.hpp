@@ -326,7 +326,7 @@ namespace IWXMVM::IW3
             }
 
             return entities;
-		}
+        }
 
         auto FindBoneIndex(Structures::DObj_s* dobj, uint16_t boneName)
         {

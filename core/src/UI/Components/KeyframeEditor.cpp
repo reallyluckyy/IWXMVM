@@ -98,7 +98,7 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                     uint32_t displayStartTick, uint32_t displayEndTick,
-                                                    std::vector<Types::Keyframe>& keyframes)
+                                                    std::vector<Types::Keyframe>& keyframes, uint32_t demoLength)
     {
         using namespace ImGui;
 
@@ -135,7 +135,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength);
 
         bool isAnyKeyframeHovered = false;
 
@@ -209,7 +209,8 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                  uint32_t displayStartTick, uint32_t displayEndTick, const float width,
-                                                 std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex)
+                                                 std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
+                                                 uint32_t demoLength)
     {
         using namespace ImGui;
 
@@ -247,7 +248,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength);
 
         bool isAnyKeyframeHovered = false;
 
@@ -418,11 +419,12 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
     {
-        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        auto currentTick = demoInfo.currentTick;
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
         DrawKeyframeSliderInternal(property, &currentTick, displayStartTick, displayEndTick,
-                                   Components::KeyframeManager::Get().GetKeyframes(property));
+                                   Components::KeyframeManager::Get().GetKeyframes(property), demoInfo.endTick);
     }
 
     // TODO: move this somewhere else
@@ -445,7 +447,8 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width)
     {
-        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        auto currentTick = demoInfo.currentTick;
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
         // TODO: Probably disable for CameraData, as I'm not sure if this is helpful to the user at all
@@ -457,7 +460,7 @@ namespace IWXMVM::UI
         {
             DrawCurveEditorInternal(
                 property, &currentTick, displayStartTick, displayEndTick, width,
-                Components::KeyframeManager::Get().GetKeyframes(property), i
+                Components::KeyframeManager::Get().GetKeyframes(property), i, demoInfo.endTick
             );
         }
     }

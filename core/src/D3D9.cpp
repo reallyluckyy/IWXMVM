@@ -111,7 +111,7 @@ namespace IWXMVM::D3D9
         if (!reshadeOriginalEndSceneAddress.has_value())
         {
             UI::UIManager::Get().RunImGuiFrame();
-		}
+        }
 
         calledByEndscene = true;
         return EndScene(pDevice);
@@ -122,9 +122,9 @@ namespace IWXMVM::D3D9
     {
         if (calledByEndscene)
         {
-			calledByEndscene = false;
-			return ReshadeOriginalEndScene(pDevice);
-		}
+            calledByEndscene = false;
+            return ReshadeOriginalEndScene(pDevice);
+        }
         UI::UIManager::Get().RunImGuiFrame();
         return ReshadeOriginalEndScene(pDevice);
     }
