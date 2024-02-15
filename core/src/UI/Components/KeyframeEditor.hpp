@@ -16,7 +16,7 @@ namespace IWXMVM::UI
        private:
         void Initialize() final;
 
-        void HandleTimelineZoomInteractions(float barLength);
+        void HandleTimelineZoomInteractions(const ImVec2 rectMin, const ImVec2 rectMax);
 
         void DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                      uint32_t displayStartTick, uint32_t displayEndTick, const float width,

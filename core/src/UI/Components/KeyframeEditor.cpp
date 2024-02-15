@@ -19,20 +19,58 @@ namespace IWXMVM::UI
         return {displayStartTick, displayEndTick};
     }
 
-    void KeyframeEditor::HandleTimelineZoomInteractions(float barLength)
+    ImVec2 GetPositionForKeyframe(
+        const ImRect rect, const Types::Keyframe& keyframe, const uint32_t startTick, const uint32_t endTick,
+        const ImVec2 valueBoundaries = ImVec2(-1, 1), int32_t valueIndex = 0)
     {
-        const auto ZOOM_MULTIPLIER = 2000;
-        const auto MOVE_MULTIPLIER = 1;
+        const auto barHeight = rect.Max.y - rect.Min.y;
+        const auto barLength = rect.Max.x - rect.Min.x;
+        const auto tickPercentage = static_cast<float>(keyframe.tick - startTick) / static_cast<float>(endTick - startTick);
+        const auto x = rect.Min.x + tickPercentage * barLength;
+        const auto valuePercentage =
+            1 - (keyframe.value.GetByIndex(valueIndex) - valueBoundaries.x) / (valueBoundaries.y - valueBoundaries.x);
+        const auto y = rect.Min.y + valuePercentage * barHeight;
+        return ImVec2(x, y);
+    };
 
-        const int32_t MINIMUM_ZOOM = 500;
+    uint32_t GetTickForPosition(const float x, const ImRect rect, const uint32_t startTick, const uint32_t endTick)
+    {
+        const auto barLength = rect.Max.x - rect.Min.x;
+        const auto tickPercentage = (x - rect.Min.x) / barLength;
+        return static_cast<uint32_t>(startTick + tickPercentage * (endTick - startTick));
+    }
+
+    std::tuple<uint32_t, Types::KeyframeValue> GetKeyframeForPosition(const ImVec2 position, const ImRect rect,
+                                                                      const uint32_t startTick, const uint32_t endTick,
+                                                                      const ImVec2 valueBoundaries = ImVec2(-1, 1))
+    {
+        const auto tick = GetTickForPosition(position.x, rect, startTick, endTick);
+        const auto barHeight = rect.Max.y - rect.Min.y;
+        const auto valuePercentage = (position.y - rect.Min.y) / barHeight;
+        const auto value = valueBoundaries.x + (1 - valuePercentage) * (valueBoundaries.y - valueBoundaries.x);
+        return std::make_tuple(tick, value);
+    };
+
+    void KeyframeEditor::HandleTimelineZoomInteractions(const ImVec2 rectMin, const ImVec2 rectMax)
+    {
+        constexpr auto ZOOM_MULTIPLIER = 2000;
+        constexpr auto MOVE_MULTIPLIER = 1;
+
+        constexpr int32_t MINIMUM_ZOOM = 500;
 
         const auto minTick = 0;
         const auto maxTick = (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick;
 
         auto scrollDelta = Input::GetScrollDelta() * Input::GetDeltaTime();
-        displayStartTick += scrollDelta * 100 * ZOOM_MULTIPLIER;
+        
+        // center zoom section around mouse cursor if zooming in
+        const auto barLength = rectMax.x - rectMin.x;
+        const auto mousePercentage = (ImGui::GetMousePos().x - rectMin.x) / barLength;
+
+        scrollDelta = scrollDelta * 100 * ZOOM_MULTIPLIER * maxTick / 50000;
+        displayStartTick += scrollDelta * mousePercentage;
         displayStartTick = glm::clamp(displayStartTick, minTick, displayEndTick - MINIMUM_ZOOM);
-        displayEndTick -= scrollDelta * 100 * ZOOM_MULTIPLIER;
+        displayEndTick -= scrollDelta * (1.0f - mousePercentage);
         displayEndTick = glm::clamp(displayEndTick, displayStartTick + MINIMUM_ZOOM, maxTick);
 
         if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -40,7 +78,7 @@ namespace IWXMVM::UI
             auto zoomWindowSizeBefore = displayEndTick - displayStartTick;
 
             auto delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
-            delta /= barLength;
+            delta /= (rectMax.x - rectMin.x);
             delta *= (displayEndTick - displayStartTick);
 
             displayStartTick = glm::max(displayStartTick - (int32_t)(delta.x * MOVE_MULTIPLIER), minTick);
@@ -59,33 +97,6 @@ namespace IWXMVM::UI
             ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
         }
     }
-
-    ImVec2 GetPositionForKeyframe(
-        const ImRect rect, const Types::Keyframe& keyframe, const uint32_t startTick, const uint32_t endTick,
-        const ImVec2 valueBoundaries = ImVec2(-1, 1), int32_t valueIndex = 0)
-    {
-        const auto barHeight = rect.Max.y - rect.Min.y;
-        const auto barLength = rect.Max.x - rect.Min.x;
-        const auto tickPercentage = static_cast<float>(keyframe.tick - startTick) / static_cast<float>(endTick - startTick);
-        const auto x = rect.Min.x + tickPercentage * barLength;
-        const auto valuePercentage =
-            1 - (keyframe.value.GetByIndex(valueIndex) - valueBoundaries.x) / (valueBoundaries.y - valueBoundaries.x);
-        const auto y = rect.Min.y + valuePercentage * barHeight;
-        return ImVec2(x, y);
-    };
-
-    std::tuple<uint32_t, Types::KeyframeValue> GetKeyframeForPosition(const ImVec2 position, const ImRect rect,
-                                                                      const uint32_t startTick, const uint32_t endTick,
-                                                                      const ImVec2 valueBoundaries = ImVec2(-1, 1))
-    {
-        const auto barHeight = rect.Max.y - rect.Min.y;
-        const auto barLength = rect.Max.x - rect.Min.x;
-        const auto tickPercentage = (position.x - rect.Min.x) / barLength;
-        const auto tick = static_cast<uint32_t>(startTick + tickPercentage * (endTick - startTick));
-        const auto valuePercentage = (position.y - rect.Min.y) / barHeight;
-        const auto value = valueBoundaries.x + (1 - valuePercentage) * (valueBoundaries.y - valueBoundaries.x);
-        return std::make_tuple(tick, value);
-    };
 
     void SortKeyframes(std::vector<Types::Keyframe>& keyframes)
     {
@@ -188,7 +199,7 @@ namespace IWXMVM::UI
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && !isAnyKeyframeHovered && !selectedKeyframeId.has_value())
         {
-            HandleTimelineZoomInteractions(frame_bb.Max.x - frame_bb.Min.x);
+            HandleTimelineZoomInteractions(frame_bb.Min, frame_bb.Max);
         }
 
         if (hovered && !isAnyKeyframeHovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -388,7 +399,7 @@ namespace IWXMVM::UI
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && !isAnyKeyframeHovered && !selectedKeyframeId.has_value())
         {
-            HandleTimelineZoomInteractions(frame_bb.Max.x - frame_bb.Min.x);
+            HandleTimelineZoomInteractions(frame_bb.Min, frame_bb.Max);
         }
 
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
