@@ -159,7 +159,7 @@ namespace IWXMVM::IW3::Hooks::Playback
 
         if (latestRewindTo > 0)
         {
-            if (Structures ::GetClientStatic()->realtime + 1000 >= latestRewindTo - g_frameData->serverTime)
+            if (*reinterpret_cast<int*>(0xD90BCF8) + 1000 >= latestRewindTo)
             {
                 // workaround so that we rewindTo won't be written to until the game has caught up
                 // probably requires some rethinking / rewriting
@@ -182,9 +182,8 @@ namespace IWXMVM::IW3::Hooks::Playback
                 return;
             }
 
-            ResetOldClientData(g_frameData->serverTime);
+            ResetOldClientData(latestRewindTo);
             CL_FirstSnapshotWrapper();
-            Structures::GetClientStatic()->realtime = latestRewindTo - g_frameData->serverTime;
          
             //rewindTo = -1;
 
