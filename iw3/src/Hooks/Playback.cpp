@@ -159,10 +159,11 @@ namespace IWXMVM::IW3::Hooks::Playback
 
         if (latestRewindTo > 0)
         {
-            if (*reinterpret_cast<int*>(0xD90BCF8) + 1000 >= latestRewindTo)
+            if (*reinterpret_cast<int*>(cl.snap_serverTime) + 1000 >= latestRewindTo &&
+                *reinterpret_cast<int*>(cl.snap_serverTime) >= g_frameData->serverTime + 1000)
             {
-                // workaround so that we rewindTo won't be written to until the game has caught up
-                // probably requires some rethinking / rewriting
+                LOG_DEBUG("Finished rewinding. Requested server time: {}, actual server time: {}",
+                          latestRewindTo, *reinterpret_cast<int*>(cl.snap_serverTime));
                 latestRewindTo = 0;
                 rewindTo = -1;
             }
@@ -178,14 +179,13 @@ namespace IWXMVM::IW3::Hooks::Playback
             if (latestRewindTo - g_frameData->serverTime <= 0)
             {
                 // not sure why this happens yet, but this is an invalid value!
+                LOG_DEBUG("Cannot rewind past first tick: {}", latestRewindTo - g_frameData->serverTime);
                 rewindTo = -1;
                 return;
             }
 
             ResetOldClientData(latestRewindTo);
             CL_FirstSnapshotWrapper();
-         
-            //rewindTo = -1;
 
             LOG_DEBUG("Rewinded and time is now: {}", latestRewindTo - g_frameData->serverTime);
             g_countBuffer = g_frameData->fileOffset;
@@ -217,9 +217,10 @@ namespace IWXMVM::IW3::Hooks::Playback
         return g_file.is_open();
     }
 
-    void StoreCurrentGamestate()
+    void StoreCurrentGamestate(int len)
     {
-        if (*reinterpret_cast<int*>(clc.serverCommandSequence) == 0)
+        // TODO: find a more robust method of detecting a gamestate message
+        if (len >= 10'000)
         {
             // first message with the gamestate; triggers the game to load a map
             if (g_frameData != nullptr)
@@ -256,10 +257,29 @@ namespace IWXMVM::IW3::Hooks::Playback
         using namespace Structures;
         fileHandleData_t fh =
             *reinterpret_cast<fileHandleData_t*>(GetGameAddresses().fsh() + f * sizeof(fileHandleData_t));
-        bool isDemoFile = false;
+       
+        //
+        // TODO handle file closing and resetting data properly
+        if (g_frameData != nullptr && g_frameData->serverTime != 0 &&
+            Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
+        {
+            const std::string_view sv =
+                reinterpret_cast<fileHandleData_t*>(GetGameAddresses().fsh() + 1 * sizeof(fileHandleData_t))->name;
+
+            if (!sv.ends_with(Mod::GetGameInterface()->GetDemoExtension()))
+            {
+                LOG_DEBUG("Closing file handle and resetting rewind data.");
+                g_fileStreamMode = Uninitialized;
+                g_file.close();
+                g_countBuffer = 0;
+                g_frameData.reset();
+                rewindTo.store(-1);
+            }
+        }
+        //
 
         std::string_view sv = fh.name;
-        isDemoFile = sv.ends_with(Mod::GetGameInterface()->GetDemoExtension());
+        bool isDemoFile = sv.ends_with(Mod::GetGameInterface()->GetDemoExtension());
 
         if (!isDemoFile)
         {
@@ -286,9 +306,8 @@ namespace IWXMVM::IW3::Hooks::Playback
         if (len == 1 && rewindTo != -1)  // only reset when the game has just requested the one byte message type
             RestoreOldGamestate();
         else if (len > 12)
-        {  // to exclude client archives (and CoD4X protocol header)
-            StoreCurrentGamestate();
-        }
+            // to exclude client archives (and CoD4X protocol header)
+            StoreCurrentGamestate(len);
 
         g_file.read(reinterpret_cast<char*>(buffer), len);
         g_countBuffer += len;
@@ -299,19 +318,6 @@ namespace IWXMVM::IW3::Hooks::Playback
 
     void SkipForward(std::int32_t ticks)
     {
-        if (rewindTo.load() == -2)
-        {
-            LOG_DEBUG("Trying to skip forward unsynchronized.", ticks);
-            return;
-        }
-
-        if (ticks > 60'000)
-        {
-            // workaround to prevent the demo from ending prematurely
-            // by using this, we cannot skip forward by more than 1 minute
-            return;
-        }
-
         Structures::GetClientStatic()->realtime += ticks;
         LOG_DEBUG("Skipping forward {} ticks, realtime: {}", ticks, Structures::GetClientStatic()->realtime);
     }
@@ -332,6 +338,7 @@ namespace IWXMVM::IW3::Hooks::Playback
         // This is admittedly a bit of a hack.
         if (Components::Playback::IsPaused())
         {
+            LOG_DEBUG("Demo was paused while rewinding, so skipping 200 ms forward.");
             SkipForward(200);
         }
 
