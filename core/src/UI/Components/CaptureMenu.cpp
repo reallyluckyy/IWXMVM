@@ -244,6 +244,7 @@ namespace IWXMVM::UI
 
             if (!captureManager.IsFFmpegPresent())
             {
+                ImGui::Dummy(ImVec2(0, ImGui::GetStyle().ItemSpacing.y * 4));
                 ImGui::PushStyleColor(ImGuiCol_Text, {249.0f / 255.0f, 22.0f / 255.0f, 22.0f / 255.0f, 1.0f});
                 ImGui::PushFont(UIManager::Get().GetBoldFont());
                 ImGui::TextWrapped("Failed to open ffmpeg. Check to see if it's present in the game's directory and try again");

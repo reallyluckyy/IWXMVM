@@ -41,7 +41,6 @@ namespace IWXMVM::Components
 
     struct CaptureSettings
     {
-        Camera::Mode cameraMode;
         int32_t startTick, endTick;
         
         OutputFormat outputFormat;

@@ -51,7 +51,6 @@ namespace IWXMVM::Components
     void CaptureManager::Initialize()
     {
         captureSettings = {
-            Camera::Mode::FirstPerson,
             -1,
             -1,
             OutputFormat::Video, 
