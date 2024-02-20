@@ -1,5 +1,7 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -26,6 +28,7 @@
 
 #include <Windows.h>
 #include <psapi.h>
+#include <shobjidl.h>
 
 #include "Logger.hpp"
 

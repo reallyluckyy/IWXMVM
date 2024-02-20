@@ -65,7 +65,7 @@ namespace IWXMVM::Components
 
         void Initialize();
         void ToggleCapture();
-        void StartCapture();
+        void StartCapture(); // returns false only on ffmpeg open failure to signal to the UI
         void StopCapture();
 
         std::string_view GetOutputFormatLabel(OutputFormat outputFormat);
@@ -106,6 +106,11 @@ namespace IWXMVM::Components
             return isCapturing;
         }
 
+        bool IsFFmpegPresent() const
+        {
+            return !ffmpegNotFound;
+        }
+
         void SetOutputDirectory(const std::filesystem::path& path)
         {
             outputDirectory = path;
@@ -132,11 +137,15 @@ namespace IWXMVM::Components
 
         CaptureSettings captureSettings;
         std::filesystem::path outputDirectory;
-        std::atomic_bool isCapturing = false;
+        FILE* pipe = nullptr;
+        std::int32_t screenWidth = 0;
+        std::int32_t screenHeight = 0;
+        IDirect3DSurface9* backBuffer = nullptr;
+        IDirect3DSurface9* tempSurface = nullptr;
 
         // internal capture state
-        IDirect3DTexture9* captureTexture = nullptr;
+        std::atomic_bool isCapturing = false;
         std::int32_t capturedFrameCount = 0;
-        std::filesystem::path imageSequenceDirectory;
+        bool ffmpegNotFound = false;
     };
 }  // namespace IWXMVM::Components

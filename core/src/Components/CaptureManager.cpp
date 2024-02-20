@@ -85,36 +85,35 @@ namespace IWXMVM::Components
 
         if (captureLock.load() == SHOULD_CAPTURE_FRAME)
         {
-            if (!D3D9::CaptureBackBuffer(captureTexture))
+            IDirect3DDevice9* device = D3D9::GetDevice();
+            if (FAILED(device->GetRenderTargetData(backBuffer, tempSurface)))
             {
-                LOG_ERROR("Failed to capture back buffer");
+                LOG_ERROR("Failed copy backbuffer to surface");
                 StopCapture();
                 return;
             }
 
-            switch (captureSettings.outputFormat)
+            D3DLOCKED_RECT lockedRect = {};
+            if (FAILED(tempSurface->LockRect(&lockedRect, nullptr, 0)))
             {
-                case OutputFormat::ImageSequence:
-                {
-                    std::string filename =
-                        std::format("{0}/{1}_{2}.tga", imageSequenceDirectory.string(), "frame", capturedFrameCount);
-                    auto hresult = D3DXSaveTextureToFileA(filename.c_str(), D3DXIFF_TGA, captureTexture, NULL);
-                    if (hresult != D3D_OK)
-                    {
-                        LOG_ERROR("Failed to save texture to file {}", hresult);
-                        StopCapture();
-                        return;
-                    }
-                    break;
-                }
-                default:
-                    LOG_ERROR("Output format not supported yet");
-                    break;
+                LOG_ERROR("Failed to lock surface");
+                StopCapture();
+                return;
             }
+
+            const auto surfaceByteSize = screenWidth * screenHeight * 4;
+            std::fwrite(lockedRect.pBits, surfaceByteSize, 1, pipe);
 
             capturedFrameCount++;
 
-            auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+            if (FAILED(tempSurface->UnlockRect()))
+            {
+                LOG_ERROR("Failed to unlock surface");
+                StopCapture();
+                return;
+            }
+
+            const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
             if (currentTick > captureSettings.endTick)
             {
                 StopCapture();
@@ -161,62 +160,145 @@ namespace IWXMVM::Components
         }
 
         // TODO: skip to start tick
-        
-        // TODO: support arbitrary resolutions (somehow)
-        
-        Components::CameraManager::Get().SetActiveCamera(captureSettings.cameraMode);
 
         capturedFrameCount = 0;
-        if (!D3D9::CreateTexture(captureTexture,
-                                 ImVec2(captureSettings.resolution.width, captureSettings.resolution.height)))
+
+        LOG_INFO("Starting capture at {0} ({1} fps)", captureSettings.resolution.ToString(), captureSettings.framerate);
+
+        IDirect3DDevice9* device = D3D9::GetDevice();
+
+        if (FAILED(device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer)))
         {
-            LOG_ERROR("Failed to create capture texture");
+            LOG_ERROR("Failed to capture backbuffer");
+            StopCapture();
             return;
         }
 
+        D3DSURFACE_DESC bbDesc = {};
+        if (FAILED(backBuffer->GetDesc(&bbDesc)))
+        {
+            LOG_ERROR("Failed to get backbuffer description");
+            StopCapture();
+            return;
+        }
+        if (FAILED(device->CreateOffscreenPlainSurface(bbDesc.Width, bbDesc.Height, bbDesc.Format, D3DPOOL_SYSTEMMEM,
+                                                       &tempSurface, nullptr)))
+        {
+            LOG_ERROR("Failed to create temporary surface");
+            StopCapture();
+            return;
+        }
 
-        LOG_INFO("Starting capture at {0} ({1} fps)", captureSettings.resolution.ToString(), captureSettings.framerate);
+        screenWidth = static_cast<std::int32_t>(bbDesc.Width);
+        screenHeight = static_cast<std::int32_t>(bbDesc.Height);
+
+        std::string ffmpegArgs;
 
         switch (captureSettings.outputFormat)
         {
             case OutputFormat::ImageSequence:
-                imageSequenceDirectory = outputDirectory / "image_sequence";
-                if (!std::filesystem::exists(imageSequenceDirectory))
-                {
-                    std::filesystem::create_directories(imageSequenceDirectory);
-                }
+                ffmpegArgs = std::format(
+                    ".\\ffmpeg.exe -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -q:v 0 "
+                    "-vf scale={}:{} -y \"{}\\output_%06d.tga\" > ffmpeg_log.txt 2>&1",
+                    screenWidth, screenHeight, captureSettings.framerate, captureSettings.resolution.width,
+                    captureSettings.resolution.height, outputDirectory.string());
+
                 break;
+            case OutputFormat::Video:
+            {
+                std::int32_t profile = 0;
+                const char* pixelFormat = nullptr;
+                switch (captureSettings.videoCodec.value())
+                {
+                    case VideoCodec::Prores4444XQ:
+                        profile = 5;
+                        pixelFormat = "yuv444p10le";
+                        break;
+                    case VideoCodec::Prores4444:
+                        profile = 4;
+                        pixelFormat = "yuv444p10le";
+                        break;
+                    case VideoCodec::Prores422HQ:
+                        profile = 3;
+                        pixelFormat = "yuv422p10le";
+                        break;
+                    case VideoCodec::Prores422:
+                        profile = 2;
+                        pixelFormat = "yuv422p10le";
+                        break;
+                    case VideoCodec::Prores422LT:
+                        profile = 1;
+                        pixelFormat = "yuv422p10le";
+                        break;
+                    default:
+                        profile = 4;
+                        pixelFormat = "yuv444p10le";
+                        LOG_ERROR("Unsupported video codec. Choosing default ({})", static_cast<std::int32_t>(VideoCodec::Prores4444));
+                        break;
+                }
+
+                ffmpegArgs = std::format(
+                    ".\\ffmpeg.exe -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -c:v prores -profile:v {} -q:v 1 "
+                    "-pix_fmt {} -vf scale={}:{} -y \"{}\\output.mov\" > ffmpeg_log.txt 2>&1",
+                    screenWidth, screenHeight, captureSettings.framerate, profile, pixelFormat,
+                    captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string());
+
+                break;
+            }
             default:
                 LOG_ERROR("Output format not supported yet");
                 break;
         }
 
-        isCapturing = true;
+        const std::filesystem::path ffmpegPath(PathUtils::GetCurrentGameDirectory() + "\\ffmpeg.exe");
+        if (!std::filesystem::exists(ffmpegPath))
+        {
+            LOG_ERROR("ffmpeg is not present in the game directory");
+            ffmpegNotFound = true;
+            StopCapture();
+            return;
+        }
+        ffmpegNotFound = false;
+
+        LOG_INFO("ffmpeg command: {}", ffmpegArgs);
+        pipe = _popen(ffmpegArgs.c_str(), "wb");
+        if (!pipe)
+        {
+            LOG_ERROR("ffmpeg pipe open error");
+            StopCapture();
+            return;
+        }
+
+        isCapturing.store(true);
     }
 
     void CaptureManager::StopCapture()
     {
         LOG_INFO("Stopped capture (wrote {0} frames)", capturedFrameCount);
-        isCapturing = false;
+        isCapturing.store(false);
 
         if (captureLock.load() == SHOULD_CAPTURE_FRAME)
         {
             captureLock.store(FINISHED_CAPTURE);
         }
 
-        if (captureTexture)
+        if (pipe)
         {
-            captureTexture->Release();
-            captureTexture = nullptr;
+            fflush(pipe);
+            fclose(pipe);
+            pipe = nullptr;
         }
 
-        switch (captureSettings.outputFormat)
+        if (tempSurface)
         {
-            case OutputFormat::ImageSequence:
-                break;
-            default:
-                LOG_ERROR("Output format not supported yet");
-                break;
+            tempSurface->Release();
+            tempSurface = nullptr;
+        }
+
+        if (backBuffer)
+        {
+            backBuffer->Release();
+            backBuffer = nullptr;
         }
     }
 }
