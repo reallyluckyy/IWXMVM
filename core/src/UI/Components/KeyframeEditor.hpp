@@ -30,6 +30,8 @@ namespace IWXMVM::UI
                                         std::vector<Types::Keyframe>& keyframes, uint32_t demoLength);
         void DrawKeyframeSlider(const Types::KeyframeableProperty& property);
 
+        void DrawMiscButtons(ImVec2 padding, bool hasKeyframes);
+
         int32_t displayStartTick, displayEndTick;
 
         std::map<Types::KeyframeableProperty, bool> propertyVisible;

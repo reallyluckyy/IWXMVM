@@ -6,16 +6,31 @@
 
 namespace IWXMVM::Components
 {
-    Types::KeyframeableProperty campathCameraProperty(ICON_FA_VIDEO " Campath Camera",
-                                                        Types::KeyframeValueType::CameraData);
-    Types::KeyframeableProperty sunLightColorProperty(ICON_FA_SUN " Sun Light Color",
-                                             Types::KeyframeValueType::Vector3);
-    Types::KeyframeableProperty sunLightBrightnessProperty(ICON_FA_SUN " Sun Light Brightness",
-                                                           Types::KeyframeValueType::FloatingPoint);
-    Types::KeyframeableProperty sunLightPitchProperty(ICON_FA_SUN " Sun Light Pitch",
-                                                      Types::KeyframeValueType::FloatingPoint);
-    Types::KeyframeableProperty sunLightYawProperty(ICON_FA_SUN " Sun Light Yaw",
-                                                      Types::KeyframeValueType::FloatingPoint);
+    Types::KeyframeableProperty campathCameraProperty(
+        Types::KeyframeablePropertyType::CampathCamera, 
+        ICON_FA_VIDEO " Campath Camera",
+        Types::KeyframeValueType::CameraData
+    );
+    Types::KeyframeableProperty sunLightColorProperty(
+        Types::KeyframeablePropertyType::SunLightColor,
+        ICON_FA_SUN " Sun Light Color",
+        Types::KeyframeValueType::Vector3
+    );
+    Types::KeyframeableProperty sunLightBrightnessProperty(
+        Types::KeyframeablePropertyType::SunLightBrightness,
+        ICON_FA_SUN " Sun Light Brightness",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty sunLightPitchProperty(
+        Types::KeyframeablePropertyType::SunLightPitch,
+        ICON_FA_SUN " Sun Light Pitch",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty sunLightYawProperty(
+        Types::KeyframeablePropertyType::SunLightYaw,
+        ICON_FA_SUN " Sun Light Yaw",
+        Types::KeyframeValueType::FloatingPoint
+    );
 
     void KeyframeManager::Initialize()
     {
@@ -30,21 +45,13 @@ namespace IWXMVM::Components
 
     const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const
     {
-        switch (property)
+        for (auto& [p, _] : keyframes)
         {
-            case Types::KeyframeablePropertyType::CampathCamera:
-                return campathCameraProperty;
-            case Types::KeyframeablePropertyType::SunLightColor:
-                return sunLightColorProperty;
-            case Types::KeyframeablePropertyType::SunLightBrightness:
-                return sunLightBrightnessProperty;
-            case Types::KeyframeablePropertyType::SunLightPitch:
-                return sunLightPitchProperty;
-            case Types::KeyframeablePropertyType::SunLightYaw:
-                return sunLightYawProperty;
+            if (p.type == property)
+                return p;
         }
 
-        throw std::runtime_error("Unhandled keyframeable property type");
+        throw std::runtime_error("Unregistered keyframeable property type");
     }
 
     void KeyframeManager::ClearKeyframes()

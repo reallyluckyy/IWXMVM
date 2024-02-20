@@ -41,7 +41,7 @@ namespace IWXMVM
             Logger::Initialize();
 
             LOG_INFO("Loading IWXMVM {}", IWXMVM_VERSION);
-            LOG_INFO("Game: {}", Types::ToString(gameInterface->GetGame()));
+            LOG_INFO("Game: {}", magic_enum::enum_name(gameInterface->GetGame()));
             LOG_INFO("Game Path: {}", PathUtils::GetCurrentExecutablePath());
 
             LOG_DEBUG("Scanning signatures...");

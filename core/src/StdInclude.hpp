@@ -45,3 +45,5 @@
 #include "backends/imgui_impl_dx9.h"
 #include "backends/imgui_impl_win32.h"
 #pragma warning(pop)
+
+#include "magic_enum/magic_enum.hpp"

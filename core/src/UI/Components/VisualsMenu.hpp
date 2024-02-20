@@ -34,7 +34,6 @@ namespace IWXMVM::UI
         void UpdateSunAngle();
         void UpdateFilmtweaks();
 
-        std::optional<std::filesystem::path> OpenFileDialog(bool saveDialog = false);
         void LoadPreset(Preset);
         void AddPresetToRecent(Preset);
 

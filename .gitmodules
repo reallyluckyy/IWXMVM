@@ -22,3 +22,6 @@
 [submodule "core/third-party/tinyobjloader"]
 	path = core/third-party/tinyobjloader
 	url = https://github.com/tinyobjloader/tinyobjloader.git
+[submodule "core/third-party/magic_enum"]
+	path = core/third-party/magic_enum
+	url = https://github.com/Neargye/magic_enum.git
