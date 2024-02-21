@@ -15,5 +15,5 @@ namespace IWXMVM::IW3::DemoParser
 
     void Run();
 
-    std::tuple<int32_t, int32_t> GetDemoTickRange();
+    std::pair<int32_t, int32_t> GetDemoTickRange();
 }  // namespace IWXMVM::IW3::DemoParser
