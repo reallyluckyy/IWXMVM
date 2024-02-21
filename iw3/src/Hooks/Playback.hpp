@@ -6,8 +6,8 @@ namespace IWXMVM::IW3::Hooks::Playback
     {
         uint32_t centities = 72 * 476;
         uint32_t compass = 64 * 48;
-        //uint32_t chat = 1320;
-        //uint32_t commands = 128 * 1024;
+        uint32_t chat = 1320;
+        uint32_t commands = 128 * 1024;
         uint32_t gamestate = 140844;
     };
     static constexpr dataSizes g_dataSizes;

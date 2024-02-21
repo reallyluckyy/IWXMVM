@@ -88,7 +88,7 @@ namespace IWXMVM::IW3::DemoParser
         {
             // some of the first 256 archives are outdated (cod4)
             demoStartTick = archives[0].serverTime;
-            demoEndTick = archives.back().serverTime;
+            demoEndTick = archives.back().serverTime + 500;
 
             LOG_DEBUG("Determined demo bounds as {0} and {1}", demoStartTick, demoEndTick);
         }

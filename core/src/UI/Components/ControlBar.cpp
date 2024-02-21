@@ -54,12 +54,12 @@ namespace IWXMVM::UI
 
         if (Input::BindDown(Action::PlaybackSkipForward))
         {
-            Mod::GetGameInterface()->SetTickDelta(500);
+            Mod::GetGameInterface()->SetTickDelta(1000);
         }
 
         if (Input::BindDown(Action::PlaybackSkipBackward))
         {
-            Mod::GetGameInterface()->SetTickDelta(-500);
+            Mod::GetGameInterface()->SetTickDelta(-1000);
         }
     }
 

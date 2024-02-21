@@ -53,6 +53,7 @@ namespace IWXMVM::IW3::Hooks::Playback
 
     filestreamState g_fileStreamMode = Uninitialized;
     std::ifstream g_file;
+    uint32_t g_fileSize = 0;
     uint32_t g_countBuffer = 0;
     std::unique_ptr<customSnapshot> g_frameData;
     std::atomic<std::int32_t> rewindTo = -1;
@@ -74,7 +75,7 @@ namespace IWXMVM::IW3::Hooks::Playback
     {
         uintptr_t serverCommandSequence = 0x914E20;
         uintptr_t lastExecutedServerCommand = 0x914E24;
-        //uintptr_t serverCommands = 0x914E28;
+        uintptr_t serverCommands = 0x914E28;
         uintptr_t timeDemoFrames = 0x934E88;
         uintptr_t timeDemoStart = 0x934E8C;
         uintptr_t timeDemoPrev = 0x934E90;
@@ -199,8 +200,8 @@ namespace IWXMVM::IW3::Hooks::Playback
             *reinterpret_cast<int*>(cgs.serverCommandSequence) = g_frameData->serverCommandSequence2;
             *reinterpret_cast<int*>(0x8EEB50) = 0;
             memset(reinterpret_cast<char*>(0x84F2D8), 0, g_dataSizes.centities);
-            //memset(reinterpret_cast<char*>(0x74B798), 0, g_dataSizes.chat);
-            //memset(reinterpret_cast<char*>(clc.serverCommands), 0, g_dataSizes.commands);
+            memset(reinterpret_cast<char*>(0x74B798), 0, g_dataSizes.chat);
+            memset(reinterpret_cast<char*>(clc.serverCommands), 0, g_dataSizes.commands);
             memset(reinterpret_cast<char*>(0x742B20), 0, g_dataSizes.compass);
             memcpy(reinterpret_cast<char*>(0xC628EC), &g_frameData->gameState, g_dataSizes.gamestate);
         }
@@ -271,6 +272,7 @@ namespace IWXMVM::IW3::Hooks::Playback
                 LOG_DEBUG("Closing file handle and resetting rewind data.");
                 g_fileStreamMode = Uninitialized;
                 g_file.close();
+                g_fileSize = 0;
                 g_countBuffer = 0;
                 g_frameData.reset();
                 rewindTo.store(-1);
@@ -295,6 +297,10 @@ namespace IWXMVM::IW3::Hooks::Playback
             }
             else
             {
+                g_file.seekg(0, std::ios::end);
+                g_fileSize = g_file.tellg();
+                g_file.seekg(0, std::ios::beg);
+
                 g_fileStreamMode = Initialized;
                 LOG_DEBUG("Opened file stream for demo file: {}", fh.name);
             }
@@ -303,8 +309,18 @@ namespace IWXMVM::IW3::Hooks::Playback
         if (g_fileStreamMode != Initialized)
             return FS_Read_Trampoline(buffer, len, f);
 
-        if (len == 1 && rewindTo != -1)  // only reset when the game has just requested the one byte message type
+        if (len == 1 && (rewindTo != -1 || g_countBuffer + 9 >= g_fileSize)) // only reset when the game has just requested the one byte message type
+        {
+            if (g_countBuffer + 9 >= g_fileSize)
+            {
+                LOG_DEBUG("Reached the footer / end of the demo, rewinding and pausing now.");
+                rewindTo.store(*reinterpret_cast<int*>(cl.snap_serverTime) - 1000);
+
+                if (!Components::Playback::IsPaused())
+                    Components::Playback::TogglePaused();
+            }
             RestoreOldGamestate();
+        }  
         else if (len > 12)
             // to exclude client archives (and CoD4X protocol header)
             StoreCurrentGamestate(len);
