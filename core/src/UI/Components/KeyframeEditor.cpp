@@ -407,7 +407,7 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::Initialize()
     {
-        Events::RegisterListener(EventType::OnDemoLoad, [this]() {
+        Events::RegisterListener(EventType::PostDemoLoad, [this]() {
             displayStartTick = 0;
             displayEndTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
         });

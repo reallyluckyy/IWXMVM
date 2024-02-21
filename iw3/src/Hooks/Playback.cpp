@@ -109,6 +109,20 @@ namespace IWXMVM::IW3::Hooks::Playback
     };
     cg_t cg;
 
+    void Reset()
+    {
+        LOG_DEBUG("Closing file handle and resetting rewind data.");
+        g_fileStreamMode = Uninitialized;
+        if (g_file.is_open())
+        {
+            g_file.close();
+        }
+        g_fileSize = 0;
+        g_countBuffer = 0;
+        g_frameData.reset();
+        rewindTo.store(-1);
+    }
+
     void CL_FirstSnapshotWrapper()
     {
         int clientNum = *reinterpret_cast<int*>(cg.clientNum);
@@ -258,27 +272,6 @@ namespace IWXMVM::IW3::Hooks::Playback
         using namespace Structures;
         fileHandleData_t fh =
             *reinterpret_cast<fileHandleData_t*>(GetGameAddresses().fsh() + f * sizeof(fileHandleData_t));
-       
-        //
-        // TODO handle file closing and resetting data properly
-        if (g_frameData != nullptr && g_frameData->serverTime != 0 &&
-            Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
-        {
-            const std::string_view sv =
-                reinterpret_cast<fileHandleData_t*>(GetGameAddresses().fsh() + 1 * sizeof(fileHandleData_t))->name;
-
-            if (!sv.ends_with(Mod::GetGameInterface()->GetDemoExtension()))
-            {
-                LOG_DEBUG("Closing file handle and resetting rewind data.");
-                g_fileStreamMode = Uninitialized;
-                g_file.close();
-                g_fileSize = 0;
-                g_countBuffer = 0;
-                g_frameData.reset();
-                rewindTo.store(-1);
-            }
-        }
-        //
 
         std::string_view sv = fh.name;
         bool isDemoFile = sv.ends_with(Mod::GetGameInterface()->GetDemoExtension());

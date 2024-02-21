@@ -32,11 +32,12 @@ namespace IWXMVM::IW3
 
         void SetupEventListeners() final
         {
-            Events::RegisterListener(EventType::OnDemoLoad, DemoParser::Run);
+            Events::RegisterListener(EventType::PreDemoLoad, Hooks::Playback::Reset);
+            Events::RegisterListener(EventType::PostDemoLoad, DemoParser::Run);
 
             Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
 
-            Events::RegisterListener(EventType::OnDemoLoad,
+            Events::RegisterListener(EventType::PostDemoLoad,
                                      []() { Functions::FindDvar("sv_cheats")->current.enabled = true; });
         }
 

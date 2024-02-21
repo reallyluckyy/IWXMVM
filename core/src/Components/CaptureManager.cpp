@@ -62,7 +62,7 @@ namespace IWXMVM::Components
 
         outputDirectory = std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "recordings";
 
-        Events::RegisterListener(EventType::OnDemoLoad, [&]() {
+        Events::RegisterListener(EventType::PostDemoLoad, [&]() {
             // for now we'll force the resolution to the current window size
             // TODO: remove when we support resolution selection
             captureSettings.resolution = Resolution(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);

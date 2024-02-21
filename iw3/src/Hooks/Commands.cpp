@@ -177,9 +177,11 @@ namespace IWXMVM::IW3::Hooks::Commands
         if (oldFunction == nullptr)
             return;
 
+        Events::Invoke(EventType::PreDemoLoad);
+
         reinterpret_cast<void (*)()>(oldFunction)();
 
-        Events::Invoke(EventType::OnDemoLoad);
+        Events::Invoke(EventType::PostDemoLoad);
     }
 
     // TODO: replayDemo is not supported yet because the old demo path needs to be stored!

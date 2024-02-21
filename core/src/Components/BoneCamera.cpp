@@ -13,7 +13,7 @@ namespace IWXMVM::Components
     {
         positionOffset = glm::vec3(0, 10, 0);
 
-        Events::RegisterListener(EventType::OnDemoLoad, [&]() {
+        Events::RegisterListener(EventType::PostDemoLoad, [&]() {
             entityId = 0;
         });
     }
