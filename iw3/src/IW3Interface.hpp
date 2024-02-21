@@ -75,11 +75,13 @@ namespace IWXMVM::IW3
             str += (str.ends_with(".dm_1")) ? "" : ".dm_1";
             demoInfo.path = Functions::GetFilePath(std::move(str));
 
+            auto [demoStartTick, demoEndTick] = DemoParser::GetDemoTickRange();
+
             demoInfo.isRewinding = IW3::Hooks::Playback::rewindTo.load() != -1;
             if (!demoInfo.isRewinding)
-                lastValidTick = Structures::GetClientActive()->serverTime - DemoParser::demoStartTick;
+                lastValidTick = Structures::GetClientActive()->serverTime - demoStartTick;
             demoInfo.currentTick = lastValidTick;
-            demoInfo.endTick = DemoParser::demoEndTick - DemoParser::demoStartTick;
+            demoInfo.endTick = demoEndTick - demoStartTick;
 
             return demoInfo;
         }

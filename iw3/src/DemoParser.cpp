@@ -10,6 +10,11 @@ namespace IWXMVM::IW3::DemoParser
     uint32_t demoStartTick;
     uint32_t demoEndTick;
 
+    std::tuple<int32_t, int32_t> GetDemoTickRange()
+    {
+        return std::make_tuple(demoStartTick, demoEndTick);
+    }
+
     enum class DemoMessageType : uint8_t
     {
         NetworkPacket = 0,
