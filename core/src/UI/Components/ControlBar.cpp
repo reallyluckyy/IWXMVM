@@ -194,8 +194,11 @@ namespace IWXMVM::UI
 
             ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
             ImGui::SameLine();
-            ImGuiEx::TimescaleSlider("##1", &timescale.value().value->floating_point, 0.001f, 1000.0f, "%.3f",
-                                     ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
+            ImGuiEx::TimescaleSlider("##1", &timescale.value().value->floating_point, 
+                Components::Playback::TIMESCALE_STEPS.front(),
+                Components::Playback::TIMESCALE_STEPS.back(),
+                "%.3f",
+                ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
             auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
             auto progressBarX = padding.x + pauseButtonSize.x + playbackSpeedSliderWidth + padding.x * 3;

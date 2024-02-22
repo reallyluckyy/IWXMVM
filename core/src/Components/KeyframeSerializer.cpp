@@ -121,7 +121,7 @@ namespace IWXMVM::Components
             {
                 LOG_WARN("Game of loaded keyframes file doesnt match current game!");
                 LOG_WARN("Expected: {0}", gameName);
-                LOG_WARN("Actual: {1}", currentGameName);
+                LOG_WARN("Actual: {0}", currentGameName);
             }
 
             auto demoName = rootNode[NODE_DEMO_NAME].get<std::string>();
@@ -130,7 +130,7 @@ namespace IWXMVM::Components
             {
                 LOG_WARN("Demo names dont match {0} vs {1}", demoName, currentDemoName);
                 LOG_WARN("Expected: {0}", demoName);
-                LOG_WARN("Actual: {1}", currentDemoName);
+                LOG_WARN("Actual: {0}", currentDemoName);
             }
 
             auto properties = rootNode[NODE_PROPERTIES];
