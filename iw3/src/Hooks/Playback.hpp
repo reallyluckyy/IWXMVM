@@ -5,6 +5,7 @@ namespace IWXMVM::IW3::Hooks::Playback
     struct dataSizes
     {
         uint32_t centities = 72 * 476;
+        uint32_t clientInfo = 64 * 1228;
         uint32_t compass = 64 * 48;
         uint32_t chat = 1320;
         uint32_t commands = 128 * 1024;
@@ -23,6 +24,7 @@ namespace IWXMVM::IW3::Hooks::Playback
         int serverCommandSequence1 = 0;
         int serverCommandSequence2 = 0;
 
+        char clientInfo[g_dataSizes.clientInfo]{};
         char gameState[g_dataSizes.gamestate]{};
     };
 

@@ -213,11 +213,13 @@ namespace IWXMVM::IW3::Hooks::Playback
             *reinterpret_cast<int*>(clc.serverCommandSequence) = g_frameData->serverCommandSequence1;
             *reinterpret_cast<int*>(cgs.serverCommandSequence) = g_frameData->serverCommandSequence2;
             *reinterpret_cast<int*>(0x8EEB50) = 0;
-            memset(reinterpret_cast<char*>(0x84F2D8), 0, g_dataSizes.centities);
+
+            memset(reinterpret_cast<char*>(0x742B20), 0, g_dataSizes.compass);
             memset(reinterpret_cast<char*>(0x74B798), 0, g_dataSizes.chat);
             memset(reinterpret_cast<char*>(clc.serverCommands), 0, g_dataSizes.commands);
-            memset(reinterpret_cast<char*>(0x742B20), 0, g_dataSizes.compass);
-            memcpy(reinterpret_cast<char*>(0xC628EC), &g_frameData->gameState, g_dataSizes.gamestate);
+            memset(reinterpret_cast<char*>(0x84F2D8), 0, g_dataSizes.centities);
+            memcpy(reinterpret_cast<char*>(0x839270), g_frameData->clientInfo, g_dataSizes.clientInfo);
+            memcpy(reinterpret_cast<char*>(0xC628EC), g_frameData->gameState, g_dataSizes.gamestate);
         }
     }
 
@@ -255,7 +257,8 @@ namespace IWXMVM::IW3::Hooks::Playback
             g_frameData->serverCommandSequence1 = *reinterpret_cast<int*>(clc.serverCommandSequence);
             g_frameData->serverCommandSequence2 = *reinterpret_cast<int*>(cgs.serverCommandSequence);
 
-            memcpy(&g_frameData->gameState, reinterpret_cast<char*>(0xC628EC), g_dataSizes.gamestate);
+            memcpy(g_frameData->clientInfo, reinterpret_cast<char*>(0x839270), g_dataSizes.clientInfo);
+            memcpy(g_frameData->gameState, reinterpret_cast<char*>(0xC628EC), g_dataSizes.gamestate);
         }
         else if (!g_frameData->populated)
         {
