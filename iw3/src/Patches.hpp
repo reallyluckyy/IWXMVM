@@ -18,12 +18,14 @@ namespace IWXMVM::IW3::Patches
                                                                  CG_RegisterItemsBytes, PatchApplySetting::Immediately};
         ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
         
+        // For rewinding
          // TODO: sigs
         NopPatch<5> Con_TimeJumped{0x45C2A7, PatchApplySetting::Deferred};
         NopPatch<2> CL_SetCGameTime{0x45C511, PatchApplySetting::Immediately};
         JumpPatch CL_CGameNeedsServerCommand{0x45B01A, PatchApplySetting::Immediately};
         JumpPatch CG_ProcessSnapshots{0x44E4B0, PatchApplySetting::Immediately};
         JumpPatch CG_ReadNextSnapshot{0x44E2C3, PatchApplySetting::Immediately};
+        NopPatch<5> CG_MapRestart{0x44B4AD, PatchApplySetting::Immediately}; // Prevents cg_thirdperson from being reset
     };
 
     inline IW3Patches& GetGamePatches()
