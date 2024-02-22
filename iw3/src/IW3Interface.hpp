@@ -281,9 +281,10 @@ namespace IWXMVM::IW3
 
         void SetTickDelta(std::int32_t value) final
         {
+            constexpr int32_t REWIND_DEADZONE = 250;
             if (value > 0)
                 Hooks::Playback::SkipForward(value);
-            else if (value < -300)
+            else if (value < -REWIND_DEADZONE)
                 Hooks::Playback::RewindBy(value);
         }
 
