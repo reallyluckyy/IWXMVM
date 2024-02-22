@@ -194,9 +194,9 @@ namespace IWXMVM::IW3::Hooks::Playback
             if (latestRewindTo - g_frameData->serverTime <= 0)
             {
                 // not sure why this happens yet, but this is an invalid value!
-                LOG_DEBUG("Cannot rewind past first tick: {}", latestRewindTo - g_frameData->serverTime);
-                rewindTo = -1;
-                return;
+                LOG_DEBUG("Cannot rewind past first tick: {}, instead rewinding to: {}.",
+                          latestRewindTo - g_frameData->serverTime, g_frameData->serverTime);
+                latestRewindTo = g_frameData->serverTime;
             }
 
             ResetOldClientData(latestRewindTo);
