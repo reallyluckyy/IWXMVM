@@ -144,6 +144,12 @@ namespace IWXMVM::Components
         }
     }
 
+    std::filesystem::path GetFFmpegPath()
+    {
+        auto appdataPath = std::filesystem::path(getenv("APPDATA"));
+        return appdataPath / "codmvm_launcher" / "ffmpeg.exe";
+    }
+
     std::string GetFFmpegCommand(const Components::CaptureSettings& captureSettings, const std::filesystem::path& outputDirectory, const Resolution screenDimensions)
     {
         switch (captureSettings.outputFormat)
@@ -255,9 +261,7 @@ namespace IWXMVM::Components
         screenDimensions.height = static_cast<std::int32_t>(bbDesc.Height);
 
         std::string ffmpegCommand = GetFFmpegCommand(captureSettings, outputDirectory, screenDimensions);
-
-        const std::filesystem::path ffmpegPath(PathUtils::GetCurrentGameDirectory() + "\\ffmpeg.exe");
-        if (!std::filesystem::exists(ffmpegPath))
+        if (!std::filesystem::exists(GetFFmpegPath()))
         {
             LOG_ERROR("ffmpeg is not present in the game directory");
             ffmpegNotFound = true;
