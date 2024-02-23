@@ -63,7 +63,7 @@ namespace IWXMVM::Components
 
         void Initialize();
         void ToggleCapture();
-        void StartCapture(); // returns false only on ffmpeg open failure to signal to the UI
+        void StartCapture();
         void StopCapture();
 
         std::string_view GetOutputFormatLabel(OutputFormat outputFormat);
