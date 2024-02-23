@@ -136,13 +136,12 @@ namespace IWXMVM::Components
 
         CaptureSettings captureSettings;
         std::filesystem::path outputDirectory;
-        FILE* pipe = nullptr;
-        std::int32_t screenWidth = 0;
-        std::int32_t screenHeight = 0;
-        IDirect3DSurface9* backBuffer = nullptr;
-        IDirect3DSurface9* tempSurface = nullptr;
 
         // internal capture state
+        FILE* pipe = nullptr;
+        Resolution screenDimensions = Resolution(0, 0);
+        IDirect3DSurface9* backBuffer = nullptr;
+        IDirect3DSurface9* tempSurface = nullptr;
         std::atomic_bool isCapturing = false;
         std::int32_t capturedFrameCount = 0;
         bool ffmpegNotFound = false;

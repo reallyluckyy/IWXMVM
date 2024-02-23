@@ -100,7 +100,7 @@ namespace IWXMVM::Components
                 return;
             }
 
-            const auto surfaceByteSize = screenWidth * screenHeight * 4;
+            const auto surfaceByteSize = screenDimensions.width * screenDimensions.height * 4;
             std::fwrite(lockedRect.pBits, surfaceByteSize, 1, pipe);
 
             capturedFrameCount++;
@@ -141,6 +141,69 @@ namespace IWXMVM::Components
         else
         {
             StopCapture();
+        }
+    }
+
+    std::string GetFFmpegCommand(const Components::CaptureSettings& captureSettings, const std::filesystem::path& outputDirectory, const Resolution screenDimensions)
+    {
+        switch (captureSettings.outputFormat)
+        {
+            case OutputFormat::ImageSequence:
+                return std::format(
+                    ".\\ffmpeg.exe -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -q:v 0 "
+                    "-vf scale={}:{} -y \"{}\\output_%06d.tga\" > ffmpeg_log.txt 2>&1",
+                    screenDimensions.width, screenDimensions.height, captureSettings.framerate,
+                    captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string());
+            case OutputFormat::Video:
+            {
+                std::int32_t profile = 0;
+                const char* pixelFormat = nullptr;
+                switch (captureSettings.videoCodec.value())
+                {
+                    case VideoCodec::Prores4444XQ:
+                        profile = 5;
+                        pixelFormat = "yuv444p10le";
+                        break;
+                    case VideoCodec::Prores4444:
+                        profile = 4;
+                        pixelFormat = "yuv444p10le";
+                        break;
+                    case VideoCodec::Prores422HQ:
+                        profile = 3;
+                        pixelFormat = "yuv422p10le";
+                        break;
+                    case VideoCodec::Prores422:
+                        profile = 2;
+                        pixelFormat = "yuv422p10le";
+                        break;
+                    case VideoCodec::Prores422LT:
+                        profile = 1;
+                        pixelFormat = "yuv422p10le";
+                        break;
+                    default:
+                        profile = 4;
+                        pixelFormat = "yuv444p10le";
+                        LOG_ERROR("Unsupported video codec. Choosing default ({})",
+                                  static_cast<std::int32_t>(VideoCodec::Prores4444));
+                        break;
+                }
+
+                std::string filename = "output.mov";
+                auto i = 0;
+                while (std::filesystem::exists(outputDirectory / filename))
+                {
+                    filename = std::format("output{0}.mov", ++i);
+                }
+
+                return std::format(
+                    ".\\ffmpeg.exe -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -c:v prores -profile:v {} -q:v 1 "
+                    "-pix_fmt {} -vf scale={}:{} -y \"{}\\{}\" > ffmpeg_log.txt 2>&1",
+                    screenDimensions.width, screenDimensions.height, captureSettings.framerate, profile, pixelFormat,
+                    captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string(), filename);
+            }
+            default:
+                LOG_ERROR("Output format not supported yet");
+                break;
         }
     }
 
@@ -188,66 +251,10 @@ namespace IWXMVM::Components
             return;
         }
 
-        screenWidth = static_cast<std::int32_t>(bbDesc.Width);
-        screenHeight = static_cast<std::int32_t>(bbDesc.Height);
+        screenDimensions.width = static_cast<std::int32_t>(bbDesc.Width);
+        screenDimensions.height = static_cast<std::int32_t>(bbDesc.Height);
 
-        std::string ffmpegArgs;
-
-        switch (captureSettings.outputFormat)
-        {
-            case OutputFormat::ImageSequence:
-                ffmpegArgs = std::format(
-                    ".\\ffmpeg.exe -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -q:v 0 "
-                    "-vf scale={}:{} -y \"{}\\output_%06d.tga\" > ffmpeg_log.txt 2>&1",
-                    screenWidth, screenHeight, captureSettings.framerate, captureSettings.resolution.width,
-                    captureSettings.resolution.height, outputDirectory.string());
-
-                break;
-            case OutputFormat::Video:
-            {
-                std::int32_t profile = 0;
-                const char* pixelFormat = nullptr;
-                switch (captureSettings.videoCodec.value())
-                {
-                    case VideoCodec::Prores4444XQ:
-                        profile = 5;
-                        pixelFormat = "yuv444p10le";
-                        break;
-                    case VideoCodec::Prores4444:
-                        profile = 4;
-                        pixelFormat = "yuv444p10le";
-                        break;
-                    case VideoCodec::Prores422HQ:
-                        profile = 3;
-                        pixelFormat = "yuv422p10le";
-                        break;
-                    case VideoCodec::Prores422:
-                        profile = 2;
-                        pixelFormat = "yuv422p10le";
-                        break;
-                    case VideoCodec::Prores422LT:
-                        profile = 1;
-                        pixelFormat = "yuv422p10le";
-                        break;
-                    default:
-                        profile = 4;
-                        pixelFormat = "yuv444p10le";
-                        LOG_ERROR("Unsupported video codec. Choosing default ({})", static_cast<std::int32_t>(VideoCodec::Prores4444));
-                        break;
-                }
-
-                ffmpegArgs = std::format(
-                    ".\\ffmpeg.exe -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -c:v prores -profile:v {} -q:v 1 "
-                    "-pix_fmt {} -vf scale={}:{} -y \"{}\\output.mov\" > ffmpeg_log.txt 2>&1",
-                    screenWidth, screenHeight, captureSettings.framerate, profile, pixelFormat,
-                    captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string());
-
-                break;
-            }
-            default:
-                LOG_ERROR("Output format not supported yet");
-                break;
-        }
+        std::string ffmpegCommand = GetFFmpegCommand(captureSettings, outputDirectory, screenDimensions);
 
         const std::filesystem::path ffmpegPath(PathUtils::GetCurrentGameDirectory() + "\\ffmpeg.exe");
         if (!std::filesystem::exists(ffmpegPath))
@@ -259,8 +266,8 @@ namespace IWXMVM::Components
         }
         ffmpegNotFound = false;
 
-        LOG_INFO("ffmpeg command: {}", ffmpegArgs);
-        pipe = _popen(ffmpegArgs.c_str(), "wb");
+        LOG_DEBUG("ffmpeg command: {}", ffmpegCommand);
+        pipe = _popen(ffmpegCommand.c_str(), "wb");
         if (!pipe)
         {
             LOG_ERROR("ffmpeg pipe open error");
