@@ -69,8 +69,6 @@ namespace IWXMVM::Components
         std::ofstream keyframeFile(path);
         keyframeFile << rootNode.dump(4);
         keyframeFile.close();
-
-        LOG_INFO("Wrote keyframes to {}", path.string());
     }
 
     Types::KeyframeValue ReadValueOfType(const Types::KeyframeValueType valueType, const nlohmann::json& values)
@@ -99,16 +97,15 @@ namespace IWXMVM::Components
         }
     }
 
-    void KeyframeSerializer::Read(std::filesystem::path path)
+    void KeyframeSerializer::Read(std::filesystem::path path, bool requireDemoMatch)
     {
         using json = nlohmann::json;
-
-        LOG_INFO("Reading keyframes from {}", path.string());
 
         std::ifstream file(path);
         if (!file.is_open())
         {
-            LOG_ERROR("Failed to read keyframe file");
+            LOG_ERROR("Failed to read keyframe file at {}", path.string());
+            return;
         }
 
         try
@@ -128,6 +125,12 @@ namespace IWXMVM::Components
             auto currentDemoName = Mod::GetGameInterface()->GetDemoInfo().name;
             if (demoName.compare(currentDemoName) != 0)
             {
+                if (requireDemoMatch)
+                {
+                    LOG_INFO("Not loading keyframes since this demo is not the previous demo");
+                    return;
+                }
+
                 LOG_WARN("Demo names dont match {0} vs {1}", demoName, currentDemoName);
                 LOG_WARN("Expected: {0}", demoName);
                 LOG_WARN("Actual: {0}", currentDemoName);
@@ -169,6 +172,25 @@ namespace IWXMVM::Components
         catch (const std::exception& e)
         {
             LOG_ERROR("Failed to parse keyframe file ({})", e.what());
+        }
+    }
+
+    std::filesystem::path GetRecentKeyframesPath()
+    {
+        return PathUtils::GetIWXMVMPath() / "keyframes" / "recent.json";
+    }
+
+    void KeyframeSerializer::WriteRecent()
+    {
+        Write(GetRecentKeyframesPath());
+    }
+
+    void KeyframeSerializer::ReadRecent()
+    {
+        if (std::filesystem::exists(GetRecentKeyframesPath()))
+        {
+            LOG_INFO("Reading last sessions keyframes for this demo...");
+            Read(GetRecentKeyframesPath(), true);
         }
     }
 }

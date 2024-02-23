@@ -35,6 +35,8 @@ namespace IWXMVM::Components
 
         void ClearKeyframes();
 
+        void SortAndSaveKeyframes(std::vector<Types::Keyframe>& keyframes);
+
        private:
         KeyframeManager()
         {

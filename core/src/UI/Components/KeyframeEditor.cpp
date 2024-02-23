@@ -101,11 +101,6 @@ namespace IWXMVM::UI
         }
     }
 
-    void SortKeyframes(std::vector<Types::Keyframe>& keyframes)
-    {
-        std::sort(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) { return a.tick < b.tick; });
-    }
-
     std::optional<int32_t> selectedKeyframeId = std::nullopt;
     std::optional<int32_t> selectedKeyframeValueIndex = std::nullopt;
 
@@ -186,7 +181,7 @@ namespace IWXMVM::UI
             {
                 auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick);
                 k.tick = tick;
-                SortKeyframes(keyframes);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
                 {
@@ -212,7 +207,7 @@ namespace IWXMVM::UI
                 keyframes.end())
             {
                 keyframes.emplace_back(property, tick, Components::KeyframeManager::Get().Interpolate(property, tick));
-                SortKeyframes(keyframes);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
             }
         }
     }
@@ -353,7 +348,7 @@ namespace IWXMVM::UI
                 value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
                 k.value.SetByIndex(keyframeValueIndex,
                                    glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
-                SortKeyframes(keyframes);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
                 {
@@ -383,7 +378,7 @@ namespace IWXMVM::UI
                                      "%.2f"))
                 {
                     k.value.SetByIndex(keyframeValueIndex, currentValue);
-                    SortKeyframes(keyframes);
+                    Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
                 }
 
                 if (ImGui::IsKeyPressed(ImGuiKey_Enter))
@@ -419,7 +414,7 @@ namespace IWXMVM::UI
                 auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
                 value.SetByIndex(keyframeValueIndex, valueAtMouse.floatingPoint);
                 keyframes.emplace_back(property, tick, value);
-                SortKeyframes(keyframes);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
             }
         }
     }
@@ -488,6 +483,7 @@ namespace IWXMVM::UI
                 if (path.has_value())
                 {
                     Components::KeyframeSerializer::Write(path.value());
+                    LOG_INFO("Wrote keyframes to {}", path.value().string());
                 }
             }
             ImGui::SameLine();
@@ -505,6 +501,7 @@ namespace IWXMVM::UI
                 if (path.has_value())
                 {
                     Components::KeyframeSerializer::Read(path.value());
+                    LOG_INFO("Read keyframes from {}", path.value().string());
                 }
             }
         }

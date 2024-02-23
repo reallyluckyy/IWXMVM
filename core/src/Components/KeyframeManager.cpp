@@ -3,6 +3,8 @@
 
 #include "Resources.hpp"
 #include "Utilities/MathUtils.hpp"
+#include "KeyframeSerializer.hpp"
+#include "Events.hpp"
 
 namespace IWXMVM::Components
 {
@@ -41,6 +43,11 @@ namespace IWXMVM::Components
         InitializeProperty(sunLightBrightnessProperty);
         InitializeProperty(sunLightPitchProperty);
         InitializeProperty(sunLightYawProperty);
+
+        Events::RegisterListener(EventType::OnDemoLoad, [&]() { 
+            ClearKeyframes();
+            Components::KeyframeSerializer::ReadRecent();
+        });
     }
 
     const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const
@@ -60,6 +67,13 @@ namespace IWXMVM::Components
         {
             k.clear();
         }
+    }
+
+    void KeyframeManager::SortAndSaveKeyframes(std::vector<Types::Keyframe>& keyframes)
+    {
+        std::sort(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) { return a.tick < b.tick; });
+
+        Components::KeyframeSerializer::WriteRecent();
     }
 
     Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property,
