@@ -29,7 +29,6 @@ namespace IWXMVM::Components
 
     enum class VideoCodec
     {
-        Uncompressed,
         Prores4444XQ,
         Prores4444,
         Prores422HQ,

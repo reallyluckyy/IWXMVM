@@ -31,8 +31,6 @@ namespace IWXMVM::Components
     {
         switch (codec)
         {
-            case VideoCodec::Uncompressed:
-                return "Uncompressed";
             case VideoCodec::Prores4444XQ:
                 return "Prores 4444 XQ";
             case VideoCodec::Prores4444:
