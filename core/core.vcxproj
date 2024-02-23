@@ -191,6 +191,7 @@
     <ClInclude Include="src\Types\Filmtweaks.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
+    <ClInclude Include="src\Types\HudInfo.hpp" />
     <ClInclude Include="src\Types\Keyframe.hpp" />
     <ClInclude Include="src\Types\KeyframeableProperty.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />

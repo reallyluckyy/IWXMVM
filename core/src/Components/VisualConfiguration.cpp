@@ -3,6 +3,7 @@
 
 #include <unordered_set>
 
+// TODO: rework this somehow
 namespace IWXMVM::Components
 {
     std::string tokenBacklog;
@@ -25,7 +26,15 @@ namespace IWXMVM::Components
         "r_filmtweakinvert",   
         "r_lighttweaksuncolor",    
         "r_lighttweaksundirection",
-        "r_lighttweaksunlight"
+        "r_lighttweaksunlight",
+        "cg_draw2d",
+        "ui_hud_hardcore",
+        "cg_drawshellshock",
+        "ui_drawcrosshair",
+        "iwxmvm_ui_showscore",
+        "ui_hud_obituaries",
+        "g_teamcolor_allies",
+        "g_teamcolor_axis"
     };
 
     bool ProcessString(std::string& str)
@@ -118,19 +127,19 @@ namespace IWXMVM::Components
 
             // DOF
             if (dvar == "r_dof_enable")
-                visuals.dofActive = value;
+                visuals.dof.enabled = value;
             else if (dvar == "r_dof_farblur")
-                visuals.dofFarBlur = value;
+                visuals.dof.farBlur = value;
             else if (dvar == "r_dof_farstart")
-                visuals.dofFarStart = value;
+                visuals.dof.farStart = value;
             else if (dvar == "r_dof_farend")
-                visuals.dofFarEnd = value;
+                visuals.dof.farEnd = value;
             else if (dvar == "r_dof_nearblur")
-                visuals.dofNearBlur = value;
+                visuals.dof.nearBlur = value;
             else if (dvar == "r_dof_nearstart")
-                visuals.dofNearStart = value;
+                visuals.dof.nearStart = value;
             else if (dvar == "r_dof_nearend")
-                visuals.dofNearEnd = value;
+                visuals.dof.nearEnd = value;
 
             // SUN
             else if (dvar == "r_lighttweaksuncolor")
@@ -167,13 +176,13 @@ namespace IWXMVM::Components
 
             // FILMTWEAKS
             else if (dvar == "r_filmtweakenable")
-                visuals.filmtweaksActive = value;
+                visuals.filmtweaks.enabled = value;
             else if (dvar == "r_filmtweakbrightness")
-                visuals.filmtweaksBrightness = value;
+                visuals.filmtweaks.brightness = value;
             else if (dvar == "r_filmtweakcontrast")
-                visuals.filmtweaksContrast = value;
+                visuals.filmtweaks.contrast = value;
             else if (dvar == "r_filmtweakdesaturation")
-                visuals.filmtweaksDesaturation = value;
+                visuals.filmtweaks.desaturation = value;
             else if (dvar == "r_filmtweaklighttint")
             {
                 std::string sg, sb;
@@ -185,7 +194,7 @@ namespace IWXMVM::Components
                 sb = GetNextToken(in);
                 if (!ConvertStringToFloat(sb, b))
                     continue;
-                visuals.filmtweaksTintLight = glm::vec3(r, g, b);
+                visuals.filmtweaks.tintLight = glm::vec3(r, g, b);
             }
             else if (dvar == "r_filmtweakdarktint")
             {
@@ -198,10 +207,50 @@ namespace IWXMVM::Components
                 sb = GetNextToken(in);
                 if (!ConvertStringToFloat(sb, b))
                     continue;
-                visuals.filmtweaksTintDark = glm::vec3(r, g, b);
+                visuals.filmtweaks.tintDark = glm::vec3(r, g, b);
             }
             else if (dvar == "r_filmtweakinvert")
-                visuals.filmtweaksInvert = value;
+                visuals.filmtweaks.invert = value;
+
+            // MISC
+            else if (dvar == "cg_draw2d")
+                visuals.hudInfo.show2DElements = value;
+            else if (dvar == "ui_hud_hardcore")
+                visuals.hudInfo.showPlayerHUD = !value;
+            else if (dvar == "cg_drawshellshock")
+                visuals.hudInfo.showShellshock = value;
+            else if (dvar == "ui_drawcrosshair")
+                visuals.hudInfo.showCrosshair = value;
+            else if (dvar == "iwxmvm_ui_showscore")
+                visuals.hudInfo.showScore = value;
+            else if (dvar == "ui_hud_obituaries")
+                visuals.hudInfo.showKillfeed = value;
+            else if (dvar == "g_teamcolor_allies")
+            {
+                std::string sg, sb;
+                float r = value;
+                float g, b;
+                sg = GetNextToken(in);
+                if (!ConvertStringToFloat(sg, g))
+                    continue;
+                sb = GetNextToken(in);
+                if (!ConvertStringToFloat(sb, b))
+                    continue;
+                visuals.hudInfo.killfeedTeam1Color = glm::vec3(r, g, b);
+            }
+            else if (dvar == "g_teamcolor_axis")
+            {
+                std::string sg, sb;
+                float r = value;
+                float g, b;
+                sg = GetNextToken(in);
+                if (!ConvertStringToFloat(sg, g))
+                    continue;
+                sb = GetNextToken(in);
+                if (!ConvertStringToFloat(sb, b))
+                    continue;
+                visuals.hudInfo.killfeedTeam2Color = glm::vec3(r, g, b);
+            }
         }
 
         return visuals;
@@ -217,13 +266,13 @@ namespace IWXMVM::Components
         }
 
         // DOF
-        out << "r_dof_enable " << settings.dofActive << "\n";
-        out << "r_dof_farblur " << settings.dofFarBlur << "\n";
-        out << "r_dof_farstart " << settings.dofFarStart << "\n";
-        out << "r_dof_farend " << settings.dofFarEnd << "\n";
-        out << "r_dof_nearblur " << settings.dofNearBlur << "\n";
-        out << "r_dof_nearstart " << settings.dofNearStart << "\n";
-        out << "r_dof_nearend " << settings.dofNearEnd << "\n";
+        out << "r_dof_enable " << settings.dof.enabled << "\n";
+        out << "r_dof_farblur " << settings.dof.farBlur << "\n";
+        out << "r_dof_farstart " << settings.dof.farStart << "\n";
+        out << "r_dof_farend " << settings.dof.farEnd << "\n";
+        out << "r_dof_nearblur " << settings.dof.nearBlur << "\n";
+        out << "r_dof_nearstart " << settings.dof.nearStart << "\n";
+        out << "r_dof_nearend " << settings.dof.nearEnd << "\n";
 
         // SUN
         out << "r_lighttweaksuncolor " << settings.sunColorUI.r << " " << settings.sunColorUI.g << " "
@@ -233,15 +282,29 @@ namespace IWXMVM::Components
         out << "r_lighttweaksunlight " << settings.sunBrightness << "\n";
 
         // FILMTWEAKS
-        out << "r_filmtweakenable " << settings.filmtweaksActive << "\n";
-        out << "r_filmtweakbrightness " << settings.filmtweaksBrightness << "\n";
-        out << "r_filmtweakcontrast " << settings.filmtweaksContrast << "\n";
-        out << "r_filmtweakdesaturation " << settings.filmtweaksDesaturation << "\n";
-        out << "r_filmtweaklighttint " << settings.filmtweaksTintLight.r << " " << settings.filmtweaksTintLight.g << " "
-            << settings.filmtweaksTintLight.b << "\n";
-        out << "r_filmtweakdarktint " << settings.filmtweaksTintDark.r << " " << settings.filmtweaksTintDark.g << " "
-            << settings.filmtweaksTintDark.b << "\n";
-        out << "r_filmtweakinvert " << settings.filmtweaksInvert << "\n";
+        out << "r_filmtweakenable " << settings.filmtweaks.enabled << "\n";
+        out << "r_filmtweakbrightness " << settings.filmtweaks.brightness << "\n";
+        out << "r_filmtweakcontrast " << settings.filmtweaks.contrast << "\n";
+        out << "r_filmtweakdesaturation " << settings.filmtweaks.desaturation << "\n";
+        out << "r_filmtweaklighttint " << settings.filmtweaks.tintLight.r << " " << settings.filmtweaks.tintLight.g
+            << " " << settings.filmtweaks.tintLight.b << "\n";
+        out << "r_filmtweakdarktint " << settings.filmtweaks.tintDark.r << " " << settings.filmtweaks.tintDark.g << " "
+            << settings.filmtweaks.tintDark.b << "\n";
+        out << "r_filmtweakinvert " << settings.filmtweaks.invert << "\n";
+
+        // MISC
+        out << "cg_draw2d " << settings.hudInfo.show2DElements << "\n";
+        out << "ui_hud_hardcore " << !settings.hudInfo.showPlayerHUD << "\n";
+        out << "cg_drawshellshock " << settings.hudInfo.showShellshock << "\n";
+        out << "ui_drawcrosshair " << settings.hudInfo.showCrosshair << "\n";
+        out << "iwxmvm_ui_showscore " << settings.hudInfo.showScore << "\n";
+        out << "ui_hud_obituaries " << settings.hudInfo.showKillfeed << "\n";
+        out << "g_teamcolor_allies " << settings.hudInfo.killfeedTeam1Color[0] << " "
+            << settings.hudInfo.killfeedTeam1Color[1] << " " << settings.hudInfo.killfeedTeam1Color[2]
+            << " 1\n";
+        out << "g_teamcolor_axis " << settings.hudInfo.killfeedTeam2Color[0] << " "
+            << settings.hudInfo.killfeedTeam2Color[1] << " " << settings.hudInfo.killfeedTeam2Color[2]
+            << " 1\n";
         out.close();
     }
 }

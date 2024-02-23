@@ -109,6 +109,11 @@ namespace IWXMVM::Patches
             }
         }
 
+        bool IsApplied()
+        {
+            return _active;
+        }
+
        private:
         static constexpr std::size_t _size = length;
 

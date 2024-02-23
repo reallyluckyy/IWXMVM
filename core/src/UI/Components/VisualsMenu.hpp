@@ -33,6 +33,7 @@ namespace IWXMVM::UI
         void SetAngleFromPosition(glm::vec3);
         void UpdateSunAngle();
         void UpdateFilmtweaks();
+        void UpdateHudInfo();
 
         void LoadPreset(Preset);
         void AddPresetToRecent(Preset);

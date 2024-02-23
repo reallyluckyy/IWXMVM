@@ -17,6 +17,9 @@ namespace IWXMVM::IW3::Patches
         Patch<std::size(CG_RegisterItemsBytes)> CG_RegisterItems{GetGameAddresses().CG_RegisterItems(),
                                                                  CG_RegisterItemsBytes, PatchApplySetting::Immediately};
         ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
+        
+        ReturnPatch R_AddCmdDrawTextWithEffects{GetGameAddresses().R_AddCmdDrawTextWithEffects(),
+                                                PatchApplySetting::Deferred};
     };
 
     inline IW3Patches& GetGamePatches()

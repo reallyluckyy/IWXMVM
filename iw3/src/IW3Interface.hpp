@@ -231,6 +231,33 @@ namespace IWXMVM::IW3
             return filmtweaks;
         }
 
+        Types::HudInfo GetHudInfo()
+        {
+            glm::vec3 teamColorAllies;
+            auto ss = std::stringstream(Functions::FindDvar("g_TeamColor_Allies")->current.string);
+            ss >> teamColorAllies[0] >> teamColorAllies[1] >> teamColorAllies[2];
+            
+            glm::vec3 teamColorAxis;
+            ss = std::stringstream(Functions::FindDvar("g_TeamColor_Axis")->current.string);
+            ss >> teamColorAxis[0] >> teamColorAxis[1] >> teamColorAxis[2];
+
+            auto d = Functions::FindDvar("ui_hud_obituaries");
+            d->current;
+
+            Types::HudInfo hudInfo = {
+                Functions::FindDvar("cg_draw2D")->current.enabled,
+                !Functions::FindDvar("ui_hud_hardcore")->current.enabled,
+                Functions::FindDvar("cg_drawShellshock")->current.value,
+                Functions::FindDvar("ui_drawCrosshair")->current.enabled, 
+                !Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.IsApplied(),
+                Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
+                teamColorAllies,   
+                teamColorAxis
+            };
+
+            return hudInfo;
+        }
+
         void SetSun(Types::Sun sun) final
         {
             auto gfxWorld = Structures::GetGfxWorld();
@@ -269,6 +296,30 @@ namespace IWXMVM::IW3
                 Functions::FindDvar("r_filmTweakDarkTint")->current.vector[i] = glm::value_ptr(filmtweaks.tintDark)[i];
             }
             Functions::FindDvar("r_filmTweakInvert")->current.enabled = filmtweaks.invert;
+        }
+
+        void SetHudInfo(Types::HudInfo hudInfo) final
+        {
+            Functions::FindDvar("cg_draw2D")->current.enabled = hudInfo.show2DElements;
+            Functions::FindDvar("ui_hud_hardcore")->current.enabled = !hudInfo.showPlayerHUD;
+            Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5 : 0;
+            Functions::FindDvar("cg_drawShellshock")->current.value = hudInfo.showShellshock;
+            Functions::FindDvar("ui_hud_obituaries")->current.string = hudInfo.showKillfeed ? "1" : "0";
+            Functions::FindDvar("ui_drawCrosshair")->current.enabled = hudInfo.showCrosshair;
+            if (hudInfo.showScore)
+                Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.Revert();
+            else
+                Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.Apply();
+            
+            std::stringstream teamColorAllies;
+            teamColorAllies << hudInfo.killfeedTeam1Color[0] << " " << hudInfo.killfeedTeam1Color[1] << " "
+                            << hudInfo.killfeedTeam1Color[2] << " 1\0";
+            std::strcpy((char*)Functions::FindDvar("g_TeamColor_Allies")->current.string, teamColorAllies.str().c_str());
+
+            std::stringstream teamColorAxis;
+            teamColorAxis << hudInfo.killfeedTeam2Color[0] << " " << hudInfo.killfeedTeam2Color[1] << " " 
+                          << hudInfo.killfeedTeam2Color[2] << " 1\0";
+            std::strcpy((char*)Functions::FindDvar("g_TeamColor_Axis")->current.string, teamColorAxis.str().c_str());
         }
 
         std::atomic<std::int32_t> tick;
