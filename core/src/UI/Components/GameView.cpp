@@ -31,6 +31,7 @@ namespace IWXMVM::UI
         return ImVec2(window.x, window.y);
     }
 
+    bool wasGizmoButtonClickedThisFrame = false;
     void DrawGizmoButton(const char* label, ImVec2 size, GFX::GizmoMode gizmoMode)
     {
         auto& graphicsManager = GFX::GraphicsManager::Get();
@@ -42,6 +43,7 @@ namespace IWXMVM::UI
                 ImGui::PopStyleColor();
 
             graphicsManager.SetGizmoMode(gizmoMode);
+            wasGizmoButtonClickedThisFrame = wasGizmoButtonClickedThisFrame || true;
         }
         else
         {
@@ -70,6 +72,12 @@ namespace IWXMVM::UI
         DrawGizmoButton(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT, buttonSize, GFX::GizmoMode::TranslateGlobal);
         ImGui::SameLine(0, buttonSpacing.x);
         DrawGizmoButton(ICON_FA_ROTATE, buttonSize, GFX::GizmoMode::Rotate);
+
+        if (Input::KeyUp(ImGuiKey_MouseLeft) && !graphicsManager.WasObjectHoveredThisFrame() &&
+            !graphicsManager.WasObjectDraggedThisFrame() && !wasGizmoButtonClickedThisFrame)
+        {
+            graphicsManager.ResetSelection();
+        }
     }
 
     void DrawKeyBox(const char* keyName)
@@ -402,19 +410,12 @@ namespace IWXMVM::UI
         {
             cameraManager.SetActiveCamera(Components::Camera::Mode::Bone);
         }
-
-        auto& graphicsManager = GFX::GraphicsManager::Get();
-
-        if (Input::KeyUp(ImGuiKey_MouseLeft) 
-            && !graphicsManager.WasObjectHoveredThisFrame() 
-            && !graphicsManager.WasObjectDraggedThisFrame())
-        {
-            graphicsManager.ResetSelection();
-        }
     }
 
     void GameView::Render()
     {
+        wasGizmoButtonClickedThisFrame = false;
+
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
 
