@@ -83,6 +83,15 @@ namespace IWXMVM::UI
         }
     }
 
+    void DrawSectionHeader(const char* label)
+    {
+        ImGui::Dummy(ImVec2(0.0f, 10.0f));
+        ImGui::PushFont(UIManager::Get().GetBoldFont());
+        ImGui::Text(label);
+        ImGui::PopFont();
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
+    }
+
     void VisualsMenu::RenderConfigSection()
     {
         if (ImGui::BeginCombo("##configCombo", currentPreset.name.c_str()))
@@ -141,6 +150,8 @@ namespace IWXMVM::UI
             }
         }
 
+        ImGui::Dummy(ImVec2(0, 5));
+
         ImGui::Separator();
     }
 
@@ -148,9 +159,7 @@ namespace IWXMVM::UI
     {
         auto checkboxColumnPosition = ImGui::GetWindowWidth() * 0.6f;
 
-        ImGui::Dummy(ImVec2(0.0f, 10.0f));
-        ImGui::Text("Misc");
-        ImGui::Dummy(ImVec2(0.0f, 10.0f));
+        DrawSectionHeader(ICON_FA_BURGER "  Misc");
 
         bool modified = false;
 
@@ -177,12 +186,14 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
             modified = ImGui::Checkbox("##showFlashbangCheckbox", &visuals.hudInfo.showShellshock) || modified;
 
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Show Crosshair");
             ImGui::SameLine();
             ImGui::SetCursorPosX(checkboxColumnPosition);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
             modified = ImGui::Checkbox("##showCrosshairCheckbox", &visuals.hudInfo.showCrosshair) || modified;
             
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Show Score");
             ImGui::SameLine();
             ImGui::SetCursorPosX(checkboxColumnPosition);
@@ -227,9 +238,7 @@ namespace IWXMVM::UI
 
     void VisualsMenu::RenderFilmtweaks()
     {
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::Text("Filmtweaks");
+        DrawSectionHeader(ICON_FA_IMAGE "  Filmtweaks");
 
         bool modified = false;
 
@@ -241,11 +250,16 @@ namespace IWXMVM::UI
         modified = ImGui::Checkbox("##enableFilmtweaksCheckbox", &visuals.filmtweaks.enabled) || modified;
 
         // TODO: Make these all keyframable
-        modified = ImGui::SliderFloat("Brightness", &visuals.filmtweaks.brightness, -1, 1) || modified;
-        modified = ImGui::SliderFloat("Contrast", &visuals.filmtweaks.contrast, 0, 4) || modified;
-        modified = ImGui::SliderFloat("Desaturation", &visuals.filmtweaks.desaturation, 0, 4) || modified;
-        modified = ImGui::ColorEdit3("Tint Light", glm::value_ptr(visuals.filmtweaks.tintLight)) || modified;
-        modified = ImGui::ColorEdit3("Tint Dark", glm::value_ptr(visuals.filmtweaks.tintDark)) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat("Brightness", &visuals.filmtweaks.brightness, -1, 1, 
+                                                      Types::KeyframeablePropertyType::FilmtweakBrightness) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat("Contrast", &visuals.filmtweaks.contrast, 0, 4,
+                                                      Types::KeyframeablePropertyType::FilmtweakContrast) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat("Desaturation", &visuals.filmtweaks.desaturation, 0, 4, 
+                                                      Types::KeyframeablePropertyType::FilmtweakDesaturation) || modified;
+        modified = ImGuiEx::Keyframeable::ColorEdit3("Tint Light", glm::value_ptr(visuals.filmtweaks.tintLight), 
+                                                     Types::KeyframeablePropertyType::FilmtweakTintLight) || modified;
+        modified = ImGuiEx::Keyframeable::ColorEdit3("Tint Dark", glm::value_ptr(visuals.filmtweaks.tintDark),
+                                                     Types::KeyframeablePropertyType::FilmtweakTintDark) || modified;
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Invert");
@@ -264,26 +278,38 @@ namespace IWXMVM::UI
 
     void VisualsMenu::RenderDOF()
     {
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::Text("Depth of Field");
+        DrawSectionHeader(ICON_FA_CAMERA "  Depth of Field");
 
         bool modified = false;
 
         modified = ImGui::Checkbox("Enable DOF", &visuals.dof.enabled) || modified;
-        modified = ImGui::SliderFloat("Far Blur", &visuals.dof.farBlur, 0, 10) || modified;
-        modified = ImGui::SliderFloat("Far Start", &visuals.dof.farStart, 0, 5000) || modified;
-        modified = ImGui::SliderFloat("Far End", &visuals.dof.farEnd, 0, 5000) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Far Blur", &visuals.dof.farBlur, 0, 10,
+            Types::KeyframeablePropertyType::DepthOfFieldFarBlur) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Far Start", &visuals.dof.farStart, 0, 5000,
+            Types::KeyframeablePropertyType::DepthOfFieldFarStart) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Far End", &visuals.dof.farEnd, 0, 5000,
+            Types::KeyframeablePropertyType::DepthOfFieldFarEnd) || modified;
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
-        modified = ImGui::SliderFloat("Near Blur", &visuals.dof.nearBlur, 0, 10) || modified;
-        modified = ImGui::SliderFloat("Near Start", &visuals.dof.nearStart, 0, 5000) || modified;
-        modified = ImGui::SliderFloat("Near End", &visuals.dof.nearEnd, 0, 5000) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Near Blur", &visuals.dof.nearBlur, 0, 10,
+            Types::KeyframeablePropertyType::DepthOfFieldNearBlur) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Near Start", &visuals.dof.nearStart, 0, 5000,
+            Types::KeyframeablePropertyType::DepthOfFieldNearStart) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Near End", &visuals.dof.nearEnd, 0, 5000,
+            Types::KeyframeablePropertyType::DepthOfFieldNearEnd) || modified;
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
-        modified = ImGui::SliderFloat("Bias", &visuals.dof.bias, 0.1, 10) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Bias", &visuals.dof.bias, 0.1, 10,
+            Types::KeyframeablePropertyType::DepthOfFieldBias) || modified;
 
         if (modified)
         {
@@ -295,9 +321,7 @@ namespace IWXMVM::UI
 
     void VisualsMenu::RenderSun()
     {
-        ImGui::AlignTextToFramePadding();
-
-        ImGui::Text("Sun");
+        DrawSectionHeader(ICON_FA_SUN "  Sun");
 
         bool modified = false;
 

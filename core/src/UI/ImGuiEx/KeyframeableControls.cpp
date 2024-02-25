@@ -18,20 +18,16 @@ namespace ImGuiEx::Keyframeable
 
     void DrawKeyframeButton(const char* label, bool drawButton, std::function<void()> AddKeyframe)
     {
-        if (drawButton)
+        ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 0.0f);
+        ImGui::BeginDisabled(!drawButton);
+        if (ImGui::Button(std::format(ICON_FA_STOPWATCH "##{0}", label).c_str(), 
+            ImVec2(ImGui::GetFontSize() * 1.5, ImGui::GetFontSize() * 1.5)))
         {
-            if (ImGui::Button(std::format(ICON_FA_STOPWATCH "##{0}", label).c_str(), 
-                ImVec2(ImGui::GetFontSize() * 1.5, ImGui::GetFontSize() * 1.5)))
-            {
-                AddKeyframe();
-            }
-            ImGui::SameLine();
+            AddKeyframe();
         }
-        else
-        {
-            ImGui::Dummy(ImVec2(ImGui::GetFontSize() * 1.5, ImGui::GetFontSize() * 1.5));
-            ImGui::SameLine();
-        }
+        ImGui::SameLine();
+        ImGui::EndDisabled();
+        ImGui::PopStyleVar();
     }
 
     bool SliderFloat(const char* label, float* v, float v_min, float v_max, 
@@ -62,7 +58,7 @@ namespace ImGuiEx::Keyframeable
         bool result = true;
         if (keyframes.empty())
         {
-            result = ImGui::SliderFloat(std::format("##{0}", label).c_str(), v, v_min, v_max);
+            result = ImGui::SliderFloat(std::format("##{0}{1}", label, magic_enum::enum_name(propertyType)).c_str(), v, v_min, v_max);
         }
         else
         {

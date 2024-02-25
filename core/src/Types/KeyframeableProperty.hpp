@@ -8,7 +8,19 @@ namespace IWXMVM::Types
         SunLightColor,
         SunLightBrightness,
         SunLightPitch,
-        SunLightYaw
+        SunLightYaw,
+        FilmtweakBrightness,
+        FilmtweakContrast,
+        FilmtweakDesaturation,
+        FilmtweakTintLight,
+        FilmtweakTintDark,
+        DepthOfFieldFarBlur,
+        DepthOfFieldFarStart,
+        DepthOfFieldFarEnd,
+        DepthOfFieldNearBlur,
+        DepthOfFieldNearStart,
+        DepthOfFieldNearEnd,
+        DepthOfFieldBias
     };
 
     enum class KeyframeValueType

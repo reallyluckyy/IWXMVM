@@ -273,12 +273,23 @@ namespace IWXMVM::IW3
         {
             Functions::FindDvar("r_dof_tweak")->current.enabled = dof.enabled;
             Functions::FindDvar("r_dof_enable")->current.enabled = dof.enabled;
+            
             Functions::FindDvar("r_dof_farBlur")->current.value = dof.farBlur;
             Functions::FindDvar("r_dof_farStart")->current.value = dof.farStart;
             Functions::FindDvar("r_dof_farEnd")->current.value = dof.farEnd;
+            
+            // hacky workaround because nearblur works weirdly in this game
+            if (dof.nearBlur < 1.3f)
+            {
+                dof.nearBlur = 5;
+                dof.nearStart = 0;
+                dof.nearEnd = 0;
+            }
+
             Functions::FindDvar("r_dof_nearBlur")->current.value = dof.nearBlur;
             Functions::FindDvar("r_dof_nearStart")->current.value = dof.nearStart;
             Functions::FindDvar("r_dof_nearEnd")->current.value = dof.nearEnd;
+
             Functions::FindDvar("r_dof_bias")->current.value = dof.bias;
         }
 
