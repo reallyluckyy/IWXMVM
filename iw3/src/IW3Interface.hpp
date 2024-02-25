@@ -364,16 +364,13 @@ namespace IWXMVM::IW3
             for (int i = 0; i < 256; i++)
             {
                 auto pose = (Structures::cpose_t*)(&cg_entities[i]);
-                if (pose->eType)
-                {
-                    entities.push_back(
-                        Types::Entity
-                        {
-                            .id = i, 
-                            .type = ToEntityType(pose->eType)
-                        }
-                    );
-                }
+                entities.push_back(
+                    Types::Entity
+                    {
+                        .id = i, 
+                        .type = ToEntityType(pose->eType)
+                    }
+                );
             }
 
             return entities;
