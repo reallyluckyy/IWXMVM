@@ -12,18 +12,14 @@ cbuffer LightInfo : register(c12)
     float4 lightDirection : register(c13);
     float4 camPosition : register(c14);
     float4 filmtweaksParams : register(c15);
-    bool ignoreLighting : register(c16);
+    bool ignoreLighting : register(b0);
 };
 
 float4 main(PS_INPUT input) : COLOR
 {
-    if (ignoreLighting == true)
+    if(ignoreLighting)
     {
 	    return float4(input.color, 1);
-    }
-    else 
-    {
-        return float4(1, 0, 0, 1);
     }
 
     float4 ambient = float4(0.45, 0.45, 0.45, 1.0);

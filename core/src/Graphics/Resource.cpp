@@ -120,7 +120,7 @@ namespace IWXMVM::GFX
         HRESULT result = D3D_OK;
 
         device->SetVertexShaderConstantF(4, reinterpret_cast<const float*>(&model), 4);
-        device->SetPixelShaderConstantB(16, reinterpret_cast<const BOOL*>(&ignoreLighting), 1);
+        device->SetPixelShaderConstantB(0, reinterpret_cast<BOOL*>(&ignoreLighting), 1);
 
         result = device->DrawIndexedPrimitive(
             D3DPT_TRIANGLELIST, meshes[mesh.index].vertexBufferOffset, 0, static_cast<UINT>(mesh.indices.size()),
