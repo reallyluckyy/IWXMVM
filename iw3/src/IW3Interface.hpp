@@ -374,12 +374,14 @@ namespace IWXMVM::IW3
 
             for (int i = 0; i < 256; i++)
             {
-                auto pose = (Structures::cpose_t*)(&cg_entities[i]);
+                auto entity = cg_entities[i];
                 entities.push_back(
                     Types::Entity
                     {
                         .id = i, 
-                        .type = ToEntityType(pose->eType)
+                        .type = ToEntityType(entity.pose.eType),
+                        .clientNum = entity.nextState.clientNum,
+                        .isValid = entity.nextValid
                     }
                 );
             }

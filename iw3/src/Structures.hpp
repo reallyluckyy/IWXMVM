@@ -788,9 +788,34 @@ namespace IWXMVM::IW3::Structures
         float vLastMoveAng[3];
     };
 
+    struct cpose_t
+    {
+        unsigned __int16 lightingHandle;
+        char eType;
+        char eTypeUnion;
+        char localClientNum;
+        int cullIn;
+        char isRagdoll;
+        int ragdollHandle;
+        int killcamRagdollHandle;
+        int physObjId;
+        float origin[3];
+        float angles[3];
+        byte pad[0x30];  // some fields here
+    };
+
     struct centity_s
     {
-        std::byte content[0x1DC];
+        cpose_t pose;
+        LerpEntityState currentState;
+        entityState_s nextState;
+        bool nextValid;
+        bool bMuzzleFlash;
+        bool bTrailMade;
+        int previousEventSequence;
+        int miscTime;
+        float lightingOrigin[3];
+        void* tree; // XAnimTree_s
     };
 
     struct cg_s
@@ -998,22 +1023,6 @@ namespace IWXMVM::IW3::Structures
         bool cgameInitCalled;
         int keyCatchers;
         bool displayHUDWithKeycatchUI;
-        // ...
-    };
-
-    struct cpose_t
-    {
-        unsigned __int16 lightingHandle;
-        char eType;
-        char eTypeUnion;
-        char localClientNum;
-        int cullIn;
-        char isRagdoll;
-        int ragdollHandle;
-        int killcamRagdollHandle;
-        int physObjId;
-        float origin[3];
-        float angles[3];
         // ...
     };
 
