@@ -346,6 +346,7 @@ namespace IWXMVM::UI
             }
             else
             {
+                ImGui::AlignTextToFramePadding();
                 ImGui::Text("%d demos found!", demoPaths.size());
                 ImGui::SameLine();
 

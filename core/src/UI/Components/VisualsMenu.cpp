@@ -68,7 +68,7 @@ namespace IWXMVM::UI
         {
             if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
             {
-                ImGui::Text("Load a demo to control visual settings");
+                UI::DrawInaccessibleTabWarning();
                 ImGui::End();
                 return;
             }

@@ -23,7 +23,7 @@ namespace IWXMVM::UI
         {
             if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
             {
-                ImGui::Text("Load a demo to access capture settings");
+                UI::DrawInaccessibleTabWarning();
                 ImGui::End();
                 return;
             }

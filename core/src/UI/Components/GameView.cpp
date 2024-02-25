@@ -258,6 +258,7 @@ namespace IWXMVM::UI
 
         if (currentCamera->GetMode() == Components::Camera::Mode::FirstPerson)
         {
+            /*
             ImGui::SameLine();
 
             const char* playerCameraComboItems[] = {"Player 1", "Player 2", "Player 3", "Player 4"};
@@ -265,6 +266,7 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(200);
             ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems,
                          IM_ARRAYSIZE(playerCameraComboItems));
+            */
         }
         else if (currentCamera->GetMode() == Components::Camera::Mode::Bone)
         {
