@@ -33,7 +33,7 @@ namespace IWXMVM::GFX
         void Uninitialize();
 
         void AddMesh(Mesh* mesh);
-        void DrawMesh(const Mesh& mesh, const glm::mat4& model) const noexcept;
+        void DrawMesh(const Mesh& mesh, const glm::mat4& model, bool ignoreLighting = false) const noexcept;
         void BindBuffers() const noexcept;
         void ClearBuffers() noexcept;
 

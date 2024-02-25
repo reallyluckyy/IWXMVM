@@ -300,7 +300,7 @@ namespace IWXMVM::GFX
 
         IDirect3DDevice9* device = D3D9::GetDevice();
         device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-        BufferManager::Get().DrawMesh(mesh, model);
+        BufferManager::Get().DrawMesh(mesh, model, true);
         device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
     }
 
@@ -520,7 +520,7 @@ namespace IWXMVM::GFX
                         const auto rotate = glm::eulerAngleZYX(glm::radians(interpValue.cameraData.rotation.y),
                                                                glm::radians(interpValue.cameraData.rotation.x),
                                                                glm::radians(interpValue.cameraData.rotation.z));
-                        BufferManager::Get().DrawMesh(icosphere, translate * scale * rotate);
+                        BufferManager::Get().DrawMesh(icosphere, translate * scale * rotate, true);
                     }
                 }
             }
@@ -536,7 +536,7 @@ namespace IWXMVM::GFX
 
             const auto translate = glm::translate(boneData.position);
             const auto scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
-            BufferManager::Get().DrawMesh(axis, translate * glm::mat4x4(boneData.rotation) * scale);
+            BufferManager::Get().DrawMesh(axis, translate * glm::mat4x4(boneData.rotation) * scale, true);
         }
 
         // Restore the DX9 transform

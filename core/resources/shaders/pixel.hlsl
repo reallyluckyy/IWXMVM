@@ -12,10 +12,16 @@ cbuffer LightInfo : register(c12)
     float4 lightDirection : register(c13);
     float4 camPosition : register(c14);
     float4 filmtweaksParams : register(c15);
+    bool ignoreLighting : register(b0);
 };
 
 float4 main(PS_INPUT input) : COLOR
 {
+    if(ignoreLighting)
+    {
+	    return float4(input.color, 1);
+    }
+
     float4 ambient = float4(0.45, 0.45, 0.45, 1.0);
     float4 diffuse = max(dot(lightDirection.xyz, input.normalWorld), 0) * lightColor;
     float specularLight = 1;
