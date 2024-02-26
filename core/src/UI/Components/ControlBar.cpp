@@ -4,6 +4,7 @@
 #include "Mod.hpp"
 #include "Components/CameraManager.hpp"
 #include "Components/Playback.hpp"
+#include "Components/Rewinding.hpp"
 #include "UI/ImGuiEx/ImGuiExtensions.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
@@ -54,12 +55,12 @@ namespace IWXMVM::UI
 
         if (Input::BindDown(Action::PlaybackSkipForward))
         {
-            Mod::GetGameInterface()->SetTickDelta(1000);
+            Components::Playback::SetTickDelta(1000);
         }
 
         if (Input::BindDown(Action::PlaybackSkipBackward))
         {
-            Mod::GetGameInterface()->SetTickDelta(-1000);
+            Components::Playback::SetTickDelta(-1000);
         }
     }
 
@@ -211,9 +212,9 @@ namespace IWXMVM::UI
                 auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
                 auto draggedProgresBar =
                     DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick);
-                if (draggedProgresBar && !demoInfo.isRewinding)
+                if (draggedProgresBar && !Components::Rewinding::IsRewinding())
                 {
-                    Mod::GetGameInterface()->SetTickDelta(tickValue - demoInfo.currentTick);
+                    Components::Playback::SetTickDelta(tickValue - demoInfo.currentTick);
                 }
                 else
                 {

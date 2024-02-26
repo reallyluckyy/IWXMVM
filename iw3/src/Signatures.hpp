@@ -56,6 +56,10 @@ namespace IWXMVM::IW3::Signatures
         Sig("89 86 ?? ?? ?? ?? E8 ?? ?? ?? ?? 88 9F FF 00 00 00", GAType::Data, 2, Lambda::DereferenceAddress) > fsh;
         Sig("68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 83 C4 0C 88 1D", GAType::Data, 1,
             Lambda::DereferenceAddress) > lastValidBasepath;
+        Sig("68 ?? ?? ?? ?? 89 1E", GAType::Data, 1, Lambda::DereferenceAddress) > s_compassActors;
+        Sig("39 8C 07 ?? ?? ?? ?? 5F", GAType::Data, 3, Lambda::DereferenceAddress) > conGameMsgWindow0; // killfeed
+        Sig("E8 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? ?? 0F 85 92 01 00 00", GAType::Data, 1,
+            Lambda::DereferenceAddress) > CL_FirstSnapshot;
 
         // cod4x
         using MType = Types::ModuleType;

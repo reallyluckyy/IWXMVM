@@ -7,7 +7,6 @@ namespace IWXMVM::Types
         std::string name;
         std::string path;
 
-        bool isRewinding;
         uint32_t currentTick;
         uint32_t endTick;
     };

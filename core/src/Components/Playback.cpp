@@ -2,7 +2,7 @@
 #include "Playback.hpp"
 
 #include "Mod.hpp"
-#include "Events.hpp"
+#include "Rewinding.hpp"
 
 namespace IWXMVM::Components::Playback
 {
@@ -10,13 +10,30 @@ namespace IWXMVM::Components::Playback
 
     void TogglePaused()
     {
-		isPlaybackPaused = !isPlaybackPaused;
-	}
+        isPlaybackPaused = !isPlaybackPaused;
+    }
 
     bool IsPaused()
     {
-		return isPlaybackPaused;
-	}
+        return isPlaybackPaused;
+    }
+    
+    void SkipForward(std::int32_t ticks)
+    {
+        auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
+        auto realtime = reinterpret_cast<int32_t*>(addresses.cls.realtime);
+        *realtime = *realtime + ticks;
+        LOG_DEBUG("Skipping forward {} ticks, realtime: {}", ticks, *realtime);
+    }
+
+    void SetTickDelta(int32_t value)
+    {
+        constexpr int32_t REWIND_DEADZONE = 250;
+        if (value > 0)
+            SkipForward(value);
+        else if (value < -REWIND_DEADZONE)
+            Rewinding::RewindBy(value);
+    }
 
     void GeneratePattern(auto& pattern, float fps, float timescale)
     {

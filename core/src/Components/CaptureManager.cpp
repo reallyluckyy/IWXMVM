@@ -2,6 +2,7 @@
 #include "CaptureManager.hpp"
 
 #include "Mod.hpp"
+#include "Components/Rewinding.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "D3D9.hpp"
 #include "Events.hpp"
@@ -115,7 +116,7 @@ namespace IWXMVM::Components
             capturedFrameCount++;
 
             auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            if (!demoInfo.isRewinding && demoInfo.currentTick > captureSettings.endTick)
+            if (!Rewinding::IsRewinding() && demoInfo.currentTick > captureSettings.endTick)
             {
                 StopCapture();
             }

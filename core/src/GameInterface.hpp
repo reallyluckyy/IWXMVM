@@ -13,6 +13,7 @@
 #include "Types/Filmtweaks.hpp"
 #include "Types/BoneData.hpp"
 #include "Types/Entity.hpp"
+#include "Types/PlaybackData.hpp"
 
 namespace IWXMVM
 {
@@ -54,8 +55,6 @@ namespace IWXMVM
         virtual void PlayDemo(std::filesystem::path demoPath) = 0;
         virtual void Disconnect() = 0;
 
-        virtual void SetTickDelta(std::int32_t) = 0;
-
         virtual bool IsConsoleOpen() = 0;
 
         // perhaps dvars shouldnt be exposed to core at all?
@@ -71,6 +70,11 @@ namespace IWXMVM
         virtual std::vector<Types::Entity> GetEntities() = 0;
         virtual Types::BoneData GetBoneData(int32_t entityId, const std::string& name) = 0;
         virtual constexpr std::vector<std::string> GetSupportedBoneNames() = 0;
+
+        // == things for rewinding ==
+        virtual void CL_FirstSnapshot() = 0;
+        virtual void ResetClientData(int serverTime) = 0;
+        virtual Types::PlaybackData GetPlaybackDataAddresses() const = 0;
 
        private:
         Types::Game game;
