@@ -116,7 +116,7 @@ namespace IWXMVM::Components
         InitializeProperty(dofNearEnd);
         InitializeProperty(dofBias);
 
-        Events::RegisterListener(EventType::OnDemoLoad, [&]() { 
+        Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
             ClearKeyframes();
             Components::KeyframeSerializer::ReadRecent();
         });

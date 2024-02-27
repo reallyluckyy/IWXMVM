@@ -1306,22 +1306,6 @@ namespace IWXMVM::IW3::Structures
         // ...
     };
 
-    struct cpose_t
-    {
-        unsigned __int16 lightingHandle;
-        char eType;
-        char eTypeUnion;
-        char localClientNum;
-        int cullIn;
-        char isRagdoll;
-        int ragdollHandle;
-        int killcamRagdollHandle;
-        int physObjId;
-        float origin[3];
-        float angles[3];
-        // ...
-    };
-
     union qfile_gus
     {
         _iobuf* o;
