@@ -407,7 +407,7 @@ namespace IWXMVM::IW3
         void CL_FirstSnapshot()
         {
             int clientNum = *reinterpret_cast<int*>(&Structures::GetClientGlobals()->clientNum);
-            uint32_t CL_FirstSnapshot = GetGameAddresses().CL_FirstSnapshot();
+            uintptr_t CL_FirstSnapshot = GetGameAddresses().CL_FirstSnapshot();
 
             Patches::GetGamePatches().Con_TimeJumped.Apply();
 
