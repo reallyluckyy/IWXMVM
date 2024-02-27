@@ -2,6 +2,7 @@
 #include "DollyCamera.hpp"
 
 #include "Mod.hpp"
+#include "Components/Rewinding.hpp"
 
 namespace IWXMVM::Components
 {
@@ -11,6 +12,8 @@ namespace IWXMVM::Components
 
     void DollyCamera::Update()
     {
+        if (Rewinding::IsRewinding())
+            return;
         const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
         
         const auto& keyframeManager = KeyframeManager::Get();

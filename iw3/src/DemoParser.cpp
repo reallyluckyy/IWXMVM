@@ -10,6 +10,11 @@ namespace IWXMVM::IW3::DemoParser
     uint32_t demoStartTick;
     uint32_t demoEndTick;
 
+    std::pair<int32_t, int32_t> GetDemoTickRange()
+    {
+        return std::make_pair(demoStartTick, demoEndTick);
+    }
+
     enum class DemoMessageType : uint8_t
     {
         NetworkPacket = 0,
@@ -88,7 +93,7 @@ namespace IWXMVM::IW3::DemoParser
         {
             // some of the first 256 archives are outdated (cod4)
             demoStartTick = archives[0].serverTime;
-            demoEndTick = archives.back().serverTime;
+            demoEndTick = archives.back().serverTime + 500;
 
             LOG_DEBUG("Determined demo bounds as {0} and {1}", demoStartTick, demoEndTick);
         }

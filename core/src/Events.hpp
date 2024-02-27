@@ -5,9 +5,10 @@ namespace IWXMVM
     enum class EventType
     {
         OnFrame, // once per rendered frame
-        OnDemoLoad,
+        PreDemoLoad,
+        PostDemoLoad,
         OnCameraChanged,
-        OnRenderGameView
+        OnRenderGameView,
     };
 
     namespace Events

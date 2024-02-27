@@ -352,7 +352,9 @@ namespace IWXMVM::IW3::Structures
         float viewaxis[3][3];
         float viewOffset[3];
         int time;
-        // ...
+        float zNear;
+        float blurRadius;
+        byte filler[0x4038];
     };
 
     struct clSnapshot_t
@@ -735,6 +737,47 @@ namespace IWXMVM::IW3::Structures
         float vehicleViewPitch;
     };
 
+    struct XModel
+    {
+        const char* name;
+        char numBones;
+        char numRootBones;
+        char numsurfs;
+        char lodRampType;
+        unsigned __int16* boneNames;
+        // ...
+    };
+    
+    struct DSkelPartBits
+    {
+        int anim[4];
+        int control[4];
+        int skel[4];
+    };
+
+    struct DSkel
+    {
+        DSkelPartBits partBits;
+        int timeStamp;
+        void* mat;  // DObjAnimMat
+    };
+
+    struct DObj_s
+    {
+        void* tree;  // XAnimTree_s*
+        unsigned __int16 duplicateParts;
+        unsigned __int16 entnum;
+        char duplicatePartsSize;
+        char numModels;
+        char numBones;
+        unsigned int ignoreCollision;
+        volatile int locked;
+        DSkel skel;
+        float radius;
+        unsigned int hidePartBits[4];
+        XModel** models;  // XModel**
+    };
+
     struct cgs_t
     {
         int viewX;
@@ -744,6 +787,28 @@ namespace IWXMVM::IW3::Structures
         float viewAspect;
         int serverCommandSequence;
         int processedSnapshotNum;
+        int localServer;
+        char gametype[32];
+        char szHostName[256];
+        int maxclients;
+        char mapname[64];
+        int gameEndTime;
+        int voteTime;
+        int voteYes;
+        int voteNo;
+        char voteString[256];
+        XModel* gameModels[512];
+        void* fxs[100];
+        void* smokeGrenadeFx;
+        byte holdBreathParams[0x268];
+        char teamChatMsgs[8][160];
+        int teamChatMsgTimes[8];
+        int teamChatPos;
+        int teamLastChatPos;
+        float compassWidth;
+        float compassHeight;
+        float compassY;
+        // ...
     };
 
     enum DemoType
@@ -818,6 +883,115 @@ namespace IWXMVM::IW3::Structures
         void* tree; // XAnimTree_s
     };
 
+    struct score_t
+    {
+        byte pad[0x28];
+    };
+
+    struct viewDamage_t
+    {
+        int time;
+        int duration;
+        float yaw;
+    };
+
+    struct shellshock_t
+    {
+        byte pad[0x20];
+    };
+
+    struct $F6DFD6D87F75480A1EF1906639406DF5
+    {
+        int time;
+        int duration;
+    };
+
+    struct animScriptData_t
+    {
+        byte pad[0x9A9D0];
+    };
+
+    struct $0867E0FC4F8157A276DAB76B1612E229
+    {
+        byte pad[0x10];
+    };
+
+    struct lerpFrame_t
+    {
+        float yawAngle;
+        int yawing;
+        float pitchAngle;
+        int pitching;
+        int animationNumber;
+        void* animation;
+        int animationTime;
+        float oldFramePos[3];
+        float animSpeedScale;
+        int oldFrameSnapshotTime;
+    };
+
+    struct clientControllers_t
+    {
+        float angles[6][3];
+        float tag_origin_angles[3];
+        float tag_origin_offset[3];
+    };
+
+    struct __declspec(align(4)) clientInfo_t
+    {
+        int infoValid;
+        int nextValid;
+        int clientNum;
+        char name[16];
+        team_t team;
+        team_t oldteam;
+        int rank;
+        int prestige;
+        int perks;
+        int score;
+        int location;
+        int health;
+        char model[64];
+        char attachModelNames[6][64];
+        char attachTagNames[6][64];
+        lerpFrame_t legs;
+        lerpFrame_t torso;
+        float lerpMoveDir;
+        float lerpLean;
+        float playerAngles[3];
+        int leftHandGun;
+        int dobjDirty;
+        clientControllers_t control;
+        unsigned int clientConditions[10][2];
+        void* pXAnimTree;
+        int iDObjWeapon;
+        char weaponModel;
+        int stanceTransitionTime;
+        int turnAnimEndTime;
+        char turnAnimType;
+        int attachedVehEntNum;
+        int attachedVehSlotIndex;
+        bool hideWeapon;
+        bool usingKnife;
+    };
+
+    struct bgs_t
+    {
+        animScriptData_t animScriptData;
+        $0867E0FC4F8157A276DAB76B1612E229 generic_human;
+        int time;
+        int latestSnapshotTime;
+        int frametime;
+        int anim_user;
+        XModel*(__cdecl* GetXModel)(const char*);
+        void(__cdecl* CreateDObj)(void*, unsigned __int16, void*, int, int, void*);
+        unsigned __int16(__cdecl* AttachWeapon)(void*, unsigned __int16, void*);
+        DObj_s*(__cdecl* GetDObj)(int, int);
+        void(__cdecl* SafeDObjFree)(int, int);
+        void*(__cdecl* AllocXAnim)(int);
+        clientInfo_t clientinfo[64];
+    };
+
     struct cg_s
     {
         int clientNum;
@@ -847,7 +1021,113 @@ namespace IWXMVM::IW3::Structures
         int landTime;
         float heightToCeiling;
         refdef_s refdef;
-        // since refdef is incomplete, this is incomplete here too
+        float refdefViewAngles[3];
+        float lastVieworg[3];
+        float swayViewAngles[3];
+        float swayAngles[3];
+        float swayOffset[3];
+        int iEntityLastType[1024];
+        XModel* pEntityLastXModel[1024];
+        float zoomSensitivity;
+        bool isLoading;
+        char objectiveText[1024];
+        char scriptMainMenu[256];
+        int scoresRequestTime;
+        int numScores;
+        int teamScores[4];
+        int teamPings[4];
+        int teamPlayers[4];
+        score_t scores[64];
+        int scoreLimit;
+        int showScores;
+        int scoreFadeTime;
+        int scoresTop;
+        int scoresOffBottom;
+        int scoresBottom;
+        int drawHud;
+        int crosshairClientNum;
+        int crosshairClientLastTime;
+        int crosshairClientStartTime;
+        int identifyClientNum;
+        int cursorHintIcon;
+        int cursorHintTime;
+        int cursorHintFade;
+        int cursorHintString;
+        int lastClipFlashTime;
+        int invalidCmdHintType;
+        int invalidCmdHintTime;
+        int lastHealthPulseTime;
+        int lastHealthLerpDelay;
+        int lastHealthClient;
+        float lastHealth;
+        float healthOverlayFromAlpha;
+        float healthOverlayToAlpha;
+        int healthOverlayPulseTime;
+        int healthOverlayPulseDuration;
+        int healthOverlayPulsePhase;
+        bool healthOverlayHurt;
+        int healthOverlayLastHitTime;
+        float healthOverlayOldHealth;
+        int healthOverlayPulseIndex;
+        int proneBlockedEndTime;
+        int lastStance;
+        int lastStanceChangeTime;
+        int lastStanceFlashTime;
+        int voiceTime;
+        unsigned int weaponSelect;
+        int weaponSelectTime;
+        unsigned int weaponLatestPrimaryIdx;
+        int prevViewmodelWeapon;
+        int equippedOffHand;
+        viewDamage_t viewDamage[8];
+        int damageTime;
+        float damageX;
+        float damageY;
+        float damageValue;
+        float viewFade;
+        int weapIdleTime;
+        int nomarks;
+        int v_dmg_time;
+        float v_dmg_pitch;
+        float v_dmg_roll;
+        float fBobCycle;
+        float xyspeed;
+        float kickAVel[3];
+        float kickAngles[3];
+        float offsetAngles[3];
+        float gunPitch;
+        float gunYaw;
+        float gunXOfs;
+        float gunYOfs;
+        float gunZOfs;
+        float vGunOffset[3];
+        float vGunSpeed[3];
+        float viewModelAxis[4][3];
+        float rumbleScale;
+        float compassNorthYaw;
+        float compassNorth[2];
+        void* compassMapMaterial; // Material*
+        float compassMapUpperLeft[2];
+        float compassMapWorldSize[2];
+        int compassFadeTime;
+        int healthFadeTime;
+        int ammoFadeTime;
+        int stanceFadeTime;
+        int sprintFadeTime;
+        int offhandFadeTime;
+        int offhandFlashTime;
+        shellshock_t shellshock;
+        $F6DFD6D87F75480A1EF1906639406DF5 testShock;
+        int holdBreathTime;
+        int holdBreathInTime;
+        int holdBreathDelay;
+        float holdBreathFrac;
+        float radarProgress;
+        float selectedLocation[2];
+        SprintState sprintStates;
+        int _unk01;
+        int _unk02;
+        bgs_t bgs;
         // ...
     };
 
@@ -1026,45 +1306,43 @@ namespace IWXMVM::IW3::Structures
         // ...
     };
 
-    struct DSkelPartBits
+    struct cpose_t
     {
-        int anim[4];
-        int control[4];
-        int skel[4];
-    };
-
-    struct DSkel
-    {
-        DSkelPartBits partBits;
-        int timeStamp;
-        void* mat; // DObjAnimMat
-    };
-
-    struct XModel
-    {
-        const char* name;
-        char numBones;
-        char numRootBones;
-        char numsurfs;
-        char lodRampType;
-        unsigned __int16* boneNames;
+        unsigned __int16 lightingHandle;
+        char eType;
+        char eTypeUnion;
+        char localClientNum;
+        int cullIn;
+        char isRagdoll;
+        int ragdollHandle;
+        int killcamRagdollHandle;
+        int physObjId;
+        float origin[3];
+        float angles[3];
         // ...
     };
 
-    struct DObj_s
+    union qfile_gus
     {
-        void* tree; // XAnimTree_s*
-        unsigned __int16 duplicateParts;
-        unsigned __int16 entnum;
-        char duplicatePartsSize;
-        char numModels;
-        char numBones;
-        unsigned int ignoreCollision;
-        volatile int locked;
-        DSkel skel;
-        float radius;
-        unsigned int hidePartBits[4];
-        XModel** models;  // XModel**
+        _iobuf* o;
+        char* z;
+    };
+
+    struct qfile_us
+    {
+        qfile_gus file;
+        int iwdIsClone;
+    };
+
+    struct fileHandleData_t
+    {
+        qfile_us handleFiles;
+        int handleSync;
+        int fileSize;
+        int zipFilePos;
+        iwd_t* zipFile;
+        int streamed;
+        char name[256];
     };
 
     clientConnection_t* GetClientConnection();

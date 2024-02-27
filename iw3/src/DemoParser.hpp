@@ -15,6 +15,5 @@ namespace IWXMVM::IW3::DemoParser
 
     void Run();
 
-    extern uint32_t demoStartTick;
-    extern uint32_t demoEndTick;
+    std::pair<int32_t, int32_t> GetDemoTickRange();
 }  // namespace IWXMVM::IW3::DemoParser

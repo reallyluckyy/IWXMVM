@@ -2,6 +2,7 @@
 #include "CaptureManager.hpp"
 
 #include "Mod.hpp"
+#include "Components/Rewinding.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "D3D9.hpp"
 #include "Events.hpp"
@@ -59,7 +60,7 @@ namespace IWXMVM::Components
 
         outputDirectory = std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "recordings";
 
-        Events::RegisterListener(EventType::OnDemoLoad, [&]() {
+        Events::RegisterListener(EventType::PostDemoLoad, [&]() {
             // for now we'll force the resolution to the current window size
             // TODO: remove when we support resolution selection
             captureSettings.resolution = Resolution(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
@@ -111,7 +112,7 @@ namespace IWXMVM::Components
             }
 
             const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
-            if (currentTick > captureSettings.endTick)
+            if (!Rewinding::IsRewinding() && currentTick > captureSettings.endTick)
             {
                 StopCapture();
             }

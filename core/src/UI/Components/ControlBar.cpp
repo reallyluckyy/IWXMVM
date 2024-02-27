@@ -4,6 +4,7 @@
 #include "Mod.hpp"
 #include "Components/CameraManager.hpp"
 #include "Components/Playback.hpp"
+#include "Components/Rewinding.hpp"
 #include "UI/ImGuiEx/ImGuiExtensions.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
@@ -54,12 +55,12 @@ namespace IWXMVM::UI
 
         if (Input::BindDown(Action::PlaybackSkipForward))
         {
-            Mod::GetGameInterface()->SetTickDelta(500);
+            Components::Playback::SetTickDelta(1000);
         }
 
         if (Input::BindDown(Action::PlaybackSkipBackward))
         {
-            Mod::GetGameInterface()->SetTickDelta(-500);
+            Components::Playback::SetTickDelta(-1000);
         }
     }
 
@@ -201,23 +202,31 @@ namespace IWXMVM::UI
                 ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
             auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            auto progressBarX = padding.x + pauseButtonSize.x + playbackSpeedSliderWidth + padding.x * 3;
-            auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - padding.x;
+            if (demoInfo.currentTick < demoInfo.endTick)
+            {
+                auto progressBarX = padding.x + pauseButtonSize.x + playbackSpeedSliderWidth + padding.x * 3;
+                auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - padding.x;
 
-            ImGui::SameLine(progressBarX);
-            ImGui::SetNextItemWidth(progressBarWidth);
-            static std::int32_t tickValue{};
+                ImGui::SameLine(progressBarX);
+                ImGui::SetNextItemWidth(progressBarWidth);
+                static std::int32_t tickValue{};
 
-            auto keyframeEditor = UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
-            auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
-            if (!DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick))
-                tickValue = demoInfo.currentTick;
-            else
-                Mod::GetGameInterface()->SetTickDelta(tickValue - demoInfo.currentTick);
+                auto keyframeEditor = UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
+                auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
+                auto draggedProgresBar =
+                    DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick);
+                if (draggedProgresBar && !Components::Rewinding::IsRewinding())
+                {
+                    Components::Playback::SetTickDelta(tickValue - demoInfo.currentTick);
+                }
+                else
+                {
+                    tickValue = demoInfo.currentTick;
+                }
 
-            ImGui::SameLine();
-            ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());
-
+                ImGui::SameLine();
+                ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());
+            }
             ImGui::End();
         }
 

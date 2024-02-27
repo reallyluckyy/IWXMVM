@@ -421,7 +421,7 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::Initialize()
     {
-        Events::RegisterListener(EventType::OnDemoLoad, [this]() {
+        Events::RegisterListener(EventType::PostDemoLoad, [this]() {
             displayStartTick = 0;
             displayEndTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
         });
@@ -521,7 +521,8 @@ namespace IWXMVM::UI
 
         const auto padding = ImGui::GetStyle().WindowPadding;
 
-        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        auto currentTick = demoInfo.currentTick;
         const auto& propertyKeyframes = Components::KeyframeManager::Get().GetKeyframes();
 
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |

@@ -41,7 +41,7 @@ namespace IWXMVM::Components
 
                 auto& keyframes = KeyframeManager::Get().GetKeyframes(property);
                 keyframes.push_back(
-                    Types::Keyframe(property, Mod::GetGameInterface()->GetDemoInfo().currentTick, node));
+                    Types::Keyframe(property, tick, node));
 
                 LOG_DEBUG("Placed node at (x: {}; y: {}; z: {}) with (pitch: {}; yaw: {}; roll: {}) at tick {}",
                           node.position.x, node.position.y, node.position.z, node.rotation.x, node.rotation.y,

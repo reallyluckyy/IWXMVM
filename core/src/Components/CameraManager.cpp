@@ -58,7 +58,7 @@ namespace IWXMVM::Components
 
         Events::RegisterListener(EventType::OnFrame, [&]() { UpdateCameraFrame(); });
 
-        Events::RegisterListener(EventType::OnDemoLoad, [&]() { SetActiveCamera(Camera::Mode::FirstPerson); });
+        Events::RegisterListener(EventType::PostDemoLoad, [&]() { SetActiveCamera(Camera::Mode::FirstPerson); });
 
         Events::RegisterListener(EventType::OnCameraChanged, [&]() {
             auto& activeCamera = GetActiveCamera();

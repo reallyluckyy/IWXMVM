@@ -15,7 +15,7 @@ namespace IWXMVM::UI
         // TODO: Come up with a proper plan on when we want to initialize the UI values from the games values
         // TODO: Ideally we dont want to ever overwrite a users custom settings, but what if the map changes
 
-        Events::RegisterListener(EventType::OnDemoLoad, [&]() {
+        Events::RegisterListener(EventType::PostDemoLoad, [&]() {
             if (visualsInitialized)
                 return;
 
