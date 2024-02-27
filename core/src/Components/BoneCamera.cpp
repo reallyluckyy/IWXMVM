@@ -17,22 +17,42 @@ namespace IWXMVM::Components
             entityId = 0;
         });
     }
+
+    void BoneCamera::SetPositionFromBoneData(const Types::BoneData& boneData)
+    {
+        if (boneData.id == -1)
+            return;
+
+        this->position = boneData.position + boneData.rotation * positionOffset;
+
+        auto euler =
+            MathUtils::AnglesFromAxis(glm::normalize(boneData.rotation[0]), glm::normalize(boneData.rotation[1]),
+                                      glm::normalize(boneData.rotation[2]));
+        this->rotation = euler + rotationOffset;
+    }
     
     void BoneCamera::Update()
     {
         const auto& bones = Mod::GetGameInterface()->GetSupportedBoneNames();
         const std::string& selectedBoneName = bones.at(boneIndex);
-        const auto selectedEntity = entityId;
-        const auto& boneData = Mod::GetGameInterface()->GetBoneData(selectedEntity, selectedBoneName);
-        if (boneData.id != -1)
+        const auto selectedEntityId = entityId;
+        const auto& boneData = Mod::GetGameInterface()->GetBoneData(selectedEntityId, selectedBoneName);
+
+        auto entities = Mod::GetGameInterface()->GetEntities();
+        auto selectedEntity = entities.at(selectedEntityId);
+        if (!selectedEntity.isValid && selectedEntity.type == Types::EntityType::Player)
         {
-            this->position = boneData.position + boneData.rotation * positionOffset;
-            
-            auto euler =
-                MathUtils::AnglesFromAxis(glm::normalize(boneData.rotation[0]), glm::normalize(boneData.rotation[1]),
-                                          glm::normalize(boneData.rotation[2]));
-            this->rotation = euler + rotationOffset;
+            for (const auto& entity : entities)
+            {
+                if (entity.type == Types::EntityType::Corpse && entity.clientNum == selectedEntityId)
+                {
+                    SetPositionFromBoneData(Mod::GetGameInterface()->GetBoneData(entity.id, selectedBoneName));
+                    return;
+                }
+            }
         }
+
+        SetPositionFromBoneData(boneData);
     }
 
 }  // namespace IWXMVM::Components

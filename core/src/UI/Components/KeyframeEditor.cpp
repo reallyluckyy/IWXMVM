@@ -10,7 +10,9 @@
 #include "Mod.hpp"
 #include "Input.hpp"
 #include "Components/KeyframeManager.hpp"
+#include "Components/KeyframeSerializer.hpp"
 #include "Events.hpp"
+#include "Utilities/PathUtils.hpp"
 
 namespace IWXMVM::UI
 {
@@ -19,20 +21,59 @@ namespace IWXMVM::UI
         return {displayStartTick, displayEndTick};
     }
 
-    void KeyframeEditor::HandleTimelineZoomInteractions(float barLength)
+    ImVec2 GetPositionForKeyframe(const ImRect rect, const Types::Keyframe& keyframe, const uint32_t startTick,
+                                  const uint32_t endTick, const ImVec2 valueBoundaries = ImVec2(-1, 1),
+                                  int32_t valueIndex = 0)
     {
-        const auto ZOOM_MULTIPLIER = 2000;
-        const auto MOVE_MULTIPLIER = 1;
+        const auto barHeight = rect.Max.y - rect.Min.y;
+        const auto barLength = rect.Max.x - rect.Min.x;
+        const auto tickPercentage =
+            static_cast<float>(keyframe.tick - startTick) / static_cast<float>(endTick - startTick);
+        const auto x = rect.Min.x + tickPercentage * barLength;
+        const auto valuePercentage =
+            1 - (keyframe.value.GetByIndex(valueIndex) - valueBoundaries.x) / (valueBoundaries.y - valueBoundaries.x);
+        const auto y = rect.Min.y + valuePercentage * barHeight;
+        return ImVec2(x, y);
+    };
 
-        const int32_t MINIMUM_ZOOM = 500;
+    uint32_t GetTickForPosition(const float x, const ImRect rect, const uint32_t startTick, const uint32_t endTick)
+    {
+        const auto barLength = rect.Max.x - rect.Min.x;
+        const auto tickPercentage = (x - rect.Min.x) / barLength;
+        return static_cast<uint32_t>(startTick + tickPercentage * (endTick - startTick));
+    }
+
+    std::tuple<uint32_t, Types::KeyframeValue> GetKeyframeForPosition(const ImVec2 position, const ImRect rect,
+                                                                      const uint32_t startTick, const uint32_t endTick,
+                                                                      const ImVec2 valueBoundaries = ImVec2(-1, 1))
+    {
+        const auto tick = GetTickForPosition(position.x, rect, startTick, endTick);
+        const auto barHeight = rect.Max.y - rect.Min.y;
+        const auto valuePercentage = (position.y - rect.Min.y) / barHeight;
+        const auto value = valueBoundaries.x + (1 - valuePercentage) * (valueBoundaries.y - valueBoundaries.x);
+        return std::make_tuple(tick, value);
+    };
+
+    void KeyframeEditor::HandleTimelineZoomInteractions(const ImVec2 rectMin, const ImVec2 rectMax)
+    {
+        constexpr auto ZOOM_MULTIPLIER = 2000;
+        constexpr auto MOVE_MULTIPLIER = 1;
+
+        constexpr int32_t MINIMUM_ZOOM = 500;
 
         const auto minTick = 0;
         const auto maxTick = (int32_t)Mod::GetGameInterface()->GetDemoInfo().endTick;
 
         auto scrollDelta = Input::GetScrollDelta() * Input::GetDeltaTime();
-        displayStartTick += scrollDelta * 100 * ZOOM_MULTIPLIER;
+
+        // center zoom section around mouse cursor if zooming in
+        const auto barLength = rectMax.x - rectMin.x;
+        const auto mousePercentage = (ImGui::GetMousePos().x - rectMin.x) / barLength;
+
+        scrollDelta = scrollDelta * 100 * ZOOM_MULTIPLIER * maxTick / 50000;
+        displayStartTick += scrollDelta * mousePercentage;
         displayStartTick = glm::clamp(displayStartTick, minTick, displayEndTick - MINIMUM_ZOOM);
-        displayEndTick -= scrollDelta * 100 * ZOOM_MULTIPLIER;
+        displayEndTick -= scrollDelta * (1.0f - mousePercentage);
         displayEndTick = glm::clamp(displayEndTick, displayStartTick + MINIMUM_ZOOM, maxTick);
 
         if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -40,7 +81,7 @@ namespace IWXMVM::UI
             auto zoomWindowSizeBefore = displayEndTick - displayStartTick;
 
             auto delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
-            delta /= barLength;
+            delta /= (rectMax.x - rectMin.x);
             delta *= (displayEndTick - displayStartTick);
 
             displayStartTick = glm::max(displayStartTick - (int32_t)(delta.x * MOVE_MULTIPLIER), minTick);
@@ -60,45 +101,12 @@ namespace IWXMVM::UI
         }
     }
 
-    ImVec2 GetPositionForKeyframe(
-        const ImRect rect, const Types::Keyframe& keyframe, const uint32_t startTick, const uint32_t endTick,
-        const ImVec2 valueBoundaries = ImVec2(-1, 1), int32_t valueIndex = 0)
-    {
-        const auto barHeight = rect.Max.y - rect.Min.y;
-        const auto barLength = rect.Max.x - rect.Min.x;
-        const auto tickPercentage = static_cast<float>(keyframe.tick - startTick) / static_cast<float>(endTick - startTick);
-        const auto x = rect.Min.x + tickPercentage * barLength;
-        const auto valuePercentage =
-            1 - (keyframe.value.GetByIndex(valueIndex) - valueBoundaries.x) / (valueBoundaries.y - valueBoundaries.x);
-        const auto y = rect.Min.y + valuePercentage * barHeight;
-        return ImVec2(x, y);
-    };
-
-    std::tuple<uint32_t, Types::KeyframeValue> GetKeyframeForPosition(const ImVec2 position, const ImRect rect,
-                                                                      const uint32_t startTick, const uint32_t endTick,
-                                                                      const ImVec2 valueBoundaries = ImVec2(-1, 1))
-    {
-        const auto barHeight = rect.Max.y - rect.Min.y;
-        const auto barLength = rect.Max.x - rect.Min.x;
-        const auto tickPercentage = (position.x - rect.Min.x) / barLength;
-        const auto tick = static_cast<uint32_t>(startTick + tickPercentage * (endTick - startTick));
-        const auto valuePercentage = (position.y - rect.Min.y) / barHeight;
-        const auto value = valueBoundaries.x + (1 - valuePercentage) * (valueBoundaries.y - valueBoundaries.x);
-        return std::make_tuple(tick, value);
-    };
-
-    void SortKeyframes(std::vector<Types::Keyframe>& keyframes)
-    {
-        std::sort(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) { return a.tick < b.tick; });
-    }
-
     std::optional<int32_t> selectedKeyframeId = std::nullopt;
     std::optional<int32_t> selectedKeyframeValueIndex = std::nullopt;
 
-
     void KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                     uint32_t displayStartTick, uint32_t displayEndTick,
-                                                    std::vector<Types::Keyframe>& keyframes)
+                                                    std::vector<Types::Keyframe>& keyframes, uint32_t demoLength)
     {
         using namespace ImGui;
 
@@ -135,10 +143,9 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength);
 
         bool isAnyKeyframeHovered = false;
-
 
         const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
         for (auto it = keyframes.begin(); it != keyframes.end();)
@@ -160,7 +167,8 @@ namespace IWXMVM::UI
                 selectedKeyframeValueIndex = std::nullopt;
             }
 
-            const ImU32 col = GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+            const ImU32 col =
+                GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Right))
@@ -173,7 +181,7 @@ namespace IWXMVM::UI
             {
                 auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick);
                 k.tick = tick;
-                SortKeyframes(keyframes);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
                 {
@@ -188,7 +196,7 @@ namespace IWXMVM::UI
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && !isAnyKeyframeHovered && !selectedKeyframeId.has_value())
         {
-            HandleTimelineZoomInteractions(frame_bb.Max.x - frame_bb.Min.x);
+            HandleTimelineZoomInteractions(frame_bb.Min, frame_bb.Max);
         }
 
         if (hovered && !isAnyKeyframeHovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -199,7 +207,7 @@ namespace IWXMVM::UI
                 keyframes.end())
             {
                 keyframes.emplace_back(property, tick, Components::KeyframeManager::Get().Interpolate(property, tick));
-                SortKeyframes(keyframes);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
             }
         }
     }
@@ -209,7 +217,8 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                  uint32_t displayStartTick, uint32_t displayEndTick, const float width,
-                                                 std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex)
+                                                 std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
+                                                 uint32_t demoLength)
     {
         using namespace ImGui;
 
@@ -247,7 +256,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength);
 
         bool isAnyKeyframeHovered = false;
 
@@ -261,12 +270,14 @@ namespace IWXMVM::UI
         else
         {
             const auto minValueKeyframe = std::min_element(
-                keyframes.begin(), keyframes.end(),
-                [keyframeValueIndex](const auto& a, const auto& b) { return a.value.GetByIndex(keyframeValueIndex) < b.value.GetByIndex(keyframeValueIndex); });
+                keyframes.begin(), keyframes.end(), [keyframeValueIndex](const auto& a, const auto& b) {
+                    return a.value.GetByIndex(keyframeValueIndex) < b.value.GetByIndex(keyframeValueIndex);
+                });
 
             const auto maxValueKeyframe = std::max_element(
-                keyframes.begin(), keyframes.end(),
-                [keyframeValueIndex](const auto& a, const auto& b) { return a.value.GetByIndex(keyframeValueIndex) < b.value.GetByIndex(keyframeValueIndex); });
+                keyframes.begin(), keyframes.end(), [keyframeValueIndex](const auto& a, const auto& b) {
+                    return a.value.GetByIndex(keyframeValueIndex) < b.value.GetByIndex(keyframeValueIndex);
+                });
 
             auto minValue = minValueKeyframe->value.GetByIndex(keyframeValueIndex);
             auto maxValue = maxValueKeyframe->value.GetByIndex(keyframeValueIndex);
@@ -302,7 +313,8 @@ namespace IWXMVM::UI
         {
             auto& k = *it;
 
-            const auto position = GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries, keyframeValueIndex);
+            const auto position = GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries,
+                                                         keyframeValueIndex);
 
             ImRect text_bb(ImVec2(position.x - textSize.x / 2, position.y - textSize.y / 2),
                            ImVec2(position.x + textSize.x / 2, position.y + textSize.y / 2));
@@ -317,9 +329,11 @@ namespace IWXMVM::UI
             }
 
             auto currentValue = k.value.GetByIndex(keyframeValueIndex);
-            auto keyframeValueLabel = currentValue < 20 ? std::format("{0:.2f}", currentValue) : std::format("{0:.0f}", currentValue);
+            auto keyframeValueLabel =
+                currentValue < 20 ? std::format("{0:.2f}", currentValue) : std::format("{0:.0f}", currentValue);
 
-            const ImU32 col = GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+            const ImU32 col =
+                GetColorU32(hovered || selectedKeyframeId == k.id ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
             window->DrawList->AddText(text_bb.Min, col, ICON_FA_DIAMOND);
             window->DrawList->AddText(ImVec2(text_bb.Max.x + 2, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
                                       keyframeValueLabel.c_str());
@@ -334,7 +348,7 @@ namespace IWXMVM::UI
                 value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
                 k.value.SetByIndex(keyframeValueIndex,
                                    glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
-                SortKeyframes(keyframes);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
                 {
@@ -364,7 +378,7 @@ namespace IWXMVM::UI
                                      "%.2f"))
                 {
                     k.value.SetByIndex(keyframeValueIndex, currentValue);
-                    SortKeyframes(keyframes);
+                    Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
                 }
 
                 if (ImGui::IsKeyPressed(ImGuiKey_Enter))
@@ -387,7 +401,7 @@ namespace IWXMVM::UI
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && !isAnyKeyframeHovered && !selectedKeyframeId.has_value())
         {
-            HandleTimelineZoomInteractions(frame_bb.Max.x - frame_bb.Min.x);
+            HandleTimelineZoomInteractions(frame_bb.Min, frame_bb.Max);
         }
 
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -400,7 +414,7 @@ namespace IWXMVM::UI
                 auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
                 value.SetByIndex(keyframeValueIndex, valueAtMouse.floatingPoint);
                 keyframes.emplace_back(property, tick, value);
-                SortKeyframes(keyframes);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
             }
         }
     }
@@ -418,47 +432,29 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
     {
-        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        auto currentTick = demoInfo.currentTick;
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
         DrawKeyframeSliderInternal(property, &currentTick, displayStartTick, displayEndTick,
-                                   Components::KeyframeManager::Get().GetKeyframes(property));
+                                   Components::KeyframeManager::Get().GetKeyframes(property), demoInfo.endTick);
     }
-
-    // TODO: move this somewhere else
-    int32_t GetValueCountForProperty(const Types::KeyframeableProperty& property)
-    {
-        // I dont really like the way this is done, I just cant really think of a better solution right now
-        switch (property.valueType)
-        {
-            case Types::KeyframeValueType::FloatingPoint:
-                return 1;
-            case Types::KeyframeValueType::CameraData:
-                return 7;
-            case Types::KeyframeValueType::Vector3:
-                return 3;
-            default:
-                throw std::runtime_error("Not implemented");
-        }
-    };
-    
 
     void KeyframeEditor::DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width)
     {
-        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        auto currentTick = demoInfo.currentTick;
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
         // TODO: Probably disable for CameraData, as I'm not sure if this is helpful to the user at all
-        
+
         // if (property.valueType == Types::KeyframeValueType::CameraData)
         //    return;
 
-        for (int i = 0; i < GetValueCountForProperty(property); i++)
+        for (int i = 0; i < property.GetValueCount(); i++)
         {
-            DrawCurveEditorInternal(
-                property, &currentTick, displayStartTick, displayEndTick, width,
-                Components::KeyframeManager::Get().GetKeyframes(property), i
-            );
+            DrawCurveEditorInternal(property, &currentTick, displayStartTick, displayEndTick, width,
+                                    Components::KeyframeManager::Get().GetKeyframes(property), i, demoInfo.endTick);
         }
     }
 
@@ -471,6 +467,43 @@ namespace IWXMVM::UI
         if (ImGui::DragFloat(label, &v, 0.1f, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE, "%.2f"))
         {
             // TODO: should this do something?
+        }
+    }
+
+    constexpr auto CLEAR_KEYFRAMES_POPUP_LABEL = "Are you sure?##clearKeyframes";
+    void KeyframeEditor::DrawMiscButtons(ImVec2 padding, bool hasKeyframes)
+    {
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2 - padding.y);
+        if (hasKeyframes)
+        {
+            if (ImGui::Button(ICON_FA_FILE_ARROW_DOWN " Export", ImVec2(GetSize().x / 20, 0)))
+            {
+                auto path = PathUtils::OpenFileDialog(true, OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT,
+                                                      "Keyframes (*.json)\0*.json\0", "json");
+                if (path.has_value())
+                {
+                    Components::KeyframeSerializer::Write(path.value());
+                    LOG_INFO("Wrote keyframes to {}", path.value().string());
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_TRASH_CAN " Clear", ImVec2(GetSize().x / 20, 0)))
+            {
+                ImGui::OpenPopup(CLEAR_KEYFRAMES_POPUP_LABEL);
+            }
+        }
+        else
+        {
+            if (ImGui::Button(ICON_FA_FILE_IMPORT " Import", ImVec2(GetSize().x / 20, 0)))
+            {
+                auto path = PathUtils::OpenFileDialog(false, OFN_EXPLORER | OFN_FILEMUSTEXIST,
+                                                      "Keyframes (*.json)\0*.json\0", "json");
+                if (path.has_value())
+                {
+                    Components::KeyframeSerializer::Read(path.value());
+                    LOG_INFO("Read keyframes from {}", path.value().string());
+                }
+            }
         }
     }
 
@@ -525,7 +558,7 @@ namespace IWXMVM::UI
                     auto showCurve = ImGui::TreeNode(property.name.data());
                     if (showCurve)
                     {
-                        for (int i = 0; i < GetValueCountForProperty(property); i++)
+                        for (int i = 0; i < property.GetValueCount(); i++)
                         {
                             auto startY = ImGui::GetCursorPosY();
                             auto disableValueInput = keyframes.empty();
@@ -540,13 +573,14 @@ namespace IWXMVM::UI
                                 ImGui::BeginDisabled();
 
                             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding.x);
-                            DrawKeyframeValueInput(std::format("##valueInput{0}{1}", property.name, i).c_str(), value.GetByIndex(i));
+                            DrawKeyframeValueInput(std::format("##valueInput{0}{1}", property.name, i).c_str(),
+                                                   value.GetByIndex(i));
 
                             if (disableValueInput)
                                 ImGui::EndDisabled();
 
                             ImGui::SetCursorPosY(startY + CURVE_EDITOR_LANE_HEIGHT + ImGui::GetStyle().ItemSpacing.y);
-                        } 
+                        }
                     }
 
                     auto progressBarWidth = GetSize().x - firstColumnSize - GetSize().x * 0.05f - padding.x * 2;
@@ -561,7 +595,6 @@ namespace IWXMVM::UI
                     }
                 }
 
-                
                 ImGui::TableNextRow();
 
                 ImGui::TableSetColumnIndex(0);
@@ -586,42 +619,31 @@ namespace IWXMVM::UI
                 ImGui::EndTable();
             }
 
-            if (std::any_of(propertyKeyframes.begin(), propertyKeyframes.end(),
-                [](const auto& pair) { return !pair.second.empty(); }))
+            auto miscButtonsY = ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2 - padding.y;
+            if (miscButtonsY > ImGui::GetCursorPosY())
             {
-                constexpr auto CLEAR_KEYFRAMES_POPUP_LABEL = "Clear all keyframes?##clearKeyframes";
-                auto miscButtonsY = ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2 - padding.y;
-                if (miscButtonsY > ImGui::GetCursorPosY())
+                auto hasKeyframes = std::any_of(propertyKeyframes.begin(), propertyKeyframes.end(),
+                                                [](const auto& pair) { return !pair.second.empty(); });
+                DrawMiscButtons(padding, hasKeyframes);
+            }
+
+            if (ImGui::BeginPopupModal(CLEAR_KEYFRAMES_POPUP_LABEL, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::Text("This will delete all currently placed keyframes");
+                if (ImGui::Button("Delete"))
                 {
-                    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - ImGui::GetFontSize() * 2 - padding.y);
-                    if (ImGui::Button(ICON_FA_FILE_ARROW_DOWN " Export", ImVec2(GetSize().x / 20, 0)))
-                    {
-                        // TODO:
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button(ICON_FA_TRASH_CAN " Clear", ImVec2(GetSize().x / 20, 0)))
-                    {
-                        ImGui::OpenPopup(CLEAR_KEYFRAMES_POPUP_LABEL);
-                    }
+                    Components::KeyframeManager::Get().ClearKeyframes();
+                    ImGui::CloseCurrentPopup();
                 }
 
-                if (ImGui::BeginPopupModal(CLEAR_KEYFRAMES_POPUP_LABEL, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Keep"))
                 {
-                    if (ImGui::Button("Delete Keyframes"))
-                    {
-                        Components::KeyframeManager::Get().ClearKeyframes();
-                        ImGui::CloseCurrentPopup();
-                    }
-
-                    ImGui::SetItemDefaultFocus();
-                    ImGui::SameLine();
-                    if (ImGui::Button("Cancel"))
-                    {
-                        ImGui::CloseCurrentPopup();
-                    }
-
-                    ImGui::EndPopup();
+                    ImGui::CloseCurrentPopup();
                 }
+
+                ImGui::EndPopup();
             }
 
             ImGui::PopStyleVar();

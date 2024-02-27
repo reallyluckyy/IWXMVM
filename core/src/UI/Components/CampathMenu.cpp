@@ -20,10 +20,16 @@ namespace IWXMVM::UI
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
         ImGui::Begin("Campath", NULL, flags);
 
+        if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
+        {
+            UI::DrawInaccessibleTabWarning();
+            ImGui::End();
+            return;
+        }
+
         auto& campathManager = Components::CampathManager::Get();
 
-        if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
-            Components::CameraManager::Get().GetActiveCamera()->GetMode() != Components::Camera::Mode::Dolly)
+        if (Components::CameraManager::Get().GetActiveCamera()->GetMode() != Components::Camera::Mode::Dolly)
         {
             ImGui::Text("Campath Controls");
             ImGui::Text("%s - Add Node",

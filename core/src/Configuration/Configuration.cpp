@@ -56,6 +56,6 @@ namespace IWXMVM
 
     std::filesystem::path Configuration::GetUserConfigPath()
     {
-        return std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "config.json";
+        return PathUtils::GetIWXMVMPath() / "config.json";
     }
 }  // namespace IWXMVM

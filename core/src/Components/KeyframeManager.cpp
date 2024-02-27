@@ -3,19 +3,96 @@
 
 #include "Resources.hpp"
 #include "Utilities/MathUtils.hpp"
+#include "KeyframeSerializer.hpp"
+#include "Events.hpp"
 
 namespace IWXMVM::Components
 {
-    Types::KeyframeableProperty campathCameraProperty(ICON_FA_VIDEO " Campath Camera",
-                                                        Types::KeyframeValueType::CameraData);
-    Types::KeyframeableProperty sunLightColorProperty(ICON_FA_SUN " Sun Light Color",
-                                             Types::KeyframeValueType::Vector3);
-    Types::KeyframeableProperty sunLightBrightnessProperty(ICON_FA_SUN " Sun Light Brightness",
-                                                           Types::KeyframeValueType::FloatingPoint);
-    Types::KeyframeableProperty sunLightPitchProperty(ICON_FA_SUN " Sun Light Pitch",
-                                                      Types::KeyframeValueType::FloatingPoint);
-    Types::KeyframeableProperty sunLightYawProperty(ICON_FA_SUN " Sun Light Yaw",
-                                                      Types::KeyframeValueType::FloatingPoint);
+    Types::KeyframeableProperty campathCameraProperty(
+        Types::KeyframeablePropertyType::CampathCamera, 
+        ICON_FA_VIDEO " Campath Camera",
+        Types::KeyframeValueType::CameraData
+    );
+    Types::KeyframeableProperty sunLightColorProperty(
+        Types::KeyframeablePropertyType::SunLightColor,
+        ICON_FA_SUN " Sun Light Color",
+        Types::KeyframeValueType::Vector3
+    );
+    Types::KeyframeableProperty sunLightBrightnessProperty(
+        Types::KeyframeablePropertyType::SunLightBrightness,
+        ICON_FA_SUN " Sun Light Brightness",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty sunLightPitchProperty(
+        Types::KeyframeablePropertyType::SunLightPitch,
+        ICON_FA_SUN " Sun Light Pitch",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty sunLightYawProperty(
+        Types::KeyframeablePropertyType::SunLightYaw,
+        ICON_FA_SUN " Sun Light Yaw",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty filmtweakBrightnessProperty(
+        Types::KeyframeablePropertyType::FilmtweakBrightness,
+        ICON_FA_IMAGE " Filmtweak Brightness",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty filmtweakContrastProperty(
+        Types::KeyframeablePropertyType::FilmtweakContrast,
+        ICON_FA_IMAGE " Filmtweak Contrast",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty filmtweakDesaturationProperty(
+        Types::KeyframeablePropertyType::FilmtweakDesaturation,
+        ICON_FA_IMAGE " Filmtweak Desaturation",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty filmtweakTintLightProperty(
+        Types::KeyframeablePropertyType::FilmtweakTintLight,
+        ICON_FA_IMAGE " Filmtweak Tint Light",
+        Types::KeyframeValueType::Vector3
+    );
+    Types::KeyframeableProperty filmtweakTintDarkProperty(
+        Types::KeyframeablePropertyType::FilmtweakTintDark,
+        ICON_FA_IMAGE " Filmtweak Tint Dark",
+        Types::KeyframeValueType::Vector3
+    );
+    Types::KeyframeableProperty dofFarBlur(
+        Types::KeyframeablePropertyType::DepthOfFieldFarBlur,
+        ICON_FA_CAMERA " DOF Far Blur",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty dofFarStart(
+        Types::KeyframeablePropertyType::DepthOfFieldFarStart,
+        ICON_FA_CAMERA " DOF Far Start",
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty dofFarEnd(
+        Types::KeyframeablePropertyType::DepthOfFieldFarEnd,
+        ICON_FA_CAMERA " DOF Far End", 
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty dofNearBlur(
+        Types::KeyframeablePropertyType::DepthOfFieldNearBlur,
+        ICON_FA_CAMERA " DOF Near Blur", 
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty dofNearStart(
+        Types::KeyframeablePropertyType::DepthOfFieldNearStart,
+        ICON_FA_CAMERA " DOF Near Start", 
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty dofNearEnd(
+        Types::KeyframeablePropertyType::DepthOfFieldNearEnd,
+        ICON_FA_CAMERA " DOF Near End", 
+        Types::KeyframeValueType::FloatingPoint
+    );
+    Types::KeyframeableProperty dofBias(
+        Types::KeyframeablePropertyType::DepthOfFieldBias,
+        ICON_FA_CAMERA " DOF Bias", 
+        Types::KeyframeValueType::FloatingPoint
+    );
 
     void KeyframeManager::Initialize()
     {
@@ -26,25 +103,34 @@ namespace IWXMVM::Components
         InitializeProperty(sunLightBrightnessProperty);
         InitializeProperty(sunLightPitchProperty);
         InitializeProperty(sunLightYawProperty);
+        InitializeProperty(filmtweakBrightnessProperty);
+        InitializeProperty(filmtweakContrastProperty);
+        InitializeProperty(filmtweakDesaturationProperty);
+        InitializeProperty(filmtweakTintLightProperty);
+        InitializeProperty(filmtweakTintDarkProperty);
+        InitializeProperty(dofFarBlur);
+        InitializeProperty(dofFarStart);
+        InitializeProperty(dofFarEnd);
+        InitializeProperty(dofNearBlur);
+        InitializeProperty(dofNearStart);
+        InitializeProperty(dofNearEnd);
+        InitializeProperty(dofBias);
+
+        Events::RegisterListener(EventType::OnDemoLoad, [&]() { 
+            ClearKeyframes();
+            Components::KeyframeSerializer::ReadRecent();
+        });
     }
 
     const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const
     {
-        switch (property)
+        for (auto& [p, _] : keyframes)
         {
-            case Types::KeyframeablePropertyType::CampathCamera:
-                return campathCameraProperty;
-            case Types::KeyframeablePropertyType::SunLightColor:
-                return sunLightColorProperty;
-            case Types::KeyframeablePropertyType::SunLightBrightness:
-                return sunLightBrightnessProperty;
-            case Types::KeyframeablePropertyType::SunLightPitch:
-                return sunLightPitchProperty;
-            case Types::KeyframeablePropertyType::SunLightYaw:
-                return sunLightYawProperty;
+            if (p.type == property)
+                return p;
         }
 
-        throw std::runtime_error("Unhandled keyframeable property type");
+        throw std::runtime_error("Unregistered keyframeable property type");
     }
 
     void KeyframeManager::ClearKeyframes()
@@ -53,6 +139,13 @@ namespace IWXMVM::Components
         {
             k.clear();
         }
+    }
+
+    void KeyframeManager::SortAndSaveKeyframes(std::vector<Types::Keyframe>& keyframes)
+    {
+        std::sort(keyframes.begin(), keyframes.end(), [](const auto& a, const auto& b) { return a.tick < b.tick; });
+
+        Components::KeyframeSerializer::WriteRecent();
     }
 
     Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property,

@@ -61,16 +61,18 @@ namespace ImGuiEx
             return;
 
         window->DrawList->AddRectFilled(ImVec2(x, rect.Min.y), ImVec2(x + thickness, rect.Max.y), color);
-	}
+    }
 
     constexpr std::size_t MARKER_DISTANCE = 5000;
-    void DemoProgressBarLines(const ImRect rect, uint32_t currentTick, uint32_t displayStartTick, uint32_t displayEndTick)
+    void DemoProgressBarLines(const ImRect rect, uint32_t currentTick, uint32_t displayStartTick,
+                              uint32_t displayEndTick, std::uint32_t demoLength)
     {
         using namespace ImGui;
 
+        auto markerDistance = MARKER_DISTANCE * demoLength / 50000;
         for (uint32_t i = displayStartTick; i < currentTick; i++)
         {
-            if (i % MARKER_DISTANCE == 0)
+            if (i % markerDistance == 0)
             {
                 DrawProgressLineAtTick(rect, i, GetColorU32(ImGuiCol_Button), 2, displayStartTick, displayEndTick);
             }

@@ -52,6 +52,8 @@ namespace IWXMVM::IW3::Signatures
         Sig("5C 24 38 55 8B 6C 24 40 57 8B F9", GAType::Code, -5) > CG_DObjGetWorldBoneMatrix;
         Sig("03 44 24 04 0F B7 04 45", GAType::Data, 8, Lambda::DereferenceAddress) > clientObjMap;
         Sig("0F BF F0 6B F6 64 81 C6", GAType::Data, 8, Lambda::DereferenceAddress) > objBuf;
+        
+        // for rewinding
         Sig("83 C4 ?? 53 57 56 ?? ?? ?? ?? ?? 83 C4", GAType::Code, 6, Lambda::FollowCodeFlow) > FS_Read;
         Sig("89 86 ?? ?? ?? ?? E8 ?? ?? ?? ?? 88 9F FF 00 00 00", GAType::Data, 2, Lambda::DereferenceAddress) > fsh;
         Sig("68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 83 C4 0C 88 1D", GAType::Data, 1,
@@ -60,6 +62,9 @@ namespace IWXMVM::IW3::Signatures
         Sig("39 8C 07 ?? ?? ?? ?? 5F", GAType::Data, 3, Lambda::DereferenceAddress) > conGameMsgWindow0; // killfeed
         Sig("83 3D ?? ?? ?? ?? ?? 0F 85 92 01 00 00", GAType::Code, -5,
             Lambda::FollowCodeFlow) > CL_FirstSnapshot;
+
+        Sig("55 8B 6C 24 38 85 ED", GAType::Code, -5) > R_AddCmdDrawTextWithEffects;
+
 
         // cod4x
         using MType = Types::ModuleType;

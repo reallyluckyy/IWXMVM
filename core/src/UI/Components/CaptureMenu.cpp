@@ -23,7 +23,7 @@ namespace IWXMVM::UI
         {
             if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
             {
-                ImGui::Text("Load a demo to access capture settings");
+                UI::DrawInaccessibleTabWarning();
                 ImGui::End();
                 return;
             }
@@ -39,31 +39,6 @@ namespace IWXMVM::UI
             ImGui::PushFont(UIManager::Get().GetBoldFont());
             ImGui::Text("Capture Settings");
             ImGui::PopFont();
-
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Camera");
-            ImGui::SameLine();
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
-            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) - ImGui::GetStyle().WindowPadding.x);
-            if (ImGui::BeginCombo("##captureMenuCameraCombo", 
-                cameraManager.GetCameraModeLabel(captureSettings.cameraMode).data()))
-            {
-                for (auto cameraMode : captureManager.GetRecordableCameras())
-                {
-                    bool isSelected = captureSettings.cameraMode == cameraMode;
-                    if (ImGui::Selectable(cameraManager.GetCameraModeLabel(cameraMode).data(),
-                                          captureSettings.cameraMode == cameraMode))
-                    {
-                        captureSettings.cameraMode = cameraMode;
-                    }
-
-                    if (isSelected)
-                    {
-                        ImGui::SetItemDefaultFocus();
-                    }
-                }
-                ImGui::EndCombo();
-            }
 
             auto halfWidth = ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) - ImGui::GetStyle().WindowPadding.x;
             halfWidth /= 2;
@@ -136,8 +111,6 @@ namespace IWXMVM::UI
                 }
             }
             
-            ImGui::BeginDisabled();
-
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Resolution");
             ImGui::SameLine();
@@ -162,8 +135,6 @@ namespace IWXMVM::UI
                 }
                 ImGui::EndCombo();
             }
-
-            ImGui::EndDisabled();
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Framerate");
@@ -206,13 +177,80 @@ namespace IWXMVM::UI
 
             ImGui::BeginDisabled(captureManager.IsCapturing());
 
+            // TODO: Unicode directories will break this
             if (ImGui::Button(ICON_FA_FOLDER_OPEN " Browse",
                                 ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 2)))
             {
-                // open folder browse dialog using IFileDialog
+                // Create FileOpenDialog object
+                IFileOpenDialog* pFileOpen = nullptr;
+                HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_IFileOpenDialog,
+                                              reinterpret_cast<void**>(&pFileOpen));
+
+                if (SUCCEEDED(hr))
+                {
+                    // Set options to allow only folder selection
+                    FILEOPENDIALOGOPTIONS options = {};
+                    hr = pFileOpen->GetOptions(&options);
+                    hr = pFileOpen->SetOptions(options | FOS_PICKFOLDERS);
+
+                    // Convert path to wchar string
+                    const std::string charPath = PathUtils::GetCurrentGameDirectory();
+                    const std::size_t convertedChars = mbstowcs(nullptr, charPath.c_str(), charPath.length());
+                    wchar_t* wcharPath = new wchar_t[convertedChars + 1];
+                    mbstowcs(wcharPath, charPath.c_str(), convertedChars + 1);
+
+                    // Set an initial folder
+                    IShellItem* pInitialFolder = nullptr;
+                    if (wcharPath)
+                    {
+                        hr = SHCreateItemFromParsingName(wcharPath, nullptr, IID_PPV_ARGS(&pInitialFolder));
+                        if (SUCCEEDED(hr))
+                        {
+                            pFileOpen->SetFolder(pInitialFolder);
+                            pInitialFolder->Release();
+                        }
+                    }
+                    delete[] wcharPath;
+
+                    // Show the dialog
+                    hr = pFileOpen->Show(NULL);
+
+                    // Get the selected folder path
+                    if (SUCCEEDED(hr))
+                    {
+                        IShellItem* pItem = nullptr;
+                        hr = pFileOpen->GetResult(&pItem);
+                        if (SUCCEEDED(hr))
+                        {
+                            PWSTR pszFilePath = nullptr;
+                            hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+
+                            if (SUCCEEDED(hr))
+                            {
+                                std::filesystem::path outputPath(pszFilePath);
+                                LOG_INFO("Set recording output directory to: {}", outputPath.string());
+                                captureManager.SetOutputDirectory(outputPath);
+                            }
+
+                            CoTaskMemFree(pszFilePath);
+                            pItem->Release();
+                        }
+                    }
+                    pFileOpen->Release();
+                } 
             }
 
             ImGui::EndDisabled();
+
+            if (!captureManager.IsFFmpegPresent())
+            {
+                ImGui::Dummy(ImVec2(0, ImGui::GetStyle().ItemSpacing.y * 4));
+                ImGui::PushStyleColor(ImGuiCol_Text, {249.0f / 255.0f, 22.0f / 255.0f, 22.0f / 255.0f, 1.0f});
+                ImGui::PushFont(UIManager::Get().GetBoldFont());
+                ImGui::TextWrapped("Could not find ffmpeg. Please restart the mod through the codmvm launcher!");
+                ImGui::PopFont();
+                ImGui::PopStyleColor();
+            }
 
             ImGui::Dummy(ImVec2(0, ImGui::GetStyle().ItemSpacing.y * 4));
             ImGui::PushFont(UIManager::Get().GetBoldFont());

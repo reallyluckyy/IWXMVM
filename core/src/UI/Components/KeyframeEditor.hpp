@@ -16,17 +16,21 @@ namespace IWXMVM::UI
        private:
         void Initialize() final;
 
-        void HandleTimelineZoomInteractions(float barLength);
+        void HandleTimelineZoomInteractions(const ImVec2 rectMin, const ImVec2 rectMax);
 
         void DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                      uint32_t displayStartTick, uint32_t displayEndTick, const float width,
-                                     std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex);
+                                     std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex, 
+                                     uint32_t demoLength);
 
         void DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width);
 
         void DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
-                                        uint32_t displayStartTick, uint32_t displayEndTick, std::vector<Types::Keyframe>& keyframes);
+                                        uint32_t displayStartTick, uint32_t displayEndTick, 
+                                        std::vector<Types::Keyframe>& keyframes, uint32_t demoLength);
         void DrawKeyframeSlider(const Types::KeyframeableProperty& property);
+
+        void DrawMiscButtons(ImVec2 padding, bool hasKeyframes);
 
         int32_t displayStartTick, displayEndTick;
 

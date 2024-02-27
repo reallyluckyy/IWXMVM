@@ -33,8 +33,8 @@ namespace IWXMVM::UI
         void SetAngleFromPosition(glm::vec3);
         void UpdateSunAngle();
         void UpdateFilmtweaks();
+        void UpdateHudInfo();
 
-        std::optional<std::filesystem::path> OpenFileDialog(bool saveDialog = false);
         void LoadPreset(Preset);
         void AddPresetToRecent(Preset);
 

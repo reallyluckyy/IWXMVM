@@ -113,13 +113,14 @@ namespace IWXMVM::GFX
         mesh->index = meshCount - 1;
     }
 
-    void BufferManager::DrawMesh(const Mesh& mesh, const glm::mat4& model) const noexcept
+    void BufferManager::DrawMesh(const Mesh& mesh, const glm::mat4& model, bool ignoreLighting) const noexcept
     {
         IDirect3DDevice9* device = D3D9::GetDevice();
 
         HRESULT result = D3D_OK;
 
         device->SetVertexShaderConstantF(4, reinterpret_cast<const float*>(&model), 4);
+        device->SetPixelShaderConstantB(0, reinterpret_cast<BOOL*>(&ignoreLighting), 1);
 
         result = device->DrawIndexedPrimitive(
             D3DPT_TRIANGLELIST, meshes[mesh.index].vertexBufferOffset, 0, static_cast<UINT>(mesh.indices.size()),

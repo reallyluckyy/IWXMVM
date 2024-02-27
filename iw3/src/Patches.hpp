@@ -18,6 +18,7 @@ namespace IWXMVM::IW3::Patches
                                                                  CG_RegisterItemsBytes, PatchApplySetting::Immediately};
         ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
         
+
         // For rewinding
          // TODO: sigs
         NopPatch<5> Con_TimeJumped{0x45C2A7, PatchApplySetting::Deferred};
@@ -26,6 +27,9 @@ namespace IWXMVM::IW3::Patches
         JumpPatch CG_ProcessSnapshots{0x44E4B0, PatchApplySetting::Immediately};
         JumpPatch CG_ReadNextSnapshot{0x44E2C3, PatchApplySetting::Immediately};
         NopPatch<5> CG_MapRestart{0x44B4AD, PatchApplySetting::Immediately}; // Prevents cg_thirdperson from being reset
+
+        ReturnPatch R_AddCmdDrawTextWithEffects{GetGameAddresses().R_AddCmdDrawTextWithEffects(),
+                                                PatchApplySetting::Deferred};
     };
 
     inline IW3Patches& GetGamePatches()

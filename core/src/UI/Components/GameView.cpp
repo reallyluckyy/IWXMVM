@@ -31,6 +31,7 @@ namespace IWXMVM::UI
         return ImVec2(window.x, window.y);
     }
 
+    bool wasGizmoButtonClickedThisFrame = false;
     void DrawGizmoButton(const char* label, ImVec2 size, GFX::GizmoMode gizmoMode)
     {
         auto& graphicsManager = GFX::GraphicsManager::Get();
@@ -42,6 +43,7 @@ namespace IWXMVM::UI
                 ImGui::PopStyleColor();
 
             graphicsManager.SetGizmoMode(gizmoMode);
+            wasGizmoButtonClickedThisFrame = wasGizmoButtonClickedThisFrame || true;
         }
         else
         {
@@ -70,6 +72,12 @@ namespace IWXMVM::UI
         DrawGizmoButton(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT, buttonSize, GFX::GizmoMode::TranslateGlobal);
         ImGui::SameLine(0, buttonSpacing.x);
         DrawGizmoButton(ICON_FA_ROTATE, buttonSize, GFX::GizmoMode::Rotate);
+
+        if (Input::KeyUp(ImGuiKey_MouseLeft) && !graphicsManager.WasObjectHoveredThisFrame() &&
+            !graphicsManager.WasObjectDraggedThisFrame() && !wasGizmoButtonClickedThisFrame)
+        {
+            graphicsManager.ResetSelection();
+        }
     }
 
     void DrawKeyBox(const char* keyName)
@@ -258,6 +266,7 @@ namespace IWXMVM::UI
 
         if (currentCamera->GetMode() == Components::Camera::Mode::FirstPerson)
         {
+            /*
             ImGui::SameLine();
 
             const char* playerCameraComboItems[] = {"Player 1", "Player 2", "Player 3", "Player 4"};
@@ -265,6 +274,7 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(200);
             ImGui::Combo("##gameViewCameraPlayerCombo", &currentPlayerCameraComboItem, playerCameraComboItems,
                          IM_ARRAYSIZE(playerCameraComboItems));
+            */
         }
         else if (currentCamera->GetMode() == Components::Camera::Mode::Bone)
         {
@@ -404,6 +414,8 @@ namespace IWXMVM::UI
 
     void GameView::Render()
     {
+        wasGizmoButtonClickedThisFrame = false;
+
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
 

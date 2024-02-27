@@ -1,5 +1,7 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -27,6 +29,7 @@
 
 #include <Windows.h>
 #include <psapi.h>
+#include <shobjidl.h>
 
 #include "Logger.hpp"
 
@@ -46,3 +49,5 @@
 #include "backends/imgui_impl_dx9.h"
 #include "backends/imgui_impl_win32.h"
 #pragma warning(pop)
+
+#include "magic_enum/magic_enum.hpp"

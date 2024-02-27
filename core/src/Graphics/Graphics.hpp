@@ -38,8 +38,18 @@ namespace IWXMVM::GFX
         void Render();
 
         std::optional<int32_t> GetSelectedNodeId() const { return selectedNodeId; }
+        bool WasObjectHoveredThisFrame() const { return objectHoveredThisFrame; }
+        bool WasObjectDraggedThisFrame() const { return heldAxis.has_value(); }
+        
+        void ResetSelection()
+        {
+            selectedNodeId = std::nullopt;
+            heldAxis = std::nullopt;
+        }
+
         GizmoMode GetGizmoMode() const { return gizmoMode; }
         void SetGizmoMode(GizmoMode mode) { gizmoMode = mode; }
+       
        private:
         GraphicsManager()
             : axis(AXIS_MODEL_data, AXIS_MODEL_size),
@@ -55,6 +65,7 @@ namespace IWXMVM::GFX
         }
 
         bool MouseIntersects(ImVec2 mousePos, Mesh& mesh, glm::mat4 model);
+        bool MouseIntersectsSphereAt(ImVec2 mousePos, glm::vec3 pos, float radius);
         void DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex);
         void DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation);
         void DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation);
@@ -76,6 +87,8 @@ namespace IWXMVM::GFX
         Mesh gizmo_rotate_z;
 
         std::optional<int32_t> selectedNodeId = std::nullopt;
+        std::optional<int32_t> heldAxis = std::nullopt;
+        bool objectHoveredThisFrame = false;
         GizmoMode gizmoMode = GizmoMode::TranslateLocal;
     };
 }  // namespace IWXMVM

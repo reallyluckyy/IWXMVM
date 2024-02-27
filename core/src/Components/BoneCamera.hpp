@@ -1,5 +1,6 @@
 #pragma once
 #include "Camera.hpp"
+#include "Types/BoneData.hpp"
 
 namespace IWXMVM::Components
 {
@@ -35,5 +36,7 @@ namespace IWXMVM::Components
 
         glm::vec3 positionOffset;
         glm::vec3 rotationOffset;
+
+        void SetPositionFromBoneData(const Types::BoneData& boneData);
     };
 }  // namespace IWXMVM::Components

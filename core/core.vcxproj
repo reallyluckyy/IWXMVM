@@ -62,7 +62,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;third-party/magic_enum/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -91,7 +91,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;third-party/magic_enum/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -120,6 +120,7 @@
     <ClCompile Include="src\Components\DollyCamera.cpp" />
     <ClCompile Include="src\Components\FreeCamera.cpp" />
     <ClCompile Include="src\Components\KeyframeManager.cpp" />
+    <ClCompile Include="src\Components\KeyframeSerializer.cpp" />
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
     <ClCompile Include="src\Components\CaptureManager.cpp" />
     <ClCompile Include="src\Components\Playback.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="src\Components\DollyCamera.hpp" />
     <ClInclude Include="src\Components\FreeCamera.hpp" />
     <ClInclude Include="src\Components\KeyframeManager.hpp" />
+    <ClInclude Include="src\Components\KeyframeSerializer.hpp" />
     <ClInclude Include="src\Components\OrbitCamera.hpp" />
     <ClInclude Include="src\Components\CaptureManager.hpp" />
     <ClInclude Include="src\Components\Playback.hpp" />
@@ -191,6 +193,7 @@
     <ClInclude Include="src\Types\Filmtweaks.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
+    <ClInclude Include="src\Types\HudInfo.hpp" />
     <ClInclude Include="src\Types\Keyframe.hpp" />
     <ClInclude Include="src\Types\KeyframeableProperty.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />

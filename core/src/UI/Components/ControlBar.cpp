@@ -143,7 +143,7 @@ namespace IWXMVM::UI
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
         }
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, endTick);
 
         return value_changed;
     }
@@ -195,8 +195,11 @@ namespace IWXMVM::UI
 
             ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
             ImGui::SameLine();
-            ImGuiEx::TimescaleSlider("##1", &timescale.value().value->floating_point, 0.001f, 1000.0f, "%.3f",
-                                     ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
+            ImGuiEx::TimescaleSlider("##1", &timescale.value().value->floating_point, 
+                Components::Playback::TIMESCALE_STEPS.front(),
+                Components::Playback::TIMESCALE_STEPS.back(),
+                "%.3f",
+                ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
             auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
             if (demoInfo.currentTick < demoInfo.endTick)

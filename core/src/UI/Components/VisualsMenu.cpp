@@ -6,6 +6,7 @@
 #include "UI/ImGuiEx/KeyframeableControls.hpp"
 #include "Events.hpp"
 #include "Resources.hpp"
+#include "Utilities/PathUtils.hpp"
 
 namespace IWXMVM::UI
 {
@@ -21,28 +22,17 @@ namespace IWXMVM::UI
             auto dof = Mod::GetGameInterface()->GetDof();
             auto sun = Mod::GetGameInterface()->GetSun();
             auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
+            auto hudInfo = Mod::GetGameInterface()->GetHudInfo();
 
             visuals = {
-                dof.enabled,
-                dof.farBlur,
-                dof.farStart,
-                dof.farEnd,
-                dof.nearBlur,
-                dof.nearStart,
-                dof.nearEnd,
-                dof.bias,
+                dof,
                 glm::make_vec3(sun.color),
                 glm::make_vec3(sun.direction),
                 0,  
                 0,
                 sun.brightness,
-                filmtweaks.enabled,
-                filmtweaks.brightness,
-                filmtweaks.contrast,
-                filmtweaks.desaturation,
-                glm::make_vec3(filmtweaks.tintLight),
-                glm::make_vec3(filmtweaks.tintDark),
-                filmtweaks.invert
+                filmtweaks,
+                hudInfo
             };
             recentPresets = {};
 
@@ -54,6 +44,21 @@ namespace IWXMVM::UI
 
             visualsInitialized = true;
         });
+
+        // This is a hack to get the keyframed visuals to update when the visual tab isnt selected
+        Events::RegisterListener(EventType::OnFrame, [&]() {
+            if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
+                return;
+
+            if (UIManager::Get().GetSelectedTab() != Tab::Visuals)
+            {
+                ImGui::SetCursorPos(ImVec2(100000, 100000));
+                RenderMiscSection();
+                RenderSun();
+                RenderFilmtweaks();
+                RenderDOF();
+            }
+        });
     }
 
     void VisualsMenu::Render()
@@ -63,20 +68,28 @@ namespace IWXMVM::UI
         {
             if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
             {
-                ImGui::Text("Load a demo to control visual settings");
+                UI::DrawInaccessibleTabWarning();
                 ImGui::End();
                 return;
             }
 
             RenderConfigSection();
             RenderMiscSection();
-
             RenderSun();
             RenderFilmtweaks();
             RenderDOF();
 
             ImGui::End();
         }
+    }
+
+    void DrawSectionHeader(const char* label)
+    {
+        ImGui::Dummy(ImVec2(0.0f, 10.0f));
+        ImGui::PushFont(UIManager::Get().GetBoldFont());
+        ImGui::Text(label);
+        ImGui::PopFont();
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
     }
 
     void VisualsMenu::RenderConfigSection()
@@ -92,6 +105,7 @@ namespace IWXMVM::UI
                 UpdateSun();
                 SetAngleFromPosition(visuals.sunDirectionUI);
                 UpdateFilmtweaks();
+                UpdateHudInfo();
             }
 
             ImGui::Separator();
@@ -109,7 +123,8 @@ namespace IWXMVM::UI
             ImGui::Separator();
             if (ImGui::Selectable(ICON_FA_FOLDER_OPEN " Load from file", false))
             {
-                auto path = OpenFileDialog();
+                auto path =
+                    PathUtils::OpenFileDialog(false, OFN_EXPLORER | OFN_FILEMUSTEXIST, "Config\0*.cfg\0All Files\0*.*\0", "cfg");
                 if (path.has_value())
                 {
                     Preset preset;
@@ -126,7 +141,8 @@ namespace IWXMVM::UI
 
         if (ImGui::Button(ICON_FA_FLOPPY_DISK " Save"))
         {
-            auto path = OpenFileDialog(true);
+            auto path = PathUtils::OpenFileDialog(
+                true, OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT, "Config\0*.cfg\0", "cfg");
             if (path.has_value())
             {
                 Components::VisualConfiguration::Save(path.value(), visuals);
@@ -134,195 +150,211 @@ namespace IWXMVM::UI
             }
         }
 
+        ImGui::Dummy(ImVec2(0, 5));
+
         ImGui::Separator();
     }
 
     void VisualsMenu::RenderMiscSection()
     {
-        ImGui::Dummy(ImVec2(0.0f, 10.0f));
-        ImGui::Text("Misc");
-        ImGui::Dummy(ImVec2(0.0f, 10.0f));
+        auto checkboxColumnPosition = ImGui::GetWindowWidth() * 0.6f;
+
+        DrawSectionHeader(ICON_FA_BURGER "  Misc");
+
+        bool modified = false;
 
         ImGui::AlignTextToFramePadding();
-        ImGui::Text("Remove HUD");
+        ImGui::Text("Show 2D Elements");
         ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetCursorPosX(checkboxColumnPosition);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        ImGui::Checkbox("##removeHudCheckbox", &visuals.removeHud);
+        modified = ImGui::Checkbox("##show2DElementsCheckbox", &visuals.hudInfo.show2DElements) || modified;
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Remove Hitmarker");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        ImGui::Checkbox("##removeHitmarkerCheckbox", &visuals.removeHitmarker);
+        if (visuals.hudInfo.show2DElements)
+        {
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show Player HUD");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(checkboxColumnPosition);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::Checkbox("##showPlayerHUDCheckbox", &visuals.hudInfo.showPlayerHUD) || modified;
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Remove Score");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        ImGui::Checkbox("##removeScoreCheckbox", &visuals.removeScore);
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show Shellshock/Flashbang");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(checkboxColumnPosition);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::Checkbox("##showFlashbangCheckbox", &visuals.hudInfo.showShellshock) || modified;
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Remove Flashbang");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        ImGui::Checkbox("##removeFlashbangCheckbox", &visuals.removeFlashbang);
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show Crosshair");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(checkboxColumnPosition);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::Checkbox("##showCrosshairCheckbox", &visuals.hudInfo.showCrosshair) || modified;
+            
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show Score");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(checkboxColumnPosition);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::Checkbox("##showScoreCheckbox", &visuals.hudInfo.showScore) || modified;
 
-        ImGui::Dummy(ImVec2(0.0f, 20.0f));
+            ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Remove Killfeed");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        ImGui::Checkbox("##removeKillfeedCheckbox", &visuals.removeKillfeed);
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show Killfeed");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::Checkbox("##showKillfeedCheckbox", &visuals.hudInfo.showKillfeed) || modified;
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Team 1 Color");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static glm::vec3 team1Color;
-        ImGui::ColorEdit3("##team1Color", glm::value_ptr(team1Color));
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Team 1 Color");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::ColorEdit3("##killfeedTeam1Color", glm::value_ptr(visuals.hudInfo.killfeedTeam1Color)) ||
+                       modified;
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Team 2 Color");
-        ImGui::SameLine();
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        static glm::vec3 team2Color;
-        ImGui::ColorEdit3("##team2Color", glm::value_ptr(team2Color));
-
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Team 2 Color");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::ColorEdit3("##killfeedTeam2Color", glm::value_ptr(visuals.hudInfo.killfeedTeam2Color)) ||
+                       modified;
+        }
+        
         ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
         ImGui::Separator();
+
+        if (modified)
+        {
+            UpdateHudInfo();
+        }
     }
 
     void VisualsMenu::RenderFilmtweaks()
     {
-        ImGui::AlignTextToFramePadding();
+        DrawSectionHeader(ICON_FA_IMAGE "  Filmtweaks");
 
-        ImGui::Text("Filmtweaks");
+        bool modified = false;
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Enable Filmtweaks");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        if(ImGui::Checkbox("##enableFilmtweaksCheckbox", &visuals.filmtweaksActive))
-            UpdateFilmtweaks();
+        modified = ImGui::Checkbox("##enableFilmtweaksCheckbox", &visuals.filmtweaks.enabled) || modified;
 
         // TODO: Make these all keyframable
-        if (ImGui::SliderFloat("Brightness", &visuals.filmtweaksBrightness, -1, 1))
-            UpdateFilmtweaks();
-        if (ImGui::SliderFloat("Contrast", &visuals.filmtweaksContrast, 0, 4))
-            UpdateFilmtweaks();
-        if (ImGui::SliderFloat("Desaturation", &visuals.filmtweaksDesaturation, 0, 4))
-            UpdateFilmtweaks();
-        if (ImGui::ColorEdit3("Tint Light", glm::value_ptr(visuals.filmtweaksTintLight)))
-            UpdateFilmtweaks();
-        if (ImGui::ColorEdit3("Tint Dark", glm::value_ptr(visuals.filmtweaksTintDark)))
-            UpdateFilmtweaks();
+        modified = ImGuiEx::Keyframeable::SliderFloat("Brightness", &visuals.filmtweaks.brightness, -1, 1, 
+                                                      Types::KeyframeablePropertyType::FilmtweakBrightness) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat("Contrast", &visuals.filmtweaks.contrast, 0, 4,
+                                                      Types::KeyframeablePropertyType::FilmtweakContrast) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat("Desaturation", &visuals.filmtweaks.desaturation, 0, 4, 
+                                                      Types::KeyframeablePropertyType::FilmtweakDesaturation) || modified;
+        modified = ImGuiEx::Keyframeable::ColorEdit3("Tint Light", glm::value_ptr(visuals.filmtweaks.tintLight), 
+                                                     Types::KeyframeablePropertyType::FilmtweakTintLight) || modified;
+        modified = ImGuiEx::Keyframeable::ColorEdit3("Tint Dark", glm::value_ptr(visuals.filmtweaks.tintDark),
+                                                     Types::KeyframeablePropertyType::FilmtweakTintDark) || modified;
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Invert");
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        if(ImGui::Checkbox("##invertFilmtweaksCheckbox", &visuals.filmtweaksInvert))
-            UpdateFilmtweaks();
+        modified = ImGui::Checkbox("##invertFilmtweaksCheckbox", &visuals.filmtweaks.invert) || modified;
 
-        
+        if (modified)
+        {
+            UpdateFilmtweaks();
+        }
 
         ImGui::Separator();
     }
 
     void VisualsMenu::RenderDOF()
     {
-        ImGui::AlignTextToFramePadding();
+        DrawSectionHeader(ICON_FA_CAMERA "  Depth of Field");
 
-        ImGui::Text("Depth of Field");
+        bool modified = false;
 
-        if (ImGui::Checkbox("Enable DOF", &visuals.dofActive))
-            UpdateDof();
-
-        if (ImGui::SliderFloat("Far Blur", &visuals.dofFarBlur, 0, 10))
-            UpdateDof();
-
-        if (ImGui::SliderFloat("Far Start", &visuals.dofFarStart, 0, 5000))
-            UpdateDof();
-
-        if (ImGui::SliderFloat("Far End", &visuals.dofFarEnd, 0, 5000))
-            UpdateDof();
-
-        ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
-
-        if (ImGui::SliderFloat("Near Blur", &visuals.dofNearBlur, 0, 10))
-            UpdateDof();
-
-        if (ImGui::SliderFloat("Near Start", &visuals.dofNearStart, 0, 5000))
-            UpdateDof();
-
-        if (ImGui::SliderFloat("Near End", &visuals.dofNearEnd, 0, 5000))
-            UpdateDof();
+        modified = ImGui::Checkbox("Enable DOF", &visuals.dof.enabled) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Far Blur", &visuals.dof.farBlur, 0, 10,
+            Types::KeyframeablePropertyType::DepthOfFieldFarBlur) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Far Start", &visuals.dof.farStart, 0, 5000,
+            Types::KeyframeablePropertyType::DepthOfFieldFarStart) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Far End", &visuals.dof.farEnd, 0, 5000,
+            Types::KeyframeablePropertyType::DepthOfFieldFarEnd) || modified;
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
-        if (ImGui::SliderFloat("Bias", &visuals.dofBias, 0.1, 10))
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Near Blur", &visuals.dof.nearBlur, 0, 10,
+            Types::KeyframeablePropertyType::DepthOfFieldNearBlur) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Near Start", &visuals.dof.nearStart, 0, 5000,
+            Types::KeyframeablePropertyType::DepthOfFieldNearStart) || modified;
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Near End", &visuals.dof.nearEnd, 0, 5000,
+            Types::KeyframeablePropertyType::DepthOfFieldNearEnd) || modified;
+
+        ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
+
+        modified = ImGuiEx::Keyframeable::SliderFloat(
+            "Bias", &visuals.dof.bias, 0.1, 10,
+            Types::KeyframeablePropertyType::DepthOfFieldBias) || modified;
+
+        if (modified)
+        {
             UpdateDof();
+        }
 
         ImGui::Separator();
     }
 
     void VisualsMenu::RenderSun()
     {
-        ImGui::AlignTextToFramePadding();
+        DrawSectionHeader(ICON_FA_SUN "  Sun");
 
-        ImGui::Text("Sun");
+        bool modified = false;
 
-        if (ImGuiEx::Keyframeable::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI),
-                                              Types::KeyframeablePropertyType::SunLightColor))
-            UpdateSun();
+        modified = ImGuiEx::Keyframeable::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI),
+                                                     Types::KeyframeablePropertyType::SunLightColor) ||
+                   modified;
 
-        if (ImGuiEx::Keyframeable::SliderFloat("Brightness", &visuals.sunBrightness, 0, 4,
-                                             Types::KeyframeablePropertyType::SunLightBrightness))
-            UpdateSun();
+        modified = ImGuiEx::Keyframeable::SliderFloat("Brightness", &visuals.sunBrightness, 0, 4,
+                                                      Types::KeyframeablePropertyType::SunLightBrightness) ||
+                   modified;
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
         // ImGui::SliderAngle sets sun angles in radians but displays them as degrees
-        if (ImGuiEx::Keyframeable::SliderAngle("Pitch", &visuals.sunPitch, 0, 360,
-                                               Types::KeyframeablePropertyType::SunLightPitch))
+        modified = ImGuiEx::Keyframeable::SliderAngle("Pitch", &visuals.sunPitch, 0, 360,
+                                                      Types::KeyframeablePropertyType::SunLightPitch) ||
+                   modified;
+
+        modified = ImGuiEx::Keyframeable::SliderAngle("Yaw", &visuals.sunYaw, 0, 360,
+                                                      Types::KeyframeablePropertyType::SunLightYaw) ||
+                   modified;
+
+        if (modified)
+        {
             UpdateSunAngle();
-
-        if (ImGuiEx::Keyframeable::SliderAngle("Yaw", &visuals.sunYaw, 0, 360,
-                                               Types::KeyframeablePropertyType::SunLightYaw))
-            UpdateSunAngle();
-
-        /*
-        ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
-
-        if (ImGui::SliderFloat("X", glm::value_ptr(visuals.sunDirectionUI), -1, 1))
-            UpdateSun();
-
-        if (ImGui::SliderFloat("Y", &(glm::value_ptr(visuals.sunDirectionUI)[1]), -1, 1))
-            UpdateSun();
-
-        if (ImGui::SliderFloat("Z", &(glm::value_ptr(visuals.sunDirectionUI)[2]), -1, 1))
-            UpdateSun();
-        */
+        }
 
         ImGui::Separator();
     }
 
     void VisualsMenu::UpdateDof()
     {
-        Types::DoF dofSettings = {visuals.dofActive,   visuals.dofFarBlur,   visuals.dofFarStart, visuals.dofFarEnd,
-                                  visuals.dofNearBlur, visuals.dofNearStart, visuals.dofNearEnd,  visuals.dofBias};
-        Mod::GetGameInterface()->SetDof(dofSettings);
+        Mod::GetGameInterface()->SetDof(visuals.dof);
     }
 
     void VisualsMenu::UpdateSun()
@@ -358,46 +390,12 @@ namespace IWXMVM::UI
 
     void VisualsMenu::UpdateFilmtweaks()
     {
-        
-        Types::Filmtweaks filmtweakSettings = {visuals.filmtweaksActive, visuals.filmtweaksBrightness, visuals.filmtweaksContrast, 
-            visuals.filmtweaksDesaturation, visuals.filmtweaksTintLight, visuals.filmtweaksTintDark, visuals.filmtweaksInvert};
-        Mod::GetGameInterface()->SetFilmtweaks(filmtweakSettings);
+        Mod::GetGameInterface()->SetFilmtweaks(visuals.filmtweaks);
     }
 
-    std::optional<std::filesystem::path> VisualsMenu::OpenFileDialog(bool saveDialog)
+    void VisualsMenu::UpdateHudInfo()
     {
-        CHAR szFile[1024] = {0}; // TODO: Do something about this.
-
-        OPENFILENAMEA ofn = {};
-        ofn.lStructSize = sizeof(ofn);
-        ofn.lpstrFile = szFile;
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = "Config\0*.cfg\0All Files\0*.*\0";
-        ofn.nFilterIndex = 1;
-        if (saveDialog)
-        {
-            ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-            ofn.lpstrDefExt = "cfg";         
-        }
-        else
-        {
-            ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST;
-        }
-
-        BOOL result;
-        if (saveDialog)
-            result = GetSaveFileNameA(&ofn);
-        else
-            result = GetOpenFileNameA(&ofn);
-
-        if (result == TRUE)
-        {
-            return std::filesystem::u8path(szFile);
-        }
-        else
-        {
-            return std::nullopt;
-        }
+        Mod::GetGameInterface()->SetHudInfo(visuals.hudInfo);
     }
 
     void VisualsMenu::LoadPreset(Preset preset)
@@ -411,6 +409,7 @@ namespace IWXMVM::UI
             UpdateSun();
             SetAngleFromPosition(visuals.sunDirectionUI);
             UpdateFilmtweaks();
+            UpdateHudInfo();
 
             AddPresetToRecent(preset);
             currentPreset = preset;

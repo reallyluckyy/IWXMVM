@@ -23,4 +23,6 @@ namespace IWXMVM::UI
        private:
         void RenderSelectedTab();
     };
+
+    void DrawInaccessibleTabWarning();
 }  // namespace IWXMVM::UI

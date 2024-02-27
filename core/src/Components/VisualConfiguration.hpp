@@ -1,4 +1,7 @@
 #pragma once
+#include "Types/Filmtweaks.hpp"
+#include "Types/Dof.hpp"
+#include "Types/HudInfo.hpp"
 
 namespace IWXMVM::Components
 {
@@ -8,16 +11,7 @@ namespace IWXMVM::Components
         struct Settings
         {
             // DOF
-            bool dofActive;
-            float dofFarBlur;
-            float dofFarStart;
-            float dofFarEnd;
-
-            float dofNearBlur;
-            float dofNearStart;
-            float dofNearEnd;
-
-            float dofBias;
+            Types::DoF dof;
 
             // SUN
             glm::vec3 sunColorUI;
@@ -27,22 +21,10 @@ namespace IWXMVM::Components
             float sunBrightness = 1;
 
             // FILMTWEAKS
-            bool filmtweaksActive;
-            float filmtweaksBrightness;
-            float filmtweaksContrast;
-            float filmtweaksDesaturation;
-            glm::vec3 filmtweaksTintLight;
-            glm::vec3 filmtweaksTintDark;
-            bool filmtweaksInvert;
+            Types::Filmtweaks filmtweaks;
 
             // MISC
-            bool removeHud;
-            bool removeHitmarker;
-            bool removeScore;
-            bool removeFlashbang;
-            bool removeKillfeed;
-            glm::vec3 team1Color;
-            glm::vec3 team2Color;
+            Types::HudInfo hudInfo;
         };
 
         static std::optional<Settings> Load(std::filesystem::path file);

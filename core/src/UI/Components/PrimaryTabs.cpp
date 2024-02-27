@@ -13,6 +13,19 @@ namespace IWXMVM::UI
     {
     }
 
+    void DrawInaccessibleTabWarning()
+    {
+        auto label = ICON_FA_TRIANGLE_EXCLAMATION "  Not in a demo";
+        auto windowWidth = ImGui::GetWindowSize().x;
+        auto textWidth = ImGui::CalcTextSize(label).x;
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::PushFont(UIManager::Get().GetBoldFont());
+        ImGui::Text(label);
+        ImGui::PopFont();
+        ImGui::Dummy(ImVec2(0, 5));
+        ImGui::TextWrapped("Load a demo from the " ICON_FA_FILE " DEMOS tab to access these settings!");
+    }
+
     void PrimaryTabs::RenderSelectedTab()
     {
         ImGui::SetNextWindowPos(ImVec2(UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().x,

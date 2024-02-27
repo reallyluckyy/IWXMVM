@@ -8,7 +8,19 @@ namespace IWXMVM::Types
         SunLightColor,
         SunLightBrightness,
         SunLightPitch,
-        SunLightYaw
+        SunLightYaw,
+        FilmtweakBrightness,
+        FilmtweakContrast,
+        FilmtweakDesaturation,
+        FilmtweakTintLight,
+        FilmtweakTintDark,
+        DepthOfFieldFarBlur,
+        DepthOfFieldFarStart,
+        DepthOfFieldFarEnd,
+        DepthOfFieldNearBlur,
+        DepthOfFieldNearStart,
+        DepthOfFieldNearEnd,
+        DepthOfFieldBias
     };
 
     enum class KeyframeValueType
@@ -20,11 +32,12 @@ namespace IWXMVM::Types
 
     struct KeyframeableProperty
     {
+        Types::KeyframeablePropertyType type;
         std::string_view name;
         KeyframeValueType valueType;
 
-        KeyframeableProperty(std::string_view name, KeyframeValueType valueType)
-            : name(name), valueType(valueType)
+        KeyframeableProperty(Types::KeyframeablePropertyType type, std::string_view name, KeyframeValueType valueType)
+            : type(type), name(name), valueType(valueType)
         {
         }
 
@@ -32,5 +45,22 @@ namespace IWXMVM::Types
         {
             return name < other.name;
         }
+
+       public:
+        int32_t GetValueCount() const
+        {
+            // I dont really like the way this is done, I just cant really think of a better solution right now
+            switch (valueType)
+            {
+                case Types::KeyframeValueType::FloatingPoint:
+                    return 1;
+                case Types::KeyframeValueType::CameraData:
+                    return 7;
+                case Types::KeyframeValueType::Vector3:
+                    return 3;
+                default:
+                    throw std::runtime_error("Not implemented");
+            }
+        };
     };
 }

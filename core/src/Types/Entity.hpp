@@ -18,6 +18,8 @@ namespace IWXMVM::Types
     {
         int32_t id;
         EntityType type;
+        int32_t clientNum; // associated client number
+        bool isValid;
 
         std::string ToString()
         {

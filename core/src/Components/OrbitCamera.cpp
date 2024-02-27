@@ -13,13 +13,6 @@ namespace IWXMVM::Components
 {
     void OrbitCamera::Initialize()
     {
-        Events::RegisterListener(EventType::OnRenderGameView, [&]() {
-            if (UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->HasFocus() &&
-                CameraManager::Get().GetActiveCamera()->GetMode() == Camera::Mode::Orbit)
-            {
-                DrawOverlay();
-            }
-        });
     }
 
     void OrbitCamera::Update()
@@ -106,52 +99,5 @@ namespace IWXMVM::Components
         {
             scrollDelta = 0.0;
         }
-    }
-
-    void OrbitCamera::DrawOverlay()
-    {
-        if (Input::BindHeld(Action::OrbitCameraRotate))
-        {
-            DrawGrid();
-        }
-
-        // DrawOrbitPoint();
-    }
-
-    void OrbitCamera::DrawGrid()
-    {
-        auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
-        auto viewport = glm::vec4(gameView->GetPosition().x, gameView->GetPosition().y,
-                                  gameView->GetPosition().x + gameView->GetSize().x,
-                                  gameView->GetPosition().y + gameView->GetSize().y);
-        ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(viewport.x, viewport.y), ImVec2(viewport.z, viewport.w),
-                                                  ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.0f, 0.6f)));
-
-        const auto GLOBAL_AXIS_LENGTH = 3000.0f;
-        const auto MAIN_COLOR = ImVec4(0.4f, 0.4f, 0.4f, 0.6f);
-        const auto SECONDARY_COLOR = ImVec4(0.5f, 0.5f, 0.5f, 0.4f);
-
-        ImGuiEx::DrawLine3D(glm::vec3(-GLOBAL_AXIS_LENGTH, 0, 0), glm::vec3(GLOBAL_AXIS_LENGTH, 0, 0), MAIN_COLOR, 5);
-        ImGuiEx::DrawLine3D(glm::vec3(0, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(0, GLOBAL_AXIS_LENGTH, 0), MAIN_COLOR, 5);
-
-        for (int i = -GLOBAL_AXIS_LENGTH; i < GLOBAL_AXIS_LENGTH; i += 100)
-        {
-            ImGuiEx::DrawLine3D(glm::vec3(-GLOBAL_AXIS_LENGTH, i, 0), glm::vec3(GLOBAL_AXIS_LENGTH, i, 0),
-                                SECONDARY_COLOR, 3);
-            ImGuiEx::DrawLine3D(glm::vec3(i, -GLOBAL_AXIS_LENGTH, 0), glm::vec3(i, GLOBAL_AXIS_LENGTH, 0),
-                                SECONDARY_COLOR, 3);
-        }
-    }
-
-    void OrbitCamera::DrawOrbitPoint()
-    {
-        const auto AXIS_LENGTH = 150.0f;
-
-        ImGuiEx::DrawLine3D(orbitCameraOrigin - glm::vec3(AXIS_LENGTH, 0, 0),
-                            orbitCameraOrigin + glm::vec3(AXIS_LENGTH, 0, 0), ImVec4(1.0f, 0.0f, 0.0f, 0.8f), 5);
-        ImGuiEx::DrawLine3D(orbitCameraOrigin - glm::vec3(0, AXIS_LENGTH, 0),
-                            orbitCameraOrigin + glm::vec3(0, AXIS_LENGTH, 0), ImVec4(0.0f, 1.0f, 0.0f, 0.8f), 5);
-        ImGuiEx::DrawLine3D(orbitCameraOrigin - glm::vec3(0, 0, AXIS_LENGTH),
-                            orbitCameraOrigin + glm::vec3(0, 0, AXIS_LENGTH), ImVec4(0.0f, 0.0f, 1.0f, 0.8f), 5);
     }
 }  // namespace IWXMVM::Components

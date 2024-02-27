@@ -265,8 +265,16 @@ namespace IWXMVM::GFX
         return false;
     }
 
-    std::optional<int32_t> heldAxis = std::nullopt;
-    bool objectHoveredThisFrame = false;
+    bool GraphicsManager::MouseIntersectsSphereAt(ImVec2 mousePos, glm::vec3 pos, float radius)
+    {
+        auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        const auto view = GetViewMatrix();
+        const auto projection = GetProjectionMatrix();
+        const auto mouseRayDirection = GetMouseRay(mousePos, projection, view);
+
+        float distance;
+        return glm::intersectRaySphere(camera->GetPosition(), glm::normalize(mouseRayDirection), pos, radius * radius, distance);
+    }
     
     void GraphicsManager::DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
     {
@@ -290,7 +298,10 @@ namespace IWXMVM::GFX
             }
         }
 
-        BufferManager::Get().DrawMesh(mesh, model);
+        IDirect3DDevice9* device = D3D9::GetDevice();
+        device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+        BufferManager::Get().DrawMesh(mesh, model, true);
+        device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
     }
 
     
@@ -362,14 +373,6 @@ namespace IWXMVM::GFX
                 auto dot = glm::dot(glm::normalize(intersection.value() - position), axisDirection);
                 auto distance = glm::distance(intersection.value(), position);
                 position = position + axisDirection * dot * distance;
-            }
-
-            // Draw axis
-            auto step = 10.0f;
-            for (int i = -2000; i < 2000; i += step)
-            {
-                BufferManager::Get().DrawMesh(
-                    icosphere, glm::translate(position + axisDirection * i) * glm::scale(glm::vec3(1, 1, 1) * 0.8f));
             }
         }
     }
@@ -464,7 +467,7 @@ namespace IWXMVM::GFX
                                                        glm::radians(node.value.cameraData.rotation.z));
                 auto scale = glm::scale(glm::vec3(1, 1, 1));
                 
-                bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, camera, translate * rotate);
+                bool mouseIntersects = MouseIntersectsSphereAt(ImGui::GetIO().MousePos, node.value.cameraData.position, 20);
                 objectHoveredThisFrame |= mouseIntersects;
                 if (mouseIntersects && !heldAxis.has_value())
                    scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
@@ -517,7 +520,7 @@ namespace IWXMVM::GFX
                         const auto rotate = glm::eulerAngleZYX(glm::radians(interpValue.cameraData.rotation.y),
                                                                glm::radians(interpValue.cameraData.rotation.x),
                                                                glm::radians(interpValue.cameraData.rotation.z));
-                        BufferManager::Get().DrawMesh(icosphere, translate * scale * rotate);
+                        BufferManager::Get().DrawMesh(icosphere, translate * scale * rotate, true);
                     }
                 }
             }
@@ -526,14 +529,14 @@ namespace IWXMVM::GFX
         if (currentCameraMode == Components::Camera::Mode::Bone)
         {
             auto& boneCamera = dynamic_cast<Components::BoneCamera&>(*activeCam);
-			const auto& bones = Mod::GetGameInterface()->GetSupportedBoneNames();
-			const std::string& selectedBoneName = bones.at(boneCamera.GetBoneIndex());
-			const auto selectedPlayer = boneCamera.GetEntityId();
-			const auto& boneData = Mod::GetGameInterface()->GetBoneData(selectedPlayer, selectedBoneName);
+            const auto& bones = Mod::GetGameInterface()->GetSupportedBoneNames();
+            const std::string& selectedBoneName = bones.at(boneCamera.GetBoneIndex());
+            const auto selectedPlayer = boneCamera.GetEntityId();
+            const auto& boneData = Mod::GetGameInterface()->GetBoneData(selectedPlayer, selectedBoneName);
 
-			const auto translate = glm::translate(boneData.position);
-			const auto scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
-			BufferManager::Get().DrawMesh(axis, translate * glm::mat4x4(boneData.rotation) * scale);
+            const auto translate = glm::translate(boneData.position);
+            const auto scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
+            BufferManager::Get().DrawMesh(axis, translate * glm::mat4x4(boneData.rotation) * scale, true);
         }
 
         // Restore the DX9 transform
