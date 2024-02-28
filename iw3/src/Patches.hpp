@@ -19,15 +19,16 @@ namespace IWXMVM::IW3::Patches
         ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
         
 
-        // For rewinding
-         // TODO: sigs
-        NopPatch<5> Con_TimeJumped{0x45C2A7, PatchApplySetting::Deferred};
-        NopPatch<2> CL_SetCGameTime{0x45C511, PatchApplySetting::Immediately};
-        JumpPatch CL_CGameNeedsServerCommand{0x45B01A, PatchApplySetting::Immediately};
-        JumpPatch CG_ProcessSnapshots{0x44E4B0, PatchApplySetting::Immediately};
-        JumpPatch CG_ReadNextSnapshot{0x44E2C3, PatchApplySetting::Immediately};
-        NopPatch<5> CG_MapRestart{0x44B4AD, PatchApplySetting::Immediately}; // Prevents cg_thirdperson from being reset
-
+        // For rewinding (not sure if all of these are actually necessary)
+        NopPatch<5> Con_TimeJumped{GetGameAddresses().Con_TimeJumpedCall(), PatchApplySetting::Deferred};
+        NopPatch<2> CL_SetCGameTime{GetGameAddresses().CL_SetCGameTimeError(), PatchApplySetting::Immediately};
+        JumpPatch CL_CGameNeedsServerCommand{GetGameAddresses().CL_CGameNeedsServerCommandError(),
+                                             PatchApplySetting::Immediately};
+        JumpPatch CG_ProcessSnapshots{GetGameAddresses().CG_ProcessSnapshotsError(), PatchApplySetting::Immediately};
+        JumpPatch CG_ReadNextSnapshot{GetGameAddresses().CG_ReadNextSnapshotWarning(), PatchApplySetting::Immediately};
+        NopPatch<5> CG_MapRestart{GetGameAddresses().CG_MapRestartSetThirdpersonCall(),
+                                  PatchApplySetting::Immediately};  // Prevents cg_thirdperson from being reset
+         
         ReturnPatch R_AddCmdDrawTextWithEffects{GetGameAddresses().R_AddCmdDrawTextWithEffects(),
                                                 PatchApplySetting::Deferred};
     };
