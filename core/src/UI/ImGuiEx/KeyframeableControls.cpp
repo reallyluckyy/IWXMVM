@@ -42,7 +42,8 @@ namespace ImGuiEx::Keyframeable
             throw std::invalid_argument("Property is not a floating point value");
 
         const auto& keyframes = keyframeManager.GetKeyframes(property);
-        DrawKeyframeButton(label, keyframes.empty(), [&]() {
+        DrawKeyframeButton(std::format("##{0}{1}KeyframeButton", label, magic_enum::enum_name(propertyType)).c_str(),
+                           keyframes.empty(), [&]() {
             keyframeManager.GetKeyframes(property).emplace_back(
                 property, 
                 IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
@@ -55,10 +56,11 @@ namespace ImGuiEx::Keyframeable
 
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4);
 
+        const auto labelText = std::format("##{0}{1}Label", label, magic_enum::enum_name(propertyType));
         bool result = true;
         if (keyframes.empty())
         {
-            result = ImGui::SliderFloat(std::format("##{0}{1}", label, magic_enum::enum_name(propertyType)).c_str(), v, v_min, v_max);
+            result = ImGui::SliderFloat(labelText.c_str(), v, v_min, v_max);
         }
         else
         {
@@ -68,7 +70,7 @@ namespace ImGuiEx::Keyframeable
             *v = interpolatedValue.floatingPoint;
 
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
-            ImGui::SliderFloat(std::format("##{0}", label).c_str(), v, v_min, v_max, "%.2f", ImGuiSliderFlags_NoInput);
+            ImGui::SliderFloat(labelText.c_str(), v, v_min, v_max, "%.2f", ImGuiSliderFlags_NoInput);
             ImGui::PopStyleVar();
 
             DrawTooltip();
