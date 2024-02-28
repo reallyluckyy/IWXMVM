@@ -11,6 +11,7 @@
 #include "Input.hpp"
 #include "Components/KeyframeManager.hpp"
 #include "Components/KeyframeSerializer.hpp"
+#include "Components/Playback.hpp"
 #include "Events.hpp"
 #include "Utilities/PathUtils.hpp"
 
@@ -458,15 +459,72 @@ namespace IWXMVM::UI
         }
     }
 
-    void DrawKeyframeValueInput(const char* label, float value)
+    void DrawKeyframeValueInput(const char* label, float dvalue, const Types::KeyframeableProperty& property, int index)
     {
+        std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
         static float v = 0;
 
-        v = value;
+        v = dvalue;
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6.0f);
         if (ImGui::DragFloat(label, &v, 0.1f, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE, "%.2f"))
         {
-            // TODO: should this do something?
+            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            auto currentTick = demoInfo.currentTick;
+            auto [tick, val] = std::make_tuple(currentTick, v);
+            if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
+                keyframes.end())
+            {
+                auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
+                keyframes.emplace_back(property, tick, value);
+            }
+            else
+            {
+                auto keyframe = std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; });
+                keyframe->value.SetByIndex(index, v);
+            }
+            Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
+        }
+    }
+
+    void DrawLeftArrow(const char* label, const Types::KeyframeableProperty& property)
+    {
+        std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
+        ImGui::SameLine();
+        if (ImGui::ArrowButton(label, 0))
+        {
+            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            auto currentTick = demoInfo.currentTick;
+            auto previousKeyframe = *keyframes.begin();
+            for (const auto& keyframe : keyframes)
+            {
+                if (keyframe.tick < currentTick)
+                    previousKeyframe = keyframe;
+            }
+            if (previousKeyframe.tick < currentTick)
+            {
+                Components::Playback::SetTickDelta(previousKeyframe.tick - demoInfo.currentTick);
+            }
+        }
+    }
+
+     void DrawRightArrow(const char* label, const Types::KeyframeableProperty& property)
+    {
+        std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
+        ImGui::SameLine();
+        if (ImGui::ArrowButton(label, 1))
+        {
+            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            auto currentTick = demoInfo.currentTick;
+            auto previousKeyframe = *keyframes.rbegin();
+            for (std::vector<Types::Keyframe>::reverse_iterator keyframe = keyframes.rbegin(); keyframe != keyframes.rend(); ++keyframe)
+            {
+                if (keyframe->tick > currentTick)
+                    previousKeyframe = *keyframe;
+            }
+            if (previousKeyframe.tick > currentTick)
+            {
+                Components::Playback::SetTickDelta(previousKeyframe.tick - demoInfo.currentTick);
+            }
         }
     }
 
@@ -574,7 +632,9 @@ namespace IWXMVM::UI
 
                             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding.x);
                             DrawKeyframeValueInput(std::format("##valueInput{0}{1}", property.name, i).c_str(),
-                                                   value.GetByIndex(i));
+                                                   value.GetByIndex(i), property, i);
+                            DrawLeftArrow(std::format("##leftArrow{0}{1}", property.name, i).c_str(), property);
+                            DrawRightArrow(std::format("##rightArrow{0}{1}", property.name, i).c_str(), property);
 
                             if (disableValueInput)
                                 ImGui::EndDisabled();
