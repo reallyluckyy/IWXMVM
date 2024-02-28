@@ -11,6 +11,7 @@
 #include "Input.hpp"
 #include "Components/KeyframeManager.hpp"
 #include "Components/KeyframeSerializer.hpp"
+#include "Components/Rewinding.hpp"
 #include "Components/Playback.hpp"
 #include "Events.hpp"
 #include "Utilities/PathUtils.hpp"
@@ -502,7 +503,7 @@ namespace IWXMVM::UI
             }
             if (previousKeyframe.tick < currentTick)
             {
-                Components::Playback::SetTickDelta(previousKeyframe.tick - demoInfo.currentTick);
+                Components::Rewinding::RewindBy(previousKeyframe.tick - demoInfo.currentTick);
             }
         }
     }
@@ -515,15 +516,15 @@ namespace IWXMVM::UI
         {
             auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
             auto currentTick = demoInfo.currentTick;
-            auto previousKeyframe = *keyframes.rbegin();
+            auto nextKeyframe = *keyframes.rbegin();
             for (std::vector<Types::Keyframe>::reverse_iterator keyframe = keyframes.rbegin(); keyframe != keyframes.rend(); ++keyframe)
             {
                 if (keyframe->tick > currentTick)
-                    previousKeyframe = *keyframe;
+                    nextKeyframe = *keyframe;
             }
-            if (previousKeyframe.tick > currentTick)
+            if (nextKeyframe.tick > currentTick)
             {
-                Components::Playback::SetTickDelta(previousKeyframe.tick - demoInfo.currentTick);
+                Components::Playback::SkipForward(nextKeyframe.tick - demoInfo.currentTick);
             }
         }
     }
