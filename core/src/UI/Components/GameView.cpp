@@ -241,8 +241,8 @@ namespace IWXMVM::UI
             ImGui::PopFont();
             return;
         }
-
-        ImGui::SetNextItemWidth(300);
+        
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 12);
 
         if (ImGui::BeginCombo("##gameViewCameraCombo",
                               cameraManager.GetCameraModeLabel(currentCamera->GetMode()).data()))
@@ -285,7 +285,7 @@ namespace IWXMVM::UI
             ImGui::SameLine();
 
             auto boneCamera = static_cast<Components::BoneCamera*>(currentCamera.get());
-            ImGui::SetNextItemWidth(200);
+            ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
             auto entities = Mod::GetGameInterface()->GetEntities();
             if (ImGui::BeginCombo("##gameViewBoneCameraTargetCombo", entities[boneCamera->GetEntityId()].ToString().c_str()))
             {
@@ -311,7 +311,7 @@ namespace IWXMVM::UI
 
             const auto& supportedBoneNames = Mod::GetGameInterface()->GetSupportedBoneNames();
 
-            ImGui::SetNextItemWidth(200);
+            ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
             if (ImGui::BeginCombo("##gameViewBoneCameraBoneCombo",
                                   supportedBoneNames[boneCamera->GetBoneIndex()].c_str()))
             {
@@ -345,7 +345,7 @@ namespace IWXMVM::UI
                 ImGui::Text("Offset");
                 ImGui::SameLine();
 
-                ImGui::SetNextItemWidth(200);
+                ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
                 ImGui::DragFloat3("##gameViewBoneCameraOffset", &boneCamera->GetPositionOffset().x, 1, -10000, 10000,
                                   "%.1f");
 
@@ -355,7 +355,7 @@ namespace IWXMVM::UI
                 ImGui::Text("Rotation");
                 ImGui::SameLine();
 
-                ImGui::SetNextItemWidth(200);
+                ImGui::SetNextItemWidth(ImGui::GetFontSize() * 8);
                 ImGui::DragFloat3("##gameViewBoneCameraRotation", &boneCamera->GetRotationOffset().x, 1, -180, 180,
                                   "%.1f");
 
@@ -365,7 +365,7 @@ namespace IWXMVM::UI
                 ImGui::Text("FOV");
                 ImGui::SameLine();
 
-                ImGui::SetNextItemWidth(50);
+                ImGui::SetNextItemWidth(ImGui::GetFontSize() * 2);
                 ImGui::DragFloat("##gameViewBoneCameraFOV", &boneCamera->GetFov(), 1, 1, 180, "%.0f");
             }
         }
