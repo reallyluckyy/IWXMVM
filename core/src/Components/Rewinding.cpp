@@ -59,9 +59,14 @@ namespace IWXMVM::Components::Rewinding
 
         if (latestRewindTo > 0)
         {
-            if (*reinterpret_cast<int*>(addresses.cl.snap_serverTime) + 1000 >= latestRewindTo &&
-                *reinterpret_cast<int*>(addresses.cl.snap_serverTime) >= initialGamestate->serverTime + 1000)
+            if (auto curTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
+                curTime + 1000 >= latestRewindTo && curTime >= initialGamestate->serverTime + 1000)
             {
+                if (curTime < latestRewindTo)
+                {
+                    Playback::SkipForward(latestRewindTo - curTime);
+                }
+
                 LOG_DEBUG("Finished rewinding. Requested server time: {}, actual server time: {}", latestRewindTo,
                           *reinterpret_cast<int*>(addresses.cl.snap_serverTime));
                 latestRewindTo = 0;
@@ -87,7 +92,7 @@ namespace IWXMVM::Components::Rewinding
             Mod::GetGameInterface()->ResetClientData(latestRewindTo);
             Mod::GetGameInterface()->CL_FirstSnapshot();
 
-            LOG_DEBUG("Rewinded and time is now: {}", latestRewindTo - initialGamestate->serverTime);
+            LOG_DEBUG("Rewound and time is now: {}", latestRewindTo - initialGamestate->serverTime);
             demoFileOffset = initialGamestate->fileOffset;
             demoFile.seekg(demoFileOffset);
 
