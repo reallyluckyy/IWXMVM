@@ -21,7 +21,7 @@ namespace ImGuiEx::Keyframeable
         ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 0.0f);
         ImGui::BeginDisabled(!drawButton);
         if (ImGui::Button(std::format(ICON_FA_STOPWATCH "##{0}", label).c_str(), 
-            ImVec2(ImGui::GetFontSize() * 1.5, ImGui::GetFontSize() * 1.5)))
+            ImVec2(ImGui::GetFontSize() * 1.5f, ImGui::GetFontSize() * 1.5f)))
         {
             AddKeyframe();
         }
@@ -54,7 +54,7 @@ namespace ImGuiEx::Keyframeable
         ImGui::Text(label);
         ImGui::SameLine();
 
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4);
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
 
         const auto labelText = std::format("##{0}{1}Label", label, magic_enum::enum_name(propertyType));
         bool result = true;
@@ -100,8 +100,8 @@ namespace ImGuiEx::Keyframeable
         ImGui::Text(label);
         ImGui::SameLine();
 
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6 - ImGui::GetStyle().WindowPadding.x);
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
         bool result = true;
         if (keyframes.empty())
         {
@@ -147,8 +147,8 @@ namespace ImGuiEx::Keyframeable
         ImGui::Text(label);
         ImGui::SameLine();
 
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6 - ImGui::GetStyle().WindowPadding.x);
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
         bool result = true;
         if (keyframes.empty())
         {

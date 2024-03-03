@@ -176,7 +176,7 @@ namespace IWXMVM::Components::Rewinding
             else
             {
                 demoFile.seekg(0, std::ios::end);
-                demoFileSize = demoFile.tellg();
+                demoFileSize = (uint32_t)demoFile.tellg();
                 demoFile.seekg(0, std::ios::beg);
 
                 filestreamState = FilestreamState::Initialized;

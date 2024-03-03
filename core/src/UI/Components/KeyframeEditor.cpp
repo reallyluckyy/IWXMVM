@@ -71,9 +71,9 @@ namespace IWXMVM::UI
         const auto mousePercentage = (ImGui::GetMousePos().x - rectMin.x) / barLength;
 
         scrollDelta = scrollDelta * 100 * ZOOM_MULTIPLIER * maxTick / 50000;
-        displayStartTick += scrollDelta * mousePercentage;
+        displayStartTick += static_cast<uint32_t>(scrollDelta * mousePercentage);
         displayStartTick = glm::clamp(displayStartTick, minTick, displayEndTick - MINIMUM_ZOOM);
-        displayEndTick -= scrollDelta * (1.0f - mousePercentage);
+        displayEndTick -= static_cast<uint32_t>(scrollDelta * (1.0f - mousePercentage));
         displayEndTick = glm::clamp(displayEndTick, displayStartTick + MINIMUM_ZOOM, maxTick);
 
         if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))

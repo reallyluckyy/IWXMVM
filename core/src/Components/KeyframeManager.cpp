@@ -173,6 +173,12 @@ namespace IWXMVM::Components
         return Interpolate(property, keyframes, tick);
     }
 
+    Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property, const uint32_t tick) const 
+    {
+        return Interpolate(property, static_cast<float>(tick));
+    }
+
+
     Types::KeyframeValue KeyframeManager::CubicInterpolate(Types::KeyframeValueType valueType,
                                                            const auto& keyframes,
                                                            const float tick) const

@@ -40,7 +40,7 @@ namespace IWXMVM::Components
 
     struct CaptureSettings
     {
-        int32_t startTick, endTick;
+        uint32_t startTick, endTick;
         
         OutputFormat outputFormat;
         std::optional<VideoCodec> videoCodec;

@@ -50,10 +50,10 @@ namespace IWXMVM::UI
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(halfWidth);
-            ImGui::DragInt("##startTickInput", &captureSettings.startTick, 10, 0, captureSettings.endTick);
+            ImGui::DragInt("##startTickInput", (int32_t*)&captureSettings.startTick, 10, 0, captureSettings.endTick);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(halfWidth);
-            ImGui::DragInt("##endTickInput", &captureSettings.endTick, 10, captureSettings.startTick, endTick);
+            ImGui::DragInt("##endTickInput", (int32_t*)&captureSettings.endTick, 10, captureSettings.startTick, endTick);
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Output Format");

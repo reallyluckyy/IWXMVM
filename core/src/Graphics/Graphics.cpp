@@ -76,7 +76,7 @@ namespace IWXMVM::GFX
         BufferManager::Get().AddMesh(&camera);
         BufferManager::Get().AddMesh(&icosphere);
 
-        for (int i = 0; i < gizmo_translate_x.vertices.size(); i++)
+        for (size_t i = 0; i < gizmo_translate_x.vertices.size(); i++)
         {
             gizmo_translate_x.vertices[i].col = D3DCOLOR_COLORVALUE(1, 0, 0, 1);
             gizmo_translate_y.vertices[i].col = D3DCOLOR_COLORVALUE(0, 1, 0, 1);
@@ -86,7 +86,7 @@ namespace IWXMVM::GFX
         BufferManager::Get().AddMesh(&gizmo_translate_y);
         BufferManager::Get().AddMesh(&gizmo_translate_z);
 
-        for (int i = 0; i < gizmo_rotate_x.vertices.size(); i++)
+        for (size_t i = 0; i < gizmo_rotate_x.vertices.size(); i++)
         {
             gizmo_rotate_x.vertices[i].col = D3DCOLOR_COLORVALUE(1, 0, 0, 1);
             gizmo_rotate_y.vertices[i].col = D3DCOLOR_COLORVALUE(0, 1, 0, 1);
@@ -245,7 +245,7 @@ namespace IWXMVM::GFX
         const auto projection = GetProjectionMatrix();
         const auto mouseRayDirection = GetMouseRay(mousePos, projection, view);
 
-        for (int i = 0; i < mesh.indices.size(); i += 3)
+        for (size_t i = 0; i < mesh.indices.size(); i += 3)
         {
             const auto i1 = mesh.indices[i];
             const auto i2 = mesh.indices[i+1];

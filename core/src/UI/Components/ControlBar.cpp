@@ -64,7 +64,7 @@ namespace IWXMVM::UI
         }
     }
 
-    bool ControlBar::DrawDemoProgressBar(int32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)
+    bool ControlBar::DrawDemoProgressBar(uint32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)
     {
         using namespace ImGui;
         auto label = "##demoProgressBar";
@@ -209,7 +209,7 @@ namespace IWXMVM::UI
 
                 ImGui::SameLine(progressBarX);
                 ImGui::SetNextItemWidth(progressBarWidth);
-                static std::int32_t tickValue{};
+                static uint32_t tickValue{};
 
                 auto keyframeEditor = UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
                 auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();

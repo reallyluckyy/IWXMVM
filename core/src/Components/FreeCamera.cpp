@@ -69,7 +69,7 @@ namespace IWXMVM::Components
         constexpr float SCROLL_UPPER_BOUNDARY = 0.001f;
         const float SMOOTHING_FACTOR = glm::clamp(1.0f - 15.0f * Input::GetDeltaTime(), 0.0f, 1.0f);
 
-        static double scrollDelta = 0.0;
+        static auto scrollDelta = 0.0f;
 
         auto speedModifier = Input::KeyHeld(ImGuiKey_LeftCtrl) ? 0.1f : 1.0f;
         speedModifier *= Input::KeyHeld(ImGuiKey_LeftShift) ? 3.0f : 1.0f;
