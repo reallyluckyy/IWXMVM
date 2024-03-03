@@ -109,6 +109,9 @@ namespace IWXMVM::UI
     {
         std::scoped_lock lock(UI::UIManager::Get().GetMutex());
 
+        // Make sure the system cursor wasnt hidden by some game logic
+        ShowCursor(TRUE);
+
         auto& gameView = UIManager::Get().GetUIComponent(UI::Component::GameView);
         if (gameView->HasFocus() && UIManager::Get().IsFreecamSelected())
         {
