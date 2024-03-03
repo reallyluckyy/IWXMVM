@@ -242,15 +242,6 @@ namespace IWXMVM::Components::Rewinding
             return;
         }
 
-        // If playback is paused, skip forward a little bit to trigger
-        // a demo file read, which will restore the gamestate.
-        // This is admittedly a bit of a hack.
-        if (Components::Playback::IsPaused())
-        {
-            LOG_DEBUG("Demo was paused while rewinding, so skipping 200 ms forward");
-            Playback::SkipForward(200);
-        }
-
         LOG_DEBUG("Rewinding back {} ticks", ticks);
     }
 
