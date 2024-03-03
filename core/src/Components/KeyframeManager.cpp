@@ -11,87 +11,104 @@ namespace IWXMVM::Components
     Types::KeyframeableProperty campathCameraProperty(
         Types::KeyframeablePropertyType::CampathCamera, 
         ICON_FA_VIDEO " Campath Camera",
-        Types::KeyframeValueType::CameraData
+        Types::KeyframeValueType::CameraData,
+        -3000, 3000 // TODO: this is not super helpful for rotation and fov
     );
     Types::KeyframeableProperty sunLightColorProperty(
         Types::KeyframeablePropertyType::SunLightColor,
         ICON_FA_SUN " Sun Light Color",
-        Types::KeyframeValueType::Vector3
+        Types::KeyframeValueType::Vector3,
+        0, 255
     );
     Types::KeyframeableProperty sunLightBrightnessProperty(
         Types::KeyframeablePropertyType::SunLightBrightness,
         ICON_FA_SUN " Sun Light Brightness",
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint,
+        0, 4
     );
     Types::KeyframeableProperty sunLightPitchProperty(
         Types::KeyframeablePropertyType::SunLightPitch,
         ICON_FA_SUN " Sun Light Pitch",
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint,
+        0, 360
     );
     Types::KeyframeableProperty sunLightYawProperty(
         Types::KeyframeablePropertyType::SunLightYaw,
         ICON_FA_SUN " Sun Light Yaw",
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint, 
+        0, 360
     );
     Types::KeyframeableProperty filmtweakBrightnessProperty(
         Types::KeyframeablePropertyType::FilmtweakBrightness,
         ICON_FA_IMAGE " Filmtweak Brightness",
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint,
+        -1, 1
     );
     Types::KeyframeableProperty filmtweakContrastProperty(
         Types::KeyframeablePropertyType::FilmtweakContrast,
         ICON_FA_IMAGE " Filmtweak Contrast",
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint,
+        0, 4
     );
     Types::KeyframeableProperty filmtweakDesaturationProperty(
         Types::KeyframeablePropertyType::FilmtweakDesaturation,
         ICON_FA_IMAGE " Filmtweak Desaturation",
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint, 
+        0, 1
     );
     Types::KeyframeableProperty filmtweakTintLightProperty(
         Types::KeyframeablePropertyType::FilmtweakTintLight,
         ICON_FA_IMAGE " Filmtweak Tint Light",
-        Types::KeyframeValueType::Vector3
+        Types::KeyframeValueType::Vector3,
+        0, 255
     );
     Types::KeyframeableProperty filmtweakTintDarkProperty(
         Types::KeyframeablePropertyType::FilmtweakTintDark,
         ICON_FA_IMAGE " Filmtweak Tint Dark",
-        Types::KeyframeValueType::Vector3
+        Types::KeyframeValueType::Vector3,
+        0, 255
     );
     Types::KeyframeableProperty dofFarBlur(
         Types::KeyframeablePropertyType::DepthOfFieldFarBlur,
         ICON_FA_CAMERA " DOF Far Blur",
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint,
+        0, 10
     );
     Types::KeyframeableProperty dofFarStart(
         Types::KeyframeablePropertyType::DepthOfFieldFarStart,
         ICON_FA_CAMERA " DOF Far Start",
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint, 
+        0, 5000
     );
     Types::KeyframeableProperty dofFarEnd(
         Types::KeyframeablePropertyType::DepthOfFieldFarEnd,
         ICON_FA_CAMERA " DOF Far End", 
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint, 
+        0, 5000
     );
     Types::KeyframeableProperty dofNearBlur(
         Types::KeyframeablePropertyType::DepthOfFieldNearBlur,
         ICON_FA_CAMERA " DOF Near Blur", 
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint,
+        0, 10
     );
     Types::KeyframeableProperty dofNearStart(
         Types::KeyframeablePropertyType::DepthOfFieldNearStart,
         ICON_FA_CAMERA " DOF Near Start", 
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint, 
+        0, 5000
     );
     Types::KeyframeableProperty dofNearEnd(
         Types::KeyframeablePropertyType::DepthOfFieldNearEnd,
         ICON_FA_CAMERA " DOF Near End", 
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint,
+        0, 5000
     );
     Types::KeyframeableProperty dofBias(
         Types::KeyframeablePropertyType::DepthOfFieldBias,
         ICON_FA_CAMERA " DOF Bias", 
-        Types::KeyframeValueType::FloatingPoint
+        Types::KeyframeValueType::FloatingPoint, 
+        0.1, 10
     );
 
     void KeyframeManager::Initialize()
