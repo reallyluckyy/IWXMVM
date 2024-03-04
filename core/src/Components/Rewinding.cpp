@@ -62,11 +62,6 @@ namespace IWXMVM::Components::Rewinding
             auto curTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
             if (curTime + 1000 >= latestRewindTo && curTime >= initialGamestate->serverTime + 1000)
             {
-                if (curTime < latestRewindTo)
-                {
-                    Playback::SkipForward(latestRewindTo - curTime);
-                }
-
                 LOG_DEBUG("Finished rewinding. Requested server time: {}, actual server time: {}", latestRewindTo,
                           *reinterpret_cast<int*>(addresses.cl.snap_serverTime));
                 latestRewindTo = 0;
