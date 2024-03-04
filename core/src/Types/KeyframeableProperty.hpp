@@ -35,9 +35,13 @@ namespace IWXMVM::Types
         Types::KeyframeablePropertyType type;
         std::string_view name;
         KeyframeValueType valueType;
+        std::tuple<float, float> defaultValueRange;
 
-        KeyframeableProperty(Types::KeyframeablePropertyType type, std::string_view name, KeyframeValueType valueType)
-            : type(type), name(name), valueType(valueType)
+        KeyframeableProperty(Types::KeyframeablePropertyType type, std::string_view name, KeyframeValueType valueType, float defaultValueRangeMin, float defaultValueRangeMax)
+            : type(type),
+              name(name),
+              valueType(valueType),
+              defaultValueRange(std::make_tuple(defaultValueRangeMin, defaultValueRangeMax))
         {
         }
 

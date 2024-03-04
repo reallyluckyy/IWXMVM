@@ -9,7 +9,7 @@ namespace IWXMVM::UI
         void Render() final;
         void Release() final;
 
-        bool DrawDemoProgressBar(int32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick,
+        bool DrawDemoProgressBar(uint32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick,
                                  uint32_t startTick, uint32_t endTick);
 
        private:

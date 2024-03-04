@@ -82,7 +82,7 @@ namespace IWXMVM::UI
 
     void DrawKeyBox(const char* keyName)
     {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.1, 0.1, 0.1, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5);
         ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 1.0f);
 
@@ -108,7 +108,7 @@ namespace IWXMVM::UI
         auto initialPos = ImGui::GetCursorPos();
         ImGui::SetCursorPos(ImVec2(0, ImGui::GetCursorPosY() - spacing * 0.5f));
 
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.1, 0.1, 0.1, 0.4f));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.1f, 0.1f, 0.1f, 0.4f));
         ImGui::PushStyleVar(ImGuiStyleVar_DisabledAlpha, 1.0f);
 
         ImGui::BeginDisabled();

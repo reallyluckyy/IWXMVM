@@ -310,8 +310,8 @@ namespace IWXMVM::D3D9
 
         auto device = D3D9::GetDevice();
 
-        auto result = D3DXCreateTexture(device, size.x, size.y, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8,
-                                        D3DPOOL_DEFAULT, &texture);
+        auto result = D3DXCreateTexture(device, (UINT)size.x, (UINT)size.y, D3DX_DEFAULT, D3DUSAGE_RENDERTARGET,
+                                        D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &texture);
         if (FAILED(result))
             return false;
 

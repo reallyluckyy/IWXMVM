@@ -181,7 +181,7 @@ namespace IWXMVM::Components::Rewinding
             else
             {
                 demoFile.seekg(0, std::ios::end);
-                demoFileSize = demoFile.tellg();
+                demoFileSize = (uint32_t)demoFile.tellg();
                 demoFile.seekg(0, std::ios::beg);
 
                 filestreamState = FilestreamState::Initialized;
@@ -240,7 +240,7 @@ namespace IWXMVM::Components::Rewinding
             LOG_DEBUG("Attempted to rewind back {} ticks", ticks);
             return;
         }
-
+      
         LOG_DEBUG("Rewinding back {} ticks", ticks);
     }
 

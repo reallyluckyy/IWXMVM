@@ -49,6 +49,7 @@ namespace IWXMVM::IW3
         void SetMouseMode(Types::MouseMode mode) final
         {
             Structures::GetMouseVars()->mouseInitialized = (mode == Types::MouseMode::Capture) ? false : true;
+            Structures::GetMouseVars()->mouseActive = (mode == Types::MouseMode::Capture) ? false : true;
         }
 
         Types::GameState GetGameState() final

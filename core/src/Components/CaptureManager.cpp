@@ -50,8 +50,8 @@ namespace IWXMVM::Components
     void CaptureManager::Initialize()
     {
         captureSettings = {
-            -1,
-            -1,
+            0,
+            0,
             OutputFormat::Video, 
             VideoCodec::Prores4444,
             Resolution(1920, 1080),
@@ -61,11 +61,11 @@ namespace IWXMVM::Components
         outputDirectory = std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "recordings";
 
         Events::RegisterListener(EventType::PostDemoLoad, [&]() {
-            if (captureSettings.startTick == -1 || captureSettings.endTick == -1)
+            if (captureSettings.startTick == 0 || captureSettings.endTick == 0)
             {
                 auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
-                captureSettings.startTick = endTick * 0.1;
-                captureSettings.endTick = endTick * 0.9;
+                captureSettings.startTick = static_cast<int32_t>(endTick * 0.1);
+                captureSettings.endTick = static_cast<int32_t>(endTick * 0.9);
             }
         });
 
@@ -203,8 +203,8 @@ namespace IWXMVM::Components
                     captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string(), filename);
             }
             default:
-                LOG_ERROR("Output format not supported yet");
-                break;
+                LOG_ERROR("Output format not supported");
+                return "";
         }
     }
 

@@ -16,6 +16,8 @@
 
 namespace IWXMVM::UI
 {
+    std::map<Types::KeyframeablePropertyType, std::vector<ImVec2>> verticalZoomRanges;
+
     std::tuple<int32_t, int32_t> KeyframeEditor::GetDisplayTickRange() const
     {
         return {displayStartTick, displayEndTick};
@@ -54,7 +56,39 @@ namespace IWXMVM::UI
         return std::make_tuple(tick, value);
     };
 
-    void KeyframeEditor::HandleTimelineZoomInteractions(const ImVec2 rectMin, const ImVec2 rectMax)
+    void HandleVerticalPan(const ImVec2 rectMin, const ImVec2 rectMax, const Types::KeyframeableProperty& property,
+        std::optional<int32_t> valueIndex)
+    {
+        static int32_t heldValueIndex = -1;
+
+        if (valueIndex.has_value() && Input::KeyDown(ImGuiKey_MouseLeft))
+        {
+            heldValueIndex = valueIndex.value();
+        }
+
+        if (valueIndex.has_value() && Input::KeyUp(ImGuiKey_MouseLeft))
+        {
+            heldValueIndex = -1;
+        }
+
+        auto delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
+
+        if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+        {
+            if (valueIndex.has_value() && heldValueIndex == valueIndex.value())
+            {
+                auto currentRange = verticalZoomRanges[property.type][valueIndex.value()];
+                auto scaledDelta = delta / (rectMax.y - rectMin.y);
+                scaledDelta *= currentRange.y - currentRange.x;
+                verticalZoomRanges[property.type][valueIndex.value()].x += scaledDelta.y;
+                verticalZoomRanges[property.type][valueIndex.value()].y += scaledDelta.y;
+            }
+
+            ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
+        }
+    }
+
+    void KeyframeEditor::HandleTimelineZoomInteractions(const ImVec2 rectMin, const ImVec2 rectMax, const Types::KeyframeableProperty& property, std::optional<int32_t> valueIndex)
     {
         constexpr auto ZOOM_MULTIPLIER = 2000;
         constexpr auto MOVE_MULTIPLIER = 1;
@@ -71,34 +105,43 @@ namespace IWXMVM::UI
         const auto mousePercentage = (ImGui::GetMousePos().x - rectMin.x) / barLength;
 
         scrollDelta = scrollDelta * 100 * ZOOM_MULTIPLIER * maxTick / 50000;
-        displayStartTick += scrollDelta * mousePercentage;
+        displayStartTick += static_cast<uint32_t>(scrollDelta * mousePercentage);
         displayStartTick = glm::clamp(displayStartTick, minTick, displayEndTick - MINIMUM_ZOOM);
-        displayEndTick -= scrollDelta * (1.0f - mousePercentage);
+        displayEndTick -= static_cast<uint32_t>(scrollDelta * (1.0f - mousePercentage));
         displayEndTick = glm::clamp(displayEndTick, displayStartTick + MINIMUM_ZOOM, maxTick);
 
-        if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+        auto delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left, 0.1f);
+
+        if (glm::abs(delta.x) > glm::abs(delta.y) * 1.25f)
         {
-            auto zoomWindowSizeBefore = displayEndTick - displayStartTick;
-
-            auto delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
-            delta /= (rectMax.x - rectMin.x);
-            delta *= (displayEndTick - displayStartTick);
-
-            displayStartTick = glm::max(displayStartTick - (int32_t)(delta.x * MOVE_MULTIPLIER), minTick);
-            displayEndTick = glm::min(displayEndTick - (int32_t)(delta.x * MOVE_MULTIPLIER), maxTick);
-
-            auto zoomWindowSizeAfter = displayEndTick - displayStartTick;
-
-            if (zoomWindowSizeAfter != zoomWindowSizeBefore)
+            if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
             {
-                if (displayStartTick == minTick)
-                    displayEndTick = displayStartTick + zoomWindowSizeBefore;
-                else
-                    displayStartTick = displayEndTick - zoomWindowSizeBefore;
-            }
+                auto zoomWindowSizeBefore = displayEndTick - displayStartTick;
 
-            ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
+                auto scaledDelta = delta / (rectMax.x - rectMin.x);
+                scaledDelta *= (displayEndTick - displayStartTick);
+
+                displayStartTick = glm::max(displayStartTick - (int32_t)(scaledDelta.x * MOVE_MULTIPLIER), minTick);
+                displayEndTick = glm::min(displayEndTick - (int32_t)(scaledDelta.x * MOVE_MULTIPLIER), maxTick);
+
+                auto zoomWindowSizeAfter = displayEndTick - displayStartTick;
+
+                if (zoomWindowSizeAfter != zoomWindowSizeBefore)
+                {
+                    if (displayStartTick == minTick)
+                        displayEndTick = displayStartTick + zoomWindowSizeBefore;
+                    else
+                        displayStartTick = displayEndTick - zoomWindowSizeBefore;
+                }
+
+                ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
+            }
         }
+        else
+        {
+            HandleVerticalPan(rectMin, rectMax, property, valueIndex); 
+        }
+
     }
 
     std::optional<int32_t> selectedKeyframeId = std::nullopt;
@@ -196,7 +239,7 @@ namespace IWXMVM::UI
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && !isAnyKeyframeHovered && !selectedKeyframeId.has_value())
         {
-            HandleTimelineZoomInteractions(frame_bb.Min, frame_bb.Max);
+            HandleTimelineZoomInteractions(frame_bb.Min, frame_bb.Max, property, std::nullopt);
         }
 
         if (hovered && !isAnyKeyframeHovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -210,6 +253,76 @@ namespace IWXMVM::UI
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
             }
         }
+    }
+
+
+    ImVec2& GetValueDisplayRange(const Types::KeyframeableProperty& property,
+                                                  const std::vector<Types::Keyframe>& keyframes,
+                                                  int32_t keyframeValueIndex)
+    {
+        ImVec2 valueBoundaries = ImVec2(-1.0, 1.0);
+        auto& propertyRanges = verticalZoomRanges.at(property.type);
+        return propertyRanges.at(keyframeValueIndex);
+
+        return valueBoundaries;
+    }
+
+    bool PositionInBoundingBox(ImVec2 position, ImRect rect)
+    {
+        return position.x > rect.Min.x && position.x < rect.Max.x && position.y > rect.Min.y &&
+               position.y < rect.Max.y;
+    }
+
+    void DrawVerticalZoomButtons(const Types::KeyframeableProperty& property, int32_t valueIndex)
+    {
+        auto buttonSize = ImVec2(1, 1) * ImGui::GetFontSize() * 1.5f;
+        auto cursorPosition = ImGui::GetCursorPos();
+
+        auto& currentRange = verticalZoomRanges[property.type][valueIndex];
+
+        auto halfMagnitude = (currentRange.y - currentRange.x) * 0.5f;
+        auto center = halfMagnitude + currentRange.x;
+
+        ImGui::PushID(std::format("{}{}zoomButtons", property.name, valueIndex).c_str());
+
+        if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS_PLUS "##verticalZoomInButton", buttonSize))
+        {
+            currentRange.x = center - halfMagnitude * 0.75f;
+            currentRange.y = center + halfMagnitude * 0.75f;
+        }
+
+        ImGui::SetCursorPos(cursorPosition + ImVec2(0, buttonSize.y + ImGui::GetStyle().ItemSpacing.y));
+        if (ImGui::Button(ICON_FA_ARROWS_UP_DOWN "##verticalZoomResetButton", buttonSize))
+        {
+            const auto& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
+            if (!keyframes.empty())
+            {
+                const auto minValueKeyframe =
+                    std::min_element(keyframes.begin(), keyframes.end(), [valueIndex](const auto& a, const auto& b) {
+                        return a.value.GetByIndex(valueIndex) < b.value.GetByIndex(valueIndex);
+                    });
+
+                const auto maxValueKeyframe =
+                    std::max_element(keyframes.begin(), keyframes.end(), [valueIndex](const auto& a, const auto& b) {
+                        return a.value.GetByIndex(valueIndex) < b.value.GetByIndex(valueIndex);
+                    });
+
+                auto minValue = minValueKeyframe->value.GetByIndex(valueIndex);
+                auto maxValue = maxValueKeyframe->value.GetByIndex(valueIndex);
+
+                currentRange.x = (minValue < 0 ? minValue * 1.15f : minValue / 1.15f) - 0.1f;
+                currentRange.y = (maxValue < 0 ? maxValue / 1.15f : maxValue * 1.15f) + 0.1f;
+            }
+        }
+
+        ImGui::SetCursorPos(cursorPosition + ImVec2(0, buttonSize.y + ImGui::GetStyle().ItemSpacing.y) * 2);
+        if (ImGui::Button(ICON_FA_MAGNIFYING_GLASS_MINUS "##verticalZoomOutButton", buttonSize))
+        {
+            currentRange.x = center - halfMagnitude * 1.5f;
+            currentRange.y = center + halfMagnitude * 1.5f;
+        }
+
+        ImGui::PopID();
     }
 
     const float CURVE_EDITOR_LANE_HEIGHT = 200.0f;
@@ -262,29 +375,7 @@ namespace IWXMVM::UI
 
         const auto textSize = CalcTextSize(ICON_FA_DIAMOND);
 
-        ImVec2 valueBoundaries;
-        if (keyframes.empty())
-        {
-            valueBoundaries = ImVec2(-1.0, 1.0);
-        }
-        else
-        {
-            const auto minValueKeyframe = std::min_element(
-                keyframes.begin(), keyframes.end(), [keyframeValueIndex](const auto& a, const auto& b) {
-                    return a.value.GetByIndex(keyframeValueIndex) < b.value.GetByIndex(keyframeValueIndex);
-                });
-
-            const auto maxValueKeyframe = std::max_element(
-                keyframes.begin(), keyframes.end(), [keyframeValueIndex](const auto& a, const auto& b) {
-                    return a.value.GetByIndex(keyframeValueIndex) < b.value.GetByIndex(keyframeValueIndex);
-                });
-
-            auto minValue = minValueKeyframe->value.GetByIndex(keyframeValueIndex);
-            auto maxValue = maxValueKeyframe->value.GetByIndex(keyframeValueIndex);
-            valueBoundaries = ImVec2(minValue < 0 ? minValue * 1.15f : minValue / 1.15f,
-                                     maxValue < 0 ? maxValue / 1.15f : maxValue * 1.15f);
-            valueBoundaries += ImVec2(-0.1, 0.1);
-        }
+        auto valueBoundaries = GetValueDisplayRange(property, keyframes, keyframeValueIndex);
 
         if (!keyframes.empty())
         {
@@ -302,6 +393,12 @@ namespace IWXMVM::UI
                 auto position =
                     GetPositionForKeyframe(frame_bb, Types::Keyframe(property, tick, value), displayStartTick,
                                            displayEndTick, valueBoundaries, keyframeValueIndex);
+
+                if (!PositionInBoundingBox(position, frame_bb))
+                {
+                    continue;
+                }
+
                 polylinePoints.push_back(position);
             }
 
@@ -315,6 +412,12 @@ namespace IWXMVM::UI
 
             const auto position = GetPositionForKeyframe(frame_bb, k, displayStartTick, displayEndTick, valueBoundaries,
                                                          keyframeValueIndex);
+
+            if (!PositionInBoundingBox(position, frame_bb))
+            {
+                ++it;
+                continue;
+            }
 
             ImRect text_bb(ImVec2(position.x - textSize.x / 2, position.y - textSize.y / 2),
                            ImVec2(position.x + textSize.x / 2, position.y + textSize.y / 2));
@@ -401,7 +504,7 @@ namespace IWXMVM::UI
         const bool hovered = ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
         if (hovered && !isAnyKeyframeHovered && !selectedKeyframeId.has_value())
         {
-            HandleTimelineZoomInteractions(frame_bb.Min, frame_bb.Max);
+            HandleTimelineZoomInteractions(frame_bb.Min, frame_bb.Max, property, keyframeValueIndex);
         }
 
         if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -427,7 +530,14 @@ namespace IWXMVM::UI
         });
 
         for (const auto& pair : Components::KeyframeManager::Get().GetKeyframes())
+        {
             propertyVisible[pair.first] = false;
+
+            verticalZoomRanges[pair.first.type] = std::vector<ImVec2>(pair.first.GetValueCount());
+            for (int i = 0; i < pair.first.GetValueCount(); i++)
+                verticalZoomRanges[pair.first.type][i] =
+                    ImVec2(std::get<0>(pair.first.defaultValueRange), std::get<1>(pair.first.defaultValueRange));
+        }
     }
 
     void KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
@@ -575,6 +685,11 @@ namespace IWXMVM::UI
                             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding.x);
                             DrawKeyframeValueInput(std::format("##valueInput{0}{1}", property.name, i).c_str(),
                                                    value.GetByIndex(i));
+
+                            ImGui::SameLine();
+
+                            ImGui::SetCursorPosX(GetSize().x / 8 - ImGui::GetFontSize() * 1.5f - ImGui::GetStyle().WindowPadding.x);
+                            DrawVerticalZoomButtons(property, i);
 
                             if (disableValueInput)
                                 ImGui::EndDisabled();
