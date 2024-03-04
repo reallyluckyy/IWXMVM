@@ -599,6 +599,16 @@ namespace IWXMVM::UI
 
     void DrawLeftArrow(const char* label, const Types::KeyframeableProperty& property)
     {
+        static auto lastKeyFrameTime = 0;
+        if (lastKeyFrameTime != 0 && !Components::Rewinding::IsRewinding())
+        {
+            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            auto currentTick = demoInfo.currentTick;
+            Components::Playback::SkipForward(lastKeyFrameTime - demoInfo.currentTick);
+
+            lastKeyFrameTime = 0;
+        }
+
         std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
         ImGui::SameLine();
         if (ImGui::ArrowButton(label, 0))
@@ -613,7 +623,8 @@ namespace IWXMVM::UI
             }
             if (previousKeyframe.tick < currentTick)
             {
-                Components::Rewinding::RewindBy(previousKeyframe.tick - demoInfo.currentTick);
+                lastKeyFrameTime = previousKeyframe.tick;
+                Components::Rewinding::RewindBy(previousKeyframe.tick - demoInfo.currentTick - 50);
             }
         }
     }
@@ -749,7 +760,7 @@ namespace IWXMVM::UI
 
                             ImGui::SameLine();
 
-                            ImGui::SetCursorPosX(GetSize().x / 8 - ImGui::GetFontSize() * 1.5f - ImGui::GetStyle().WindowPadding.x);
+                            ImGui::SetCursorPosX(GetSize().x / 8);
                             DrawVerticalZoomButtons(property, i);
 
                             if (disableValueInput)
