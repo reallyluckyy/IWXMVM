@@ -10,25 +10,20 @@ namespace IWXMVM::UI
 {
     void Readme::Initialize()
     {
+        ImGui::OpenPopup("Readme");
     }
 
     void Readme::Render()
     {
-        SetPosition(0, UIManager::Get().GetUIComponent(UI::Component::GameView)->GetPosition().y +
-                           UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().y);
-        SetSize(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y - GetPosition().y);
+        ImGui::SetNextWindowSize(ImVec2(1400, 800));
 
-        ImGui::SetNextWindowPos(GetPosition());
-        ImGui::SetNextWindowSize(GetSize());
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 20));
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(50, 30));
-
-        if (ImGui::Begin("Readme", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-                             ImGuiWindowFlags_NoTitleBar))
+        if (ImGui::BeginPopupModal("Readme", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
         {
 
             ImGui::PushFont(UIManager::Get().GetBoldFont()); 
-            ImGui::Text("IWXMVM %s for %s", IWXMVM_VERSION, magic_enum::enum_name(Mod::GetGameInterface()->GetGame()));
+            ImGui::Text("IWXMVM BETA");
             ImGui::PopFont();
 
             ImGui::Dummy(ImVec2(0, 20));
@@ -50,10 +45,7 @@ namespace IWXMVM::UI
             ImGui::TextWrapped("The UI is divided into three sections.");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
             ImGui::TextWrapped(
-                "The game view in the top left shows the game. The bottom area where you are currently reading this "
-                "will contain the playback controls and the keyframe editor as soon as you load a demo.");
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
-            ImGui::TextWrapped("To the right of the game view is the main settings section, consisting of 4 tabs:");
+                "The game view in the top left shows the game. The bottom area will contain the playback controls and the keyframe editor as soon as you load a demo. To the right of the game view is the main settings section, consisting of 4 tabs:");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
             ImGui::BulletText(ICON_FA_FILE " DEMOS: for loading demos");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
