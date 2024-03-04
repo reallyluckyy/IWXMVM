@@ -59,8 +59,6 @@ namespace IWXMVM
             Components::KeyframeManager::Get().Initialize();
             Components::CaptureManager::Get().Initialize();
 
-            // TODO: ...
-
             LOG_INFO("Initialized IWXMVM!");
 
             while (!ejectRequested.load())

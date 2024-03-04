@@ -145,6 +145,7 @@
     <ClCompile Include="src\UI\Components\ControlsMenu.cpp" />
     <ClCompile Include="src\UI\Components\KeyframeEditor.cpp" />
     <ClCompile Include="src\UI\Components\Preferences.cpp" />
+    <ClCompile Include="src\UI\Components\Readme.cpp" />
     <ClCompile Include="src\UI\ImGuiEx\ImGuiExtensions.cpp" />
     <ClCompile Include="src\UI\Components\DebugPanel.cpp" />
     <ClCompile Include="src\Events.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="src\UI\Components\ControlsMenu.hpp" />
     <ClInclude Include="src\UI\Components\KeyframeEditor.hpp" />
     <ClInclude Include="src\UI\Components\Preferences.hpp" />
+    <ClInclude Include="src\UI\Components\Readme.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />
     <ClInclude Include="src\UI\ImGuiEx\KeyframeableControls.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />

@@ -1,0 +1,15 @@
+#pragma once
+#include "UI/UIComponent.hpp"
+
+namespace IWXMVM::UI
+{
+    class Readme : public UIComponent
+    {
+       public:
+        void Render() final;
+        void Release() final;
+
+       private:
+        void Initialize() final;
+    };
+}  // namespace IWXMVM::UI

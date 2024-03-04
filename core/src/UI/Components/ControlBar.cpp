@@ -153,6 +153,11 @@ namespace IWXMVM::UI
 
     void ControlBar::Render()
     {
+        if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu)
+        {
+            UIManager::Get().GetUIComponent(UI::Component::Readme)->Render();
+        }
+
         if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
             return;
 
