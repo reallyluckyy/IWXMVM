@@ -13,13 +13,15 @@ namespace IWXMVM::UI
         ImGui::OpenPopup("Readme");
     }
 
+    bool visible = true;
+
     void Readme::Render()
     {
         ImGui::SetNextWindowSize(ImVec2(1400, 800));
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30, 20));
 
-        if (ImGui::BeginPopupModal("Readme", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
+        if (ImGui::BeginPopupModal("Readme", &visible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize))
         {
 
             ImGui::PushFont(UIManager::Get().GetBoldFont()); 
