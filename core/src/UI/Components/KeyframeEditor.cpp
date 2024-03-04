@@ -149,7 +149,7 @@ namespace IWXMVM::UI
     std::optional<int32_t> selectedKeyframeId = std::nullopt;
     std::optional<int32_t> selectedKeyframeValueIndex = std::nullopt;
 
-    void KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
+    bool KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                     uint32_t displayStartTick, uint32_t displayEndTick,
                                                     std::vector<Types::Keyframe>& keyframes, uint32_t demoLength)
     {
@@ -255,6 +255,8 @@ namespace IWXMVM::UI
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
             }
         }
+
+        return hovered;
     }
 
 
@@ -330,7 +332,7 @@ namespace IWXMVM::UI
     const float CURVE_EDITOR_LANE_HEIGHT = 200.0f;
     constexpr float KEYFRAME_MAX_VALUE = 10'000.0f;
 
-    void KeyframeEditor::DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
+    bool KeyframeEditor::DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                  uint32_t displayStartTick, uint32_t displayEndTick, const float width,
                                                  std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
                                                  uint32_t demoLength)
@@ -522,6 +524,8 @@ namespace IWXMVM::UI
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
             }
         }
+
+        return hovered;
     }
 
     void KeyframeEditor::Initialize()
@@ -542,32 +546,29 @@ namespace IWXMVM::UI
         }
     }
 
-    void KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
+    bool KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
     {
         auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
         auto currentTick = demoInfo.currentTick;
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
-        DrawKeyframeSliderInternal(property, &currentTick, displayStartTick, displayEndTick,
-                                   Components::KeyframeManager::Get().GetKeyframes(property), demoInfo.endTick);
+        return DrawKeyframeSliderInternal(property, &currentTick, displayStartTick, displayEndTick,
+                                          Components::KeyframeManager::Get().GetKeyframes(property), demoInfo.endTick);
     }
 
-    void KeyframeEditor::DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width)
+    bool KeyframeEditor::DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width)
     {
         auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
         auto currentTick = demoInfo.currentTick;
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
-        // TODO: Probably disable for CameraData, as I'm not sure if this is helpful to the user at all
-
-        // if (property.valueType == Types::KeyframeValueType::CameraData)
-        //    return;
-
+        bool result = false;
         for (int i = 0; i < property.GetValueCount(); i++)
         {
-            DrawCurveEditorInternal(property, &currentTick, displayStartTick, displayEndTick, width,
-                                    Components::KeyframeManager::Get().GetKeyframes(property), i, demoInfo.endTick);
+            result = DrawCurveEditorInternal(property, &currentTick, displayStartTick, displayEndTick, width,
+                                             Components::KeyframeManager::Get().GetKeyframes(property), i, demoInfo.endTick) || result;
         }
+        return result;
     }
 
     void DrawKeyframeValueInput(const char* label, float dvalue, const Types::KeyframeableProperty& property, int index)
@@ -689,6 +690,8 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::Render()
     {
+        static bool wasInnerAreaHovered = false;
+
         SetPosition(0, UIManager::Get().GetUIComponent(UI::Component::ControlBar)->GetPosition().y +
                            UIManager::Get().GetUIComponent(UI::Component::ControlBar)->GetSize().y);
         SetSize(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y - GetPosition().y);
@@ -706,7 +709,15 @@ namespace IWXMVM::UI
         const auto& propertyKeyframes = Components::KeyframeManager::Get().GetKeyframes();
 
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-                                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollWithMouse;
+                                 ImGuiWindowFlags_NoTitleBar;
+
+        if (wasInnerAreaHovered)
+        {
+            flags |= ImGuiWindowFlags_NoScrollWithMouse;
+        }
+
+        wasInnerAreaHovered = false;
+
         if (ImGui::Begin("Keyframe Editor", nullptr, flags))
         {
             ImGui::SetCursorPos(padding);
@@ -773,11 +784,11 @@ namespace IWXMVM::UI
                     auto progressBarWidth = GetSize().x - firstColumnSize - GetSize().x * 0.05f - padding.x * 2;
                     ImGui::SetNextItemWidth(progressBarWidth);
                     ImGui::TableSetColumnIndex(1);
-                    DrawKeyframeSlider(property);
+                    wasInnerAreaHovered = DrawKeyframeSlider(property) || wasInnerAreaHovered;
 
                     if (showCurve)
                     {
-                        DrawCurveEditor(property, progressBarWidth);
+                        wasInnerAreaHovered = DrawCurveEditor(property, progressBarWidth) || wasInnerAreaHovered;
                         ImGui::TreePop();
                     }
                 }
