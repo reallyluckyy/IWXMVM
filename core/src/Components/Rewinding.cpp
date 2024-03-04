@@ -65,7 +65,6 @@ namespace IWXMVM::Components::Rewinding
                 if (curTime < latestRewindTo)
                 {
                     Playback::SkipForward(latestRewindTo - curTime);
-                    *reinterpret_cast<int*>(addresses.cl.snap_serverTime) += latestRewindTo - curTime;
                 }
 
                 LOG_DEBUG("Finished rewinding. Requested server time: {}, actual server time: {}", latestRewindTo,
