@@ -59,9 +59,14 @@ namespace IWXMVM::Components::Rewinding
 
         if (latestRewindTo > 0)
         {
-            if (*reinterpret_cast<int*>(addresses.cl.snap_serverTime) + 1000 >= latestRewindTo &&
-                *reinterpret_cast<int*>(addresses.cl.snap_serverTime) >= initialGamestate->serverTime + 1000)
+            auto curTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
+            if (curTime + 1000 >= latestRewindTo && curTime >= initialGamestate->serverTime + 1000)
             {
+                if (curTime < latestRewindTo)
+                {
+                    Playback::SkipForward(latestRewindTo - curTime);
+                }
+
                 LOG_DEBUG("Finished rewinding. Requested server time: {}, actual server time: {}", latestRewindTo,
                           *reinterpret_cast<int*>(addresses.cl.snap_serverTime));
                 latestRewindTo = 0;
@@ -87,7 +92,7 @@ namespace IWXMVM::Components::Rewinding
             Mod::GetGameInterface()->ResetClientData(latestRewindTo);
             Mod::GetGameInterface()->CL_FirstSnapshot();
 
-            LOG_DEBUG("Rewinded and time is now: {}", latestRewindTo - initialGamestate->serverTime);
+            LOG_DEBUG("Rewound and time is now: {}", latestRewindTo - initialGamestate->serverTime);
             demoFileOffset = initialGamestate->fileOffset;
             demoFile.seekg(demoFileOffset);
 
@@ -235,10 +240,7 @@ namespace IWXMVM::Components::Rewinding
             LOG_DEBUG("Attempted to rewind back {} ticks", ticks);
             return;
         }
-
-        // Skip forward a little bit to trigger a demo file read, which will restore the gamestate.
-        Playback::SkipForward(200);
-
+      
         LOG_DEBUG("Rewinding back {} ticks", ticks);
     }
 

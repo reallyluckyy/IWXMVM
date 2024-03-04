@@ -76,6 +76,12 @@ namespace IWXMVM::Components::Playback
             return captureManager.OnGameFrame();
         }
 
+        // workaround for low timescales that would take a couple of seconds to trigger the rewind process to begin
+        if (Components::Rewinding::IsRewinding())
+        {
+            return 50;
+        }
+
         // always return 0 msec when pausing demo playback
         if (IsPaused())
         {
