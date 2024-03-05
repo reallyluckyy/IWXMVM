@@ -468,7 +468,6 @@ namespace IWXMVM::IW3
 
         void CL_FirstSnapshot()
         {
-            int clientNum = *reinterpret_cast<int*>(&Structures::GetClientGlobals()->clientNum);
             uintptr_t CL_FirstSnapshot = GetGameAddresses().CL_FirstSnapshot();
 
             Patches::GetGamePatches().Con_TimeJumped.Apply();
@@ -476,7 +475,7 @@ namespace IWXMVM::IW3
             _asm
             {
                 pushad
-                mov eax, clientNum
+                xor eax, eax
                 call CL_FirstSnapshot
                 popad
             }
