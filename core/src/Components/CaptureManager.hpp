@@ -142,6 +142,7 @@ namespace IWXMVM::Components
         FILE* pipe = nullptr;
         Resolution screenDimensions = Resolution(0, 0);
         IDirect3DSurface9* backBuffer = nullptr;
+        IDirect3DSurface9* downsampledRenderTarget = nullptr;
         IDirect3DSurface9* tempSurface = nullptr;
         std::atomic_bool isCapturing = false;
         std::int32_t capturedFrameCount = 0;

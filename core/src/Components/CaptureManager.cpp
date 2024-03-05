@@ -80,9 +80,16 @@ namespace IWXMVM::Components
         if (captureLock.load() == SHOULD_CAPTURE_FRAME)
         {
             IDirect3DDevice9* device = D3D9::GetDevice();
-            if (FAILED(device->GetRenderTargetData(backBuffer, tempSurface)))
+            if (FAILED(device->StretchRect(backBuffer, NULL, downsampledRenderTarget, NULL, D3DTEXF_NONE)))
             {
-                LOG_ERROR("Failed copy backbuffer to surface");
+                LOG_ERROR("Failed to copy data from backbuffer to render target");
+                StopCapture();
+                return;
+            }
+
+            if (FAILED(device->GetRenderTargetData(downsampledRenderTarget, tempSurface)))
+            {
+                LOG_ERROR("Failed copy render target data to surface");
                 StopCapture();
                 return;
             }
@@ -254,6 +261,14 @@ namespace IWXMVM::Components
             return;
         }
 
+        if (FAILED(device->CreateRenderTarget(bbDesc.Width, bbDesc.Height, bbDesc.Format, D3DMULTISAMPLE_NONE, 0, FALSE,
+            &downsampledRenderTarget, NULL)))
+        {
+            LOG_ERROR("Failed to create render target");
+            StopCapture();
+            return;
+        }
+
         screenDimensions.width = static_cast<std::int32_t>(bbDesc.Width);
         screenDimensions.height = static_cast<std::int32_t>(bbDesc.Height);
 
@@ -306,6 +321,12 @@ namespace IWXMVM::Components
         {
             backBuffer->Release();
             backBuffer = nullptr;
+        }
+
+        if (downsampledRenderTarget)
+        {
+            downsampledRenderTarget->Release();
+            downsampledRenderTarget = nullptr;
         }
     }
 }
