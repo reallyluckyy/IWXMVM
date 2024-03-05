@@ -7,6 +7,7 @@ namespace IWXMVM
         OnFrame, // once per rendered frame
         PreDemoLoad,
         PostDemoLoad,
+        OnDemoBoundsDetermined,
         OnCameraChanged,
         OnRenderGameView,
     };

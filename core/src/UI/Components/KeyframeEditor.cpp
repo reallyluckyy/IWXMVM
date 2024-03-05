@@ -530,9 +530,11 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::Initialize()
     {
-        Events::RegisterListener(EventType::PostDemoLoad, [this]() {
+        Events::RegisterListener(EventType::OnDemoBoundsDetermined, [this]() {
             displayStartTick = 0;
             displayEndTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
+
+            LOG_DEBUG("Set initial keyframe editor zoom as {} to {}", displayStartTick, displayEndTick);
         });
 
         for (const auto& pair : Components::KeyframeManager::Get().GetKeyframes())

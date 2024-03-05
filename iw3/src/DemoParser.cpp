@@ -2,6 +2,7 @@
 #include "DemoParser.hpp"
 
 #include "Mod.hpp"
+#include "Events.hpp"
 #include "Structures.hpp"
 #include "Utilities/PathUtils.hpp"
 
@@ -96,6 +97,8 @@ namespace IWXMVM::IW3::DemoParser
             demoEndTick = archives.back().serverTime + 500;
 
             LOG_DEBUG("Determined demo bounds as {0} and {1}", demoStartTick, demoEndTick);
+
+            Events::Invoke(EventType::OnDemoBoundsDetermined);
         }
         else
         {
