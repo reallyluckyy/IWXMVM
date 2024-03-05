@@ -4,6 +4,7 @@
 #include "Components/CampathManager.hpp"
 #include "Components/KeyframeManager.hpp"
 #include "Components/CaptureManager.hpp"
+#include "Components/Rewinding.hpp"
 
 namespace IWXMVM
 {

@@ -58,6 +58,7 @@ namespace IWXMVM
             Components::CampathManager::Get().Initialize();
             Components::KeyframeManager::Get().Initialize();
             Components::CaptureManager::Get().Initialize();
+            Components::Rewinding::Initialize();
 
             LOG_INFO("Initialized IWXMVM!");
 

@@ -10,5 +10,5 @@ namespace IWXMVM::Components
         int FS_Read(void* buffer, int len);
 
         void Initialize();
-    } // namespace Playback
+    } // namespace Rewinding
 }  // namespace IWXMVM::Components
