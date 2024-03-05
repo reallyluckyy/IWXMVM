@@ -57,10 +57,21 @@ namespace IWXMVM::HookManager
 
     void CreateHook(std::uintptr_t originalPtr, std::uintptr_t detourPtr, std::uintptr_t* trampolinePtr)
     {
-        if (MH_CreateHook((void*)originalPtr, (void*)detourPtr, (void**)trampolinePtr) != MH_OK)
-            throw std::runtime_error("Failed to create hook");
-        if (MH_EnableHook((void*)originalPtr) != MH_OK)
-            throw std::runtime_error("Failed to enable hook");
+        auto result = MH_CreateHook((void*)originalPtr, (void*)detourPtr, (void**)trampolinePtr);
+        if (result != MH_OK)
+        {
+            throw std::runtime_error(
+                std::format("Failed to create hook for address {:X}: {}", originalPtr, magic_enum::enum_name(result)).c_str()
+            );
+        }
+
+        result = MH_EnableHook((void*)originalPtr);
+        if (result != MH_OK)
+        {
+            throw std::runtime_error(
+                std::format("Failed to enable hook for address {:X}: {}", originalPtr, magic_enum::enum_name(result))
+                    .c_str());
+        }
     }
 
     void Unhook()
