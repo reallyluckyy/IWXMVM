@@ -79,8 +79,9 @@ namespace IWXMVM::IW3
 
             auto [demoStartTick, demoEndTick] = DemoParser::GetDemoTickRange();
 
-            if (!Components::Rewinding::IsRewinding())
-                lastValidTick = Structures::GetClientActive()->serverTime - demoStartTick;
+            const auto serverTime = Structures::GetClientActive()->serverTime;
+            if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding())
+                lastValidTick = serverTime - demoStartTick;
             demoInfo.currentTick = lastValidTick;
             demoInfo.endTick = demoEndTick - demoStartTick;
 
