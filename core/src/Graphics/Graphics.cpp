@@ -287,11 +287,6 @@ namespace IWXMVM::GFX
         {
             bool mouseIntersects = MouseIntersects(ImGui::GetIO().MousePos, mesh, model);
             objectHoveredThisFrame |= mouseIntersects;
-            if (!heldAxis.has_value() && mouseIntersects)
-            {
-                model = model * glm::scale(glm::vec3(1, 1, 1) * 1.1f);
-            }
-
             if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft))
             {
                 heldAxis = axisIndex;
@@ -471,7 +466,7 @@ namespace IWXMVM::GFX
                 objectHoveredThisFrame |= mouseIntersects;
                 if (mouseIntersects && !heldAxis.has_value())
                    scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
-                BufferManager::Get().DrawMesh(camera, translate * rotate * scale);
+                BufferManager::Get().DrawMesh(camera, translate * rotate * scale, mouseIntersects);
 
                 if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft) && selectedNodeId != node.id)
                 {
