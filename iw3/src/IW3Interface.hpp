@@ -37,8 +37,13 @@ namespace IWXMVM::IW3
 
             Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
 
-            Events::RegisterListener(EventType::PostDemoLoad,
-                                     []() { Functions::FindDvar("sv_cheats")->current.enabled = true; });
+            Events::RegisterListener(EventType::PostDemoLoad, []() { 
+                Functions::FindDvar("sv_cheats")->current.enabled = true; 
+                    
+                // ensure these are set to their defaults, so our killfeed toggle works properly
+                Functions::FindDvar("con_gamemsgwindow0msgtime")->current.value = 5;
+                Functions::FindDvar("con_gamemsgwindow0linecount")->current.integer = 4;
+            });
         }
 
         uintptr_t GetWndProc() final
@@ -250,9 +255,6 @@ namespace IWXMVM::IW3
             ss = std::stringstream(Functions::FindDvar("g_TeamColor_Axis")->current.string);
             ss >> teamColorAxis[0] >> teamColorAxis[1] >> teamColorAxis[2];
 
-            auto d = Functions::FindDvar("ui_hud_obituaries");
-            d->current;
-
             Types::HudInfo hudInfo = {
                 Functions::FindDvar("cg_draw2D")->current.enabled,
                 !Functions::FindDvar("ui_hud_hardcore")->current.enabled,
@@ -320,6 +322,9 @@ namespace IWXMVM::IW3
 
         void SetHudInfo(Types::HudInfo hudInfo) final
         {
+            Functions::FindDvar("con_gamemsgwindow0msgtime")->current.value = 5;
+            Functions::FindDvar("con_gamemsgwindow0linecount")->current.integer = 4;
+
             Functions::FindDvar("cg_draw2D")->current.enabled = hudInfo.show2DElements;
             Functions::FindDvar("ui_hud_hardcore")->current.enabled = !hudInfo.showPlayerHUD;
             Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5 : 0;
