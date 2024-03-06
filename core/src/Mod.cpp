@@ -47,18 +47,18 @@ namespace IWXMVM
             LOG_DEBUG("Scanning signatures...");
             gameInterface->InitializeGameAddresses();
 
-            LOG_DEBUG("Installing game hooks and patches...");
-            D3D9::Initialize();
-            gameInterface->InstallHooksAndPatches();
-            gameInterface->SetupEventListeners();
-
-            // Initialize Components
+            LOG_DEBUG("Initializing components...");
             Configuration::Get().Initialize();
             Components::CameraManager::Get().Initialize();
             Components::CampathManager::Get().Initialize();
             Components::KeyframeManager::Get().Initialize();
             Components::CaptureManager::Get().Initialize();
             Components::Rewinding::Initialize();
+
+            LOG_DEBUG("Installing game hooks and patches...");
+            D3D9::Initialize();
+            gameInterface->InstallHooksAndPatches();
+            gameInterface->SetupEventListeners();
 
             LOG_INFO("Initialized IWXMVM!");
 

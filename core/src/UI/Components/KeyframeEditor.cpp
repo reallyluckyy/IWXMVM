@@ -282,7 +282,7 @@ namespace IWXMVM::UI
         auto buttonSize = ImVec2(1, 1) * ImGui::GetFontSize() * 1.5f;
         auto cursorPosition = ImGui::GetCursorPos();
 
-        auto& currentRange = verticalZoomRanges[property.type][valueIndex];
+        auto& currentRange = verticalZoomRanges.at(property.type).at(valueIndex);
 
         auto halfMagnitude = (currentRange.y - currentRange.x) * 0.5f;
         auto center = halfMagnitude + currentRange.x;
