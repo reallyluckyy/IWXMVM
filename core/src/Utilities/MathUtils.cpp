@@ -61,9 +61,9 @@ namespace IWXMVM::MathUtils
         constexpr int32_t MAX_NODES = 256;
         float ticks[MAX_NODES];
         float values[MAX_NODES];
-        for (int i = 0; i < n; i++)
+        for (size_t i = 0; i < n; i++)
         {
-            ticks[i] = keyframes[i].tick;
+            ticks[i] = static_cast<float>(keyframes[i].tick);
             values[i] = keyframes[i].value.GetByIndex(valueIndex);
         }
 
@@ -73,7 +73,7 @@ namespace IWXMVM::MathUtils
         y2[0] = -0.5f;
         u[0] = (3.0f / (ticks[1] - ticks[0])) * ((values[1] - values[0]) / (ticks[1] - ticks[0]));
 
-        for (int i = 1; i <= n - 2; i++)
+        for (size_t i = 1; i <= n - 2; i++)
         {
             const auto prevTick = ticks[i - 1];
             const auto prevValue = values[i - 1];

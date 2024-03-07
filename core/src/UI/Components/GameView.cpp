@@ -164,13 +164,13 @@ namespace IWXMVM::UI
                 ImGui::SameLine(0, smallSpacing);
                 DrawKeybindEntry("Scroll", "Roll Camera");
 
-                ImGui::SameLine(0, spacing * 1.5);
+                ImGui::SameLine(0, spacing * 1.5f);
                 DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)), "Place Campath Node");
 
                 ImGui::SameLine(0, spacing);
                 DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyClearNodes)), "Delete Campath");
 
-                ImGui::SameLine(0, spacing * 1.5);
+                ImGui::SameLine(0, spacing * 1.5f);
                 DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Unlock Mouse");
             }
             else
@@ -205,7 +205,7 @@ namespace IWXMVM::UI
         ImVec2 viewportCenter = ImVec2(glm::floor(windowPosition.x + GetPosition().x + GetSize().x / 2),
                                        glm::floor(windowPosition.y + GetPosition().y + GetSize().y / 2));
         ImGui::GetIO().MousePosPrev += ImVec2(viewportCenter.x - cursorPosition.x, viewportCenter.y - cursorPosition.y);
-        SetCursorPos(viewportCenter.x, viewportCenter.y);
+        SetCursorPos(static_cast<int32_t>(viewportCenter.x), static_cast<int32_t>(viewportCenter.y));
     }
 
     void GameView::Initialize()
@@ -289,7 +289,7 @@ namespace IWXMVM::UI
             auto entities = Mod::GetGameInterface()->GetEntities();
             if (ImGui::BeginCombo("##gameViewBoneCameraTargetCombo", entities[boneCamera->GetEntityId()].ToString().c_str()))
             {
-                for (int i = 0; i < entities.size(); i++)
+                for (size_t i = 0; i < entities.size(); i++)
                 {
                     if (entities[i].type == Types::EntityType::Unsupported)
                         continue;
@@ -315,7 +315,7 @@ namespace IWXMVM::UI
             if (ImGui::BeginCombo("##gameViewBoneCameraBoneCombo",
                                   supportedBoneNames[boneCamera->GetBoneIndex()].c_str()))
             {
-                for (int i = 0; i < supportedBoneNames.size(); i++)
+                for (size_t i = 0; i < supportedBoneNames.size(); i++)
                 {
                     bool isSelected = boneCamera->GetBoneIndex() == i;
                     if (ImGui::Selectable(supportedBoneNames[i].data(), boneCamera->GetBoneIndex() == i))

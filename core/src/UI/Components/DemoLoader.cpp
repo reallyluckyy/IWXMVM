@@ -240,7 +240,7 @@ namespace IWXMVM::UI
                         Mod::GetGameInterface()->GetDemoInfo().name == demoName)
                     {
                         if (ImGui::Button(std::format(ICON_FA_STOP " STOP##{0}", demoName).c_str(),
-                                          ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+                                          ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5f)))
                         {
                             Mod::GetGameInterface()->Disconnect();
                         }
@@ -248,7 +248,7 @@ namespace IWXMVM::UI
                     else
                     {
                         if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(),
-                                          ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5)))
+                                          ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5f)))
                         {
                             Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
                         }
@@ -258,7 +258,7 @@ namespace IWXMVM::UI
 
                     ImGui::Text("%s", demoName.c_str());
                 }
-                catch (std::exception& ex)
+                catch (std::exception&)
                 {
                     ImGui::BeginDisabled();
                     ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION " ERROR");
@@ -289,7 +289,7 @@ namespace IWXMVM::UI
                 ImGui::TreePop();
             }
         }
-        catch (std::exception& ex)
+        catch (std::exception&)
         {
 			ImGui::BeginDisabled();
 			ImGui::TreeNode("<invalid directory name>");

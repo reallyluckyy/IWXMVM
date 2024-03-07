@@ -388,7 +388,7 @@ namespace IWXMVM::IW3::Structures
         CL_STANCE_PRONE = 0x2,
     };
 
-    struct __declspec(align(2)) usercmd_s
+    struct usercmd_s
     {
         int serverTime;
         int buttons;

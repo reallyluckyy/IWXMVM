@@ -108,7 +108,7 @@ namespace IWXMVM::Components
         Types::KeyframeablePropertyType::DepthOfFieldBias,
         ICON_FA_CAMERA " DOF Bias", 
         Types::KeyframeValueType::FloatingPoint, 
-        0.1, 10
+        0.1f, 10
     );
 
     void KeyframeManager::Initialize()
@@ -182,6 +182,13 @@ namespace IWXMVM::Components
             return LinearlyInterpolate(property.valueType, keyframes, tick);
 
         return CubicInterpolate(property.valueType, keyframes, tick);
+    }
+
+    Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property,
+                                                      const std::vector<Types::Keyframe>& keyframes,
+                                                      const uint32_t tick) const 
+    {
+        return Interpolate(property, keyframes, static_cast<float>(tick));
     }
 
     Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property, const float tick) const

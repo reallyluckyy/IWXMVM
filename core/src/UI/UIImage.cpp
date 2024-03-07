@@ -60,7 +60,7 @@ UIImage UIImage::FromFile(const std::string path)
         texture->GetLevelDesc(0, &imageDesc);
 
         image.texture = texture;
-        image.dimensions = ImVec2(imageDesc.Width, imageDesc.Height);
+        image.dimensions = ImVec2(static_cast<float>(imageDesc.Width), static_cast<float>(imageDesc.Height));
 
         resourceImageCache.insert({(uint8_t*)data, image});
 

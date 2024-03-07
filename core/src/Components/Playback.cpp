@@ -48,7 +48,7 @@ namespace IWXMVM::Components::Playback
         const std::size_t callCountPerSecond =
             static_cast<std::size_t>(std::clamp(fps / timescale, 1000.0f, 1'000'000.0f));
 
-        const std::size_t onesCount = pattern.size() / (callCountPerSecond / static_cast<float>(pattern.size()));
+        const std::size_t onesCount = static_cast<size_t>(pattern.size() / (callCountPerSecond / static_cast<float>(pattern.size())));
         const std::size_t zerosCount = pattern.size() - onesCount;
 
         for (std::size_t i = 0, zeros = 1, ones = 1; i < pattern.size(); ++i)

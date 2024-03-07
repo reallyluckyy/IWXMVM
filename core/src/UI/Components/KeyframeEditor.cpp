@@ -121,7 +121,7 @@ namespace IWXMVM::UI
                 auto zoomWindowSizeBefore = displayEndTick - displayStartTick;
 
                 auto scaledDelta = delta / (rectMax.x - rectMin.x);
-                scaledDelta *= (displayEndTick - displayStartTick);
+                scaledDelta *= static_cast<float>(displayEndTick - displayStartTick);
 
                 displayStartTick = glm::max(displayStartTick - (int32_t)(scaledDelta.x * MOVE_MULTIPLIER), minTick);
                 displayEndTick = glm::min(displayEndTick - (int32_t)(scaledDelta.x * MOVE_MULTIPLIER), maxTick);

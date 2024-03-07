@@ -308,7 +308,7 @@ namespace IWXMVM::UI
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
         modified = ImGuiEx::Keyframeable::SliderFloat(
-            "Bias", &visuals.dof.bias, 0.1, 10,
+            "Bias", &visuals.dof.bias, 0.1f, 10,
             Types::KeyframeablePropertyType::DepthOfFieldBias) || modified;
 
         if (modified)
@@ -418,7 +418,7 @@ namespace IWXMVM::UI
 
     void VisualsMenu::AddPresetToRecent(Preset newPreset)
     {
-        for (int i = 0; i < recentPresets.size(); ++i)
+        for (size_t i = 0; i < recentPresets.size(); ++i)
         {
             Preset preset = recentPresets[i];
             if (preset.path == newPreset.path)

@@ -29,6 +29,8 @@ namespace IWXMVM::Components
 
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
                                          const std::vector<Types::Keyframe>& keyframes, const float tick) const;
+        Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
+                                         const std::vector<Types::Keyframe>& keyframes, const uint32_t tick) const; 
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property, const float tick) const;
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property, const uint32_t tick) const;
 
