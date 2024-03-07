@@ -149,9 +149,6 @@ namespace IWXMVM::IW3::Hooks::Camera
         Functions::FindDvar("cg_draw2d")->current.enabled = (isFreeCamera) ? 0 : 1;
         Functions::FindDvar("cg_drawShellshock")->current.enabled = (isFreeCamera) ? 0 : 1;
 
-        // TODO: hide / show killcam 'YOU' marker by placing / removing an absolute jump at 0x444B6B
-        // TODO: hide / show class menu when watching demos and using free / orbit camera by placing / removing an
-        // absolute jump at 0x474E20
         constexpr int32_t LODBIAS = -40000;
         Functions::FindDvar("r_lodBiasRigid")->current.value = LODBIAS;
         Functions::FindDvar("r_lodBiasSkinned")->current.value = LODBIAS;

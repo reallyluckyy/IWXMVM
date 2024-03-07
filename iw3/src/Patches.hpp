@@ -17,7 +17,9 @@ namespace IWXMVM::IW3::Patches
         Patch<std::size(CG_RegisterItemsBytes)> CG_RegisterItems{GetGameAddresses().CG_RegisterItems(),
                                                                  CG_RegisterItemsBytes, PatchApplySetting::Immediately};
         ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
-        
+        JumpPatch CG_AddPlayerSpriteDrawSurfs{GetGameAddresses().CG_AddPlayerSpriteDrawSurfs(),
+                                              PatchApplySetting::Immediately};
+        JumpPatch CL_CGameRendering{GetGameAddresses().CL_CGameRendering(), PatchApplySetting::Immediately};
 
         // For rewinding (not sure if all of these are actually necessary)
         NopPatch<5> Con_TimeJumped{GetGameAddresses().Con_TimeJumpedCall(), PatchApplySetting::Deferred};
