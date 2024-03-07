@@ -374,7 +374,10 @@ namespace IWXMVM::GFX
 
     void GraphicsManager::DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation)
     {
-        auto scaledModel = translation * glm::scale(glm::vec3(1, 1, 1) * 3);
+        const auto rotate = glm::eulerAngleZYX(
+            glm::radians(rotation.y), glm::radians(rotation.x), glm::radians(rotation.z)
+        );
+        const auto scaledModel = translation * rotate * glm::scale(glm::vec3(1, 1, 1) * 3);
 
         if (Input::KeyUp(ImGuiKey_MouseLeft))
         {
@@ -391,11 +394,23 @@ namespace IWXMVM::GFX
 
         if (heldAxis.has_value())
         {
-            auto amountX = ImGui::GetIO().MouseDelta.x * 0.1f;
-            auto amountY = ImGui::GetIO().MouseDelta.y * 0.1f;
-            auto delta = glm::vec3(0, 0, 0);
-            delta[heldAxis.value()] = amountX + amountY;
-            rotation += delta;
+            auto amountX = ImGui::GetIO().MouseDelta.x * 0.04f;
+            auto amountY = ImGui::GetIO().MouseDelta.y * 0.04f;
+
+            auto quat = glm::toQuat(rotate);
+
+            auto selectedAxis = heldAxis.value();
+            selectedAxis = heldAxis.value() == 1 ? 2 : selectedAxis;
+            selectedAxis = heldAxis.value() == 2 ? 1 : selectedAxis;
+            auto axis = glm::vec3(0, 0, 0);
+            axis[selectedAxis] = 1;
+
+            quat = quat * glm::angleAxis(amountX + amountY, axis);
+
+            auto newRotation = glm::degrees(glm::eulerAngles(quat));
+            rotation[0] = newRotation[1];
+            rotation[1] = newRotation[2];
+            rotation[2] = newRotation[0];
         }
     }
 
