@@ -184,20 +184,7 @@ namespace IWXMVM::IW3::Hooks::Commands
         Events::Invoke(EventType::PostDemoLoad);
     }
 
-    // TODO: replayDemo is not supported yet because the old demo path needs to be stored!
-    void CL_ReplayDemo_Hook()
-    {
-        auto* oldFunction = FindOriginalFunction(CL_ReplayDemo_Hook);
-        if (oldFunction == nullptr)
-            return;
-
-        // reinterpret_cast<void(*)()>(oldFunction)();
-
-        // Events::Invoke(EventType::OnDemoLoad);
-    }
-
-    std::vector<FunctionStorage> CmdHooks{{"demo", FunctionStorage::CommandType::ServerCommand, CL_PlayDemo_Hook},
-                                          {"replayDemo", FunctionStorage::CommandType::Command, CL_ReplayDemo_Hook}};
+    std::vector<FunctionStorage> CmdHooks{{"demo", FunctionStorage::CommandType::ServerCommand, CL_PlayDemo_Hook}};
 
     void* FindOriginalFunction(void* hook)
     {
