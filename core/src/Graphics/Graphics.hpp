@@ -60,7 +60,8 @@ namespace IWXMVM::GFX
               gizmo_translate_z(GIZMO_TRANSLATE_MODEL_data, GIZMO_TRANSLATE_MODEL_size),
               gizmo_rotate_x(GIZMO_ROTATE_MODEL_data, GIZMO_ROTATE_MODEL_size),
               gizmo_rotate_y(GIZMO_ROTATE_MODEL_data, GIZMO_ROTATE_MODEL_size),
-              gizmo_rotate_z(GIZMO_ROTATE_MODEL_data, GIZMO_ROTATE_MODEL_size)
+              gizmo_rotate_z(GIZMO_ROTATE_MODEL_data, GIZMO_ROTATE_MODEL_size),
+              campath()
         {
         }
 
@@ -70,6 +71,7 @@ namespace IWXMVM::GFX
         void DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation);
         void DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation);
 
+        void BuildCampathMesh();
         void SetupRenderState() const noexcept;
 
         IDirect3DPixelShader9* pixelShader = nullptr;
@@ -85,6 +87,7 @@ namespace IWXMVM::GFX
         Mesh gizmo_rotate_x;
         Mesh gizmo_rotate_y;
         Mesh gizmo_rotate_z;
+        Mesh campath;
 
         std::optional<int32_t> selectedNodeId = std::nullopt;
         std::optional<int32_t> heldAxis = std::nullopt;

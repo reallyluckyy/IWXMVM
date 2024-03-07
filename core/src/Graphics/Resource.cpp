@@ -89,24 +89,40 @@ namespace IWXMVM::GFX
 
     void BufferManager::Initialize()
     {
-        indexBuffer.Initialize(false);
-        vertexBuffer.Initialize(false);
+        staticIndexBuffer.Initialize(false);
+        staticVertexBuffer.Initialize(false);
+        dynamicIndexBuffer.Initialize(true);
+        dynamicVertexBuffer.Initialize(true);
     }
 
     void BufferManager::Uninitialize()
     {
-        indexBuffer.Release();
-        vertexBuffer.Release();
+        staticIndexBuffer.Release();
+        staticVertexBuffer.Release();
+        dynamicIndexBuffer.Release();
+        dynamicVertexBuffer.Release();
         meshCount = 0;
     }
 
-    void BufferManager::AddMesh(Mesh* mesh)
+    void BufferManager::AddMesh(Mesh* mesh, BufferType bufferType)
     {
-        MeshMetadata metadata = {.ptr = mesh,
-                                 .indexBufferOffset = indexBuffer.GetElementCount(),
-                                 .vertexBufferOffset = vertexBuffer.GetElementCount()};
+        auto& vertexBuffer = bufferType == BufferType::Static ? staticVertexBuffer : dynamicVertexBuffer;
+        auto& indexBuffer = bufferType == BufferType::Static ? staticIndexBuffer : dynamicIndexBuffer;
+
+        MeshMetadata metadata = {
+            .ptr = mesh,
+            .indexBufferOffset = indexBuffer.GetElementCount(),
+            .vertexBufferOffset = vertexBuffer.GetElementCount()
+        };
         indexBuffer.Add(mesh->indices);
         vertexBuffer.Add(mesh->vertices);
+
+        if (bufferType == BufferType::Dynamic && mesh->index != 0)
+        {
+            meshes[mesh->index] = metadata;
+            return;
+        }
+
         meshes[meshCount++] = metadata;
 
         // meshCount is always strictly greater than 0 here so this is safe
@@ -132,17 +148,23 @@ namespace IWXMVM::GFX
         }
     }
 
-    void BufferManager::BindBuffers() const noexcept
+    void BufferManager::BindBuffers(BufferType bufferType) const noexcept
     {
         IDirect3DDevice9* device = D3D9::GetDevice();
 
-        HRESULT result = device->SetStreamSource(0, vertexBuffer.GetHandle(), 0, sizeof(Types::Vertex));
+        auto vertexBufferHandle =
+            bufferType == BufferType::Static ? staticVertexBuffer.GetHandle() : dynamicVertexBuffer.GetHandle();
+
+        HRESULT result = device->SetStreamSource(0, vertexBufferHandle, 0, sizeof(Types::Vertex));
         if (FAILED(result))
         {
             LOG_WARN("Failed to bind vertex buffer");
         }
 
-        result = device->SetIndices(indexBuffer.GetHandle());
+        auto indexBufferHandle =
+            bufferType == BufferType::Static ? staticIndexBuffer.GetHandle() : dynamicIndexBuffer.GetHandle();
+
+        result = device->SetIndices(indexBufferHandle);
         if (FAILED(result))
         {
             LOG_WARN("Failed to bind index buffer");
@@ -151,9 +173,17 @@ namespace IWXMVM::GFX
 
     void BufferManager::ClearBuffers() noexcept
     {
-        vertexBuffer.Clear();
-        indexBuffer.Clear();
+        staticVertexBuffer.Clear();
+        staticIndexBuffer.Clear();
+        dynamicVertexBuffer.Clear();
+        dynamicIndexBuffer.Clear();
         meshCount = 0;
+    }
+
+    void BufferManager::ClearDynamicBuffers() noexcept
+    {
+        dynamicVertexBuffer.Clear();
+        dynamicIndexBuffer.Clear();
     }
 
     void BufferManager::IndexBuffer::Initialize(bool map)

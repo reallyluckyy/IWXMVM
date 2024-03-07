@@ -10,11 +10,17 @@ namespace IWXMVM::GFX
     struct Mesh
     {
         Mesh(const uint8_t data[], uint32_t size);  // For use with incbin
+        Mesh(){};
 
         std::vector<Types::Index> indices;
         std::vector<Types::Vertex> vertices;
         std::size_t index = 0; // Unique index returned by the buffer manager
         DWORD fillMode = D3DFILL_SOLID;
+    };
+
+    enum class BufferType
+    {
+        Static, Dynamic
     };
 
     class BufferManager
@@ -32,19 +38,12 @@ namespace IWXMVM::GFX
         void Initialize();
         void Uninitialize();
 
-        void AddMesh(Mesh* mesh);
+        void AddMesh(Mesh* mesh, BufferType bufferType = BufferType::Static);
         void DrawMesh(const Mesh& mesh, const glm::mat4& model, bool ignoreLighting = false) const noexcept;
-        void BindBuffers() const noexcept;
+        void BindBuffers(BufferType bufferType) const noexcept;
         void ClearBuffers() noexcept;
+        void ClearDynamicBuffers() noexcept;
 
-        IDirect3DVertexBuffer9* GetVertexBufferHandle() const noexcept
-        {
-            return vertexBuffer.GetHandle();
-        }
-        IDirect3DIndexBuffer9* GetIndexBufferHandle() const noexcept
-        {
-            return indexBuffer.GetHandle();
-        }
        private:
         BufferManager()
         {
@@ -107,8 +106,10 @@ namespace IWXMVM::GFX
             std::size_t vertexBufferOffset = 0;
         };
 
-        IndexBuffer indexBuffer;
-        VertexBuffer vertexBuffer;
+        IndexBuffer staticIndexBuffer;
+        VertexBuffer staticVertexBuffer;
+        IndexBuffer dynamicIndexBuffer;
+        VertexBuffer dynamicVertexBuffer;
         std::array<MeshMetadata, MAX_MESHES> meshes;
         std::size_t meshCount = 0;
     };

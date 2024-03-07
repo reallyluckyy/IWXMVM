@@ -414,6 +414,104 @@ namespace IWXMVM::GFX
         }
     }
 
+    void GraphicsManager::BuildCampathMesh()
+    {
+        constexpr auto lineWidth = 5.0f;
+        constexpr auto lineColor = D3DCOLOR_COLORVALUE(1, 0.8f, 0, 1);
+
+        constexpr float samplesPerUnit = 0.05f;  // Changes how many models are placed inbetween each node
+
+        auto& keyframeManager = Components::KeyframeManager::Get();
+        const auto& property = keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera);
+        auto& nodes = keyframeManager.GetKeyframes(property);
+
+        campath.vertices.clear();
+        campath.indices.clear();
+
+        for (std::size_t i = 0; i < nodes.size() - 1; i++)
+        {
+            const auto distance =
+                glm::distance(nodes[i].value.cameraData.position, nodes[i + 1].value.cameraData.position);
+            for (float t = 0.0f; t <= 1.0f; t += 1.0f / (distance * samplesPerUnit))
+            {
+                const float interpTick = nodes[i + 1].tick * t + nodes[i].tick * (1.0f - t);
+                const auto interpValue = keyframeManager.Get().Interpolate(property, interpTick);
+
+                campath.vertices.push_back(
+                    Types::Vertex{
+                        .pos = interpValue.cameraData.position - glm::vec3(lineWidth / 2, 0, 0),
+                        .normal = glm::vec3(0, 0, 1),
+                        .col = lineColor
+                    }
+                );
+
+                campath.vertices.push_back(
+                    Types::Vertex{
+                        .pos = interpValue.cameraData.position + glm::vec3(lineWidth / 2, 0, 0),
+                        .normal = glm::vec3(0, 0, 1),
+                        .col = lineColor
+                    }
+                );
+
+                campath.vertices.push_back(
+                    Types::Vertex{
+                        .pos = interpValue.cameraData.position - glm::vec3(0, 0, lineWidth / 4),
+                        .normal = glm::vec3(1, 1, 0),
+                        .col = lineColor
+                    }
+                );
+
+                campath.vertices.push_back(
+                    Types::Vertex{
+                        .pos = interpValue.cameraData.position + glm::vec3(0, 0, lineWidth / 4),
+                        .normal = glm::vec3(1, 1, 0),
+                        .col = lineColor
+                    }
+                );
+
+                if (campath.vertices.size() > 4)
+                {
+                    // We create two perpendicular planes with the vertices like so:
+                    //    2
+                    // 0     1
+                    //    3
+                    // The next node would then have the vertices:
+                    //    6
+                    // 4     5
+                    //    7
+                    // and so on, which means we need these indices to create the triangles between the left/right vertices:
+                    // 0 1 4
+                    // 1 5 4
+                    // 0 4 1
+                    // 1 4 5
+                    // and these for the up/down vertices:
+                    // 2 3 6
+                    // 3 7 6
+                    // 2 6 3
+                    // 3 6 7
+
+                    std::vector<Types::Index> newIndices{
+                        0, 1, 4,
+                        1, 5, 3,
+                        0, 4, 1,
+                        1, 4, 5,
+                        2, 3, 6,
+                        3, 7, 6,
+                        2, 6, 3,
+                        3, 6, 7
+                    };
+
+                    for (auto& index : newIndices)
+                    {
+                        index = campath.vertices.size() - (8 - index);
+                    }
+
+                    campath.indices.insert(campath.indices.end(), newIndices.begin(), newIndices.end());
+                }
+            }
+        }
+    }
+
     void GraphicsManager::Render()
     {
         if (ImGui::GetMainViewport()->Size.x == 0.0f || ImGui::GetMainViewport()->Size.y == 0.0f)
@@ -442,13 +540,26 @@ namespace IWXMVM::GFX
 
         SetupRenderState();
 
-        BufferManager::Get().BindBuffers();
+        BufferManager::Get().BindBuffers(BufferType::Static);
 
         objectHoveredThisFrame = false;
 
-        // Only draw nodes if in free/orbit mode
         const auto& activeCam = Components::CameraManager::Get().GetActiveCamera();
         const auto currentCameraMode = activeCam->GetMode();
+        if (currentCameraMode == Components::Camera::Mode::Bone)
+        {
+            auto& boneCamera = dynamic_cast<Components::BoneCamera&>(*activeCam);
+            const auto& bones = Mod::GetGameInterface()->GetSupportedBoneNames();
+            const std::string& selectedBoneName = bones.at(boneCamera.GetBoneIndex());
+            const auto selectedPlayer = boneCamera.GetEntityId();
+            const auto& boneData = Mod::GetGameInterface()->GetBoneData(selectedPlayer, selectedBoneName);
+
+            const auto translate = glm::translate(boneData.position);
+            const auto scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
+            BufferManager::Get().DrawMesh(axis, translate * glm::mat4x4(boneData.rotation) * scale, true);
+        }
+
+        // Only draw nodes if in free/orbit mode
         if (currentCameraMode == Components::Camera::Mode::Free || currentCameraMode == Components::Camera::Mode::Orbit)
         {
             // Draw axis when in orbit mode
@@ -514,39 +625,14 @@ namespace IWXMVM::GFX
             // Drawing the path
             if (!nodes.empty())
             {
-                constexpr float samplesPerUnit = 0.1f;  // Changes how many models are placed inbetween each node
+                BuildCampathMesh();
 
-                for (std::size_t i = 0; i < nodes.size() - 1; i++)
-                {
-                    const auto distance =
-                        glm::distance(nodes[i].value.cameraData.position, nodes[i + 1].value.cameraData.position);
-                    for (float t = 0.0f; t <= 1.0f; t += 1.0f / (distance * samplesPerUnit))
-                    {
-                        const float interpTick = nodes[i + 1].tick * t + nodes[i].tick * (1.0f - t);
-                        const auto interpValue = keyframeManager.Get().Interpolate(property, interpTick);
-
-                        const auto translate = glm::translate(interpValue.cameraData.position);
-                        const auto scale = glm::scale(glm::vec3(2.1f, 2.1f, 2.1f));
-                        const auto rotate = glm::eulerAngleZYX(glm::radians(interpValue.cameraData.rotation.y),
-                                                               glm::radians(interpValue.cameraData.rotation.x),
-                                                               glm::radians(interpValue.cameraData.rotation.z));
-                        BufferManager::Get().DrawMesh(icosphere, translate * scale * rotate, true);
-                    }
-                }
+                BufferManager::Get().ClearDynamicBuffers();
+                BufferManager::Get().AddMesh(&campath, BufferType::Dynamic);
+                BufferManager::Get().BindBuffers(BufferType::Dynamic);
+                
+                BufferManager::Get().DrawMesh(campath, glm::identity<glm::mat4>(), true);
             }
-        }
-        
-        if (currentCameraMode == Components::Camera::Mode::Bone)
-        {
-            auto& boneCamera = dynamic_cast<Components::BoneCamera&>(*activeCam);
-            const auto& bones = Mod::GetGameInterface()->GetSupportedBoneNames();
-            const std::string& selectedBoneName = bones.at(boneCamera.GetBoneIndex());
-            const auto selectedPlayer = boneCamera.GetEntityId();
-            const auto& boneData = Mod::GetGameInterface()->GetBoneData(selectedPlayer, selectedBoneName);
-
-            const auto translate = glm::translate(boneData.position);
-            const auto scale = glm::scale(glm::vec3(1, 1, 1) * 1.1f);
-            BufferManager::Get().DrawMesh(axis, translate * glm::mat4x4(boneData.rotation) * scale, true);
         }
 
         // Restore the DX9 transform
