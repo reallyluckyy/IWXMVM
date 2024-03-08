@@ -492,7 +492,7 @@ namespace IWXMVM::GFX
 
                     std::vector<Types::Index> newIndices{
                         0, 1, 4,
-                        1, 5, 3,
+                        1, 5, 4,
                         0, 4, 1,
                         1, 4, 5,
                         2, 3, 6,
