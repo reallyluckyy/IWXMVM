@@ -56,9 +56,13 @@ namespace IWXMVM::MathUtils
         if (n < 2)
             throw std::exception("Not enough keyframes to interpolate");
 
-        // TODO: what if we have more than 256 nodes?
-
         constexpr int32_t MAX_NODES = 256;
+        if (keyframes.size() > MAX_NODES)
+        {
+            LOG_WARN("Exceeded maximum number of keyframes ({})", MAX_NODES);
+            return keyframes.back().value.GetByIndex(valueIndex);
+        }
+
         float ticks[MAX_NODES];
         float values[MAX_NODES];
         for (size_t i = 0; i < n; i++)
