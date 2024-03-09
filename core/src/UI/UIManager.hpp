@@ -143,6 +143,7 @@ namespace IWXMVM::UI
 
         Tab selectedTab = Tab::Demos;
         bool isInitialized = false;
+        bool uiComponentsInitialized = false;
 
         bool hideOverlay = false;
         bool showImGuiDemo = false;
