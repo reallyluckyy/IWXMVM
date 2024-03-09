@@ -53,14 +53,14 @@ namespace IWXMVM::Components
 
         if (FAILED(device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer)))
         {
-            LOG_ERROR("Failed to capture backbuffer. Capture resolutino not found.");
+            LOG_ERROR("Failed to capture backbuffer. Capture resolution not found.");
             return;
         }
 
         D3DSURFACE_DESC bbDesc = {};
         if (FAILED(backBuffer->GetDesc(&bbDesc)))
         {
-            LOG_ERROR("Failed to get backbuffer description. Capture resolutino not found.");
+            LOG_ERROR("Failed to get backbuffer description. Capture resolution not found.");
             return;
         }
 
