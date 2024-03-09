@@ -23,6 +23,7 @@ namespace IWXMVM::UI
         {
             component->Release();
         }
+        uiComponentsInitialized = false;
 
         ImGui_ImplDX9_Shutdown();
         ImGui_ImplWin32_Shutdown();
@@ -41,7 +42,6 @@ namespace IWXMVM::UI
 
             Input::UpdateState(ImGui::GetIO());
 
-            static bool uiComponentsInitialized = false;
             if (!uiComponentsInitialized)
             {
                 for (const auto& component : GetUIComponents())
