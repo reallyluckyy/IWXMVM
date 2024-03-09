@@ -90,7 +90,7 @@ namespace IWXMVM::Components
 
         outputDirectory = std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "recordings";
 
-        Events::RegisterListener(EventType::PostDemoLoad, [&]() {
+        Events::RegisterListener(EventType::OnDemoBoundsDetermined, [&]() {
             if (captureSettings.startTick == 0 || captureSettings.endTick == 0)
             {
                 auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
