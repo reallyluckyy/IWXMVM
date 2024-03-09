@@ -61,6 +61,8 @@ namespace IWXMVM
         // perhaps dvars shouldnt be exposed to core at all?
         virtual std::optional<Types::Dvar> GetDvar(const std::string_view name) = 0;
 
+        virtual void SetFov(float fov) = 0;
+
         virtual Types::Sun GetSun() = 0;
         virtual Types::DoF GetDof() = 0;
         virtual Types::Filmtweaks GetFilmtweaks() = 0;

@@ -8,11 +8,148 @@
 #include "Input.hpp"
 #include "Events.hpp"
 #include "Utilities/MathUtils.hpp"
+#include "Resources.hpp"
 
 namespace IWXMVM::UI
 {
+    float fov = 90;
+
     void CampathMenu::Initialize()
     {
+    }
+
+    void DrawFirstPersonSettings()
+    {
+        auto columnPercent = 0.4f;
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Field of View");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+        if (ImGui::SliderFloat("##fovSlider", &fov, 45, 160, "%.1f"))
+        {
+            Mod::GetGameInterface()->SetFov(fov);
+        }
+    }
+
+    void DrawBoneCameraSettings()
+    {
+        auto columnPercent = 0.4f;
+
+        auto& cameraManager = Components::CameraManager::Get();
+        auto& currentCamera = cameraManager.GetActiveCamera();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Entity");
+        ImGui::SameLine();
+
+        auto boneCamera = static_cast<Components::BoneCamera*>(currentCamera.get());
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+        auto entities = Mod::GetGameInterface()->GetEntities();
+        if (ImGui::BeginCombo("##gameViewBoneCameraTargetCombo",
+                              entities[boneCamera->GetEntityId()].ToString().c_str()))
+        {
+            for (size_t i = 0; i < entities.size(); i++)
+            {
+                if (entities[i].type == Types::EntityType::Unsupported)
+                    continue;
+
+                bool isSelected = boneCamera->GetEntityId() == i;
+                if (ImGui::Selectable(entities[i].ToString().c_str(), boneCamera->GetEntityId() == i))
+                {
+                    boneCamera->GetEntityId() = i;
+                }
+
+                if (isSelected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Bone");
+        ImGui::SameLine();
+
+        const auto& supportedBoneNames = Mod::GetGameInterface()->GetSupportedBoneNames();
+
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+        if (ImGui::BeginCombo("##gameViewBoneCameraBoneCombo", supportedBoneNames[boneCamera->GetBoneIndex()].c_str()))
+        {
+            for (size_t i = 0; i < supportedBoneNames.size(); i++)
+            {
+                bool isSelected = boneCamera->GetBoneIndex() == i;
+                if (ImGui::Selectable(supportedBoneNames[i].data(), boneCamera->GetBoneIndex() == i))
+                {
+                    boneCamera->GetBoneIndex() = i;
+                }
+
+                if (isSelected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+
+        const auto& boneData = Mod::GetGameInterface()->GetBoneData(boneCamera->GetEntityId(),
+                                                                    supportedBoneNames.at(boneCamera->GetBoneIndex()));
+        if (boneData.id == -1)
+        {
+            ImGui::Dummy(ImVec2(0, 10));
+
+            ImGui::Text(ICON_FA_TRIANGLE_EXCLAMATION " Bone not found on entity");
+        }
+        else
+        {
+            ImGui::Dummy(ImVec2(0, 10));
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Offset");
+            ImGui::SameLine();
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+            ImGui::DragFloat3("##gameViewBoneCameraOffset", &boneCamera->GetPositionOffset().x, 1, -10000, 10000,
+                              "%.1f");
+
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Rotation");
+            ImGui::SameLine();
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+            ImGui::DragFloat3("##gameViewBoneCameraRotation", &boneCamera->GetRotationOffset().x, 1, -180, 180, "%.1f");
+
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Field of View");
+            ImGui::SameLine();
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+            ImGui::DragFloat("##gameViewBoneCameraFOV", &boneCamera->GetFov(), 1, 1, 180, "%.0f");
+
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Smooth Movement");
+            ImGui::SameLine();
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+            ImGui::Checkbox("##gameViewBoneCameraTemporalSmoothing", &boneCamera->UseTemporalSmoothing());
+        }
+    }
+
+    void DrawNoSettings()
+    {
+        ImGui::Dummy(ImVec2(0, 5));
+        ImGui::TextWrapped("There are no settings for this camera mode!");
     }
 
     void CampathMenu::Render()
@@ -28,16 +165,26 @@ namespace IWXMVM::UI
         }
 
         auto& campathManager = Components::CampathManager::Get();
+        auto& cameraManager = Components::CameraManager::Get();
 
-        if (Components::CameraManager::Get().GetActiveCamera()->GetMode() != Components::Camera::Mode::Dolly)
+        ImGui::Dummy(ImVec2(0.0f, 10.0f));
+        ImGui::PushFont(UIManager::Get().GetBoldFont());
+        ImGui::Text(ICON_FA_CAMERA "  %s Settings",
+                    cameraManager.GetCameraModeLabel(cameraManager.GetActiveCamera()->GetMode()));
+        ImGui::PopFont();
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
+
+        switch (cameraManager.GetActiveCamera()->GetMode())
         {
-            ImGui::Text("Campath Controls");
-            ImGui::Text("%s - Add Node",
-                        ImGui::GetKeyName(InputConfiguration::Get().GetBoundKey(Action::DollyAddNode)));
-            ImGui::Text("%s - Clear All Nodes",
-                        ImGui::GetKeyName(InputConfiguration::Get().GetBoundKey(Action::DollyClearNodes)));
-            ImGui::Text("%s - Switch To Dollycam",
-                        ImGui::GetKeyName(InputConfiguration::Get().GetBoundKey(Action::DollyPlayPath)));
+            case Components::Camera::Mode::FirstPerson:
+                DrawFirstPersonSettings();
+                break;
+            case Components::Camera::Mode::Bone:
+                DrawBoneCameraSettings();
+                break;
+            default:
+                DrawNoSettings();
+                break;
         }
 
         ImGui::End();

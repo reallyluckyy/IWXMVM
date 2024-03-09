@@ -200,6 +200,11 @@ namespace IWXMVM::IW3
             return dvar;
         }
 
+        void SetFov(float fov) final
+        {
+            Functions::FindDvar("cg_fov")->current.value = fov;
+        }
+
         Types::Sun GetSun() final
         {
             auto gfxWorld = Structures::GetGfxWorld();
@@ -461,6 +466,7 @@ namespace IWXMVM::IW3
                 "tag_clip",      
                 "tag_brass",
                 "j_head",
+                "j_mainroot",
                 "j_wrist_le",
                 "j_wrist_ri",
                 "j_shoulder_le",
