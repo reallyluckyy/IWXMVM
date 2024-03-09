@@ -609,7 +609,8 @@ namespace IWXMVM::UI
             auto currentTick = demoInfo.currentTick;
             Components::Playback::SkipForward(lastKeyFrameTime - demoInfo.currentTick);
 
-            lastKeyFrameTime = 0;
+            if (lastKeyFrameTime - demoInfo.currentTick != 50)
+                lastKeyFrameTime = 0;
         }
 
         std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
