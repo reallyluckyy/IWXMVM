@@ -84,16 +84,9 @@ namespace IWXMVM::Components
             };
         }
 
-        // TODO: support non 16x9 resolutions?
-        std::array<Resolution, 4> GetSupportedResolutions()
+        const std::array<Resolution, 4>& GetSupportedResolutions()
         {
-            return 
-            {
-                Resolution{ 3840, 2160 }, 
-                Resolution{ 2560, 1440 },
-                Resolution{ 1920, 1080 },
-                Resolution{ 1280, 720 }
-            };
+            return supportedResolutions;
         }
 
         std::array<int32_t, 6> GetSupportedFramerates()
@@ -135,6 +128,7 @@ namespace IWXMVM::Components
 
         void OnRenderFrame();
 
+        std::array<Resolution, 4> supportedResolutions;
         CaptureSettings captureSettings;
         std::filesystem::path outputDirectory;
 

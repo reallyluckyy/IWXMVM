@@ -49,12 +49,42 @@ namespace IWXMVM::Components
 
     void CaptureManager::Initialize()
     {
+        IDirect3DDevice9* device = D3D9::GetDevice();
+
+        if (FAILED(device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer)))
+        {
+            LOG_ERROR("Failed to capture backbuffer. Capture resolution not found.");
+            return;
+        }
+
+        D3DSURFACE_DESC bbDesc = {};
+        if (FAILED(backBuffer->GetDesc(&bbDesc)))
+        {
+            LOG_ERROR("Failed to get backbuffer description. Capture resolution not found.");
+            return;
+        }
+
+        backBuffer->Release();
+        backBuffer = nullptr;
+
+        const Resolution gameResolution = {
+            static_cast<std::int32_t>(bbDesc.Width),
+            static_cast<std::int32_t>(bbDesc.Height),
+        };
+        for (std::ptrdiff_t i = 0; i < std::ssize(supportedResolutions); i++)
+        {
+            supportedResolutions[i] = {
+                gameResolution.width / (i + 1),
+                gameResolution.height / (i + 1),
+            };
+        }
+
         captureSettings = {
             0,
             0,
             OutputFormat::Video, 
             VideoCodec::Prores4444,
-            Resolution(1920, 1080),
+            gameResolution,
             250
         };
 

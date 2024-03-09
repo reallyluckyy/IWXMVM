@@ -52,7 +52,6 @@ namespace IWXMVM
             Components::CameraManager::Get().Initialize();
             Components::CampathManager::Get().Initialize();
             Components::KeyframeManager::Get().Initialize();
-            Components::CaptureManager::Get().Initialize();
             Components::Rewinding::Initialize();
 
             LOG_DEBUG("Installing game hooks and patches...");
