@@ -236,6 +236,8 @@ namespace IWXMVM::UI
             Mod::GetGameInterface()->SetMouseMode(Types::MouseMode::Capture);
             isInitialized = true;
 
+            Components::CaptureManager::Get().Initialize();
+
             LOG_INFO("Initialized UI");
         }
         catch (...)
