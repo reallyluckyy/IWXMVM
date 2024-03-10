@@ -14,7 +14,7 @@ namespace IWXMVM::Components
         bool IsPaused();
 
         void SkipForward(std::int32_t ticks);
-        void SetTickDelta(std::int32_t value);
+        void SetTickDelta(std::int32_t value, bool ignoreDeadzone = false);
 
         std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec);
     } // namespace Playback

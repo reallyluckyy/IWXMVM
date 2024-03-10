@@ -3,6 +3,7 @@
 
 #include "Mod.hpp"
 #include "Components/Rewinding.hpp"
+#include "Components/Playback.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "D3D9.hpp"
 #include "Events.hpp"
@@ -261,7 +262,9 @@ namespace IWXMVM::Components
             std::filesystem::create_directories(outputDirectory);
         }
 
-        // TODO: skip to start tick
+        // skip to start tick
+        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        Playback::SetTickDelta(captureSettings.startTick - currentTick, true);
 
         capturedFrameCount = 0;
 

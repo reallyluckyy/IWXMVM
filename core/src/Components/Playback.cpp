@@ -26,12 +26,12 @@ namespace IWXMVM::Components::Playback
         LOG_DEBUG("Skipping forward {} ticks, realtime: {}", ticks, *realtime);
     }
 
-    void SetTickDelta(int32_t value)
+    void SetTickDelta(int32_t value, bool ignoreDeadzone)
     {
         constexpr int32_t REWIND_DEADZONE = 250;
         if (value > 0)
             SkipForward(value);
-        else if (value < -REWIND_DEADZONE)
+        else if ((value < -REWIND_DEADZONE) || (value < 0 && ignoreDeadzone))
             Rewinding::RewindBy(value);
     }
 
