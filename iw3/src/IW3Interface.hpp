@@ -100,6 +100,8 @@ namespace IWXMVM::IW3
 
         void PlayDemo(std::filesystem::path demoPath) final
         {
+            Events::Invoke(EventType::PreDemoLoad);
+            
             const auto demoDirectory =
                 std::filesystem::path(GetDvar("fs_basepath")->value->string) / "players" / "demos";
 

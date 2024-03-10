@@ -177,8 +177,6 @@ namespace IWXMVM::IW3::Hooks::Commands
         if (oldFunction == nullptr)
             return;
 
-        Events::Invoke(EventType::PreDemoLoad);
-
         reinterpret_cast<void (*)()>(oldFunction)();
 
         Events::Invoke(EventType::PostDemoLoad);
