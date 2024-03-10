@@ -6,6 +6,8 @@
 
 namespace IWXMVM::UI
 {
+    std::chrono::time_point<std::chrono::steady_clock> lastConfigSave;
+
     void Preferences::Initialize()
     {
     }
@@ -32,7 +34,7 @@ namespace IWXMVM::UI
         auto& preferences = PreferencesConfiguration::Get();
 
         DrawHeading("Freecam");
-        ImGui::DragFloat("Movement Speed", &preferences.freecamSpeed, 1.0f, 1.0f, 500.0f, "%.0f");
+        ImGui::DragFloat("Movement Speed##freeCamera", &preferences.freecamSpeed, 1.0f, 1.0f, 500.0f, "%.0f");
         ImGui::DragFloat("Mouse Sensitivity", &preferences.freecamMouseSpeed, 0.01f, 0.01f, 5.0f, "%.2f");
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10);
     }
@@ -43,7 +45,7 @@ namespace IWXMVM::UI
 
         DrawHeading("Orbit Camera");
         ImGui::DragFloat("Rotation Speed", &preferences.orbitRotationSpeed, 0.01f, 0.01f, 5.0f, "%.2f");
-        ImGui::DragFloat("Movement Speed", &preferences.orbitMoveSpeed, 0.01f, 0.01f, 5.0f, "%.2f");
+        ImGui::DragFloat("Movement Speed##orbitCamera", &preferences.orbitMoveSpeed, 0.01f, 0.01f, 5.0f, "%.2f");
         ImGui::DragFloat("Zoom Speed", &preferences.orbitZoomSpeed, 0.01f, 0.01f, 5.0f, "%.2f");
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10);
     }
@@ -69,6 +71,12 @@ namespace IWXMVM::UI
             }
 
             ImGui::End();
+        }
+
+        if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - lastConfigSave) > std::chrono::seconds(1))
+        {
+            lastConfigSave = std::chrono::steady_clock::now();
+            Configuration::Get().Write(true);
         }
     }
 

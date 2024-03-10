@@ -38,7 +38,7 @@ namespace IWXMVM
         Write();
     }
 
-    void Configuration::Write()
+    void Configuration::Write(bool quiet)
     {
         using json = nlohmann::json;
 
@@ -51,7 +51,10 @@ namespace IWXMVM
         configFile << config.dump(4);
         configFile.close();
 
-        LOG_INFO("Wrote config to {}", GetUserConfigPath().string());
+        if (!quiet)
+        {
+            LOG_INFO("Wrote config to {}", GetUserConfigPath().string());
+        }
     }
 
     std::filesystem::path Configuration::GetUserConfigPath()

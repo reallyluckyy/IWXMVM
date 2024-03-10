@@ -16,7 +16,7 @@ namespace IWXMVM
         void operator=(Configuration const&) = delete;
 
         void Initialize();
-        void Write();
+        void Write(bool quiet = false);
 
        private:
         Configuration()
