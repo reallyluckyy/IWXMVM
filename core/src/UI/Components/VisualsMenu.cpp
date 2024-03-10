@@ -318,11 +318,37 @@ namespace IWXMVM::UI
         ImGui::Separator();
     }
 
+    bool DrawResettableSectionHeader(const char* label)
+    {
+        ImGui::Dummy(ImVec2(0.0f, 10.0f));
+        ImGui::PushFont(UIManager::Get().GetBoldFont());
+        ImGui::Text(label);
+        ImGui::PopFont();
+
+        const char* resetlabel = ICON_FA_REPEAT " Reset ";
+        float windowWidth = ImGui::GetWindowWidth();
+        float buttonWidth = ImGui::CalcTextSize(resetlabel).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(windowWidth - buttonWidth);
+        bool ret = ImGui::Button(resetlabel);
+
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
+        return ret;
+    }
+
     void VisualsMenu::RenderSun()
     {
-        DrawSectionHeader(ICON_FA_SUN "  Sun");
-
         bool modified = false;
+
+        if (DrawResettableSectionHeader(ICON_FA_SUN "  Sun"))
+        {
+            visuals.sunBrightness = defaultVisuals.sunBrightness;
+            visuals.sunColorUI = defaultVisuals.sunColorUI;
+            visuals.sunDirectionUI = defaultVisuals.sunDirectionUI;
+            visuals.sunPitch = defaultVisuals.sunPitch;
+            visuals.sunYaw = defaultVisuals.sunYaw;
+            modified = true;
+        }
 
         modified = ImGuiEx::Keyframeable::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI),
                                                      Types::KeyframeablePropertyType::SunLightColor) ||
