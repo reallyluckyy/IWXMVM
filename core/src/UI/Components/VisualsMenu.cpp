@@ -324,8 +324,14 @@ namespace IWXMVM::UI
         ImGui::PushFont(UIManager::Get().GetBoldFont());
         ImGui::Text(label);
         ImGui::PopFont();
+
+        const char* resetlabel = ICON_FA_REPEAT " Reset ";
+        float windowWidth = ImGui::GetWindowWidth();
+        float buttonWidth = ImGui::CalcTextSize(resetlabel).x + ImGui::GetStyle().FramePadding.x * 2.0f;
         ImGui::SameLine();
-        bool ret = ImGui::SmallButton(ICON_FA_REPEAT);
+        ImGui::SetCursorPosX(windowWidth - buttonWidth);
+        bool ret = ImGui::Button(resetlabel);
+
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
         return ret;
     }
