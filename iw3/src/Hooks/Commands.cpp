@@ -8,41 +8,6 @@
 namespace IWXMVM::IW3::Hooks::Commands
 {
 
-#define MAX_TOKENIZE_STRINGS 8
-#define tokenStrings (*(struct CmdArgs*)(0x1410B40))
-#define tokenbuf (*(struct CmdArgsPrivate*)(0x1433490))
-
-    struct CmdArgsPrivate
-    {
-        char textPool[8192];
-        const char* argvPool[512];
-        int usedTextPool[MAX_TOKENIZE_STRINGS];
-        int totalUsedArgvPool;
-        int totalUsedTextPool;
-    };
-
-    struct CmdArgs
-    {
-        int nesting;
-        int localClientNum[MAX_TOKENIZE_STRINGS];
-        int argshift[MAX_TOKENIZE_STRINGS];
-        int argc[MAX_TOKENIZE_STRINGS];
-        const char** argv[MAX_TOKENIZE_STRINGS];
-    };
-
-    int Cmd_Argc()
-    {
-        return tokenStrings.argc[tokenStrings.nesting];
-    }
-
-    const char* Cmd_Argv(int argv)
-    {
-        if (argv >= Cmd_Argc())
-            return "";
-        else
-            return tokenStrings.argv[tokenStrings.nesting][argv];
-    }
-
     struct FunctionStorage
     {
         enum struct CommandType
