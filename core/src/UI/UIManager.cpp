@@ -113,7 +113,7 @@ namespace IWXMVM::UI
         ShowCursor(TRUE);
 
         auto& gameView = UIManager::Get().GetUIComponent(UI::Component::GameView);
-        if (gameView->HasFocus() && UIManager::Get().IsFreecamSelected())
+        if (gameView->HasFocus() && UIManager::Get().IsControllableCameraModeSelected())
         {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         }
@@ -126,9 +126,10 @@ namespace IWXMVM::UI
         return CallWindowProc(UIManager::Get().GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
     }
 
-    bool UIManager::IsFreecamSelected()
+    bool UIManager::IsControllableCameraModeSelected()
     {
-        return Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free;
+        auto mode = Components::CameraManager::Get().GetActiveCamera()->GetMode();
+        return mode == Components::Camera::Mode::Free || mode == Components::Camera::Mode::Bone;
     }
 
     ImVec2 UIManager::GetWindowSize(HWND hwnd)

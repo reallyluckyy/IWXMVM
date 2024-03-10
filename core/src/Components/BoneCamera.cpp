@@ -30,6 +30,15 @@ namespace IWXMVM::Components
                                       glm::normalize(boneData.rotation[2]));
         this->rotation = euler + rotationOffset;
     }
+
+    void BoneCamera::HandleInput(const Types::BoneData& boneData)
+    {
+        if (!UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->HasFocus())
+            return;
+        auto worldSpacePosition = boneData.position + boneData.rotation * positionOffset;
+        FreeCamera::HandleFreecamInput(worldSpacePosition, rotationOffset, fov, GetForwardVector(), GetRightVector());
+        positionOffset = boneData.rotation / (worldSpacePosition - boneData.position);
+    }
     
     void BoneCamera::Update()
     {
@@ -51,6 +60,8 @@ namespace IWXMVM::Components
                 }
             }
         }
+
+        HandleInput(boneData);
 
         SetPositionFromBoneData(boneData);
     }

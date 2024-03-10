@@ -46,5 +46,6 @@ namespace IWXMVM::Components
         bool useTemporalSmoothing;
 
         void SetPositionFromBoneData(const Types::BoneData& boneData);
+        void HandleInput(const Types::BoneData& boneData);
     };
 }  // namespace IWXMVM::Components

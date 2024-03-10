@@ -134,7 +134,8 @@ namespace IWXMVM::UI
         auto smallSpacing = ImGui::GetFontSize() * 0.2f;
         auto& config = InputConfiguration::Get();
 
-        if (Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Free)
+        auto cameraMode = Components::CameraManager::Get().GetActiveCamera()->GetMode();
+        if (UIManager::Get().IsControllableCameraModeSelected())
         {
             DrawKeybindsBackground(spacing);
             if (HasFocus())
@@ -163,22 +164,25 @@ namespace IWXMVM::UI
                 DrawKeyBox("Alt");
                 ImGui::SameLine(0, smallSpacing);
                 DrawKeybindEntry("Scroll", "Roll Camera");
+                
+                if (cameraMode == Components::Camera::Mode::Bone)
+                {
+                    ImGui::SameLine(0, spacing * 1.5f);
+                    DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)), "Place Campath Node");
 
-                ImGui::SameLine(0, spacing * 1.5f);
-                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)), "Place Campath Node");
-
-                ImGui::SameLine(0, spacing);
-                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyClearNodes)), "Delete Campath");
+                    ImGui::SameLine(0, spacing);
+                    DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyClearNodes)), "Delete Campath");
+                }
 
                 ImGui::SameLine(0, spacing * 1.5f);
                 DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Unlock Mouse");
             }
             else
             {
-                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Activate Freecam Controls");
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraActivate)), "Activate Controls");
             }
         }
-        else if (Components::CameraManager::Get().GetActiveCamera()->GetMode() == Components::Camera::Mode::Orbit)
+        else if (cameraMode == Components::Camera::Mode::Orbit)
         {
             DrawKeybindsBackground(spacing);
 
@@ -217,8 +221,7 @@ namespace IWXMVM::UI
         LOG_DEBUG("Initializing GameView. size.x: {}; size.y: {}", GetSize().x, GetSize().y);
 
         Events::RegisterListener(EventType::OnCameraChanged, [&]() {
-            auto& currentCamera = Components::CameraManager::Get().GetActiveCamera();
-            if (currentCamera->GetMode() == Components::Camera::Mode::Free)
+            if (UIManager::Get().IsControllableCameraModeSelected())
             {
                 SetHasFocus(false);
             }
@@ -313,7 +316,7 @@ namespace IWXMVM::UI
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
 
-        if (HasFocus() && UIManager::Get().IsFreecamSelected())
+        if (HasFocus() && UIManager::Get().IsControllableCameraModeSelected())
             LockMouse();
 
         HandleInput();
@@ -334,7 +337,7 @@ namespace IWXMVM::UI
         {
             const auto& camera = Components::CameraManager::Get().GetActiveCamera();
             bool shouldHaveFocus = false;
-            if (camera->GetMode() == Components::Camera::Mode::Free)
+            if (UIManager::Get().IsControllableCameraModeSelected())
                 shouldHaveFocus = Input::BindDown(Action::FreeCameraActivate);
             else
                 shouldHaveFocus = ImGui::IsWindowFocused();
