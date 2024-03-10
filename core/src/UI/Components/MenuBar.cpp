@@ -30,6 +30,7 @@ namespace IWXMVM::UI
                 }
                 if (ImGui::MenuItem("Exit"))
                 {
+                    Mod::RequestEject();
                 }
                 ImGui::EndMenu();
             }
