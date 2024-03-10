@@ -331,8 +331,12 @@ namespace IWXMVM::IW3
             Functions::FindDvar("con_gamemsgwindow0linecount")->current.integer = 4;
 
             Functions::FindDvar("cg_draw2D")->current.enabled = hudInfo.show2DElements;
+
             Functions::FindDvar("ui_hud_hardcore")->current.enabled = !hudInfo.showPlayerHUD;
             Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5 : 0;
+            Functions::FindDvar("cg_overheadnamessize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
+            Functions::FindDvar("cg_overheadiconsize")->current.value = hudInfo.showPlayerHUD ? 0.7f : 0;
+
             Functions::FindDvar("cg_drawShellshock")->current.value = hudInfo.showShellshock;
             Functions::FindDvar("ui_hud_obituaries")->current.string = hudInfo.showKillfeed ? "1" : "0";
             Functions::FindDvar("ui_drawCrosshair")->current.enabled = hudInfo.showCrosshair;
