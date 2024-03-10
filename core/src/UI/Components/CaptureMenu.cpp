@@ -7,6 +7,7 @@
 #include "Components/CaptureManager.hpp"
 #include "Components/CameraManager.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "Configuration/PreferencesConfiguration.hpp"
 
 namespace IWXMVM::UI
 {
@@ -229,7 +230,8 @@ namespace IWXMVM::UI
                             {
                                 std::filesystem::path outputPath(pszFilePath);
                                 LOG_INFO("Set recording output directory to: {}", outputPath.string());
-                                captureManager.SetOutputDirectory(outputPath);
+                                PreferencesConfiguration::Get().captureOutputDirectory = outputPath;
+                                Configuration::Get().Write(true);
                             }
 
                             CoTaskMemFree(pszFilePath);
@@ -256,7 +258,8 @@ namespace IWXMVM::UI
             ImGui::PushFont(UIManager::Get().GetBoldFont());
             ImGui::Text("Output Directory");
             ImGui::PopFont();
-            ImGui::TextWrapped(captureManager.GetOutputDirectory().string().c_str());
+            const auto& outputDirectory = PreferencesConfiguration::Get().captureOutputDirectory;
+            ImGui::TextWrapped(outputDirectory.string().c_str());
 
             if (captureManager.IsCapturing())
             {

@@ -30,7 +30,7 @@ namespace IWXMVM
         }
         catch (const std::exception& e)
         {
-            LOG_ERROR("Failed to parse config file ({}). Resetting config to default values...", e.what());
+            LOG_ERROR("Failed to parse config file ({})", e.what());
         }
 
         configFile.close();

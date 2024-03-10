@@ -18,6 +18,18 @@ namespace IWXMVM
         void Initialize();
         void Write(bool quiet = false);
 
+        template <typename T>
+        static void ReadValueInto(nlohmann::json json, std::string_view node, T& out)
+        {
+            try
+            {
+                out = json.at(node).get<T>();
+            }
+            catch (std::exception)
+            {
+            }
+        }
+
        private:
         Configuration()
         {

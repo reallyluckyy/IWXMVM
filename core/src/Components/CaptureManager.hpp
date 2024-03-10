@@ -104,16 +104,6 @@ namespace IWXMVM::Components
             return !ffmpegNotFound;
         }
 
-        void SetOutputDirectory(const std::filesystem::path& path)
-        {
-            outputDirectory = path;
-        }
-
-        std::filesystem::path GetOutputDirectory() const
-        {
-            return outputDirectory;
-        }
-
         std::int32_t GetCapturedFrameCount() const
 		{
 			return capturedFrameCount;
@@ -130,7 +120,6 @@ namespace IWXMVM::Components
 
         std::array<Resolution, 4> supportedResolutions;
         CaptureSettings captureSettings;
-        std::filesystem::path outputDirectory;
 
         // internal capture state
         FILE* pipe = nullptr;

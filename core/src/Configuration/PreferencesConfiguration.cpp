@@ -14,12 +14,13 @@ namespace IWXMVM
             throw std::runtime_error("Failed to deserialize preferences configuration: root node is not an object");
         }
 
-        showKeybindHints = j[NODE_SHOW_KEYBIND_HINTS].get<bool>();
-        freecamSpeed = j[NODE_FREECAM_SPEED].get<float>();
-        freecamMouseSpeed = j[NODE_FREECAM_MOUSE_SPEED].get<float>();
-        orbitRotationSpeed = j[NODE_ORBIT_ROTATION_SPEED].get<float>();
-        orbitMoveSpeed = j[NODE_ORBIT_MOVE_SPEED].get<float>();
-        orbitZoomSpeed = j[NODE_ORBIT_ZOOM_SPEED].get<float>();
+        Configuration::ReadValueInto<bool>(j, NODE_SHOW_KEYBIND_HINTS, showKeybindHints);
+        Configuration::ReadValueInto<float>(j, NODE_FREECAM_SPEED, freecamSpeed);
+        Configuration::ReadValueInto<float>(j, NODE_FREECAM_MOUSE_SPEED, freecamMouseSpeed);
+        Configuration::ReadValueInto<float>(j, NODE_ORBIT_ROTATION_SPEED, orbitRotationSpeed);
+        Configuration::ReadValueInto<float>(j, NODE_ORBIT_MOVE_SPEED, orbitMoveSpeed);
+        Configuration::ReadValueInto<float>(j, NODE_ORBIT_ZOOM_SPEED, orbitZoomSpeed);
+        Configuration::ReadValueInto<std::filesystem::path>(j, NODE_CAPTURE_OUTPUT_DIRECTORY, captureOutputDirectory);
     }
 
     void PreferencesConfiguration::Serialize(nlohmann::json& j) const
@@ -30,5 +31,6 @@ namespace IWXMVM
         j[NODE_ORBIT_ROTATION_SPEED] = orbitRotationSpeed;
         j[NODE_ORBIT_MOVE_SPEED] = orbitMoveSpeed;
         j[NODE_ORBIT_ZOOM_SPEED] = orbitZoomSpeed;
+        j[NODE_CAPTURE_OUTPUT_DIRECTORY] = captureOutputDirectory;
     }
 }  // namespace IWXMVM

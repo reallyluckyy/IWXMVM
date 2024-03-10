@@ -28,6 +28,8 @@ namespace IWXMVM
         float orbitMoveSpeed = 0.3f;
         float orbitZoomSpeed = 0.8f;
 
+        std::filesystem::path captureOutputDirectory = std::filesystem::path();
+
        private:
         PreferencesConfiguration();
 
@@ -37,6 +39,7 @@ namespace IWXMVM
         const std::string_view NODE_ORBIT_ROTATION_SPEED = "orbitRotationSpeed";
         const std::string_view NODE_ORBIT_MOVE_SPEED = "orbitMoveSpeed";
         const std::string_view NODE_ORBIT_ZOOM_SPEED = "orbitZoomSpeed";
+        const std::string_view NODE_CAPTURE_OUTPUT_DIRECTORY = "captureOutputDirectory";
 
     };
 }  // namespace IWXMVM

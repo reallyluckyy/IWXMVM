@@ -2,6 +2,7 @@
 #include "CaptureManager.hpp"
 
 #include "Mod.hpp"
+#include "Configuration/PreferencesConfiguration.hpp"
 #include "Components/Rewinding.hpp"
 #include "Components/Playback.hpp"
 #include "Utilities/PathUtils.hpp"
@@ -89,7 +90,11 @@ namespace IWXMVM::Components
             250
         };
 
-        outputDirectory = std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "recordings";
+        auto& outputDirectory = PreferencesConfiguration::Get().captureOutputDirectory;
+        if (outputDirectory.empty())
+        {
+            outputDirectory = std::filesystem::path(PathUtils::GetCurrentGameDirectory()) / "IWXMVM" / "recordings";
+        }
 
         Events::RegisterListener(EventType::OnDemoBoundsDetermined, [&]() {
             if (captureSettings.startTick == 0 || captureSettings.endTick == 0)
@@ -257,6 +262,7 @@ namespace IWXMVM::Components
         }
 
         // ensure output directory exists
+        const auto& outputDirectory = PreferencesConfiguration::Get().captureOutputDirectory;
         if (!std::filesystem::exists(outputDirectory))
         {
             std::filesystem::create_directories(outputDirectory);
