@@ -394,6 +394,12 @@ namespace IWXMVM::UI
 
     void VisualsMenu::UpdateHudInfo()
     {
+        // Do not update HUD settings when using any free-floating camera
+        // We do not want to overwrite cg_draw2D for example
+        auto& camera = Components::CameraManager::Get().GetActiveCamera();
+        if (camera->IsModControlledCameraMode())
+            return;
+
         Mod::GetGameInterface()->SetHudInfo(visuals.hudInfo);
     }
 
