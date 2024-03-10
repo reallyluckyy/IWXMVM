@@ -394,8 +394,8 @@ namespace IWXMVM::GFX
 
         if (heldAxis.has_value())
         {
-            auto amountX = ImGui::GetIO().MouseDelta.x * 0.04f;
-            auto amountY = ImGui::GetIO().MouseDelta.y * 0.04f;
+            auto amountX = ImGui::GetIO().MouseDelta.x * 0.008f;
+            auto amountY = ImGui::GetIO().MouseDelta.y * 0.008f;
 
             auto quat = glm::toQuat(rotate);
 
