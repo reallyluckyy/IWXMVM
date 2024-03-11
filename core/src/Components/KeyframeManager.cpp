@@ -259,27 +259,26 @@ namespace IWXMVM::Components
         }
 
         assert(p0Idx != -1 || p1Idx != -1);
+        assert(keyframes[p0Idx].tick < keyframes[p1Idx].tick);
         assert(p0Idx != p1Idx);
-        if (!(keyframes[p0Idx].tick < keyframes[p1Idx].tick))
-        {
-            const auto& p0 = keyframes[p0Idx];
-            const auto& p1 = keyframes[p1Idx];
 
-            const float t = static_cast<float>(tick - p0.tick) / static_cast<float>(p1.tick - p0.tick);
-            switch (valueType)
-            {
-                case Types::KeyframeValueType::FloatingPoint:
-                    return Types::KeyframeValue((1.0f - t) * p0.value.floatingPoint + t * p1.value.floatingPoint);
-                case Types::KeyframeValueType::Vector3:
-                    return Types::KeyframeValue((1.0f - t) * p0.value.vector3 + t * p1.value.vector3);
-                case Types::KeyframeValueType::CameraData:
-                    return Types::KeyframeValue(
-                        Types::CameraData((1.0f - t) * p0.value.cameraData.position + t * p1.value.cameraData.position,
-                                          (1.0f - t) * p0.value.cameraData.rotation + t * p1.value.cameraData.rotation,
-                                          (1.0f - t) * p0.value.cameraData.fov + t * p1.value.cameraData.fov));
-                default:
-                    return Types::KeyframeValue(0.0f);
-            }
+        const auto& p0 = keyframes[p0Idx];
+        const auto& p1 = keyframes[p1Idx];
+
+        const float t = static_cast<float>(tick - p0.tick) / static_cast<float>(p1.tick - p0.tick);
+        switch (valueType)
+        {
+            case Types::KeyframeValueType::FloatingPoint:
+                return Types::KeyframeValue((1.0f - t) * p0.value.floatingPoint + t * p1.value.floatingPoint);
+            case Types::KeyframeValueType::Vector3:
+                return Types::KeyframeValue((1.0f - t) * p0.value.vector3 + t * p1.value.vector3);
+            case Types::KeyframeValueType::CameraData:
+                return Types::KeyframeValue(
+                    Types::CameraData((1.0f - t) * p0.value.cameraData.position + t * p1.value.cameraData.position,
+                                      (1.0f - t) * p0.value.cameraData.rotation + t * p1.value.cameraData.rotation,
+                                      (1.0f - t) * p0.value.cameraData.fov + t * p1.value.cameraData.fov));
+            default:
+                return Types::KeyframeValue(0.0f);
         }
     }
 
