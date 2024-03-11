@@ -64,7 +64,7 @@ namespace IWXMVM::UI
             }
             else
             {
-                // best place to put code? maybe only set timeframe on capture button click. 
+                // best place to put code? maybe only set timeframe on capture button click (though this is slightly less intuitive i would say). 
                 // also maybe extract getting first and last keyframe to seperate function in KeyframeManager
                 std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes =
                     KeyframeManager::Get().GetKeyframes();
