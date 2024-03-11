@@ -89,7 +89,7 @@ namespace IWXMVM::UI
                         }
                     }
 
-                    if (minTick != UINT32_MAX && maxTick)
+                    if (minTick != UINT32_MAX && maxTick && maxTick > minTick)
                     {
                         captureSettings.startTick = minTick;
                         captureSettings.endTick = maxTick;
