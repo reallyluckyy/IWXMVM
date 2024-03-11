@@ -25,10 +25,15 @@ namespace IWXMVM::Components
 
         this->position = boneData.position + boneData.rotation * positionOffset;
 
-        auto euler =
-            MathUtils::AnglesFromAxis(glm::normalize(boneData.rotation[0]), glm::normalize(boneData.rotation[1]),
-                                      glm::normalize(boneData.rotation[2]));
-        this->rotation = euler + rotationOffset;
+        auto qBoneRotation = glm::quat(boneData.rotation);
+        auto qRotationOffset = glm::quat(glm::radians(rotationOffset));
+        auto newRotation = glm::degrees(glm::eulerAngles(qBoneRotation * qRotationOffset));
+
+        // im sure theres a glm way to fix our orientation without having
+        // to do this manually (also in Graphics.cpp), but im just happy this works right now
+        this->rotation[0] = newRotation[1];
+        this->rotation[1] = newRotation[2];
+        this->rotation[2] = newRotation[0];
     }
 
     void BoneCamera::HandleInput(const Types::BoneData& boneData)

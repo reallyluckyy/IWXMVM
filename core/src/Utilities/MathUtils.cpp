@@ -19,14 +19,6 @@ namespace IWXMVM::MathUtils
         return glm::vec3(glm::degrees(pitch), glm::degrees(yaw), 0.0f);
     }
 
-    glm::vec3 AnglesFromAxis(glm::vec3 forward, glm::vec3 right, glm::vec3 up)
-    {
-        auto yaw = std::atan2(forward.y, forward.x);
-		auto pitch = std::atan2(-forward.z, std::sqrt(forward.x * forward.x + forward.y * forward.y));
-		auto roll = std::atan2(right.z, up.z);
-		return glm::vec3(glm::degrees(pitch), glm::degrees(yaw), glm::degrees(roll));
-    }
-
     std::optional<ImVec2> WorldToScreenPoint(glm::vec3 point, Components::Camera& camera)
     {
         auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
