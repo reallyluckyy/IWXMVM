@@ -94,10 +94,6 @@ namespace IWXMVM::UI
                         captureSettings.startTick = minTick;
                         captureSettings.endTick = maxTick;
                     }
-                    else
-                    {
-                        captureManager.SetTimeFrameToDefault();
-                    }
                 }
                 
             }
