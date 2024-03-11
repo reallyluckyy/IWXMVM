@@ -44,7 +44,7 @@ namespace IWXMVM::UI
                 UIManager::Get().GetUIComponent(UI::Component::VisualsMenu)->Render();
                 break;
             case Tab::Camera:
-                UIManager::Get().GetUIComponent(UI::Component::CampathMenu)->Render();
+                UIManager::Get().GetUIComponent(UI::Component::CameraMenu)->Render();
                 break;
             case Tab::Record:
                 UIManager::Get().GetUIComponent(UI::Component::CaptureMenu)->Render();
