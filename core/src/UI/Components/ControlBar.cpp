@@ -62,6 +62,22 @@ namespace IWXMVM::UI
         {
             Components::Playback::SetTickDelta(-1000);
         }
+
+        if (Input::BindDown(Action::TimeFrameMoveStart))
+        {
+            auto& captureManager = Components::CaptureManager::Get();
+            auto& captureSettings = captureManager.GetCaptureSettings();
+            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            captureSettings.startTick = demoInfo.currentTick;
+        }
+
+        if (Input::BindDown(Action::TimeFrameMoveEnd))
+        {
+            auto& captureManager = Components::CaptureManager::Get();
+            auto& captureSettings = captureManager.GetCaptureSettings();
+            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            captureSettings.endTick = demoInfo.currentTick;
+        }
     }
 
     bool ControlBar::DrawDemoProgressBar(uint32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)

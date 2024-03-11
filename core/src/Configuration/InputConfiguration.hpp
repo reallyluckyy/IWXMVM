@@ -23,7 +23,8 @@ namespace IWXMVM
         PlaybackSkipBackward,
         PlaybackSkipForward,
         PlaybackToggle,
-
+        TimeFrameMoveStart,
+        TimeFrameMoveEnd,
         Count,
     };
 
