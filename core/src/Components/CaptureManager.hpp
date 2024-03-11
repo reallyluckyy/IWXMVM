@@ -47,6 +47,7 @@ namespace IWXMVM::Components
 
         Resolution resolution;
         int32_t framerate;
+        bool usingCustomTimeFrame;
     };
 
     class CaptureManager

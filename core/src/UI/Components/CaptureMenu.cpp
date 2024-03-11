@@ -46,15 +46,58 @@ namespace IWXMVM::UI
             halfWidth -= ImGui::GetStyle().ItemSpacing.x / 2;
             auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
 
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Timeframe");
-            ImGui::SameLine();
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
-            ImGui::SetNextItemWidth(halfWidth);
-            ImGui::DragInt("##startTickInput", (int32_t*)&captureSettings.startTick, 10, 0, captureSettings.endTick);
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(halfWidth);
-            ImGui::DragInt("##endTickInput", (int32_t*)&captureSettings.endTick, 10, captureSettings.startTick, endTick);
+            ImGui::Checkbox("Custom Timeframe", &captureSettings.usingCustomTimeFrame);
+
+            if (captureSettings.usingCustomTimeFrame)
+            {
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Timeframe");
+                ImGui::SameLine();
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
+                ImGui::SetNextItemWidth(halfWidth);
+                ImGui::DragInt("##startTickInput", (int32_t*)&captureSettings.startTick, 10, 0,
+                               captureSettings.endTick);
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(halfWidth);
+                ImGui::DragInt("##endTickInput", (int32_t*)&captureSettings.endTick, 10, captureSettings.startTick,
+                               endTick);
+            }
+            else
+            {
+                // best place to put code? maybe only set timeframe on capture button click. 
+                // also maybe extract getting first and last keyframe to seperate function in KeyframeManager
+                std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes =
+                    KeyframeManager::Get().GetKeyframes();
+
+                if (!keyframes.empty())
+                {
+                    std::uint32_t minTick = UINT32_MAX;
+                    std::uint32_t maxTick = 0;
+
+                    for (const auto& pair : keyframes)
+                    {
+                        for (const auto& keyframe : pair.second)
+                        {
+                            if (keyframe.tick < minTick)
+                            {
+                                minTick = keyframe.tick;
+                            }
+                            if (keyframe.tick > maxTick)
+                            {
+                                maxTick = keyframe.tick;
+                            }
+                        }
+                    }
+
+                    if (minTick != UINT32_MAX && maxTick)
+                    {
+                        captureSettings.startTick = minTick;
+                        captureSettings.endTick = maxTick;
+                    }
+                }
+                
+            }
+            
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Output Format");
