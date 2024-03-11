@@ -102,9 +102,11 @@ namespace IWXMVM::UI
             return selectedTab;
         }
 
-        void ToggleOverlay()
+        void ToggleOverlay();
+
+        bool IsOverlayHidden()
         {
-            hideOverlay = !hideOverlay;
+            return hideOverlay;
         }
 
         void ToggleImGuiDemo()
