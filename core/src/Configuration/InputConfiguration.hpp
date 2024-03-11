@@ -15,6 +15,8 @@ namespace IWXMVM
         FreeCameraRight,
         FreeCameraUp,
         FreeCameraDown,
+        FreeCameraFaster,
+        FreeCameraSlower,
         FreeCameraReset,
         OrbitCameraReset,
         OrbitCameraRotate,

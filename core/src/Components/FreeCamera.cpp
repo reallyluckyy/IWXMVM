@@ -71,8 +71,8 @@ namespace IWXMVM::Components
 
         static auto scrollDelta = 0.0f;
 
-        auto speedModifier = Input::KeyHeld(ImGuiKey_LeftCtrl) ? 0.1f : 1.0f;
-        speedModifier *= Input::KeyHeld(ImGuiKey_LeftShift) ? 3.0f : 1.0f;
+        auto speedModifier = Input::BindHeld(Action::FreeCameraFaster) ? 3.0f : 1.0f;
+        speedModifier *= Input::BindHeld(Action::FreeCameraSlower) ? 0.1f : 1.0f;
 
         const auto cameraBaseSpeed = Input::GetDeltaTime() * preferences.freecamSpeed;
         const auto cameraMovementSpeed = cameraBaseSpeed * speedModifier;
