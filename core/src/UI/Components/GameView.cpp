@@ -158,9 +158,9 @@ namespace IWXMVM::UI
                 DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)), "Up/Down");
 
                 ImGui::SameLine(0, spacing);
-                DrawKeyBox("LShift");
+                DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraFaster)));
                 ImGui::SameLine(0, smallSpacing);
-                DrawKeybindEntry("LCtrl", "Faster/Slower");
+                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraSlower)), "Faster/Slower");
                 
                 ImGui::SameLine(0, spacing);
                 DrawKeybindEntry("Scroll", "Field of View");
