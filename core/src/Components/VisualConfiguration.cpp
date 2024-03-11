@@ -156,7 +156,7 @@ namespace IWXMVM::Components
                 sa = GetNextToken(in);
                 if (!ConvertStringToFloat(sa, a))
                     continue;
-                visuals.sunColorUI = glm::vec3(r, g, b);
+                visuals.sunColor = glm::vec3(r, g, b);
             }
             else if (dvar == "r_lighttweaksundirection")
             {
@@ -169,7 +169,7 @@ namespace IWXMVM::Components
                 sz = GetNextToken(in);
                 if (!ConvertStringToFloat(sz, z))
                     continue;
-                visuals.sunDirectionUI = glm::vec3(x, y, z);
+                visuals.sunDirection = glm::vec3(x, y, z);
             }
             else if (dvar == "r_lighttweaksunlight")
                 visuals.sunBrightness = value;
@@ -275,10 +275,10 @@ namespace IWXMVM::Components
         out << "r_dof_nearend " << settings.dof.nearEnd << "\n";
 
         // SUN
-        out << "r_lighttweaksuncolor " << settings.sunColorUI.r << " " << settings.sunColorUI.g << " "
-            << settings.sunColorUI.b << " 1\n";
-        out << "r_lighttweaksundirection " << settings.sunDirectionUI.x << " " << settings.sunDirectionUI.y << " "
-            << settings.sunDirectionUI.z << "\n";
+        out << "r_lighttweaksuncolor " << settings.sunColor.r << " " << settings.sunColor.g << " "
+            << settings.sunColor.b << " 1\n";
+        out << "r_lighttweaksundirection " << settings.sunDirection.x << " " << settings.sunDirection.y << " "
+            << settings.sunDirection.z << "\n";
         out << "r_lighttweaksunlight " << settings.sunBrightness << "\n";
 
         // FILMTWEAKS

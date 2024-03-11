@@ -211,12 +211,20 @@ namespace IWXMVM::IW3
 
         Types::Sun GetSun() final
         {
-            auto gfxWorld = Structures::GetGfxWorld();
+            const auto& r_lightTweakSunDirection = Functions::FindDvar("r_lightTweakSunDirection");
+            const auto& r_lightTweakSunColor = Functions::FindDvar("r_lightTweakSunColor");
+            const auto& r_lightTweakSunLight = Functions::FindDvar("r_lightTweakSunLight");
+
+            auto unpackedColor = glm::unpackUint4x8(r_lightTweakSunColor->current.integer);
 
             Types::Sun sun;
-            sun.color = glm::make_vec3(gfxWorld->sunLight->color);
-            sun.direction = glm::make_vec3(gfxWorld->sunLight->dir);
-            sun.brightness = 1;
+            sun.color = glm::vec3(unpackedColor.x / 255.0f, unpackedColor.y / 255.0f, unpackedColor.z / 255.0f);
+            sun.direction = glm::vec3(
+                r_lightTweakSunDirection->current.vector[0], 
+                r_lightTweakSunDirection->current.vector[1],
+                r_lightTweakSunDirection->current.vector[2]
+            );
+            sun.brightness = Functions::FindDvar("r_lightTweakSunLight")->current.value;
             return sun;
         }
 
@@ -280,13 +288,22 @@ namespace IWXMVM::IW3
 
         void SetSun(Types::Sun sun) final
         {
-            auto gfxWorld = Structures::GetGfxWorld();
-
+            const auto& r_lightTweakSunDirection = Functions::FindDvar("r_lightTweakSunDirection");
+            const auto& r_lightTweakSunColor = Functions::FindDvar("r_lightTweakSunColor");
+            const auto& r_lightTweakSunLight = Functions::FindDvar("r_lightTweakSunLight");
+            auto packedColor = glm::packUint4x8(glm::i8vec4(static_cast<uint8_t>(sun.color.x * 255),
+                                                           static_cast<uint8_t>(sun.color.y * 255),
+                                                           static_cast<uint8_t>(sun.color.z * 255), 1));
             for (int i = 0; i < 3; ++i)
             {
-                gfxWorld->sunLight->color[i] = glm::value_ptr(sun.color)[i] * sun.brightness;
-                gfxWorld->sunLight->dir[i] = glm::value_ptr(sun.direction)[i];
+                r_lightTweakSunDirection->current.vector[i] = sun.direction[i];
             }
+            r_lightTweakSunColor->current.integer = packedColor;
+            r_lightTweakSunLight->current.value = sun.brightness;
+
+            r_lightTweakSunDirection->modified = true;
+            r_lightTweakSunColor->modified = true;
+            r_lightTweakSunLight->modified = true;
         }
 
         void SetDof(Types::DoF dof) final

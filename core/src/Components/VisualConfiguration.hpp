@@ -14,10 +14,8 @@ namespace IWXMVM::Components
             Types::DoF dof;
 
             // SUN
-            glm::vec3 sunColorUI;
-            glm::vec3 sunDirectionUI;
-            float sunPitch;
-            float sunYaw;
+            glm::vec3 sunColor;
+            glm::vec3 sunDirection;
             float sunBrightness = 1;
 
             // FILMTWEAKS

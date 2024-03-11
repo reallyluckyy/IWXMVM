@@ -26,17 +26,11 @@ namespace IWXMVM::Components
         Types::KeyframeValueType::FloatingPoint,
         0, 4
     );
-    Types::KeyframeableProperty sunLightPitchProperty(
-        Types::KeyframeablePropertyType::SunLightPitch,
-        ICON_FA_SUN " Sun Light Pitch",
-        Types::KeyframeValueType::FloatingPoint,
-        0, 360
-    );
-    Types::KeyframeableProperty sunLightYawProperty(
-        Types::KeyframeablePropertyType::SunLightYaw,
-        ICON_FA_SUN " Sun Light Yaw",
-        Types::KeyframeValueType::FloatingPoint, 
-        0, 360
+    Types::KeyframeableProperty sunLightDirectionProperty(
+        Types::KeyframeablePropertyType::SunLightDirection,
+        ICON_FA_SUN " Sun Light Direction",
+        Types::KeyframeValueType::Vector3,
+        -1, 1
     );
     Types::KeyframeableProperty filmtweakBrightnessProperty(
         Types::KeyframeablePropertyType::FilmtweakBrightness,
@@ -118,8 +112,7 @@ namespace IWXMVM::Components
         InitializeProperty(campathCameraProperty);
         InitializeProperty(sunLightColorProperty);
         InitializeProperty(sunLightBrightnessProperty);
-        InitializeProperty(sunLightPitchProperty);
-        InitializeProperty(sunLightYawProperty);
+        InitializeProperty(sunLightDirectionProperty);
         InitializeProperty(filmtweakBrightnessProperty);
         InitializeProperty(filmtweakContrastProperty);
         InitializeProperty(filmtweakDesaturationProperty);

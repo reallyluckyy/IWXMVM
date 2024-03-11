@@ -37,11 +37,6 @@ namespace IWXMVM::IW3::Structures
         return (WinMouseVars_t*)GetGameAddresses().mouseVars();
     }
 
-    GfxWorld* GetGfxWorld()
-    {
-        return (GfxWorld*)GetGameAddresses().gfxWorld();
-    }
-
     clientUIActive_t* GetClientUIActives()
     {
         return (clientUIActive_t*)GetGameAddresses().clientUIActives();

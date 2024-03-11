@@ -78,6 +78,52 @@ namespace ImGuiEx::Keyframeable
         return result;
     }
 
+    bool SliderFloat3(const char* label, float* v, float v_min, float v_max,
+                     IWXMVM::Types::KeyframeablePropertyType propertyType)
+    {
+        using namespace IWXMVM;
+
+        auto& keyframeManager = Components::KeyframeManager::Get();
+        const auto& property = keyframeManager.GetProperty(propertyType);
+
+        if (property.valueType != Types::KeyframeValueType::Vector3)
+            throw std::invalid_argument("Property is not a vector3 value");
+
+        const auto& keyframes = keyframeManager.GetKeyframes(property);
+        DrawKeyframeButton(std::format("##{0}{1}KeyframeButton", label, magic_enum::enum_name(propertyType)).c_str(),
+                           keyframes.empty(), [&]() {
+                               keyframeManager.GetKeyframes(property).emplace_back(
+                                   property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick, *v);
+                           });
+
+        ImGui::Text(label);
+        ImGui::SameLine();
+
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+
+        const auto labelText = std::format("##{0}{1}Label", label, magic_enum::enum_name(propertyType));
+        bool result = true;
+        if (keyframes.empty())
+        {
+            result = ImGui::SliderFloat3(labelText.c_str(), v, v_min, v_max);
+        }
+        else
+        {
+            auto interpolatedValue =
+                keyframeManager.Interpolate(property, Mod::GetGameInterface()->GetDemoInfo().currentTick);
+
+            *v = interpolatedValue.floatingPoint;
+
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
+            ImGui::SliderFloat3(labelText.c_str(), v, v_min, v_max, "%.2f", ImGuiSliderFlags_NoInput);
+            ImGui::PopStyleVar();
+
+            DrawTooltip();
+        }
+        return result;
+    }
+
     bool ColorEdit3(const char* label, float col[3], IWXMVM::Types::KeyframeablePropertyType propertyType)
     {
         using namespace IWXMVM;
@@ -118,51 +164,6 @@ namespace ImGuiEx::Keyframeable
 
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
             ImGui::ColorEdit3(std::format("##{0}", label).c_str(), col);
-            ImGui::PopStyleVar();
-
-            DrawTooltip();
-        }
-        return result;
-    }
-
-    bool SliderAngle(const char* label, float* v_rad, float v_degrees_min, float v_degrees_max,
-                     IWXMVM::Types::KeyframeablePropertyType propertyType)
-    {
-        using namespace IWXMVM;
-
-        auto& keyframeManager = Components::KeyframeManager::Get();
-        const auto& property = keyframeManager.GetProperty(propertyType);
-
-        if (property.valueType != Types::KeyframeValueType::FloatingPoint)
-            throw std::invalid_argument("Property is not a floating point value");
-
-        const auto& keyframes = keyframeManager.GetKeyframes(property);
-        DrawKeyframeButton(label, keyframes.empty(), [&]() {
-            keyframeManager.GetKeyframes(property).emplace_back(
-                property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
-                glm::degrees(*v_rad)
-            );
-        });
-
-        ImGui::Text(label);
-        ImGui::SameLine();
-
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.4f);
-        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-        bool result = true;
-        if (keyframes.empty())
-        {
-            result = ImGui::SliderAngle(std::format("##{0}", label).c_str(), v_rad, v_degrees_min, v_degrees_max);
-        }
-        else
-        {
-            auto interpolatedValue =
-                keyframeManager.Interpolate(property, Mod::GetGameInterface()->GetDemoInfo().currentTick);
-
-            *v_rad = glm::radians(interpolatedValue.floatingPoint);
-
-            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
-            ImGui::SliderAngle(std::format("##{0}", label).c_str(), v_rad, v_degrees_min, v_degrees_max);
             ImGui::PopStyleVar();
 
             DrawTooltip();

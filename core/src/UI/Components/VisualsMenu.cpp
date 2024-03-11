@@ -26,17 +26,13 @@ namespace IWXMVM::UI
 
             visuals = {
                 dof,
-                glm::make_vec3(sun.color),
-                glm::make_vec3(sun.direction),
-                0,  
-                0,
+                sun.color,
+                sun.direction,
                 sun.brightness,
                 filmtweaks,
                 hudInfo
             };
             recentPresets = {};
-
-            SetAngleFromPosition(sun.direction);
 
             defaultVisuals = visuals;
             defaultPreset = {"Default"};
@@ -103,7 +99,6 @@ namespace IWXMVM::UI
 
                 UpdateDof();
                 UpdateSun();
-                SetAngleFromPosition(visuals.sunDirectionUI);
                 UpdateFilmtweaks();
                 UpdateHudInfo();
             }
@@ -343,14 +338,12 @@ namespace IWXMVM::UI
         if (DrawResettableSectionHeader(ICON_FA_SUN "  Sun"))
         {
             visuals.sunBrightness = defaultVisuals.sunBrightness;
-            visuals.sunColorUI = defaultVisuals.sunColorUI;
-            visuals.sunDirectionUI = defaultVisuals.sunDirectionUI;
-            visuals.sunPitch = defaultVisuals.sunPitch;
-            visuals.sunYaw = defaultVisuals.sunYaw;
+            visuals.sunColor = defaultVisuals.sunColor;
+            visuals.sunDirection = defaultVisuals.sunDirection;
             modified = true;
         }
 
-        modified = ImGuiEx::Keyframeable::ColorEdit3("Color", glm::value_ptr(visuals.sunColorUI),
+        modified = ImGuiEx::Keyframeable::ColorEdit3("Color", glm::value_ptr(visuals.sunColor),
                                                      Types::KeyframeablePropertyType::SunLightColor) ||
                    modified;
 
@@ -360,18 +353,13 @@ namespace IWXMVM::UI
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
 
-        // ImGui::SliderAngle sets sun angles in radians but displays them as degrees
-        modified = ImGuiEx::Keyframeable::SliderAngle("Pitch", &visuals.sunPitch, 0, 360,
-                                                      Types::KeyframeablePropertyType::SunLightPitch) ||
-                   modified;
-
-        modified = ImGuiEx::Keyframeable::SliderAngle("Yaw", &visuals.sunYaw, 0, 360,
-                                                      Types::KeyframeablePropertyType::SunLightYaw) ||
+        modified = ImGuiEx::Keyframeable::SliderFloat3("Direction", glm::value_ptr(visuals.sunDirection), -180.0f,
+                                                       180.0f, Types::KeyframeablePropertyType::SunLightDirection) ||
                    modified;
 
         if (modified)
         {
-            UpdateSunAngle();
+            UpdateSun();
         }
 
         ImGui::Separator();
@@ -384,33 +372,9 @@ namespace IWXMVM::UI
 
     void VisualsMenu::UpdateSun()
     {
-        IWXMVM::Types::Sun sunSettings = {glm::make_vec3(visuals.sunColorUI), glm::make_vec3(visuals.sunDirectionUI),
+        IWXMVM::Types::Sun sunSettings = {glm::make_vec3(visuals.sunColor), glm::make_vec3(visuals.sunDirection),
                                           visuals.sunBrightness};
         Mod::GetGameInterface()->SetSun(sunSettings);
-    }
-
-    void VisualsMenu::UpdateSunAngle()
-    {
-        float origin = 0;
-        float radius = 1;
-        glm::vec3 rotation = {visuals.sunPitch, visuals.sunYaw, 0};
-
-        visuals.sunDirectionUI.x = origin + radius * glm::cos(rotation.y) * glm::cos(rotation.x);
-        visuals.sunDirectionUI.y = origin + radius * glm::sin(rotation.y) * glm::cos(rotation.z);
-        visuals.sunDirectionUI.z = -(origin + radius * glm::sin(rotation.x));
-
-        UpdateSun();
-    }
-
-    void VisualsMenu::SetAngleFromPosition(glm::vec3 pos)
-    {
-        auto norm = glm::normalize(pos);
-
-        float pitch = glm::asin(norm.y);
-        float yaw = glm::atan(norm.z, norm.x);
-
-        visuals.sunPitch = glm::mod(pitch + 2.0f * glm::pi<float>(), 2.0f * glm::pi<float>());
-        visuals.sunYaw = glm::mod(yaw + 2.0f * glm::pi<float>(), 2.0f * glm::pi<float>());
     }
 
     void VisualsMenu::UpdateFilmtweaks()
@@ -438,7 +402,6 @@ namespace IWXMVM::UI
 
             UpdateDof();
             UpdateSun();
-            SetAngleFromPosition(visuals.sunDirectionUI);
             UpdateFilmtweaks();
             UpdateHudInfo();
 

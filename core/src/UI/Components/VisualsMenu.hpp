@@ -30,8 +30,6 @@ namespace IWXMVM::UI
 
         void UpdateDof();
         void UpdateSun();
-        void SetAngleFromPosition(glm::vec3);
-        void UpdateSunAngle();
         void UpdateFilmtweaks();
         void UpdateHudInfo();
 
