@@ -29,7 +29,8 @@ namespace IWXMVM
             defaults[Action::PlaybackSkipBackward] = Bind{ImGuiKey_LeftArrow, "PlaybackSkipBackward"};
             defaults[Action::PlaybackSkipForward]  = Bind{ImGuiKey_RightArrow, "PlaybackSkipForward"};
             defaults[Action::PlaybackToggle]       = Bind{ImGuiKey_Space, "PlaybackToggle"};
-
+            defaults[Action::TimeFrameMoveStart]   = Bind{ImGuiKey_B, "TimeFrameMoveStart"};
+            defaults[Action::TimeFrameMoveEnd]     = Bind{ImGuiKey_N, "TimeFrameMoveEnd"};
             return defaults;
         }())
     {
