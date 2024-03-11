@@ -12,7 +12,7 @@
 #include "Components/MenuBar.hpp"
 #include "Components/PrimaryTabs.hpp"
 #include "Components/VisualsMenu.hpp"
-#include "Components/CampathMenu.hpp"
+#include "Components/CameraMenu.hpp"
 #include "Components/KeyframeEditor.hpp"
 #include "Components/ControlsMenu.hpp"
 #include "Components/Preferences.hpp"
@@ -31,7 +31,7 @@ namespace IWXMVM::UI
             GameView,
             PrimaryTabs,
             DemoLoader,
-            CampathMenu,
+            CameraMenu,
             VisualsMenu,
             CaptureMenu,
             ControlBar,
@@ -135,7 +135,7 @@ namespace IWXMVM::UI
 
         std::array<std::unique_ptr<UIComponent>, Component::Count> uiComponents = {
             std::make_unique<Background>(),  std::make_unique<MenuBar>(),     std::make_unique<GameView>(),
-            std::make_unique<PrimaryTabs>(), std::make_unique<DemoLoader>(),  std::make_unique<CampathMenu>(),
+            std::make_unique<PrimaryTabs>(), std::make_unique<DemoLoader>(),  std::make_unique<CameraMenu>(),
             std::make_unique<VisualsMenu>(), std::make_unique<CaptureMenu>(), std::make_unique<ControlBar>(),
             std::make_unique<DebugPanel>(),  std::make_unique<KeyframeEditor>(), std::make_unique<ControlsMenu>(),
             std::make_unique<Preferences>(), std::make_unique<Readme>()

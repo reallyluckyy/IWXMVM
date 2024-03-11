@@ -3,7 +3,7 @@
 
 namespace IWXMVM::UI
 {
-    class CampathMenu : public UIComponent
+    class CameraMenu : public UIComponent
     {
        public:
         void Initialize() final;
