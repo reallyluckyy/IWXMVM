@@ -30,7 +30,7 @@ namespace IWXMVM::Components
         Types::KeyframeablePropertyType::SunLightDirection,
         ICON_FA_SUN " Sun Light Direction",
         Types::KeyframeValueType::Vector3,
-        -1, 1
+        -360, 360
     );
     Types::KeyframeableProperty filmtweakBrightnessProperty(
         Types::KeyframeablePropertyType::FilmtweakBrightness,

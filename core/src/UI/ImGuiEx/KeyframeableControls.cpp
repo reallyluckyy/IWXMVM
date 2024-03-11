@@ -78,7 +78,7 @@ namespace ImGuiEx::Keyframeable
         return result;
     }
 
-    bool SliderFloat3(const char* label, float* v, float v_min, float v_max,
+    bool SliderFloat3(const char* label, float v[3], float v_min, float v_max,
                      IWXMVM::Types::KeyframeablePropertyType propertyType)
     {
         using namespace IWXMVM;
@@ -93,7 +93,9 @@ namespace ImGuiEx::Keyframeable
         DrawKeyframeButton(std::format("##{0}{1}KeyframeButton", label, magic_enum::enum_name(propertyType)).c_str(),
                            keyframes.empty(), [&]() {
                                keyframeManager.GetKeyframes(property).emplace_back(
-                                   property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick, *v);
+                                   property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
+                                   glm::vec3(v[0], v[1], v[2])
+                                );
                            });
 
         ImGui::Text(label);
@@ -113,7 +115,9 @@ namespace ImGuiEx::Keyframeable
             auto interpolatedValue =
                 keyframeManager.Interpolate(property, Mod::GetGameInterface()->GetDemoInfo().currentTick);
 
-            *v = interpolatedValue.floatingPoint;
+            v[0] = interpolatedValue.vector3.x;
+            v[1] = interpolatedValue.vector3.y;
+            v[2] = interpolatedValue.vector3.z;
 
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.4f);
             ImGui::SliderFloat3(labelText.c_str(), v, v_min, v_max, "%.2f", ImGuiSliderFlags_NoInput);
