@@ -1,5 +1,5 @@
 #include "StdInclude.hpp"
-#include "CampathMenu.hpp"
+#include "CameraMenu.hpp"
 
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
@@ -14,7 +14,7 @@ namespace IWXMVM::UI
 {
     float fov = 90;
 
-    void CampathMenu::Initialize()
+    void CameraMenu::Initialize()
     {
     }
 
@@ -135,7 +135,7 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
             ImGui::DragFloat("##gameViewBoneCameraFOV", &boneCamera->GetFov(), 1, 1, 180, "%.0f");
 
-
+            ImGui::BeginDisabled();
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Smooth Movement");
             ImGui::SameLine();
@@ -143,6 +143,16 @@ namespace IWXMVM::UI
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
             ImGui::Checkbox("##gameViewBoneCameraTemporalSmoothing", &boneCamera->UseTemporalSmoothing());
+            ImGui::EndDisabled();
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show Bone");
+            ImGui::SameLine();
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) -
+                                    ImGui::GetStyle().WindowPadding.x);
+            ImGui::Checkbox("##gameViewBoneCameraShowBone", &boneCamera->ShowBone());
         }
     }
 
@@ -152,10 +162,10 @@ namespace IWXMVM::UI
         ImGui::TextWrapped("There are no settings for this camera mode!");
     }
 
-    void CampathMenu::Render()
+    void CameraMenu::Render()
     {
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
-        ImGui::Begin("Campath", NULL, flags);
+        ImGui::Begin("Camera", NULL, flags);
 
         if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
         {
@@ -190,7 +200,7 @@ namespace IWXMVM::UI
         ImGui::End();
     }
 
-    void CampathMenu::Release()
+    void CameraMenu::Release()
     {
     }
 }  // namespace IWXMVM::UI

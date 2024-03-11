@@ -15,6 +15,7 @@ namespace IWXMVM::Components
             positionOffset = glm::vec3(0);
             rotationOffset = glm::vec3(0);
             useTemporalSmoothing = false;
+            showBone = true;
         }
 
         void Initialize() override;
@@ -35,6 +36,11 @@ namespace IWXMVM::Components
         {
             return useTemporalSmoothing;
         }
+
+        bool& ShowBone()
+        {
+            return showBone;
+        }
        
        private:
         int32_t entityId;
@@ -44,6 +50,7 @@ namespace IWXMVM::Components
         glm::vec3 rotationOffset;
 
         bool useTemporalSmoothing;
+        bool showBone;
 
         void SetPositionFromBoneData(const Types::BoneData& boneData);
         void HandleInput(const Types::BoneData& boneData);
