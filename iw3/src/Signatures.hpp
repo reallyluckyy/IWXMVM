@@ -72,6 +72,7 @@ namespace IWXMVM::IW3::Signatures
         Sig("8B C7 69 C0 58 02 00 00", GAType::Code, -5) > CG_MapRestartSetThirdpersonCall;
 
         Sig("55 8B 6C 24 38 85 ED", GAType::Code, -5) > R_AddCmdDrawTextWithEffects;
+        Sig("E8 ?? ?? ?? ?? 85 C0 74 35", GAType::Code, -6) > IN_Frame;
 
 
         // cod4x

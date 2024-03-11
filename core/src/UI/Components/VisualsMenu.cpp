@@ -50,7 +50,7 @@ namespace IWXMVM::UI
             if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
                 return;
 
-            if (UIManager::Get().GetSelectedTab() != Tab::Visuals)
+            if (UIManager::Get().GetSelectedTab() != Tab::Visuals && !UIManager::Get().IsOverlayHidden())
             {
                 ImGui::SetCursorPos(ImVec2(100000, 100000));
                 RenderMiscSection();

@@ -33,6 +33,8 @@ namespace IWXMVM::IW3::Patches
          
         ReturnPatch R_AddCmdDrawTextWithEffects{GetGameAddresses().R_AddCmdDrawTextWithEffects(),
                                                 PatchApplySetting::Deferred};
+
+        ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };
 
     inline IW3Patches& GetGamePatches()

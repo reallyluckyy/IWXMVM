@@ -126,6 +126,12 @@ namespace IWXMVM::UI
         return CallWindowProc(UIManager::Get().GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
     }
 
+    void UIManager::ToggleOverlay()
+    {
+        hideOverlay = !hideOverlay;
+        Mod::GetGameInterface()->SetMouseMode(hideOverlay ? Types::MouseMode::Passthrough : Types::MouseMode::Capture);
+    }
+
     bool UIManager::IsControllableCameraModeSelected()
     {
         auto mode = Components::CameraManager::Get().GetActiveCamera()->GetMode();
