@@ -48,24 +48,8 @@ namespace IWXMVM::UI
 
             ImGui::Checkbox("Custom Timeframe", &captureSettings.usingCustomTimeFrame);
 
-            if (captureSettings.usingCustomTimeFrame)
+            if (!captureSettings.usingCustomTimeFrame)
             {
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Timeframe");
-                ImGui::SameLine();
-                ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
-                ImGui::SetNextItemWidth(halfWidth);
-                ImGui::DragInt("##startTickInput", (int32_t*)&captureSettings.startTick, 10, 0,
-                               captureSettings.endTick);
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(halfWidth);
-                ImGui::DragInt("##endTickInput", (int32_t*)&captureSettings.endTick, 10, captureSettings.startTick,
-                               endTick);
-            }
-            else
-            {
-                // best place to put code? maybe only set timeframe on capture button click (though this is slightly less intuitive i would say). 
-                // also maybe extract getting first and last keyframe to seperate function in KeyframeManager
                 std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes =
                     KeyframeManager::Get().GetKeyframes();
 
@@ -76,15 +60,17 @@ namespace IWXMVM::UI
 
                     for (const auto& pair : keyframes)
                     {
-                        for (const auto& keyframe : pair.second)
+                        if (!pair.second.empty())
                         {
-                            if (keyframe.tick < minTick)
+                            std::uint32_t front = pair.second.front().tick;
+                            std::uint32_t back = pair.second.back().tick;
+                            if (front < minTick)
                             {
-                                minTick = keyframe.tick;
+                                minTick = front;
                             }
-                            if (keyframe.tick > maxTick)
+                            if (back > maxTick)
                             {
-                                maxTick = keyframe.tick;
+                                maxTick = back;
                             }
                         }
                     }
@@ -99,8 +85,24 @@ namespace IWXMVM::UI
                         captureManager.SetTimeFrameToDefault();
                     }
                 }
+                ImGui::BeginDisabled();
                 
             }
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Timeframe");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
+            ImGui::SetNextItemWidth(halfWidth);
+            ImGui::DragInt("##startTickInput", (int32_t*)&captureSettings.startTick, 10, 0, captureSettings.endTick);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(halfWidth);
+            ImGui::DragInt("##endTickInput", (int32_t*)&captureSettings.endTick, 10, captureSettings.startTick,
+                           endTick);
+            if (!captureSettings.usingCustomTimeFrame)
+            {
+                ImGui::EndDisabled();
+            }
+            
             
 
             ImGui::AlignTextToFramePadding();
