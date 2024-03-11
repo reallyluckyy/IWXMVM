@@ -69,6 +69,8 @@ namespace IWXMVM::Components
 
         std::string_view GetOutputFormatLabel(OutputFormat outputFormat);
         std::string_view GetVideoCodecLabel(VideoCodec codec);
+
+        void SetTimeFrameToDefault();
         
         CaptureSettings& GetCaptureSettings()
         {

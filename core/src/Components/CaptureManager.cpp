@@ -49,6 +49,13 @@ namespace IWXMVM::Components
         }
     }
 
+    void CaptureManager::SetTimeFrameToDefault()
+    {
+        auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
+        captureSettings.startTick = static_cast<int32_t>(endTick * 0.1);
+        captureSettings.endTick = static_cast<int32_t>(endTick * 0.9);
+    }
+
     void CaptureManager::Initialize()
     {
         IDirect3DDevice9* device = D3D9::GetDevice();
@@ -99,9 +106,7 @@ namespace IWXMVM::Components
         Events::RegisterListener(EventType::OnDemoBoundsDetermined, [&]() {
             if (captureSettings.startTick == 0 || captureSettings.endTick == 0)
             {
-                auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
-                captureSettings.startTick = static_cast<int32_t>(endTick * 0.1);
-                captureSettings.endTick = static_cast<int32_t>(endTick * 0.9);
+                SetTimeFrameToDefault();
             }
         });
 
