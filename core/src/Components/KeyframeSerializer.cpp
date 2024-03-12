@@ -177,20 +177,27 @@ namespace IWXMVM::Components
 
     std::filesystem::path GetRecentKeyframesPath()
     {
-        return PathUtils::GetIWXMVMPath() / "keyframes" / "recent.json";
+        return PathUtils::GetIWXMVMPath() / "keyframes";
+    }
+
+    auto GetDemoNameHash()
+    {
+        auto demoName = Mod::GetGameInterface()->GetDemoInfo().name;
+        return std::hash<std::string>{}(demoName);
     }
 
     void KeyframeSerializer::WriteRecent()
     {
-        Write(GetRecentKeyframesPath());
+        Write(GetRecentKeyframesPath() / std::format("{:X}.json", GetDemoNameHash()));
     }
 
     void KeyframeSerializer::ReadRecent()
     {
-        if (std::filesystem::exists(GetRecentKeyframesPath()))
+        auto path = GetRecentKeyframesPath() / std::format("{:X}.json", GetDemoNameHash());
+        if (std::filesystem::exists(path))
         {
             LOG_INFO("Reading last sessions keyframes for this demo...");
-            Read(GetRecentKeyframesPath(), true);
+            Read(path, true);
         }
     }
 }
