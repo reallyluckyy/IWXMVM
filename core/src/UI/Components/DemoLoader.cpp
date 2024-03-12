@@ -219,6 +219,7 @@ namespace IWXMVM::UI
         // directory
         MarkDirsRelevancy();
 
+        RefreshFilteredDemosMask();
         isScanningDemoPaths.store(false);
     }
 
@@ -263,19 +264,18 @@ namespace IWXMVM::UI
     void DemoLoader::RefreshFilteredDemosMask()
     {
         LOG_DEBUG("Refreshing filteredDemosMask");
-        filteredDemosMask.resize(demoPaths.size());
+        
+        bool isSearchBarEmpty = searchBarText.empty();
+        filteredDemosMask.resize(demoPaths.size(), isSearchBarEmpty);
+        if (isSearchBarEmpty)
+        {
+            return;
+        }
         for (size_t i = 0; i < demoPaths.size(); ++i)
         {
             try
             {
-                if (searchBarText.empty())
-                {
-                    filteredDemosMask[i] = true;
-                }
-                else
-                {
-                    filteredDemosMask[i] = DemoFilter(demoPaths[i].filename().u8string());
-                }
+                filteredDemosMask[i] = DemoFilter(demoPaths[i].filename().u8string());
             }
             catch (std::exception&)
             {
@@ -333,6 +333,7 @@ namespace IWXMVM::UI
         }
     }
 
+    // Wrapper for RenderDemos that takes advantage of filteredDemosMask
     void DemoLoader::FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos)
     {
         std::size_t startIdx = demos.first;
@@ -384,8 +385,10 @@ namespace IWXMVM::UI
 
     void DemoLoader::RenderSearchBar()
     {
-        ImGui::InputText(
-            "Search", &searchBarText[0], searchBarText.capacity() + 1, ImGuiInputTextFlags_CallbackResize,
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+        ImGui::InputTextWithHint(
+            "##SearchInput", "Search...", &searchBarText[0], searchBarText.capacity() + 1,
+            ImGuiInputTextFlags_CallbackResize,
             [](ImGuiInputTextCallbackData* data) -> int {
                 if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
                 {
