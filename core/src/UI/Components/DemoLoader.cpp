@@ -222,41 +222,51 @@ namespace IWXMVM::UI
         isScanningDemoPaths.store(false);
     }
 
-    void DemoLoader::RenderDemos(const std::pair<std::size_t, std::size_t>& demos)
+    static bool DemoFilter(const std::u8string demoFileName, const std::u8string searchBarText)
     {
-        filteredDemoPaths.clear();
-        for (size_t i = demos.first; i < demos.second; ++i)
+        //return true to keep
+        return demoFileName.find(searchBarText) != std::string::npos;
+    }
+
+    void DemoLoader::RefreshFilteredDemosMask()
+    {
+        LOG_DEBUG("Refreshing filteredDemosMask");
+        filteredDemosMask.resize(demoPaths.size());
+        for (size_t i = 0; i < demoPaths.size(); ++i)
         {
             try
             {
-                // converting to u8 seems to fix exception from illegal characters in file name. 
-                if (demoPaths[i].filename().u8string().find(std::u8string(searchText.begin(), searchText.end())) !=
-                    std::string::npos)
+                if (searchBarText.empty())
                 {
-                    filteredDemoPaths.push_back(demoPaths[i]);
+                    filteredDemosMask[i] = true;
+                }
+                else
+                {
+                    filteredDemosMask[i] = DemoFilter(demoPaths[i].filename().u8string(),
+                                                      std::u8string(searchBarText.begin(), searchBarText.end()));
                 }
             }
             catch (std::exception&)
             {
-                LOG_ERROR("Error filtering demoPaths.");
+                LOG_ERROR("Error filtering demoPath");
                 // catching errors just in case
             }
         }
+    }
 
-        if (filteredDemoPaths.empty())
-        {
-            return;
-        }
+    void DemoLoader::RenderDemos(const std::pair<std::size_t, std::size_t>& demos)
+    {
         ImGuiListClipper clipper;
-        clipper.Begin(filteredDemoPaths.size());
+        clipper.Begin(demos.second - demos.first);
 
         while (clipper.Step())
         {
             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
             {
+                auto idx = i + demos.first;
                 try
                 {
-                    auto demoName = filteredDemoPaths[i].filename().string();
+                    auto demoName = demoPaths[idx].filename().string();
 
                     if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
                         Mod::GetGameInterface()->GetDemoInfo().name == demoName)
@@ -272,7 +282,7 @@ namespace IWXMVM::UI
                         if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(),
                                           ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5f)))
                         {
-                            Mod::GetGameInterface()->PlayDemo(filteredDemoPaths[i]);
+                            Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
                         }
                     }
 
@@ -280,7 +290,7 @@ namespace IWXMVM::UI
 
                     ImGui::Text("%s", demoName.c_str());
                 }
-                catch (const std::exception&)
+                catch (std::exception&)
                 {
                     ImGui::BeginDisabled();
                     ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION " ERROR");
@@ -291,6 +301,27 @@ namespace IWXMVM::UI
             }
         }
     }
+
+    void DemoLoader::FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos)
+    {
+        std::size_t startIdx = demos.first;
+        std::size_t endIdx = demos.first;
+
+        for (std::size_t i = demos.first; i < demos.second; i++)
+        {
+            if (filteredDemosMask[i])
+            {
+                startIdx = i;
+                do
+                {
+                    i++;
+                } while (i < demos.second && filteredDemosMask[i]);
+                endIdx = i;
+                RenderDemos({ startIdx, endIdx });
+            }    
+        }
+    }
+
 
     void DemoLoader::RenderDir(const DemoDirectory& dir)
     {
@@ -306,7 +337,7 @@ namespace IWXMVM::UI
                     }
                 }
 
-                RenderDemos(dir.demos);
+                FilteredRenderDemos(dir.demos);
 
                 ImGui::TreePop();
             }
@@ -320,21 +351,30 @@ namespace IWXMVM::UI
 		}
     }
 
+    void DemoLoader::RenderSearchBar()
+    {
+        ImGui::InputText(
+            "Search", &searchBarText[0], searchBarText.capacity() + 1, ImGuiInputTextFlags_CallbackResize,
+            [](ImGuiInputTextCallbackData* data) -> int {
+                if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+                {
+                    std::string* str = (std::string*)data->UserData;
+                    str->resize(data->BufTextLen);
+                    data->Buf = &(*str)[0];
+                }
+                return 0;
+            },
+            &searchBarText);
+
+        if (lastSearchBarText != searchBarText)
+        {
+            RefreshFilteredDemosMask();
+            lastSearchBarText = searchBarText;
+        }
+    }
+
     void DemoLoader::RenderSearchPaths()
     {
-        ImGui::InputText("Search", &searchText[0], searchText.capacity() + 1, ImGuiInputTextFlags_CallbackResize,
-                         [](ImGuiInputTextCallbackData * data)->int
-                         { 
-                            if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
-                            {
-                                std::string* str = (std::string*)data->UserData;
-                                str->resize(data->BufTextLen);
-                                data->Buf = &(*str)[0];
-                            }
-                            return 0;
-                         },
-                         &searchText);
-
         for (auto i = searchPaths.first; i < searchPaths.second; i++)
         {
             if (ImGui::TreeNode(demoDirectories[i].path.string().c_str()))
@@ -355,7 +395,7 @@ namespace IWXMVM::UI
                     ImGui::Text("Search path is empty.");
                 }
 
-                RenderDemos(demoDirectories[i].demos);
+                FilteredRenderDemos(demoDirectories[i].demos);
 
                 ImGui::TreePop();
             }
@@ -416,6 +456,7 @@ namespace IWXMVM::UI
                 }
 
                 // Search paths will always be rendered, even if empty
+                RenderSearchBar();
                 RenderSearchPaths();
             }
 

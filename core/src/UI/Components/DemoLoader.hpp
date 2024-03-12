@@ -29,9 +29,12 @@ namespace IWXMVM::UI
         void Search();
         void MarkDirsRelevancy();
         void FindAllDemos();
-
+        
         void RenderDemos(const std::pair<std::size_t, std::size_t>& demos);
+        void FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos);
         void RenderDir(const DemoDirectory& dir);  // Recursive render function
+        void RefreshFilteredDemosMask();
+        void RenderSearchBar();
         void RenderSearchPaths();
 
         std::pair<std::size_t, std::size_t> searchPaths;  // Pair of indices representing the [first, second) interval
@@ -40,7 +43,8 @@ namespace IWXMVM::UI
         std::vector<std::filesystem::path> demoPaths;
         std::atomic<bool> isScanningDemoPaths;
 
-        std::vector<std::filesystem::path> filteredDemoPaths;
-        std::string searchText;
+        std::vector<bool> filteredDemosMask;
+        std::string searchBarText;
+        std::string lastSearchBarText;
     };
 }  // namespace IWXMVM::UI
