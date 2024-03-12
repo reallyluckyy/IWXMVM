@@ -224,17 +224,39 @@ namespace IWXMVM::UI
 
     void DemoLoader::RenderDemos(const std::pair<std::size_t, std::size_t>& demos)
     {
+        filteredDemoPaths.clear();
+        for (size_t i = demos.first; i < demos.second; ++i)
+        {
+            try
+            {
+                // converting to u8 seems to fix exception from illegal characters in file name. 
+                if (demoPaths[i].filename().u8string().find(std::u8string(searchText.begin(), searchText.end())) !=
+                    std::string::npos)
+                {
+                    filteredDemoPaths.push_back(demoPaths[i]);
+                }
+            }
+            catch (std::exception&)
+            {
+                LOG_ERROR("Error filtering demoPaths.");
+                // catching errors just in case
+            }
+        }
+
+        if (filteredDemoPaths.empty())
+        {
+            return;
+        }
         ImGuiListClipper clipper;
-        clipper.Begin(demos.second - demos.first);
+        clipper.Begin(filteredDemoPaths.size());
 
         while (clipper.Step())
         {
             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
             {
-                auto idx = i + demos.first;
                 try
                 {
-                    auto demoName = demoPaths[idx].filename().string();
+                    auto demoName = filteredDemoPaths[i].filename().string();
 
                     if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
                         Mod::GetGameInterface()->GetDemoInfo().name == demoName)
@@ -250,7 +272,7 @@ namespace IWXMVM::UI
                         if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(),
                                           ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5f)))
                         {
-                            Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+                            Mod::GetGameInterface()->PlayDemo(filteredDemoPaths[i]);
                         }
                     }
 
@@ -258,7 +280,7 @@ namespace IWXMVM::UI
 
                     ImGui::Text("%s", demoName.c_str());
                 }
-                catch (std::exception&)
+                catch (const std::exception&)
                 {
                     ImGui::BeginDisabled();
                     ImGui::Button(ICON_FA_TRIANGLE_EXCLAMATION " ERROR");
@@ -293,12 +315,26 @@ namespace IWXMVM::UI
         {
 			ImGui::BeginDisabled();
 			ImGui::TreeNode("<invalid directory name>");
+            ImGui::TreePop();
 			ImGui::EndDisabled();
 		}
     }
 
     void DemoLoader::RenderSearchPaths()
     {
+        ImGui::InputText("Search", &searchText[0], searchText.capacity() + 1, ImGuiInputTextFlags_CallbackResize,
+                         [](ImGuiInputTextCallbackData * data)->int
+                         { 
+                            if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+                            {
+                                std::string* str = (std::string*)data->UserData;
+                                str->resize(data->BufTextLen);
+                                data->Buf = &(*str)[0];
+                            }
+                            return 0;
+                         },
+                         &searchText);
+
         for (auto i = searchPaths.first; i < searchPaths.second; i++)
         {
             if (ImGui::TreeNode(demoDirectories[i].path.string().c_str()))

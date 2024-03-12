@@ -39,5 +39,8 @@ namespace IWXMVM::UI
         std::vector<DemoDirectory> demoDirectories;
         std::vector<std::filesystem::path> demoPaths;
         std::atomic<bool> isScanningDemoPaths;
+
+        std::vector<std::filesystem::path> filteredDemoPaths;
+        std::string searchText;
     };
 }  // namespace IWXMVM::UI
