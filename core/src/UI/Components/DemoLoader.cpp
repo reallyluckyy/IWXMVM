@@ -222,10 +222,42 @@ namespace IWXMVM::UI
         isScanningDemoPaths.store(false);
     }
 
-    static bool DemoFilter(const std::u8string demoFileName, const std::u8string searchBarText)
+    bool DemoLoader::DemoFilter(const std::u8string& demoFileName)
     {
-        //return true to keep
-        return demoFileName.find(searchBarText) != std::string::npos;
+        if (searchBarText != searchBarTextSplit.first)
+        {
+            searchBarTextSplit.first = searchBarText;
+            searchBarTextSplit.second.clear();
+
+            std::u8string token;
+            for (char c : searchBarText)
+            {
+                if (c == ' ')
+                {
+                    searchBarTextSplit.second.push_back(token);
+                    token.clear();
+                }
+                else
+                {
+                    token += static_cast<std::u8string::value_type>(c);
+                }
+            }
+            if (!token.empty())
+            {
+                searchBarTextSplit.second.push_back(token);
+            }
+        }
+
+        bool keepDemo = true;
+        for (const auto& word : searchBarTextSplit.second)
+        {
+            if (demoFileName.find(word) == std::u8string::npos)
+            {
+                keepDemo = false;
+                break;
+            }
+        }
+        return keepDemo;
     }
 
     void DemoLoader::RefreshFilteredDemosMask()
@@ -242,8 +274,7 @@ namespace IWXMVM::UI
                 }
                 else
                 {
-                    filteredDemosMask[i] = DemoFilter(demoPaths[i].filename().u8string(),
-                                                      std::u8string(searchBarText.begin(), searchBarText.end()));
+                    filteredDemosMask[i] = DemoFilter(demoPaths[i].filename().u8string());
                 }
             }
             catch (std::exception&)
