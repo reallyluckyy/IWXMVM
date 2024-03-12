@@ -266,16 +266,19 @@ namespace IWXMVM::UI
         LOG_DEBUG("Refreshing filteredDemosMask");
         
         bool isSearchBarEmpty = searchBarText.empty();
-        filteredDemosMask.resize(demoPaths.size(), isSearchBarEmpty);
-        if (isSearchBarEmpty)
-        {
-            return;
-        }
+        filteredDemosMask.resize(demoPaths.size());
         for (size_t i = 0; i < demoPaths.size(); ++i)
         {
             try
             {
-                filteredDemosMask[i] = DemoFilter(demoPaths[i].filename().u8string());
+                if (isSearchBarEmpty)
+                {
+                    filteredDemosMask[i] = true;
+                }
+                else
+                {
+                    filteredDemosMask[i] = DemoFilter(demoPaths[i].filename().u8string());
+                }
             }
             catch (std::exception&)
             {
@@ -336,21 +339,22 @@ namespace IWXMVM::UI
     // Wrapper for RenderDemos that takes advantage of filteredDemosMask
     void DemoLoader::FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos)
     {
-        std::size_t startIdx = demos.first;
-        std::size_t endIdx = demos.first;
-
-        for (std::size_t i = demos.first; i < demos.second; i++)
+        for (std::size_t i = demos.first; i < demos.second;)
         {
             if (filteredDemosMask[i])
             {
-                startIdx = i;
+                std::size_t startIdx = i;
                 do
                 {
                     i++;
                 } while (i < demos.second && filteredDemosMask[i]);
-                endIdx = i;
-                RenderDemos({ startIdx, endIdx });
-            }    
+                std::size_t endIdx = i;
+                RenderDemos({startIdx, endIdx});
+            }
+            else
+            {
+                i++;
+            }
         }
     }
 
