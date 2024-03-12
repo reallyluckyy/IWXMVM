@@ -34,6 +34,10 @@ namespace IWXMVM::UI
             };
             recentPresets = {};
 
+            // We do this once to force r_dof_enable and r_dof_tweak
+            // into sync with each other
+            UpdateDof();
+
             defaultVisuals = visuals;
             defaultPreset = {"Default"};
             currentPreset = defaultPreset;
