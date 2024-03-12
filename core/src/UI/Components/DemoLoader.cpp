@@ -225,6 +225,7 @@ namespace IWXMVM::UI
 
     bool DemoLoader::DemoFilter(const std::u8string& demoFileName)
     {
+        // TODO: possibly make filter more advanced, add features like "" for exact search etc
         if (searchBarText != searchBarTextSplit.first)
         {
             searchBarTextSplit.first = searchBarText;
@@ -250,9 +251,13 @@ namespace IWXMVM::UI
         }
 
         bool keepDemo = true;
-        for (const auto& word : searchBarTextSplit.second)
+        std::u8string lowerDemoFileName = demoFileName;
+        std::transform(lowerDemoFileName.begin(), lowerDemoFileName.end(), lowerDemoFileName.begin(),
+                       ::tolower);
+        for (auto& word : searchBarTextSplit.second)
         {
-            if (demoFileName.find(word) == std::u8string::npos)
+            std::transform(word.begin(), word.end(), word.begin(), ::tolower);
+            if (lowerDemoFileName.find(word) == std::u8string::npos)
             {
                 keepDemo = false;
                 break;
@@ -362,7 +367,8 @@ namespace IWXMVM::UI
     {
         try
         {
-            if (ImGui::TreeNode(dir.path.filename().string().c_str()))
+            if (ImGui::TreeNodeEx(dir.path.filename().string().c_str(),
+                                  searchBarText.empty() ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_DefaultOpen))
             {
                 for (auto i = dir.subdirectories.first; i < dir.subdirectories.second; i++)
                 {
@@ -414,7 +420,8 @@ namespace IWXMVM::UI
     {
         for (auto i = searchPaths.first; i < searchPaths.second; i++)
         {
-            if (ImGui::TreeNode(demoDirectories[i].path.string().c_str()))
+            if (ImGui::TreeNodeEx(demoDirectories[i].path.string().c_str(),
+                                  searchBarText.empty() ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_DefaultOpen))
             {
                 if (demoDirectories[i].relevant)
                 {
