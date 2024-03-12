@@ -457,18 +457,21 @@ namespace IWXMVM::IW3
             auto entity = &entities[entityId];
             auto boneName = Functions::SL_GetStringOfSize(name.c_str(), 1, name.size() + 1);
 
+            const auto orgTimeStamp = std::exchange(dobj->skel.timeStamp, Structures::GetClientActive()->skelTimeStamp);
+
             auto boneIndex = FindBoneIndex(dobj, boneName);
             if (boneIndex == -1)
             {
-                //LOG_ERROR("Bone {0} was not found in {1} models", boneName, (int)dobj->numModels);
+                // LOG_ERROR("Bone {0} was not found in {1} models", boneName, (int)dobj->numModels);
+                dobj->skel.timeStamp = orgTimeStamp;
                 return {.id = -1};
             }
 
             float rotationMatrix[3 * 3];
             float origin[3];
-            auto result =
-                Functions::CG_DObjGetWorldBoneMatrix(entity, boneIndex, (float*)rotationMatrix, dobj, origin);
+            auto result = Functions::CG_DObjGetWorldBoneMatrix(entity, boneIndex, (float*)rotationMatrix, dobj, origin);
 
+            dobj->skel.timeStamp = orgTimeStamp;
             if (!result)
             {
                 LOG_ERROR("Call to CG_DObjGetWorldTagMatrix failed");
