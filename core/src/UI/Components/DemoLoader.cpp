@@ -263,8 +263,6 @@ namespace IWXMVM::UI
 
     void DemoLoader::RefreshFilteredDemosMask()
     {
-        LOG_DEBUG("Refreshing filteredDemosMask");
-        
         bool isSearchBarEmpty = searchBarText.empty();
         filteredDemosMask.resize(demoPaths.size());
         for (size_t i = 0; i < demoPaths.size(); ++i)
@@ -286,21 +284,21 @@ namespace IWXMVM::UI
                 // catching errors just in case
             }
         }
+        cachedfilteredDemos.clear();
     }
 
-    void DemoLoader::RenderDemos(const std::pair<std::size_t, std::size_t>& demos)
+    void DemoLoader::RenderDemos(const std::vector<std::filesystem::path>& demos)
     {
         ImGuiListClipper clipper;
-        clipper.Begin(demos.second - demos.first);
+        clipper.Begin(demos.size());
 
         while (clipper.Step())
         {
             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
             {
-                auto idx = i + demos.first;
                 try
                 {
-                    auto demoName = demoPaths[idx].filename().string();
+                    auto demoName = demos[i].filename().string();
 
                     if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo &&
                         Mod::GetGameInterface()->GetDemoInfo().name == demoName)
@@ -316,7 +314,7 @@ namespace IWXMVM::UI
                         if (ImGui::Button(std::format(ICON_FA_PLAY " PLAY##{0}", demoName).c_str(),
                                           ImVec2(ImGui::GetFontSize() * 4, ImGui::GetFontSize() * 1.5f)))
                         {
-                            Mod::GetGameInterface()->PlayDemo(demoPaths[idx]);
+                            Mod::GetGameInterface()->PlayDemo(demos[i]);
                         }
                     }
 
@@ -339,23 +337,24 @@ namespace IWXMVM::UI
     // Wrapper for RenderDemos that takes advantage of filteredDemosMask
     void DemoLoader::FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos)
     {
-        for (std::size_t i = demos.first; i < demos.second;)
+        auto it = cachedfilteredDemos.find(demos);
+        if (it != cachedfilteredDemos.end())
+        {
+            RenderDemos(it->second);
+            return;
+        }
+
+        std::vector<std::filesystem::path> filteredDemos;
+        for (std::size_t i = demos.first; i < demos.second; i++)
         {
             if (filteredDemosMask[i])
             {
-                std::size_t startIdx = i;
-                do
-                {
-                    i++;
-                } while (i < demos.second && filteredDemosMask[i]);
-                std::size_t endIdx = i;
-                RenderDemos({startIdx, endIdx});
-            }
-            else
-            {
-                i++;
+                filteredDemos.push_back(demoPaths[i]);
             }
         }
+
+        cachedfilteredDemos[demos] = filteredDemos;
+        RenderDemos(filteredDemos);
     }
 
 
