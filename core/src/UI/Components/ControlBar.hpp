@@ -14,6 +14,8 @@ namespace IWXMVM::UI
 
        private:
         void Initialize() final;
+        void DrawCaptureRangeIndicators(int32_t displayStartTick, int32_t displayEndTick, float progressBarX,
+                                        float progressBarWidth, ImVec2 pauseButtonSize);
 
         bool draggingStartTimeframe = false;
         bool draggingEndTimeframe = false;

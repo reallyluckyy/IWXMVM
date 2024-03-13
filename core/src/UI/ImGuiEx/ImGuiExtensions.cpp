@@ -55,7 +55,7 @@ namespace ImGuiEx
 
         const auto percentage =
             static_cast<float>(tick - displayStartTick) / static_cast<float>(displayEndTick - displayStartTick);
-        const auto x = rect.Min.x + percentage * barLength;
+        const auto x = rect.Min.x + percentage * barLength - thickness / 2;
 
         if (x > rect.Max.x)
             return;
