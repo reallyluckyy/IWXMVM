@@ -43,7 +43,6 @@ namespace IWXMVM::UI
         std::vector<std::filesystem::path> demoPaths;
         std::atomic<bool> isScanningDemoPaths;
 
-        std::vector<bool> filteredDemosMask;
         std::string searchBarText;
         std::string lastSearchBarText;
         std::pair<std::string, std::vector<std::u8string>> searchBarTextSplit;
