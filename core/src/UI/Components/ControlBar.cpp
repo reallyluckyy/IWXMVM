@@ -189,7 +189,7 @@ namespace IWXMVM::UI
 
         SetPosition(0, UIManager::Get().GetUIComponent(UI::Component::MenuBar)->GetSize().y +
                            UIManager::Get().GetUIComponent(UI::Component::GameView)->GetSize().y);
-        SetSize(ImGui::GetIO().DisplaySize.x, ImGui::GetFontSize() * 1.4f + padding.y * 2 + 4);
+        SetSize(ImGui::GetIO().DisplaySize.x, ImGui::GetFontSize() * 1.4f + padding.y * 3.0f + 4);
 
         ImGui::SetNextWindowPos(GetPosition());
         ImGui::SetNextWindowSize(GetSize());
@@ -200,43 +200,163 @@ namespace IWXMVM::UI
                                  ImGuiWindowFlags_NoTitleBar;
         if (ImGui::Begin("Playback Controls", nullptr, flags))
         {
+            const auto pauseButtonSize = ImVec2(ImGui::GetFontSize() * 1.4f, ImGui::GetFontSize() * 1.4f);
 
             ImGui::SetCursorPosX(padding.x);
+            ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
 
-            auto pauseButtonSize = ImVec2(ImGui::GetFontSize() * 1.4f, ImGui::GetFontSize() * 1.4f);
-
-            auto image = UIImage::FromResource(
+            const auto image = UIImage::FromResource(
                 Components::Playback::IsPaused() ? IMG_PLAY_BUTTON_data : IMG_PAUSE_BUTTON_data,
                 Components::Playback::IsPaused() ? IMG_PLAY_BUTTON_size : IMG_PAUSE_BUTTON_size);
 
             if (ImGui::ImageButton(image.GetTextureID(), pauseButtonSize, ImVec2(0, 0), ImVec2(1, 1), 1))
+            {
                 Components::Playback::TogglePaused();
+            }
 
             const auto playbackSpeedSliderWidth = GetSize().x / 8;
 
             ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
-            ImGui::SameLine();
+            ImGui::SetCursorPosX(padding.x + pauseButtonSize.x + ImGui::GetFontSize() * 0.8f);
+            ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
             ImGuiEx::TimescaleSlider("##1", &timescale.value().value->floating_point, 
                 Components::Playback::TIMESCALE_STEPS.front(),
                 Components::Playback::TIMESCALE_STEPS.back(),
                 "%.3f",
                 ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
-            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
             if (demoInfo.currentTick < demoInfo.endTick)
             {
-                auto progressBarX = padding.x + pauseButtonSize.x + playbackSpeedSliderWidth + padding.x * 3;
-                auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - padding.x;
+                const auto progressBarX = padding.x + pauseButtonSize.x + playbackSpeedSliderWidth + padding.x * 3;
+                const auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - padding.x;
 
-                ImGui::SameLine(progressBarX);
+                ImGui::SetCursorPosX(progressBarX + progressBarWidth + ImGui::GetFontSize() * 0.8f);
+                ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
+                ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());
+
+                const auto keyframeEditor =
+                    UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
+                const auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
+
+                auto& captureSettings = IWXMVM::Components::CaptureManager::Get().GetCaptureSettings();
+                const float tickRange = static_cast<float>(displayEndTick - displayStartTick);
+                const ImVec2 localMouse = {
+                    ImGui::GetMousePos().x - GetPosition().x,
+                    ImGui::GetMousePos().y - GetPosition().y,
+                };
+                
+                // Left timeframe marker
+                {
+                    const auto textSize = ImGui::CalcTextSize(ICON_FA_CHEVRON_LEFT);
+                    const auto percentage =
+                        static_cast<float>(captureSettings.startTick - displayStartTick) / tickRange;
+                    const ImVec2 bbTopLeft = {
+                        progressBarX + percentage * progressBarWidth - textSize.x / 2,
+                        GetSize().y / 2 - pauseButtonSize.y / 2 - textSize.y - ImGui::GetFontSize() * 0.1f,
+                    };
+                    const ImVec2 bbBottomRight = {
+                        bbTopLeft.x + textSize.x,
+                        bbTopLeft.y + textSize.y,
+                    };
+
+                    bool isHovered = localMouse.x >= bbTopLeft.x && localMouse.x <= bbBottomRight.x &&
+                                     localMouse.y >= bbTopLeft.y && localMouse.y <= bbBottomRight.y;
+
+                    if (isHovered)
+                    {
+                        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                    }
+
+                    if (!draggingStartTimeframe && isHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+                    {
+                        draggingStartTimeframe = true;
+                    }
+                    else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left))
+                    {
+                        draggingStartTimeframe = false;
+                    }
+
+                    ImGui::SetCursorPos(bbTopLeft);
+                    if (draggingStartTimeframe)
+                    {
+                        ImGui::SetCursorPosX(std::clamp(localMouse.x, progressBarX, progressBarX + progressBarWidth) -
+                                             textSize.x / 2);
+                        captureSettings.startTick = static_cast<std::uint32_t>(
+                            (std::clamp((localMouse.x - progressBarX), 0.0f, progressBarWidth) /
+                             progressBarWidth) *
+                                tickRange +
+                            displayStartTick);
+                    }
+
+                    ImGui::Text(ICON_FA_CHEVRON_LEFT);
+                }
+
+                // Right timeframe marker
+                {
+                    const auto textSize = ImGui::CalcTextSize(ICON_FA_CHEVRON_RIGHT);
+                    const auto percentage =
+                        static_cast<float>(captureSettings.endTick - displayStartTick) / tickRange;
+                    const ImVec2 bbTopLeft = {
+                        progressBarX + percentage * progressBarWidth - textSize.x / 2,
+                        GetSize().y / 2 - pauseButtonSize.y / 2 - textSize.y - ImGui::GetFontSize() * 0.1f,
+                    };
+                    const ImVec2 bbBottomRight = {
+                        bbTopLeft.x + textSize.x,
+                        bbTopLeft.y + textSize.y,
+                    };
+
+                    bool isHovered = localMouse.x >= bbTopLeft.x && localMouse.x <= bbBottomRight.x &&
+                                     localMouse.y >= bbTopLeft.y && localMouse.y <= bbBottomRight.y;
+
+                    if (isHovered)
+                    {
+                        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+                    }
+
+                    if (!draggingEndTimeframe && isHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+                    {
+                        draggingEndTimeframe = true;
+                    }
+                    else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left))
+                    {
+                        draggingEndTimeframe = false;
+                    }
+
+                    ImGui::SetCursorPos(bbTopLeft);
+                    if (draggingEndTimeframe)
+                    {
+                        ImGui::SetCursorPosX(std::clamp(localMouse.x, progressBarX, progressBarX + progressBarWidth) -
+                                             textSize.x / 2);
+                        captureSettings.endTick = static_cast<std::uint32_t>(
+                            (std::clamp((localMouse.x - progressBarX), 0.0f, progressBarWidth) / progressBarWidth) *
+                                tickRange +
+                            displayStartTick);
+                    }
+
+                    ImGui::Text(ICON_FA_CHEVRON_RIGHT);
+                }
+
+                if (draggingStartTimeframe && draggingEndTimeframe)
+                {
+                    draggingEndTimeframe = false;
+                }
+
+                if (captureSettings.startTick > captureSettings.endTick)
+                {
+                    std::swap(captureSettings.startTick, captureSettings.endTick);
+                    std::swap(draggingStartTimeframe, draggingEndTimeframe);
+                }
+
                 ImGui::SetNextItemWidth(progressBarWidth);
                 static uint32_t tickValue{};
 
-                auto keyframeEditor = UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
-                auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
-                auto draggedProgresBar =
+                ImGui::SetCursorPosX(progressBarX);
+                ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
+                const auto draggedProgressBar =
                     DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick);
-                if (draggedProgresBar && !Components::Rewinding::IsRewinding())
+
+                if (draggedProgressBar && !Components::Rewinding::IsRewinding())
                 {
                     Components::Playback::SetTickDelta(tickValue - demoInfo.currentTick);
                 }
@@ -244,12 +364,10 @@ namespace IWXMVM::UI
                 {
                     tickValue = demoInfo.currentTick;
                 }
-
-                ImGui::SameLine();
-                ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());
             }
-            ImGui::End();
         }
+
+        ImGui::End();
 
         ImGui::EndDisabled();
 

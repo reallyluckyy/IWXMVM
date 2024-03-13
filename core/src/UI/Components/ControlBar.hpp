@@ -14,5 +14,8 @@ namespace IWXMVM::UI
 
        private:
         void Initialize() final;
+
+        bool draggingStartTimeframe = false;
+        bool draggingEndTimeframe = false;
     };
 }  // namespace IWXMVM::UI
