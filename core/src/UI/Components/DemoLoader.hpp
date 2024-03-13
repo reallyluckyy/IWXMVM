@@ -34,6 +34,7 @@ namespace IWXMVM::UI
         bool DemoFilter(const std::u8string& demoFileName);
         void FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos);
         void RenderDir(const DemoDirectory& dir);  // Recursive render function
+        void RecacheSearchBarTextSplit();
         void RenderSearchBar();
         void RenderSearchPaths();
 
@@ -45,7 +46,7 @@ namespace IWXMVM::UI
 
         std::string searchBarText;
         std::string lastSearchBarText;
-        std::pair<std::string, std::vector<std::u8string>> searchBarTextSplit;
+        std::vector<std::u8string> searchBarTextSplit;
         struct cachedfilteredDemos_pairhash
         {
             size_t operator()(const std::pair<size_t, size_t>& p) const

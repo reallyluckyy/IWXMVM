@@ -225,35 +225,11 @@ namespace IWXMVM::UI
     bool DemoLoader::DemoFilter(const std::u8string& demoFileName)
     {
         // TODO: possibly make filter more advanced, add features like "" for exact search etc
-        if (searchBarText != searchBarTextSplit.first)
-        {
-            searchBarTextSplit.first = searchBarText;
-            searchBarTextSplit.second.clear();
-
-            std::u8string token;
-            for (char c : searchBarText)
-            {
-                if (c == ' ')
-                {
-                    searchBarTextSplit.second.push_back(token);
-                    token.clear();
-                }
-                else
-                {
-                    token += static_cast<std::u8string::value_type>(c);
-                }
-            }
-            if (!token.empty())
-            {
-                searchBarTextSplit.second.push_back(token);
-            }
-        }
-
         bool keepDemo = true;
         std::u8string lowerDemoFileName = demoFileName;
         std::transform(lowerDemoFileName.begin(), lowerDemoFileName.end(), lowerDemoFileName.begin(),
                        ::tolower);
-        for (auto& word : searchBarTextSplit.second)
+        for (auto& word : searchBarTextSplit)
         {
             std::transform(word.begin(), word.end(), word.begin(), ::tolower);
             if (lowerDemoFileName.find(word) == std::u8string::npos)
@@ -374,16 +350,30 @@ namespace IWXMVM::UI
 		}
     }
 
+    void DemoLoader::RecacheSearchBarTextSplit()
+    {
+        searchBarTextSplit.clear();
+
+        std::stringstream ss(searchBarText);
+        std::string token;
+
+        while (std::getline(ss, token, ' '))
+        {
+            searchBarTextSplit.push_back(std::u8string(token.begin(), token.end()));
+        }
+    }
+
     void DemoLoader::RenderSearchBar()
     {
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputTextWithHint(
             "##SearchInput", "Search...", &searchBarText[0], searchBarText.capacity() + 1,
             ImGuiInputTextFlags_CallbackResize,
-            [](ImGuiInputTextCallbackData* data) -> int {
+            [](ImGuiInputTextCallbackData* data) -> int
+            {
                 if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
                 {
-                    std::string* str = (std::string*)data->UserData;
+                    std::string* str = reinterpret_cast<std::string*>(data->UserData);
                     str->resize(data->BufTextLen);
                     data->Buf = &(*str)[0];
                 }
@@ -393,6 +383,7 @@ namespace IWXMVM::UI
 
         if (lastSearchBarText != searchBarText)
         {
+            RecacheSearchBarTextSplit();
             cachedfilteredDemos.clear();
             totalCachedFilteredDemosCount = 0;
             lastSearchBarText = searchBarText;
