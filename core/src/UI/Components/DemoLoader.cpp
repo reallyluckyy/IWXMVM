@@ -219,7 +219,6 @@ namespace IWXMVM::UI
         // directory
         MarkDirsRelevancy();
 
-        RefreshFilteredDemosMask();
         isScanningDemoPaths.store(false);
     }
 
@@ -266,31 +265,6 @@ namespace IWXMVM::UI
         return keepDemo;
     }
 
-    void DemoLoader::RefreshFilteredDemosMask()
-    {
-        bool isSearchBarEmpty = searchBarText.empty();
-        filteredDemosMask.resize(demoPaths.size());
-        for (size_t i = 0; i < demoPaths.size(); ++i)
-        {
-            try
-            {
-                if (isSearchBarEmpty)
-                {
-                    filteredDemosMask[i] = true;
-                }
-                else
-                {
-                    filteredDemosMask[i] = DemoFilter(demoPaths[i].filename().u8string());
-                }
-            }
-            catch (std::exception&)
-            {
-                LOG_ERROR("Error filtering demoPath");
-                // catching errors just in case
-            }
-        }
-        cachedfilteredDemos.clear();
-    }
 
     void DemoLoader::RenderDemos(const std::vector<std::filesystem::path>& demos)
     {
@@ -352,7 +326,7 @@ namespace IWXMVM::UI
         std::vector<std::filesystem::path> filteredDemos;
         for (std::size_t i = demos.first; i < demos.second; i++)
         {
-            if (filteredDemosMask[i])
+            if (searchBarText.empty() || DemoFilter(demoPaths[i].filename().u8string()))
             {
                 filteredDemos.push_back(demoPaths[i]);
             }
@@ -411,7 +385,7 @@ namespace IWXMVM::UI
 
         if (lastSearchBarText != searchBarText)
         {
-            RefreshFilteredDemosMask();
+            cachedfilteredDemos.clear();
             lastSearchBarText = searchBarText;
         }
     }

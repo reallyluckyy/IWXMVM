@@ -34,7 +34,6 @@ namespace IWXMVM::UI
         bool DemoFilter(const std::u8string& demoFileName);
         void FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos);
         void RenderDir(const DemoDirectory& dir);  // Recursive render function
-        void RefreshFilteredDemosMask();
         void RenderSearchBar();
         void RenderSearchPaths();
 
