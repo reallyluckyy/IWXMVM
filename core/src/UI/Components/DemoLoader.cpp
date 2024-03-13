@@ -313,7 +313,7 @@ namespace IWXMVM::UI
         }
     }
 
-    // Wrapper for RenderDemos that takes advantage of filteredDemosMask
+    // Wrapper for RenderDemos
     void DemoLoader::FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos)
     {
         auto it = cachedfilteredDemos.find(demos);
