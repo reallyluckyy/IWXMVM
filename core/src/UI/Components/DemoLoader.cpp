@@ -326,9 +326,17 @@ namespace IWXMVM::UI
         std::vector<std::filesystem::path> filteredDemos;
         for (std::size_t i = demos.first; i < demos.second; i++)
         {
-            if (searchBarText.empty() || DemoFilter(demoPaths[i].filename().u8string()))
+            try
             {
-                filteredDemos.push_back(demoPaths[i]);
+                if (searchBarText.empty() || DemoFilter(demoPaths[i].filename().u8string()))
+                {
+                    filteredDemos.push_back(demoPaths[i]);
+                }
+            }
+            catch (std::exception&)
+            {
+                LOG_ERROR("Error filtering demoPath");
+                // catching errors just in case
             }
         }
 
