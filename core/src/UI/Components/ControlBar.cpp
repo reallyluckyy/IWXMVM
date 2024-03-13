@@ -178,7 +178,7 @@ namespace IWXMVM::UI
         };
 
         // Left timeframe marker
-        if (captureSettings.endTick < displayEndTick)
+        if (std::cmp_greater_equal(captureSettings.startTick, displayStartTick))
         {
             const auto textSize = ImGui::CalcTextSize(ICON_FA_CARET_UP);
             const auto percentage = static_cast<float>(captureSettings.startTick - displayStartTick) / tickRange;
@@ -219,12 +219,12 @@ namespace IWXMVM::UI
             }
 
             ImGui::PushFont(UIManager::Get().GetBoldFont());
-            ImGui::TextColored(ImVec4(0.8, 0.8, 0.8, 1), ICON_FA_CARET_UP);
+            ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), ICON_FA_CARET_UP);
             ImGui::PopFont();
         }
 
         // Right timeframe marker
-        if (captureSettings.endTick < displayEndTick)
+        if (std::cmp_less_equal(captureSettings.endTick, displayEndTick))
         {
             const auto textSize = ImGui::CalcTextSize(ICON_FA_CARET_UP);
             const auto percentage = static_cast<float>(captureSettings.endTick - displayStartTick) / tickRange;
@@ -265,7 +265,7 @@ namespace IWXMVM::UI
             }
 
             ImGui::PushFont(UIManager::Get().GetBoldFont());
-            ImGui::TextColored(ImVec4(0.8, 0.8, 0.8, 1), ICON_FA_CARET_UP);
+            ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), ICON_FA_CARET_UP);
             ImGui::PopFont();
         }
 
