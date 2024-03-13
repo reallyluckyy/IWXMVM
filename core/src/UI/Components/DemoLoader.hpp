@@ -56,5 +56,6 @@ namespace IWXMVM::UI
             }
         };
         std::unordered_map<std::pair<size_t, size_t>, std::vector<std::filesystem::path>, cachedfilteredDemos_pairhash> cachedfilteredDemos;
+        std::size_t totalCachedFilteredDemosCount;
     };
 }  // namespace IWXMVM::UI

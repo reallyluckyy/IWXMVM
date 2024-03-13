@@ -339,7 +339,7 @@ namespace IWXMVM::UI
                 // catching errors just in case
             }
         }
-
+        totalCachedFilteredDemosCount += filteredDemos.size();
         cachedfilteredDemos[demos] = filteredDemos;
         RenderDemos(filteredDemos);
     }
@@ -394,6 +394,7 @@ namespace IWXMVM::UI
         if (lastSearchBarText != searchBarText)
         {
             cachedfilteredDemos.clear();
+            totalCachedFilteredDemosCount = 0;
             lastSearchBarText = searchBarText;
         }
     }
@@ -449,7 +450,8 @@ namespace IWXMVM::UI
             else
             {
                 ImGui::AlignTextToFramePadding();
-                ImGui::Text("%d demos found!", demoPaths.size());
+                ImGui::Text("%d demos found!",
+                            searchBarText.empty() ? demoPaths.size() : totalCachedFilteredDemosCount);
                 ImGui::SameLine();
 
                 auto addPathButtonLabel = std::string(ICON_FA_FOLDER_OPEN " Add path");
