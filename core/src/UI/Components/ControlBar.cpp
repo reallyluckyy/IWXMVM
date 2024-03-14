@@ -164,110 +164,76 @@ namespace IWXMVM::UI
         return value_changed;
     }
 
-    void ControlBar::DrawCaptureRangeIndicators(int32_t displayStartTick, int32_t displayEndTick, float progressBarX,
-                                                float progressBarWidth, ImVec2 pauseButtonSize)
+    void ControlBar::DrawCaptureRangeIndicator(int32_t displayStartTick, int32_t displayEndTick, float progressBarX,
+                                               float progressBarWidth, ImVec2 pauseButtonSize,
+                                               uint32_t* captureSettingsTargetTick, bool* draggingTimeframe)
     {
-        if (UIManager::Get().GetSelectedTab() != Tab::Record)
-            return; 
-
-        auto& captureSettings = IWXMVM::Components::CaptureManager::Get().GetCaptureSettings();
         const float tickRange = static_cast<float>(displayEndTick - displayStartTick);
         const ImVec2 localMouse = {
             ImGui::GetMousePos().x - GetPosition().x,
             ImGui::GetMousePos().y - GetPosition().y,
         };
 
-        // Left timeframe marker
-        if (captureSettings.endTick < displayEndTick)
+        const auto textSize = ImGui::CalcTextSize(ICON_FA_CARET_UP);
+        const auto percentage = static_cast<float>(*captureSettingsTargetTick - displayStartTick) / tickRange;
+        const ImVec2 bbTopLeft = {
+            progressBarX + percentage * progressBarWidth - textSize.x / 2,
+            GetSize().y - pauseButtonSize.y / 2 - textSize.y * 0.2f,
+        };
+        const ImVec2 bbBottomRight = {
+            bbTopLeft.x + textSize.x,
+            bbTopLeft.y + textSize.y,
+        };
+
+        bool isHovered = localMouse.x >= bbTopLeft.x && localMouse.x <= bbBottomRight.x &&
+                         localMouse.y >= bbTopLeft.y && localMouse.y <= bbBottomRight.y;
+
+        if (isHovered)
         {
-            const auto textSize = ImGui::CalcTextSize(ICON_FA_CARET_UP);
-            const auto percentage = static_cast<float>(captureSettings.startTick - displayStartTick) / tickRange;
-            const ImVec2 bbTopLeft = {
-                progressBarX + percentage * progressBarWidth - textSize.x / 2,
-                GetSize().y - pauseButtonSize.y / 2 - textSize.y * 0.2f,
-            };
-            const ImVec2 bbBottomRight = {
-                bbTopLeft.x + textSize.x,
-                bbTopLeft.y + textSize.y,
-            };
-
-            bool isHovered = localMouse.x >= bbTopLeft.x && localMouse.x <= bbBottomRight.x &&
-                             localMouse.y >= bbTopLeft.y && localMouse.y <= bbBottomRight.y;
-
-            if (isHovered)
-            {
-                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-            }
-
-            if (!draggingStartTimeframe && isHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-            {
-                draggingStartTimeframe = true;
-            }
-            else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left))
-            {
-                draggingStartTimeframe = false;
-            }
-
-            ImGui::SetCursorPos(bbTopLeft);
-            if (draggingStartTimeframe)
-            {
-                ImGui::SetCursorPosX(std::clamp(localMouse.x, progressBarX, progressBarX + progressBarWidth) -
-                                     textSize.x / 2);
-                captureSettings.startTick = static_cast<std::uint32_t>(
-                    (std::clamp((localMouse.x - progressBarX), 0.0f, progressBarWidth) / progressBarWidth) * tickRange +
-                    displayStartTick);
-            }
-
-            ImGui::PushFont(UIManager::Get().GetBoldFont());
-            ImGui::TextColored(ImVec4(0.8, 0.8, 0.8, 1), ICON_FA_CARET_UP);
-            ImGui::PopFont();
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
         }
 
-        // Right timeframe marker
-        if (captureSettings.endTick < displayEndTick)
+        if (!*draggingTimeframe && isHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
-            const auto textSize = ImGui::CalcTextSize(ICON_FA_CARET_UP);
-            const auto percentage = static_cast<float>(captureSettings.endTick - displayStartTick) / tickRange;
-            const ImVec2 bbTopLeft = {
-                progressBarX + percentage * progressBarWidth - textSize.x / 2,
-                GetSize().y - pauseButtonSize.y / 2 - textSize.y * 0.2f,
-            };
-            const ImVec2 bbBottomRight = {
-                bbTopLeft.x + textSize.x,
-                bbTopLeft.y + textSize.y,
-            };
-
-            bool isHovered = localMouse.x >= bbTopLeft.x && localMouse.x <= bbBottomRight.x &&
-                             localMouse.y >= bbTopLeft.y && localMouse.y <= bbBottomRight.y;
-
-            if (isHovered)
-            {
-                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-            }
-
-            if (!draggingEndTimeframe && isHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-            {
-                draggingEndTimeframe = true;
-            }
-            else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left))
-            {
-                draggingEndTimeframe = false;
-            }
-
-            ImGui::SetCursorPos(bbTopLeft);
-            if (draggingEndTimeframe)
-            {
-                ImGui::SetCursorPosX(std::clamp(localMouse.x, progressBarX, progressBarX + progressBarWidth) -
-                                     textSize.x / 2);
-                captureSettings.endTick = static_cast<std::uint32_t>(
-                    (std::clamp((localMouse.x - progressBarX), 0.0f, progressBarWidth) / progressBarWidth) * tickRange +
-                    displayStartTick);
-            }
-
-            ImGui::PushFont(UIManager::Get().GetBoldFont());
-            ImGui::TextColored(ImVec4(0.8, 0.8, 0.8, 1), ICON_FA_CARET_UP);
-            ImGui::PopFont();
+            *draggingTimeframe = true;
         }
+        else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left))
+        {
+            *draggingTimeframe = false;
+        }
+
+        ImGui::SetCursorPos(bbTopLeft);
+        if (*draggingTimeframe)
+        {
+            ImGui::SetCursorPosX(std::clamp(localMouse.x, progressBarX, progressBarX + progressBarWidth) -
+                                 textSize.x / 2);
+            *captureSettingsTargetTick = static_cast<std::uint32_t>(
+                (std::clamp((localMouse.x - progressBarX), 0.0f, progressBarWidth) / progressBarWidth) * tickRange +
+                displayStartTick);
+        }
+
+        ImGui::PushFont(UIManager::Get().GetBoldFont());
+        ImGui::TextColored(ImVec4(0.8, 0.8, 0.8, 1), ICON_FA_CARET_UP);
+        ImGui::PopFont();
+    }
+
+    void ControlBar::DrawCaptureRangeIndicators(int32_t displayStartTick, int32_t displayEndTick, float progressBarX,
+                                                float progressBarWidth, ImVec2 pauseButtonSize)
+    {
+        if (UIManager::Get().GetSelectedTab() != Tab::Record)
+            return; 
+
+        auto& captureManager = Components::CaptureManager::Get();
+        auto& captureSettings = captureManager.GetCaptureSettings();
+
+        if (captureSettings.endTick <= displayEndTick && !captureManager.IsCapturing())
+        {
+            DrawCaptureRangeIndicator(displayStartTick, displayEndTick, progressBarX, progressBarWidth, pauseButtonSize,
+                                      &captureSettings.startTick, &draggingStartTimeframe);
+            DrawCaptureRangeIndicator(displayStartTick, displayEndTick, progressBarX, progressBarWidth, pauseButtonSize,
+                                      &captureSettings.endTick, &draggingEndTimeframe);
+        }
+
 
         if (draggingStartTimeframe && draggingEndTimeframe)
         {
