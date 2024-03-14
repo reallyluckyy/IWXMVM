@@ -213,7 +213,7 @@ namespace IWXMVM::UI
         }
 
         ImGui::PushFont(UIManager::Get().GetBoldFont());
-        ImGui::TextColored(ImVec4(0.8, 0.8, 0.8, 1), ICON_FA_CARET_UP);
+        ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), ICON_FA_CARET_UP);
         ImGui::PopFont();
     }
 
@@ -226,14 +226,19 @@ namespace IWXMVM::UI
         auto& captureManager = Components::CaptureManager::Get();
         auto& captureSettings = captureManager.GetCaptureSettings();
 
-        if (captureSettings.endTick <= displayEndTick && !captureManager.IsCapturing())
+        // Left timeframe marker
+        if (std::cmp_greater_equal(captureSettings.startTick, displayStartTick) && !captureManager.IsCapturing())
         {
             DrawCaptureRangeIndicator(displayStartTick, displayEndTick, progressBarX, progressBarWidth, pauseButtonSize,
                                       &captureSettings.startTick, &draggingStartTimeframe);
+        }
+
+        // Right timeframe marker
+        if (std::cmp_less_equal(captureSettings.endTick, displayEndTick) && !captureManager.IsCapturing())
+        {
             DrawCaptureRangeIndicator(displayStartTick, displayEndTick, progressBarX, progressBarWidth, pauseButtonSize,
                                       &captureSettings.endTick, &draggingEndTimeframe);
         }
-
 
         if (draggingStartTimeframe && draggingEndTimeframe)
         {
