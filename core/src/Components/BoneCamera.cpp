@@ -41,7 +41,25 @@ namespace IWXMVM::Components
         if (!UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->HasFocus())
             return;
         auto worldSpacePosition = boneData.position + boneData.rotation * positionOffset;
-        FreeCamera::HandleFreecamInput(worldSpacePosition, rotationOffset, fov, GetForwardVector(), GetRightVector());
+
+
+        glm::vec3 adjustedRotationOffset = 
+        {
+            rotationOffset[1], 
+            rotationOffset[2],
+            rotationOffset[0]
+        };
+
+        FreeCamera::HandleFreecamInput(worldSpacePosition, adjustedRotationOffset, fov, GetForwardVector(),
+                                       GetRightVector());
+
+        rotationOffset = 
+        {
+            adjustedRotationOffset[2],
+            adjustedRotationOffset[0],  
+            adjustedRotationOffset[1]  
+        };
+
         positionOffset = boneData.rotation / (worldSpacePosition - boneData.position);
     }
     
