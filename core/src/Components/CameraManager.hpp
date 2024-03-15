@@ -26,6 +26,10 @@ namespace IWXMVM::Components
         {
             return cameras[activeCameraIndex];
         }
+        std::unique_ptr<Camera>& GetPreviousActiveCamera()
+        {
+            return cameras[previousActiveCameraIndex];
+        }
         std::unique_ptr<Camera>& GetCamera(Camera::Mode mode);
         void SetActiveCamera(Camera::Mode mode);
 
@@ -59,5 +63,6 @@ namespace IWXMVM::Components
         }();
 
         int activeCameraIndex = 0;
+        int previousActiveCameraIndex = 0;
     };
 }  // namespace IWXMVM::Components
