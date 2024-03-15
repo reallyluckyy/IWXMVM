@@ -62,21 +62,26 @@ namespace IWXMVM::Components
 
         Events::RegisterListener(EventType::OnCameraChanged, [&]() {
             auto& activeCamera = GetActiveCamera();
-
-            auto& firstPersonCamera = GetCamera(Camera::Mode::FirstPerson);
+            auto& previousActiveCamera = GetPreviousActiveCamera();
             switch (activeCamera->GetMode())
             {
                 case Camera::Mode::Free:
                 {
-                    activeCamera->GetPosition() =
-                        firstPersonCamera->GetPosition() - firstPersonCamera->GetForwardVector() * 100;
-                    activeCamera->GetRotation() = firstPersonCamera->GetRotation();
+                    if (previousActiveCamera->GetMode() == Camera::Mode::FirstPerson())
+                    {
+                        activeCamera->GetPosition() = previousActiveCamera->GetPosition() - previousActiveCamera->GetForwardVector() * 100;
+                    }
+                    else
+                    {
+                        activeCamera->GetPosition() = previousActiveCamera->GetPosition();
+                    }
+                    activeCamera->GetRotation() = previousActiveCamera->GetRotation();
+                    activeCamera->GetFov() = previousActiveCamera->GetFov();
                     break;
                 }
                 default:
                     break;
             }
-
         });
     }
 
@@ -99,6 +104,7 @@ namespace IWXMVM::Components
         {
             if (cameras[i]->GetMode() == mode)
             {
+                previousActiveCameraIndex = activeCameraIndex;
                 activeCameraIndex = i;
             }
         }
