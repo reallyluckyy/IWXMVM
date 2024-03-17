@@ -57,7 +57,7 @@ namespace IWXMVM::UI
 
             if (ImGui::BeginMenu("Tools"))
             {
-                if (ImGui::MenuItem("Player death animations##0"))
+                if (ImGui::MenuItem("Player Death Animations##0"))
                 {
                     UIManager::Get().GetUIComponent<PlayerAnimation>(Component::PlayerAnimation)->ToggleVisibility();
                 }
