@@ -22,6 +22,48 @@ namespace IWXMVM::UI
         playbackSpeed = 1.0f;
     }
 
+    void SmartSetTickDelta(int32_t value)
+    {
+        auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
+        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        auto targetTick = currentTick + value;
+        if (value > 0)
+        {
+            // skipping forward
+            if (captureSettings.endTick > currentTick && captureSettings.endTick < targetTick)
+            {
+                Components::Playback::SetTickDelta(captureSettings.endTick - currentTick);
+                return;
+            }
+            else if (captureSettings.startTick > currentTick && captureSettings.startTick < targetTick)
+            {
+                Components::Playback::SetTickDelta(captureSettings.startTick - currentTick);
+                return;
+            }
+        }
+        else if (value < 0)
+        {
+            // skipping backward
+            if (std::abs(static_cast<int>(captureSettings.endTick - currentTick)) >
+                    IWXMVM::Components::Playback::REWIND_DEADZONE 
+                && captureSettings.endTick < currentTick 
+                && captureSettings.endTick > targetTick)
+            {
+                Components::Playback::SetTickDelta(captureSettings.endTick - currentTick);
+                return;
+            }
+            else if (std::abs(static_cast<int>(captureSettings.startTick - currentTick)) >
+                         IWXMVM::Components::Playback::REWIND_DEADZONE 
+                && captureSettings.startTick < currentTick
+                && captureSettings.startTick > targetTick)
+            {
+                Components::Playback::SetTickDelta(captureSettings.startTick - currentTick);
+                return;
+            }
+        }
+        Components::Playback::SetTickDelta(value);
+    }
+
     void HandlePlaybackInput()
     {
         if (Components::CaptureManager::Get().IsCapturing())
@@ -55,12 +97,12 @@ namespace IWXMVM::UI
 
         if (Input::BindDown(Action::PlaybackSkipForward))
         {
-            Components::Playback::SetTickDelta(1000);
+            SmartSetTickDelta(1000);
         }
 
         if (Input::BindDown(Action::PlaybackSkipBackward))
         {
-            Components::Playback::SetTickDelta(-1000);
+            SmartSetTickDelta(-1000);
         }
 
         if (Input::BindDown(Action::TimeFrameMoveStart))

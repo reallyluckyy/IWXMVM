@@ -28,7 +28,6 @@ namespace IWXMVM::Components::Playback
 
     void SetTickDelta(int32_t value, bool ignoreDeadzone)
     {
-        constexpr int32_t REWIND_DEADZONE = 250;
         if (value > 0)
             SkipForward(value);
         else if ((value < -REWIND_DEADZONE) || (value < 0 && ignoreDeadzone))
