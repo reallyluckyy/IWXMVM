@@ -31,6 +31,7 @@ namespace IWXMVM
             defaults[Action::PlaybackToggle]       = Bind{ImGuiKey_Space, "PlaybackToggle"};
             defaults[Action::TimeFrameMoveStart]   = Bind{ImGuiKey_B, "TimeFrameMoveStart"};
             defaults[Action::TimeFrameMoveEnd]     = Bind{ImGuiKey_N, "TimeFrameMoveEnd"};
+            defaults[Action::FirstPersonToggle]     = Bind{ImGuiKey_F2, "FirstPersonToggle"};
             return defaults;
         }())
     {

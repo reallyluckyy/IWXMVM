@@ -107,11 +107,11 @@ namespace IWXMVM::Components
                 if (i != activeCameraIndex)
                 {
                     previousActiveCameraIndex = activeCameraIndex;
+                    activeCameraIndex = i;
+                    Events::Invoke(EventType::OnCameraChanged);
+                    return;
                 }
-                activeCameraIndex = i;
             }
         }
-
-        Events::Invoke(EventType::OnCameraChanged);
     }
 }  // namespace IWXMVM::Components

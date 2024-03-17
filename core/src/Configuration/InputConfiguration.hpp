@@ -27,6 +27,7 @@ namespace IWXMVM
         PlaybackToggle,
         TimeFrameMoveStart,
         TimeFrameMoveEnd,
+        FirstPersonToggle,
 
         Count,
     };

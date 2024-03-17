@@ -52,12 +52,12 @@ namespace IWXMVM::UI
                 ToggleOverlay();
             }
 
-            if (Input::KeyDown(ImGuiKey_F2))
+            if (Input::KeyDown(ImGuiKey_F3))
             {
                 ToggleImGuiDemo();
             }
 
-            if (Input::KeyDown(ImGuiKey_F3))
+            if (Input::KeyDown(ImGuiKey_F4))
             {
                 ToggleDebugPanel();
             }

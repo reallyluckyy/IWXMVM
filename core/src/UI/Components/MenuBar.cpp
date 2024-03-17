@@ -42,12 +42,12 @@ namespace IWXMVM::UI
                     UIManager::Get().ToggleOverlay();
                 }
 
-                if (ImGui::MenuItem("Toggle ImGui Demo", "F2"))
+                if (ImGui::MenuItem("Toggle ImGui Demo", "F3"))
                 {
                     UIManager::Get().ToggleImGuiDemo();
                 }
 
-                if (ImGui::MenuItem("Toggle Debug Panel", "F3"))
+                if (ImGui::MenuItem("Toggle Debug Panel", "F4"))
                 {
                     UIManager::Get().ToggleDebugPanel();
                 }
