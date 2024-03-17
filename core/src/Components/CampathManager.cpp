@@ -5,6 +5,7 @@
 #include "UI/UIManager.hpp"
 #include "../Events.hpp"
 #include "../Input.hpp"
+#include "Playback.hpp"
 
 namespace IWXMVM::Components
 {
@@ -60,6 +61,20 @@ namespace IWXMVM::Components
             if (Input::BindDown(Action::DollyPlayPath))
             {
                 CameraManager::Get().SetActiveCamera(Camera::Mode::Dolly);
+                Playback::SetTickDelta(KeyframeManager::Get().GetKeyframes(property).front().tick -
+                                       Mod::GetGameInterface()->GetDemoInfo().currentTick, true);
+            }
+        }
+        else
+        {
+            if (Input::BindDown(Action::DollyPlayPath))
+            {
+                CameraManager::Get().SetActiveCamera(CameraManager::Get().GetPreviousActiveCamera()->GetMode());
+                if (CameraManager::Get().GetActiveCamera()->GetMode() == Camera::Mode::Free)
+                {
+                    UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->SetHasFocus(true);
+                }
+               
             }
         }
     }
