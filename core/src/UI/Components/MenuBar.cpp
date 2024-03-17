@@ -55,6 +55,16 @@ namespace IWXMVM::UI
                 ImGui::EndMenu();
             }
 
+            if (ImGui::BeginMenu("Tools"))
+            {
+                if (ImGui::MenuItem("Player death animations##0"))
+                {
+                    UIManager::Get().GetUIComponent<PlayerAnimation>(Component::PlayerAnimation)->ToggleVisibility();
+                }
+
+                ImGui::EndMenu();
+            }
+
             if (ImGui::BeginMenu("About"))
             {
                 if (ImGui::MenuItem("Credits", ""))

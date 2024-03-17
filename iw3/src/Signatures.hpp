@@ -18,8 +18,8 @@ namespace IWXMVM::IW3::Signatures
         Sig("8B F0 8B F9 FF 15 ?? ?? ?? ?? 8A 06", GAType::Code, -8) > Cbuf_AddText;
         Sig("83 C7 10 8B 8E ?? 00 00 00 3B 0D ?? ?? ?? 00", GAType::Code,
             15) > CG_AddPlayerSpriteDrawSurfs;  // killcam 'you' marker
-        Sig("C3 F6 05 ?? ?? ?? 00 10", GAType::Code,
-            8) > CL_CGameRendering;  // hide class menus
+        Sig("C3 F6 05 ?? ?? ?? 00 10", GAType::Code, 8) > CL_CGameRendering;  // hide class menus
+        Sig("?? ?? ?? ?? ?? 8B 6C 24 ?? 57 8B F8 8B 47", GAType::Code, 0) > PlayerAnimation;  // intercept player animation indices
         Sig("8B C5 E8 ?? ?? ?? ?? BA", GAType::Code, 17) > CG_CalcViewValues;  // first call to AnglesToAxis we need to replace
         Sig("5C 24 ?? 55 8B 6C 24 ?? 56 8D 44 24 ?? 50 51 8B CB C6 44 24", GAType::Code, -5) > CG_DObjGetWorldTagMatrix;
         Sig("00 53 56 57 8B F0 0F 85 ?? ?? ?? ?? 8D 44 24", GAType::Code, -9) > CG_DrawDisconnect;
