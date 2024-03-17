@@ -11,10 +11,6 @@
 
 namespace IWXMVM::Components
 {
-    std::atomic<std::int32_t> captureLock;
-    constexpr int32_t SHOULD_CAPTURE_FRAME = -1;
-    constexpr int32_t FINISHED_CAPTURE = 1;
-
     std::string_view CaptureManager::GetOutputFormatLabel(OutputFormat outputFormat)
     {
         switch (outputFormat)
@@ -51,6 +47,19 @@ namespace IWXMVM::Components
 
     void CaptureManager::Initialize()
     {
+        // Set r_smp_backend to 0. 
+        // This should ensure that there are no separate threads for game logic and rendering
+        // which frees us from having to do synchronizations for our recording code.
+        auto r_smp_backend = Mod::GetGameInterface()->GetDvar("r_smp_backend");
+        if (!r_smp_backend.has_value())
+        {
+            LOG_ERROR("Could not set r_smp_backend; dvar not found");
+        }
+        else
+        {
+            r_smp_backend.value().value->int32 = false;
+        }
+
         IDirect3DDevice9* device = D3D9::GetDevice();
 
         if (FAILED(device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer)))
@@ -113,60 +122,51 @@ namespace IWXMVM::Components
         if (!isCapturing)
             return;
 
-        if (captureLock.load() == SHOULD_CAPTURE_FRAME)
+        IDirect3DDevice9* device = D3D9::GetDevice();
+        if (FAILED(device->StretchRect(backBuffer, NULL, downsampledRenderTarget, NULL, D3DTEXF_NONE)))
         {
-            IDirect3DDevice9* device = D3D9::GetDevice();
-            if (FAILED(device->StretchRect(backBuffer, NULL, downsampledRenderTarget, NULL, D3DTEXF_NONE)))
-            {
-                LOG_ERROR("Failed to copy data from backbuffer to render target");
-                StopCapture();
-                return;
-            }
-
-            if (FAILED(device->GetRenderTargetData(downsampledRenderTarget, tempSurface)))
-            {
-                LOG_ERROR("Failed copy render target data to surface");
-                StopCapture();
-                return;
-            }
-
-            D3DLOCKED_RECT lockedRect = {};
-            if (FAILED(tempSurface->LockRect(&lockedRect, nullptr, 0)))
-            {
-                LOG_ERROR("Failed to lock surface");
-                StopCapture();
-                return;
-            }
-
-            const auto surfaceByteSize = screenDimensions.width * screenDimensions.height * 4;
-            std::fwrite(lockedRect.pBits, surfaceByteSize, 1, pipe);
-
-            capturedFrameCount++;
-
-            if (FAILED(tempSurface->UnlockRect()))
-            {
-                LOG_ERROR("Failed to unlock surface");
-                StopCapture();
-                return;
-            }
-
-            const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
-            if (!Rewinding::IsRewinding() && currentTick > captureSettings.endTick)
-            {
-                StopCapture();
-            }
-
-            captureLock.store(FINISHED_CAPTURE);
+            LOG_ERROR("Failed to copy data from backbuffer to render target");
+            StopCapture();
+            return;
         }
+
+        if (FAILED(device->GetRenderTargetData(downsampledRenderTarget, tempSurface)))
+        {
+            LOG_ERROR("Failed copy render target data to surface");
+            StopCapture();
+            return;
+        }
+
+        D3DLOCKED_RECT lockedRect = {};
+        if (FAILED(tempSurface->LockRect(&lockedRect, nullptr, 0)))
+        {
+            LOG_ERROR("Failed to lock surface");
+            StopCapture();
+            return;
+        }
+
+        const auto surfaceByteSize = screenDimensions.width * screenDimensions.height * 4;
+        std::fwrite(lockedRect.pBits, surfaceByteSize, 1, pipe);
+
+        capturedFrameCount++;
+
+        if (FAILED(tempSurface->UnlockRect()))
+        {
+            LOG_ERROR("Failed to unlock surface");
+            StopCapture();
+            return;
+        }
+
+        const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        if (!Rewinding::IsRewinding() && currentTick > captureSettings.endTick)
+        {
+            StopCapture();
+        }
+
     }
 
     int32_t CaptureManager::OnGameFrame()
     {
-        // wait until frame is captured
-        if (captureLock.load() == SHOULD_CAPTURE_FRAME)
-            return 0;
-
-        captureLock.store(SHOULD_CAPTURE_FRAME);
         return 1000 / GetCaptureSettings().framerate;
     }
 
@@ -337,11 +337,6 @@ namespace IWXMVM::Components
     {
         LOG_INFO("Stopped capture (wrote {0} frames)", capturedFrameCount);
         isCapturing.store(false);
-
-        if (captureLock.load() == SHOULD_CAPTURE_FRAME)
-        {
-            captureLock.store(FINISHED_CAPTURE);
-        }
 
         if (pipe)
         {

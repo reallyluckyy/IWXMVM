@@ -17,8 +17,6 @@ namespace IWXMVM
 
     bool Input::KeyDown(ImGuiKey key)
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         if (Mod::GetGameInterface()->IsConsoleOpen())
             return false;
 
@@ -29,8 +27,6 @@ namespace IWXMVM
 
     bool Input::KeyUp(ImGuiKey key)
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         if (Mod::GetGameInterface()->IsConsoleOpen())
             return false;
 
@@ -41,8 +37,6 @@ namespace IWXMVM
 
     bool Input::KeyHeld(ImGuiKey key)
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         if (Mod::GetGameInterface()->IsConsoleOpen())
             return false;
 
@@ -53,8 +47,6 @@ namespace IWXMVM
 
     ImVec2 Input::GetMouseDelta()
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         if (Mod::GetGameInterface()->IsConsoleOpen())
             return ImVec2(0, 0);
 
@@ -64,8 +56,6 @@ namespace IWXMVM
 
     float Input::GetScrollDelta()
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         if (Mod::GetGameInterface()->IsConsoleOpen())
             return 0;
 
@@ -74,30 +64,22 @@ namespace IWXMVM
 
     void Input::UpdateState(ImGuiIO& io)
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         mouseWheelDelta = io.MouseWheel;
     }
 
     float Input::GetDeltaTime()
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         ImGuiIO& io = ImGui::GetIO();
         return io.DeltaTime;
     }
 
     bool Input::BindHeld(Action action)
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         return Input::KeyHeld(InputConfiguration::Get().GetBoundKey(action));
     }
 
     bool Input::BindDown(Action action)
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         return Input::KeyDown(InputConfiguration::Get().GetBoundKey(action));
     }
 }  // namespace IWXMVM

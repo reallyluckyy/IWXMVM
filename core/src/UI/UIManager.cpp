@@ -34,8 +34,6 @@ namespace IWXMVM::UI
     {
         try
         {
-            std::scoped_lock lock(GetMutex());
-
             ImGui_ImplDX9_NewFrame();
             ImGui_ImplWin32_NewFrame();
             ImGui::NewFrame();
@@ -107,8 +105,6 @@ namespace IWXMVM::UI
 
     HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
-        std::scoped_lock lock(UI::UIManager::Get().GetMutex());
-
         // Make sure the system cursor wasnt hidden by some game logic
         ShowCursor(TRUE);
 
