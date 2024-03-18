@@ -55,6 +55,7 @@ namespace IWXMVM::UI
         if (!visible)
             return;
 
+        ImGui::SetNextWindowFocus();
         auto& preferences = PreferencesConfiguration::Get();
         if (ImGui::Begin("Preferences", &visible, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse))
         {

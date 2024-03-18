@@ -27,6 +27,8 @@ void PlayerAnimation::Render()
     if (!visible)
         return;
 
+    ImGui::SetNextWindowFocus();
+
     if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
     {
         ImGui::Begin("Player Death Animations##1", &visible, ImGuiWindowFlags_NoCollapse);
