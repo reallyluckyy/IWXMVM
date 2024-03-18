@@ -23,11 +23,11 @@ namespace IWXMVM::IW3::Patches
 
         // For rewinding (not sure if all of these are actually necessary)
         NopPatch<5> Con_TimeJumped{GetGameAddresses().Con_TimeJumpedCall(), PatchApplySetting::Deferred};
-        NopPatch<2> CL_SetCGameTime{GetGameAddresses().CL_SetCGameTimeError(), PatchApplySetting::Immediately};
-        JumpPatch CL_CGameNeedsServerCommand{GetGameAddresses().CL_CGameNeedsServerCommandError(),
-                                             PatchApplySetting::Immediately};
-        JumpPatch CG_ProcessSnapshots{GetGameAddresses().CG_ProcessSnapshotsError(), PatchApplySetting::Immediately};
-        JumpPatch CG_ReadNextSnapshot{GetGameAddresses().CG_ReadNextSnapshotWarning(), PatchApplySetting::Immediately};
+        //NopPatch<2> CL_SetCGameTime{GetGameAddresses().CL_SetCGameTimeError(), PatchApplySetting::Immediately};
+        //JumpPatch CL_CGameNeedsServerCommand{GetGameAddresses().CL_CGameNeedsServerCommandError(),
+                                             //PatchApplySetting::Immediately};
+        //JumpPatch CG_ProcessSnapshots{GetGameAddresses().CG_ProcessSnapshotsError(), PatchApplySetting::Immediately};
+        //JumpPatch CG_ReadNextSnapshot{GetGameAddresses().CG_ReadNextSnapshotWarning(), PatchApplySetting::Immediately};
         NopPatch<5> CG_MapRestart{GetGameAddresses().CG_MapRestartSetThirdpersonCall(),
                                   PatchApplySetting::Immediately};  // Prevents cg_thirdperson from being reset
          
