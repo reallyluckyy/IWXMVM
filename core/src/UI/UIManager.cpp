@@ -105,13 +105,17 @@ namespace IWXMVM::UI
 
     HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
-        // Make sure the system cursor wasnt hidden by some game logic
-        ShowCursor(TRUE);
-
-        auto& gameView = UIManager::Get().GetUIComponent(UI::Component::GameView);
-        if (gameView->HasFocus() && UIManager::Get().IsControllableCameraModeSelected())
+        auto& uiManager = UIManager::Get();
+        auto& gameView = uiManager.GetUIComponent(UI::Component::GameView);
+        if ((gameView->HasFocus() && uiManager.IsControllableCameraModeSelected()))
         {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+        }
+
+        if (!uiManager.IsOverlayHidden())
+        {
+            // Make sure the system cursor wasnt hidden by some game logic
+            ShowCursor(TRUE);
         }
 
         if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
@@ -119,7 +123,7 @@ namespace IWXMVM::UI
             return true;
         }
 
-        return CallWindowProc(UIManager::Get().GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
+        return CallWindowProc(uiManager.GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
     }
 
     void UIManager::ToggleOverlay()
