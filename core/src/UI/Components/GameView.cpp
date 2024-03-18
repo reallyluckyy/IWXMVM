@@ -170,7 +170,7 @@ namespace IWXMVM::UI
                 ImGui::SameLine(0, smallSpacing);
                 DrawKeybindEntry("Scroll", "Roll Camera");
                 
-                if (cameraMode == Components::Camera::Mode::Bone)
+                if (cameraMode != Components::Camera::Mode::Bone)
                 {
                     ImGui::SameLine(0, spacing * 1.5f);
                     DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)), "Place Campath Node");
