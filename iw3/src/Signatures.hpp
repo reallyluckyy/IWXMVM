@@ -52,7 +52,8 @@ namespace IWXMVM::IW3::Signatures
         Sig("5C 24 38 55 8B 6C 24 40 57 8B F9", GAType::Code, -5) > CG_DObjGetWorldBoneMatrix;
         Sig("03 44 24 04 0F B7 04 45", GAType::Data, 8, Lambda::DereferenceAddress) > clientObjMap;
         Sig("0F BF F0 6B F6 64 81 C6", GAType::Data, 8, Lambda::DereferenceAddress) > objBuf;
-        
+        Sig("0F B6 80 ?? ?? ?? ?? FF 24 85 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 75", GAType::Code, 22) > CL_KeyEvent;
+
         // for rewinding
         Sig("83 C4 ?? 53 57 56 ?? ?? ?? ?? ?? 83 C4", GAType::Code, 6, Lambda::FollowCodeFlow) > FS_Read;
         Sig("89 86 ?? ?? ?? ?? E8 ?? ?? ?? ?? 88 9F FF 00 00 00", GAType::Data, 2, Lambda::DereferenceAddress) > fsh;
