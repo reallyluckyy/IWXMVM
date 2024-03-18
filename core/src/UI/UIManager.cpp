@@ -105,14 +105,17 @@ namespace IWXMVM::UI
 
     HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
-        // Make sure the system cursor wasnt hidden by some game logic
-        ShowCursor(TRUE);
-
         auto& uiManager = UIManager::Get();
         auto& gameView = uiManager.GetUIComponent(UI::Component::GameView);
-        if ((gameView->HasFocus() && uiManager.IsControllableCameraModeSelected()) || uiManager.IsOverlayHidden())
+        if ((gameView->HasFocus() && uiManager.IsControllableCameraModeSelected()))
         {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+        }
+
+        if (!uiManager.IsOverlayHidden())
+        {
+            // Make sure the system cursor wasnt hidden by some game logic
+            ShowCursor(TRUE);
         }
 
         if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
