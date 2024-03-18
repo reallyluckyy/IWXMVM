@@ -104,11 +104,14 @@ namespace IWXMVM::Components
         {
             if (cameras[i]->GetMode() == mode)
             {
-                previousActiveCameraIndex = activeCameraIndex;
-                activeCameraIndex = i;
+                if (i != activeCameraIndex)
+                {
+                    previousActiveCameraIndex = activeCameraIndex;
+                    activeCameraIndex = i;
+                    Events::Invoke(EventType::OnCameraChanged);
+                    return;
+                }
             }
         }
-
-        Events::Invoke(EventType::OnCameraChanged);
     }
 }  // namespace IWXMVM::Components

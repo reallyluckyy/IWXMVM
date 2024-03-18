@@ -63,6 +63,6 @@ namespace IWXMVM::Components
         }();
 
         int activeCameraIndex = 0;
-        int previousActiveCameraIndex = 0;
+        int previousActiveCameraIndex = static_cast<int>(Camera::Mode::Free); // setting free for FirstPersonToggle
     };
 }  // namespace IWXMVM::Components
