@@ -24,6 +24,9 @@ namespace IWXMVM::UI
 
     void SmartSetTickDelta(int32_t value)
     {
+        // Skip forward/backward by the desired amount of ticks, while snapping to the closest capturing marker if 
+        // there is one between where we are and where we want to go
+        
         auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
         auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
         auto targetTick = currentTick + value;
