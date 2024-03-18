@@ -609,8 +609,7 @@ namespace IWXMVM::UI
             auto currentTick = demoInfo.currentTick;
             Components::Playback::SkipForward(lastKeyFrameTime - demoInfo.currentTick);
 
-            if (lastKeyFrameTime - demoInfo.currentTick != 50)
-                lastKeyFrameTime = 0;
+            lastKeyFrameTime = 0;
         }
 
         std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
@@ -628,7 +627,7 @@ namespace IWXMVM::UI
             if (previousKeyframe.tick < currentTick)
             {
                 lastKeyFrameTime = previousKeyframe.tick;
-                Components::Rewinding::RewindBy(previousKeyframe.tick - demoInfo.currentTick - 50);
+                Components::Rewinding::RewindBy(previousKeyframe.tick - demoInfo.currentTick - 150);
             }
         }
     }
