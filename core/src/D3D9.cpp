@@ -5,8 +5,9 @@
 
 #include "Events.hpp"
 #include "Graphics/Graphics.hpp"
-#include "Utilities/HookManager.hpp"
 #include "Mod.hpp"
+
+import HookManager;
 
 #include "UI/UIManager.hpp"
 

@@ -123,7 +123,7 @@
     <ClCompile Include="src\Components\KeyframeSerializer.cpp" />
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
     <ClCompile Include="src\Components\CaptureManager.cpp" />
-    <ClCompile Include="src\Components\Playback.cpp" />
+    <ClCompile Include="src\Components\Playback.ixx" />
     <ClCompile Include="src\Components\Rewinding.cpp" />
     <ClCompile Include="src\Components\VisualConfiguration.cpp" />
     <ClCompile Include="src\Configuration\Configuration.cpp" />
@@ -163,7 +163,7 @@
     <ClCompile Include="src\UI\ImGuiEx\KeyframeableControls.cpp" />
     <ClCompile Include="src\UI\UIImage.cpp" />
     <ClCompile Include="src\UI\UIManager.cpp" />
-    <ClCompile Include="src\Utilities\HookManager.cpp" />
+    <ClCompile Include="src\Utilities\HookManager.ixx" />
     <ClCompile Include="src\Utilities\MemoryUtils.cpp" />
     <ClCompile Include="src\Utilities\PathUtils.cpp" />
     <ClCompile Include="src\Utilities\MathUtils.cpp" />
@@ -177,7 +177,6 @@
     <ClInclude Include="src\Components\KeyframeSerializer.hpp" />
     <ClInclude Include="src\Components\OrbitCamera.hpp" />
     <ClInclude Include="src\Components\CaptureManager.hpp" />
-    <ClInclude Include="src\Components\Playback.hpp" />
     <ClInclude Include="src\Components\Rewinding.hpp" />
     <ClInclude Include="src\Components\VisualConfiguration.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
@@ -227,7 +226,6 @@
     <ClInclude Include="src\UI\Components\PrimaryTabs.hpp" />
     <ClInclude Include="src\UI\UIComponent.hpp" />
     <ClInclude Include="src\UI\UIImage.hpp" />
-    <ClInclude Include="src\Utilities\HookManager.hpp" />
     <ClInclude Include="src\Events.hpp" />
     <ClInclude Include="src\GameInterface.hpp" />
     <ClInclude Include="src\Logger.hpp" />

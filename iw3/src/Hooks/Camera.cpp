@@ -1,12 +1,13 @@
 #include "StdInclude.hpp"
 #include "Camera.hpp"
 
-#include "Utilities/HookManager.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "../Structures.hpp"
 #include "../Functions.hpp"
 #include "../Addresses.hpp"
 #include "Mod.hpp"
+
+import HookManager;
 
 namespace IWXMVM::IW3::Hooks::Camera
 {

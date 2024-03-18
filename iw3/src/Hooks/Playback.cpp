@@ -1,14 +1,15 @@
 #include "StdInclude.hpp"
 #include "Playback.hpp"
 
-#include "Components/Playback.hpp"
 #include "Components/Rewinding.hpp"
-#include "Utilities/HookManager.hpp"
 #include "Events.hpp"
 #include "../Addresses.hpp"
 #include "../Structures.hpp"
 #include "../Functions.hpp"
 #include "../Patches.hpp"
+
+import Playback;
+import HookManager;
 
 namespace IWXMVM::IW3::Hooks::Playback
 {

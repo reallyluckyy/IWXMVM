@@ -1,9 +1,10 @@
 #include "StdInclude.hpp"
 #include "Rewinding.hpp"
 
-#include "Playback.hpp"
 #include "Mod.hpp"
 #include "Events.hpp"
+
+import Playback;
 
 namespace IWXMVM::Components::Rewinding
 {

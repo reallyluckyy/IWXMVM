@@ -4,10 +4,11 @@
 #include "Mod.hpp"
 #include "Configuration/PreferencesConfiguration.hpp"
 #include "Components/Rewinding.hpp"
-#include "Components/Playback.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "D3D9.hpp"
 #include "Events.hpp"
+
+import Playback;
 
 namespace IWXMVM::Components
 {

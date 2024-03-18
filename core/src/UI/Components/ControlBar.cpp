@@ -3,13 +3,13 @@
 
 #include "Mod.hpp"
 #include "Components/CameraManager.hpp"
-#include "Components/Playback.hpp"
 #include "Components/Rewinding.hpp"
 #include "UI/ImGuiEx/ImGuiExtensions.hpp"
 #include "UI/UIImage.hpp"
 #include "UI/UIManager.hpp"
 #include "Input.hpp"
-#include "Components/Playback.hpp"
+
+import Playback;
 
 namespace IWXMVM::UI
 {

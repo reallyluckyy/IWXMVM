@@ -12,9 +12,10 @@
 #include "Components/KeyframeManager.hpp"
 #include "Components/KeyframeSerializer.hpp"
 #include "Components/Rewinding.hpp"
-#include "Components/Playback.hpp"
 #include "Events.hpp"
 #include "Utilities/PathUtils.hpp"
+
+import Playback;
 
 namespace IWXMVM::UI
 {

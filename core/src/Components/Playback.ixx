@@ -1,24 +1,34 @@
+module;
+
 #include "StdInclude.hpp"
-#include "Playback.hpp"
 
 #include "Mod.hpp"
 #include "Rewinding.hpp"
+
+export module Playback;
 
 namespace IWXMVM::Components::Playback
 {
     bool isPlaybackPaused = false;
 
-    void TogglePaused()
+    export constexpr int32_t REWIND_DEADZONE = 250;
+
+    export constexpr std::array TIMESCALE_STEPS{
+        0.001f, 0.005f, 0.01f, 0.025f, 0.05f, 0.1f, 0.125f, 0.2f,  0.25f, 0.333f,
+        0.5f,   0.75f,  1.0f,  1.25f,  1.5f,  2.0f, 5.0f,   10.0f, 20.0f, 50.0f
+    };
+
+    export void TogglePaused()
     {
         isPlaybackPaused = !isPlaybackPaused;
     }
 
-    bool IsPaused()
+    export bool IsPaused()
     {
         return isPlaybackPaused;
     }
     
-    void SkipForward(std::int32_t ticks)
+    export void SkipForward(std::int32_t ticks)
     {
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
         auto realtime = reinterpret_cast<int32_t*>(addresses.cls.realtime);
@@ -26,7 +36,7 @@ namespace IWXMVM::Components::Playback
         LOG_DEBUG("Skipping forward {} ticks, realtime: {}", ticks, *realtime);
     }
 
-    void SetTickDelta(int32_t value, bool ignoreDeadzone)
+    export void SetTickDelta(int32_t value, bool ignoreDeadzone = false)
     {
         if (value > 0)
             SkipForward(value);
@@ -67,7 +77,7 @@ namespace IWXMVM::Components::Playback
         assert(std::accumulate(pattern.begin(), pattern.end(), 0) > 0);
     }
 
-    std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec)
+    export std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec)
     {
         auto& captureManager = Components::CaptureManager::Get();
         if (captureManager.IsCapturing())

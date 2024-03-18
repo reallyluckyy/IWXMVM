@@ -7,11 +7,11 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 
-
-#include "Components/Playback.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "Components/CameraManager.hpp"
 #include "Components/CaptureManager.hpp"
+
+import Playback;
 
 namespace ImGuiEx
 {

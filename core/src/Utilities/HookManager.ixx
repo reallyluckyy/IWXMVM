@@ -1,9 +1,10 @@
+module;
+
 #include "StdInclude.hpp"
-#include "PathUtils.hpp"
-
 #include "MinHook.h"
-
 #include "UI/UIManager.hpp"
+
+export module HookManager;
 
 namespace IWXMVM::HookManager
 {
@@ -45,17 +46,17 @@ namespace IWXMVM::HookManager
         return true;
     }
 
-    bool WriteJump(std::uintptr_t from, std::uintptr_t to)
+    export bool WriteJump(std::uintptr_t from, std::uintptr_t to)
     {
         return WriteJumpInternal(from, to, JUMP_LENGTH, JUMP_OPCODE);
     }
 
-    bool WriteCall(std::uintptr_t from, std::uintptr_t to)
+    export bool WriteCall(std::uintptr_t from, std::uintptr_t to)
     {
         return WriteJumpInternal(from, to, JUMP_LENGTH, CALL_OPCODE);
     }
 
-    void CreateHook(std::uintptr_t originalPtr, std::uintptr_t detourPtr, std::uintptr_t* trampolinePtr)
+    export void CreateHook(std::uintptr_t originalPtr, std::uintptr_t detourPtr, std::uintptr_t* trampolinePtr)
     {
         auto result = MH_CreateHook((void*)originalPtr, (void*)detourPtr, (void**)trampolinePtr);
         if (result != MH_OK)
@@ -74,7 +75,7 @@ namespace IWXMVM::HookManager
         }
     }
 
-    void Unhook()
+    export void Unhook()
     {
         if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK)
             throw std::runtime_error("Failed to disable hooks");

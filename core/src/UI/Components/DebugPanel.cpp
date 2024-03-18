@@ -1,9 +1,10 @@
 #include "StdInclude.hpp"
 #include "DebugPanel.hpp"
 
-#include "Utilities/HookManager.hpp"
 #include "UI/UIManager.hpp"
 #include "Mod.hpp"
+
+import HookManager;
 
 namespace IWXMVM::UI
 {

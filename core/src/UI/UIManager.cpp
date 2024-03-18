@@ -2,13 +2,14 @@
 #include "UIManager.hpp"
 
 #include "UIComponent.hpp"
-#include "Utilities/HookManager.hpp"
 #include "Mod.hpp"
 #include "Events.hpp"
 #include "Resources.hpp"
 #include "Input.hpp"
 #include "Components/CameraManager.hpp"
 #include "Utilities/MathUtils.hpp"
+
+import HookManager;
 
 namespace IWXMVM::UI
 {

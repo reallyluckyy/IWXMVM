@@ -5,7 +5,8 @@
 #include "UI/UIManager.hpp"
 #include "../Events.hpp"
 #include "../Input.hpp"
-#include "Playback.hpp"
+
+import Playback;
 
 namespace IWXMVM::Components
 {
