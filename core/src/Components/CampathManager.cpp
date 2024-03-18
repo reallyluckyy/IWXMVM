@@ -70,18 +70,10 @@ namespace IWXMVM::Components
                 if (activeCamera->GetMode() == Camera::Mode::FirstPerson)
                 {
                     auto prevCamMode = CameraManager::Get().GetPreviousActiveCamera()->GetMode();
-                    if (prevCamMode == Camera::Mode::FirstPerson)
+                    CameraManager::Get().SetActiveCamera(prevCamMode);
+                    if (CameraManager::Get().GetActiveCamera()->GetMode() == Camera::Mode::Free)
                     {
-                        CameraManager::Get().SetActiveCamera(Camera::Mode::Free);
                         UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->SetHasFocus(true);
-                    }
-                    else
-                    {
-                        CameraManager::Get().SetActiveCamera(prevCamMode);
-                        if (CameraManager::Get().GetActiveCamera()->GetMode() == Camera::Mode::Free)
-                        {
-                            UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->SetHasFocus(true);
-                        }
                     }
                 }
                 else

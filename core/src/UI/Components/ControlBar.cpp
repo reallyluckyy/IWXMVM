@@ -33,30 +33,28 @@ namespace IWXMVM::UI
         if (value > 0)
         {
             // skipping forward
-            if (captureSettings.endTick > currentTick && captureSettings.endTick < targetTick)
-            {
-                Components::Playback::SetTickDelta(captureSettings.endTick - currentTick);
-                return;
-            }
-            else if (captureSettings.startTick > currentTick && captureSettings.startTick < targetTick)
+            if (captureSettings.startTick > currentTick && captureSettings.startTick < targetTick)
             {
                 Components::Playback::SetTickDelta(captureSettings.startTick - currentTick);
+                return;
+            }
+            else if (captureSettings.endTick > currentTick && captureSettings.endTick < targetTick)
+            {
+                Components::Playback::SetTickDelta(captureSettings.endTick - currentTick);
                 return;
             }
         }
         else if (value < 0)
         {
             // skipping backward
-            if (captureSettings.endTick < (currentTick - IWXMVM::Components::Playback::REWIND_DEADZONE) &&
-                captureSettings.endTick > targetTick)
+            if (captureSettings.endTick < currentTick && captureSettings.endTick > targetTick)
             {
-                Components::Playback::SetTickDelta(captureSettings.endTick - currentTick);
+                Components::Playback::SetTickDelta(captureSettings.endTick - currentTick, true);
                 return;
             }
-            else if (captureSettings.startTick < (currentTick - IWXMVM::Components::Playback::REWIND_DEADZONE) &&
-                     captureSettings.startTick > targetTick)
+            else if (captureSettings.startTick < currentTick && captureSettings.startTick > targetTick)
             {
-                Components::Playback::SetTickDelta(captureSettings.startTick - currentTick);
+                Components::Playback::SetTickDelta(captureSettings.startTick - currentTick, true);
                 return;
             }
         }
