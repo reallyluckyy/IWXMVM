@@ -8,7 +8,7 @@
 
 namespace IWXMVM::IW3::Hooks::PlayerAnimation
 {
-    void PlayerAnim_Hook_Internal(const std::uint32_t& curAnimIndex, std::uint32_t& newAnimIndex)
+    void BG_RunLerpFrameRate_Hook_Internal(const std::uint32_t& curAnimIndex, std::uint32_t& newAnimIndex)
     {
         // bgs_t bg_s -> animScriptData_t animScriptData -> animation_t animations
         static constexpr std::size_t ANIM_NAME_OFFSET = 104; 
@@ -16,7 +16,7 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
 
         static const char* rootAnim = []() -> const char* 
         {
-            const auto address = **reinterpret_cast<const char***>(GetGameAddresses().PlayerAnimation() + 0x8B);
+            const auto address = **reinterpret_cast<const char***>(GetGameAddresses().BG_RunLerpFrameRate() + 0x8B);
             const std::string_view sv{address, std::find(address, address + 5, '\0')};
 
             if (sv == "root")
@@ -55,8 +55,8 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
             newAnimIndex = 0;
     }
 
-    std::uintptr_t PlayerAnimation_Trampoline;
-    void __declspec(naked) PlayerAnim_Hook()
+    std::uintptr_t BG_RunLerpFrameRate_Trampoline;
+    void __declspec(naked) BG_RunLerpFrameRate_Hook()
     {
         __asm
         {
@@ -65,16 +65,16 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
             lea eax, [esp + 0x28]
             push eax
             push ebx
-            call PlayerAnim_Hook_Internal
+            call BG_RunLerpFrameRate_Hook_Internal
             add esp, 0x8
             popad
-            jmp PlayerAnimation_Trampoline
+            jmp BG_RunLerpFrameRate_Trampoline
         }
     }
 
     void Install()
     {
-        HookManager::CreateHook(GetGameAddresses().PlayerAnimation(), (std::uintptr_t)PlayerAnim_Hook,
-                                &PlayerAnimation_Trampoline);
+        HookManager::CreateHook(GetGameAddresses().BG_RunLerpFrameRate(), (std::uintptr_t)BG_RunLerpFrameRate_Hook,
+                                &BG_RunLerpFrameRate_Trampoline);
     }
 }  // namespace IWXMVM::IW3::Hooks::PlayerAnimation
