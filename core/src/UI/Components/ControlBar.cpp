@@ -44,18 +44,14 @@ namespace IWXMVM::UI
         else if (value < 0)
         {
             // skipping backward
-            if (std::abs(static_cast<int>(captureSettings.endTick - currentTick)) >
-                    IWXMVM::Components::Playback::REWIND_DEADZONE 
-                && captureSettings.endTick < currentTick 
-                && captureSettings.endTick > targetTick)
+            if (captureSettings.endTick < (currentTick - IWXMVM::Components::Playback::REWIND_DEADZONE) &&
+                captureSettings.endTick > targetTick)
             {
                 Components::Playback::SetTickDelta(captureSettings.endTick - currentTick);
                 return;
             }
-            else if (std::abs(static_cast<int>(captureSettings.startTick - currentTick)) >
-                         IWXMVM::Components::Playback::REWIND_DEADZONE 
-                && captureSettings.startTick < currentTick
-                && captureSettings.startTick > targetTick)
+            else if (captureSettings.startTick < (currentTick - IWXMVM::Components::Playback::REWIND_DEADZONE) &&
+                     captureSettings.startTick > targetTick)
             {
                 Components::Playback::SetTickDelta(captureSettings.startTick - currentTick);
                 return;
