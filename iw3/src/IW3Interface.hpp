@@ -526,6 +526,9 @@ namespace IWXMVM::IW3
         void ResetClientData(int serverTime)
         {
             auto cl = Structures::GetClientActive();
+            for (auto& snapshot : std::span{ cl->snapshots }) 
+                snapshot.valid = 0;
+
             cl->snap.serverTime = serverTime;
             cl->serverTime = 0;
             cl->oldServerTime = 0;
