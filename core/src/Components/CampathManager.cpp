@@ -16,6 +16,12 @@ namespace IWXMVM::Components
             return;
         }
 
+        // TODO remove, for testing
+        if (Input::BindDown(Action::TimeFrameMoveStart))
+        {
+            KeyframeManager::Get().Undo();
+        }
+
         auto& activeCamera = CameraManager::Get().GetActiveCamera();
 
         // TODO: There should be better feedback for making it clear to the user that they can place nodes (from their
@@ -40,20 +46,21 @@ namespace IWXMVM::Components
                 node.rotation = activeCamera->GetRotation();
                 node.fov = activeCamera->GetFov();
 
-                auto& keyframes = KeyframeManager::Get().GetKeyframes(property);
-                keyframes.push_back(
-                    Types::Keyframe(property, tick, node));
+                KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, tick, node));
 
                 LOG_DEBUG("Placed node at (x: {}; y: {}; z: {}) with (pitch: {}; yaw: {}; roll: {}) at tick {}",
                           node.position.x, node.position.y, node.position.z, node.rotation.x, node.rotation.y,
                           node.rotation.z, tick);
 
-                KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
+                KeyframeManager::Get().SortAndSaveKeyframes(KeyframeManager::Get().GetKeyframes(property));
             }
 
             if (Input::BindDown(Action::DollyClearNodes))
             {
-                KeyframeManager::Get().GetKeyframes(property).clear();
+                while (KeyframeManager::Get().GetKeyframes(property).size() > 0)
+                {
+                    KeyframeManager::Get().RemoveKeyframe(property,0);
+                }
 
                 LOG_DEBUG("Nodes cleared");
             }

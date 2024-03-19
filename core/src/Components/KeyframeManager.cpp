@@ -158,6 +158,58 @@ namespace IWXMVM::Components
         Components::KeyframeSerializer::WriteRecent();
     }
 
+    void KeyframeManager::Undo()
+    {
+        if (!undoActions.empty())
+        {
+            UndoAction* action = undoActions.back();
+            if (AddAction* addAction = dynamic_cast<AddAction*>(action); addAction)
+            {
+                keyframes[addAction->property].push_back(addAction->keyframeToAdd);
+            }
+            else if (RemoveAction* removeAction = dynamic_cast<RemoveAction*>(action); removeAction)
+            {
+                for (size_t i = 0; i < keyframes[removeAction->property].size(); i++)
+                {
+                    if (keyframes[removeAction->property][i].tick == removeAction->keyframeToRemove.tick)
+                    {
+                        keyframes[removeAction->property].erase(keyframes[removeAction->property].begin() + i);
+                        break;
+                    }
+                }
+            }
+            undoActions.pop_back();
+            delete action;
+        }
+    }
+
+    void KeyframeManager::AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd)
+    {
+        keyframes[property].push_back(keyframeToAdd);
+        RemoveAction* removeAction = new RemoveAction{property, keyframeToAdd};
+        undoActions.push_back(removeAction);
+    }
+
+    void KeyframeManager::RemoveKeyframe(Types::KeyframeableProperty property, size_t indexToRemove)
+    {
+        AddAction* addAction = new AddAction{property, keyframes[property].at(indexToRemove)};
+        undoActions.push_back(addAction);
+        keyframes[property].erase(keyframes[property].begin() + indexToRemove);
+    }
+
+
+    void KeyframeManager::RemoveKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToRemove)
+    {
+        for (size_t i = 0; i < keyframes[property].size(); i++)
+        {
+            if (keyframes[property][i].tick == keyframeToRemove.tick)
+            {
+                RemoveKeyframe(property,i);
+                return;
+            }
+        }
+    }
+
     Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property,
                                                       const std::vector<Types::Keyframe>& keyframes,
                                                       const float tick) const

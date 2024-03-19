@@ -27,6 +27,37 @@ namespace IWXMVM::Components
             return keyframes[property];
         }
 
+        struct UndoAction
+        {
+            Types::KeyframeableProperty property;
+            virtual ~UndoAction(){}
+
+            UndoAction(const Types::KeyframeableProperty& prop) : property(prop){}
+        };
+
+        struct AddAction : UndoAction
+        {
+            Types::Keyframe keyframeToAdd;
+
+            AddAction(const Types::KeyframeableProperty& prop, const Types::Keyframe& keyframe)
+                : UndoAction(prop), keyframeToAdd(keyframe){}
+        };
+
+        struct RemoveAction : UndoAction
+        {
+            Types::Keyframe keyframeToRemove;
+
+            RemoveAction(const Types::KeyframeableProperty& prop, const Types::Keyframe& keyframe)
+                : UndoAction(prop), keyframeToRemove(keyframe){}
+        };
+
+        void Undo();
+
+        void AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd);
+
+        void RemoveKeyframe(Types::KeyframeableProperty property, size_t indexToRemove);
+        void RemoveKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToRemove);
+
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
                                          const std::vector<Types::Keyframe>& keyframes, const float tick) const;
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
@@ -51,5 +82,6 @@ namespace IWXMVM::Components
                                                  const float tick) const;
 
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes;
+        std::vector<UndoAction*> undoActions;
     };
 }  // namespace IWXMVM::Components
