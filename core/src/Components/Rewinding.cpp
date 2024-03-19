@@ -264,4 +264,4 @@ namespace IWXMVM::Components::Rewinding
     {
         Events::RegisterListener(EventType::PreDemoLoad, ResetRewindData);
     }
-}  // namespace IWXMVM::Components::Playback
+}  // namespace IWXMVM::Components::Rewinding
