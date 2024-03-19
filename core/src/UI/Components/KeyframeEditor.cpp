@@ -455,11 +455,11 @@ namespace IWXMVM::UI
 
                 
                 value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
-                Types::KeyframeValue kCopyValue = k.value;
-                kCopyValue.SetByIndex(
+                Types::KeyframeValue newValue = k.value;
+                newValue.SetByIndex(
                     keyframeValueIndex,
                     glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
-                Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, kCopyValue);
+                Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, newValue);
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
@@ -489,7 +489,9 @@ namespace IWXMVM::UI
                 if (ImGui::DragFloat("##valueInput", &currentValue, 0.1f, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE,
                                      "%.2f"))
                 {
-                    k.value.SetByIndex(keyframeValueIndex, currentValue);
+                    Types::KeyframeValue newValue = k.value;
+                    newValue.SetByIndex(keyframeValueIndex, currentValue);
+                    Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, newValue);
                     Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
                 }
 
@@ -503,7 +505,7 @@ namespace IWXMVM::UI
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Right))
             {
-                keyframes.erase(it);
+                Components::KeyframeManager::Get().RemoveKeyframe(property, std::distance(keyframes.begin(),it));
                 break;
             }
 
@@ -525,7 +527,7 @@ namespace IWXMVM::UI
             {
                 auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
                 value.SetByIndex(keyframeValueIndex, valueAtMouse.floatingPoint);
-                keyframes.emplace_back(property, tick, value);
+                Components::KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, tick, value));
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
             }
         }
@@ -594,12 +596,14 @@ namespace IWXMVM::UI
                 keyframes.end())
             {
                 auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
-                keyframes.emplace_back(property, tick, value);
+                Components::KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, tick, value));
             }
             else
             {
                 auto keyframe = std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; });
-                keyframe->value.SetByIndex(index, v);
+                Types::KeyframeValue newValue = keyframe->value;
+                newValue.SetByIndex(index, v);
+                Components::KeyframeManager::Get().ModifyKeyframeValue(property, *keyframe, newValue);
             }
             Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
         }

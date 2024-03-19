@@ -221,7 +221,7 @@ namespace IWXMVM::Components
 
     void KeyframeManager::AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd)
     {
-        keyframes[property].push_back(keyframeToAdd);
+        keyframes[property].emplace_back(keyframeToAdd);
         AddAction* addAction = new AddAction(property, keyframeToAdd);
         actionHistory.push_back(addAction);
     }
