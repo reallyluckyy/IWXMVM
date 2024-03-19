@@ -58,21 +58,6 @@ namespace IWXMVM::Components::Rewinding
         rewindTo.store(NOT_IN_USE);
     }
 
-    bool CheckSkipForward()
-    {
-        if (rewindTo.load() != SKIPPING_FORWARD)
-            return false;
-
-        auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
-        auto curTime = *reinterpret_cast<int*>(addresses.cl.serverTime);
- 
-        Components::Playback::SkipForward(latestRewindTo + TICK_OFFSET - curTime);
-        latestRewindTo = NOT_IN_USE;
-        rewindTo.store(NOT_IN_USE);
-        
-        return true;
-    }
-
     void RestoreOldGamestate(auto wouldReadDemoFooter)
     {
         if (initialGamestate == nullptr || latestRewindTo > 0)
@@ -186,6 +171,49 @@ namespace IWXMVM::Components::Rewinding
         }
     }
 
+    bool CheckSkipForward()
+    {
+        if (rewindTo.load() != SKIPPING_FORWARD)
+            return false;
+
+        auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
+        auto curTime = *reinterpret_cast<int*>(addresses.cl.serverTime);
+
+        Components::Playback::SkipForward(latestRewindTo + TICK_OFFSET - curTime);
+        latestRewindTo = NOT_IN_USE;
+        rewindTo.store(NOT_IN_USE);
+
+        return true;
+    }
+
+    bool IsRewinding()
+    {
+        return rewindTo.load() != NOT_IN_USE;
+    }
+
+    void RewindBy(std::int32_t ticks)
+    {
+        if (ticks >= SKIPPING_FORWARD)
+        {
+            LOG_DEBUG("Cannot rewind invalid tick value {}", ticks);
+            return;
+        }
+
+        ticks -= TICK_OFFSET;
+        auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
+
+        // only set the rewind value if the main thread isn't using it
+        auto curRewindTo = rewindTo.load();
+        if (curRewindTo != NOT_IN_USE ||
+            !rewindTo.compare_exchange_strong(curRewindTo, *reinterpret_cast<int*>(addresses.cl.serverTime) + ticks))
+        {
+            LOG_DEBUG("Attempted to rewind back {} ticks", ticks);
+            return;
+        }
+
+        LOG_DEBUG("Rewinding back {} ticks", ticks);
+    }
+
     int FS_Read(void* buffer, int len)
     {
         if (filestreamState == FilestreamState::Uninitialized)
@@ -230,34 +258,6 @@ namespace IWXMVM::Components::Rewinding
         assert(demoFileOffset == demoFile.tellg());
 
         return len;
-    }
-
-    bool IsRewinding()
-    {
-        return rewindTo.load() != NOT_IN_USE;
-    }
-
-    void RewindBy(std::int32_t ticks)
-    {
-        if (ticks >= SKIPPING_FORWARD)
-        {
-            LOG_DEBUG("Cannot rewind invalid tick value {}", ticks);
-            return;
-        }
-
-        ticks -= TICK_OFFSET;
-        auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
-
-        // only set the rewind value if the main thread isn't using it
-        auto curRewindTo = rewindTo.load();
-        if (curRewindTo != NOT_IN_USE ||
-            !rewindTo.compare_exchange_strong(curRewindTo, *reinterpret_cast<int*>(addresses.cl.serverTime) + ticks))
-        {
-            LOG_DEBUG("Attempted to rewind back {} ticks", ticks);
-            return;
-        }
-
-        LOG_DEBUG("Rewinding back {} ticks", ticks);
     }
 
     void Initialize()
