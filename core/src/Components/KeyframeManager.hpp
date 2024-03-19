@@ -65,10 +65,8 @@ namespace IWXMVM::Components
         {
             uint32_t tick;
             Types::KeyframeValue oldValue;
-            Types::KeyframeValue newValue;
-            ModifyValueAction(const Types::KeyframeableProperty& prop, Types::KeyframeValue oValue,
-                              Types::KeyframeValue nValue, uint32_t _tick)
-                : Action(prop), oldValue(oValue), newValue(nValue),tick(_tick){}
+            ModifyValueAction(const Types::KeyframeableProperty& prop, Types::KeyframeValue oValue, uint32_t _tick)
+                : Action(prop), oldValue(oValue),tick(_tick){}
         };
 
         void Undo();
@@ -78,7 +76,14 @@ namespace IWXMVM::Components
         void RemoveKeyframe(Types::KeyframeableProperty property, size_t indexToRemove);
         void RemoveKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToRemove);
 
-        void ModifyKeyframeTick(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify, uint32_t newTick);
+        bool IsKeyframeTickBeingModified(Types::Keyframe& keyframe);
+
+        void BeginModifyingKeyframeTick(Types::Keyframe& keyframeToModify);
+
+        void EndModifyingKeyframeTick(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify);
+
+        void ModifyKeyframeTick(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
+                                uint32_t newTick);
         void ModifyKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify, Types::KeyframeValue newValue);
 
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
@@ -104,6 +109,7 @@ namespace IWXMVM::Components
                                                  const float tick) const;
 
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes;
+        std::unordered_map<uint32_t, uint32_t> beginningTickMap;
         std::vector<Action*> actionHistory;
     };
 }  // namespace IWXMVM::Components

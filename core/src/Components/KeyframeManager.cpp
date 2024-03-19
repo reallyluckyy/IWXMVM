@@ -246,11 +246,33 @@ namespace IWXMVM::Components
         }
     }
 
+    bool KeyframeManager::IsKeyframeTickBeingModified(Types::Keyframe& keyframe)
+    {
+        return beginningTickMap.find(keyframe.id) != beginningTickMap.end();
+    }
+
+    void KeyframeManager::BeginModifyingKeyframeTick(Types::Keyframe& keyframeToModify)
+    {
+        beginningTickMap[keyframeToModify.id] = keyframeToModify.tick;
+    }
+
+    void KeyframeManager::EndModifyingKeyframeTick(Types::KeyframeableProperty property,
+                                                   Types::Keyframe& keyframeToModify)
+    {
+        ModifyTickAction* modifyAction =
+            new ModifyTickAction(property, beginningTickMap[keyframeToModify.id], keyframeToModify.tick);
+        actionHistory.push_back(modifyAction);
+        beginningTickMap.erase(keyframeToModify.id);
+    }
+
     void KeyframeManager::ModifyKeyframeTick(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
                                          uint32_t newTick)
     {
-        ModifyTickAction* modifyAction = new ModifyTickAction(property, keyframeToModify.tick, newTick);
-        actionHistory.push_back(modifyAction);
+        if (beginningTickMap.find(keyframeToModify.id) == beginningTickMap.end())
+        {
+            ModifyTickAction* modifyAction = new ModifyTickAction(property, keyframeToModify.tick, newTick);
+            actionHistory.push_back(modifyAction);
+        }
         keyframeToModify.tick = newTick;
     }
 
@@ -258,7 +280,7 @@ namespace IWXMVM::Components
                                               Types::KeyframeValue newValue)
     {
         ModifyValueAction* modifyAction =
-            new ModifyValueAction(property, keyframeToModify.value, newValue, keyframeToModify.tick);
+            new ModifyValueAction(property, keyframeToModify.value, keyframeToModify.tick);
         actionHistory.push_back(modifyAction);
         keyframeToModify.value = newValue;
     }

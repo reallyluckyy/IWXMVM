@@ -226,6 +226,10 @@ namespace IWXMVM::UI
             if (selectedKeyframeId == k.id)
             {
                 auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick);
+                if (!Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
+                {
+                    Components::KeyframeManager::Get().BeginModifyingKeyframeTick(k);
+                }
                 Components::KeyframeManager::Get().ModifyKeyframeTick(property, k, tick);
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
@@ -233,6 +237,13 @@ namespace IWXMVM::UI
                 {
                     selectedKeyframeId = std::nullopt;
                     selectedKeyframeValueIndex = std::nullopt;
+                }
+            }
+            else
+            {
+                if (Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
+                {
+                    Components::KeyframeManager::Get().EndModifyingKeyframeTick(property, k);
                 }
             }
 
@@ -451,14 +462,16 @@ namespace IWXMVM::UI
                 auto [tick, value] =
                     GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
 
+                if (!Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
+                {
+                    Components::KeyframeManager::Get().BeginModifyingKeyframeTick(k);
+                }
                 Components::KeyframeManager::Get().ModifyKeyframeTick(property, k, tick);
 
-                
                 value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
                 Types::KeyframeValue newValue = k.value;
-                newValue.SetByIndex(
-                    keyframeValueIndex,
-                    glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
+                newValue.SetByIndex(keyframeValueIndex,
+                                    glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
                 Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, newValue);
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
@@ -466,6 +479,13 @@ namespace IWXMVM::UI
                 {
                     selectedKeyframeId = std::nullopt;
                     selectedKeyframeValueIndex = std::nullopt;
+                }
+            }
+            else
+            {
+                if (Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
+                {
+                    Components::KeyframeManager::Get().EndModifyingKeyframeTick(property, k);
                 }
             }
 
