@@ -208,32 +208,9 @@ namespace IWXMVM::Components
             {
                 for (size_t i = 0; i < keyframes[modifyValueAction->property].size(); i++)
                 {
-                    switch (modifyValueAction->valueType)
+                    if (keyframes[modifyValueAction->property][i].tick == modifyValueAction->tick)
                     {
-                        case IWXMVM::Types::KeyframeValueType::FloatingPoint:
-                            if (keyframes[modifyValueAction->property][i].value.floatingPoint ==
-                                modifyValueAction->newValue.floatingPoint)
-                            {
-                                keyframes[modifyValueAction->property][i].value.floatingPoint =
-                                    modifyValueAction->oldValue.floatingPoint;
-                            }
-                            break;
-                        case IWXMVM::Types::KeyframeValueType::Vector3:
-                            if (keyframes[modifyValueAction->property][i].value.vector3 ==
-                                modifyValueAction->oldValue.vector3)
-                            {
-                                keyframes[modifyValueAction->property][i].value.vector3 =
-                                    modifyValueAction->oldValue.vector3;
-                            }
-                            break;
-                        case IWXMVM::Types::KeyframeValueType::CameraData:
-                            if (keyframes[modifyValueAction->property][i].value.cameraData ==
-                                modifyValueAction->newValue.cameraData)
-                            {
-                                keyframes[modifyValueAction->property][i].value.cameraData =
-                                    modifyValueAction->oldValue.cameraData;
-                            }
-                            break;
+                        keyframes[modifyValueAction->property][i].value = modifyValueAction->oldValue;
                     }
                 }
             }
@@ -278,22 +255,12 @@ namespace IWXMVM::Components
     }
 
     void KeyframeManager::ModifyKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
-                                              Types::KeyframeValue newValue, Types::KeyframeValueType newValueType)
+                                              Types::KeyframeValue newValue)
     {
-        ModifyValueAction* modifyAction = new ModifyValueAction(property, keyframeToModify.value, newValue, newValueType);
+        ModifyValueAction* modifyAction =
+            new ModifyValueAction(property, keyframeToModify.value, newValue, keyframeToModify.tick);
         actionHistory.push_back(modifyAction);
-        switch (newValueType)
-        {
-            case IWXMVM::Types::KeyframeValueType::FloatingPoint:
-                keyframeToModify.value.floatingPoint = newValue.floatingPoint;
-                break;
-            case IWXMVM::Types::KeyframeValueType::Vector3:
-                keyframeToModify.value.vector3 = newValue.vector3;
-                break;
-            case IWXMVM::Types::KeyframeValueType::CameraData:
-                keyframeToModify.value.cameraData = newValue.cameraData;
-                break;
-        }
+        keyframeToModify.value = newValue;
     }
 
     Types::KeyframeValue KeyframeManager::Interpolate(const Types::KeyframeableProperty& property,

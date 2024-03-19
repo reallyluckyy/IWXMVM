@@ -451,11 +451,15 @@ namespace IWXMVM::UI
                 auto [tick, value] =
                     GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
 
-                k.tick = tick;
+                Components::KeyframeManager::Get().ModifyKeyframeTick(property, k, tick);
 
+                
                 value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
-                k.value.SetByIndex(keyframeValueIndex,
-                                   glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
+                Types::KeyframeValue kCopyValue = k.value;
+                kCopyValue.SetByIndex(
+                    keyframeValueIndex,
+                    glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
+                Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, kCopyValue);
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
