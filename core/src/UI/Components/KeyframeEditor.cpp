@@ -15,6 +15,7 @@
 #include "Components/Playback.hpp"
 #include "Events.hpp"
 #include "Utilities/PathUtils.hpp"
+#include "Components/KeyframeManager.hpp"
 
 namespace IWXMVM::UI
 {
@@ -218,14 +219,14 @@ namespace IWXMVM::UI
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Right))
             {
-                keyframes.erase(it);
+                Components::KeyframeManager::Get().RemoveKeyframe(property, std::distance(keyframes.begin(), it));
                 break;
             }
 
             if (selectedKeyframeId == k.id)
             {
                 auto [tick, _] = GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick);
-                k.tick = tick;
+                Components::KeyframeManager::Get().ModifyKeyframeTick(property, k, tick);
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
