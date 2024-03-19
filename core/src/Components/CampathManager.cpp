@@ -16,12 +16,6 @@ namespace IWXMVM::Components
             return;
         }
 
-        // TODO remove, for testing
-        if (Input::BindDown(Action::TimeFrameMoveStart))
-        {
-            KeyframeManager::Get().Undo();
-        }
-
         auto& activeCamera = CameraManager::Get().GetActiveCamera();
 
         // TODO: There should be better feedback for making it clear to the user that they can place nodes (from their

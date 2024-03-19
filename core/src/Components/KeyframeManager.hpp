@@ -16,6 +16,8 @@ namespace IWXMVM::Components
         KeyframeManager(KeyframeManager const&) = delete;
         void operator=(KeyframeManager const&) = delete;
 
+        void HandleInput();
+
         void Initialize();
         const std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& GetKeyframes() const
         {

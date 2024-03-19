@@ -5,10 +5,12 @@
 #include "Utilities/MathUtils.hpp"
 #include "KeyframeSerializer.hpp"
 #include "Events.hpp"
+#include "Mod.hpp"
+#include "../Input.hpp"
 
 namespace IWXMVM::Components
 {
-    Types::KeyframeableProperty campathCameraProperty(
+     Types::KeyframeableProperty campathCameraProperty(
         Types::KeyframeablePropertyType::CampathCamera, 
         ICON_FA_VIDEO " Campath Camera",
         Types::KeyframeValueType::CameraData,
@@ -105,6 +107,17 @@ namespace IWXMVM::Components
         0.1f, 10
     );
 
+    void KeyframeManager::HandleInput()
+    {
+        if (IWXMVM::Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo || CaptureManager::Get().IsCapturing())
+            return;
+
+        if (Input::KeyHeld(ImGuiKey_LeftCtrl) && Input::KeyDown(ImGuiKey_Z))
+        {
+            Undo();
+        }
+    }
+
     void KeyframeManager::Initialize()
     {
         auto InitializeProperty = [&](auto property) { keyframes[property] = std::vector<Types::Keyframe>(); }; 
@@ -130,6 +143,8 @@ namespace IWXMVM::Components
             ClearKeyframes();
             Components::KeyframeSerializer::ReadRecent();
         });
+
+        Events::RegisterListener(EventType::OnFrame, [&]() { HandleInput(); });
     }
 
     const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const
