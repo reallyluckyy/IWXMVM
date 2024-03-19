@@ -462,13 +462,6 @@ namespace IWXMVM::UI
                 auto [tick, value] =
                     GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
 
-                if (!Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
-                {
-                    Components::KeyframeManager::Get().BeginModifyingKeyframeTick(k);
-                }
-                Components::KeyframeManager::Get().ModifyKeyframeTick(property, k, tick);
-
-                
                 value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
                 Types::KeyframeValue newValue = k.value;
                 newValue.SetByIndex(keyframeValueIndex,
@@ -478,23 +471,28 @@ namespace IWXMVM::UI
                     Components::KeyframeManager::Get().BeginModifyingKeyframeValue(k);
                 }
                 Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, newValue);
-                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
+               
 
+                if (!Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
+                {
+                    Components::KeyframeManager::Get().BeginModifyingKeyframeTick(k);
+                }
+                Components::KeyframeManager::Get().ModifyKeyframeTick(property, k, tick);
+
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
                 if (IsMouseReleased(ImGuiMouseButton_Left))
                 {
                     selectedKeyframeId = std::nullopt;
                     selectedKeyframeValueIndex = std::nullopt;
-                }
-            }
-            else
-            {
-                if (Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
-                {
-                    Components::KeyframeManager::Get().EndModifyingKeyframeTick(property, k);
-                }
-                if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
-                {
-                    Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, k);
+
+                    if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
+                    {
+                        Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, k);
+                    }
+                    if (Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
+                    {
+                        Components::KeyframeManager::Get().EndModifyingKeyframeTick(property, k);
+                    }
                 }
             }
             const auto POPUP_LABEL = std::format("##editKeyframeValue{0}.{1}", k.id, keyframeValueIndex);

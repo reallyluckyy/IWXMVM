@@ -259,7 +259,6 @@ namespace IWXMVM::Components
     void KeyframeManager::EndModifyingKeyframeTick(Types::KeyframeableProperty property,
                                                    Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("STopped modifiying Tick");
         ModifyTickAction* modifyAction =
             new ModifyTickAction(property, beginningTickMap[keyframeToModify.id], keyframeToModify.tick);
         actionHistory.push_back(modifyAction);
