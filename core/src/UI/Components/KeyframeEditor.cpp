@@ -468,10 +468,15 @@ namespace IWXMVM::UI
                 }
                 Components::KeyframeManager::Get().ModifyKeyframeTick(property, k, tick);
 
+                
                 value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
                 Types::KeyframeValue newValue = k.value;
                 newValue.SetByIndex(keyframeValueIndex,
                                     glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
+                if (!Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
+                {
+                    Components::KeyframeManager::Get().BeginModifyingKeyframeValue(k);
+                }
                 Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, newValue);
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
@@ -487,8 +492,11 @@ namespace IWXMVM::UI
                 {
                     Components::KeyframeManager::Get().EndModifyingKeyframeTick(property, k);
                 }
+                if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
+                {
+                    Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, k);
+                }
             }
-
             const auto POPUP_LABEL = std::format("##editKeyframeValue{0}.{1}", k.id, keyframeValueIndex);
             if (hovered && IsMouseDoubleClicked(ImGuiMouseButton_Left))
             {
@@ -511,8 +519,19 @@ namespace IWXMVM::UI
                 {
                     Types::KeyframeValue newValue = k.value;
                     newValue.SetByIndex(keyframeValueIndex, currentValue);
+                    if (!Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
+                    {
+                        Components::KeyframeManager::Get().BeginModifyingKeyframeValue(k);
+                    }
                     Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, newValue);
                     Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
+                }
+                else
+                {
+                    if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
+                    {
+                        Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, k);
+                    }
                 }
 
                 if (ImGui::IsKeyPressed(ImGuiKey_Enter))
@@ -620,12 +639,38 @@ namespace IWXMVM::UI
             }
             else
             {
+                
                 auto keyframe = std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; });
-                Types::KeyframeValue newValue = keyframe->value;
-                newValue.SetByIndex(index, v);
-                Components::KeyframeManager::Get().ModifyKeyframeValue(property, *keyframe, newValue);
+                if (keyframe != keyframes.end())
+                {
+                    auto& keyframeObject = *keyframe;
+                    if (!Components::KeyframeManager::Get().IsKeyframeValueBeingModified(keyframeObject))
+                    {
+                        Components::KeyframeManager::Get().BeginModifyingKeyframeValue(keyframeObject);
+                    }
+                    Types::KeyframeValue newValue = keyframe->value;
+                    newValue.SetByIndex(index, v);
+                    Components::KeyframeManager::Get().ModifyKeyframeValue(property, keyframeObject, newValue);
+                }
+                
             }
             Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
+        }
+        else
+        {
+            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+            auto currentTick = demoInfo.currentTick;
+            auto keyframe = std::find_if(keyframes.begin(), keyframes.end(),
+                                         [currentTick](const auto& k) { return k.tick == currentTick; });
+            if (keyframe != keyframes.end())
+            {
+                auto& keyframeObject = *keyframe;
+                if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(keyframeObject))
+                {
+                    Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, keyframeObject);
+                }
+            }
+            
         }
     }
 

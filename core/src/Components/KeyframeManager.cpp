@@ -259,6 +259,7 @@ namespace IWXMVM::Components
     void KeyframeManager::EndModifyingKeyframeTick(Types::KeyframeableProperty property,
                                                    Types::Keyframe& keyframeToModify)
     {
+        LOG_DEBUG("STopped modifiying Tick");
         ModifyTickAction* modifyAction =
             new ModifyTickAction(property, beginningTickMap[keyframeToModify.id], keyframeToModify.tick);
         actionHistory.push_back(modifyAction);
@@ -276,12 +277,34 @@ namespace IWXMVM::Components
         keyframeToModify.tick = newTick;
     }
 
+    bool KeyframeManager::IsKeyframeValueBeingModified(Types::Keyframe& keyframe)
+    {
+        return beginningValueMap.find(keyframe.id) != beginningValueMap.end();
+    }
+
+    void KeyframeManager::BeginModifyingKeyframeValue(Types::Keyframe& keyframeToModify)
+    {
+        beginningValueMap[keyframeToModify.id] = keyframeToModify.value;
+    }
+
+    void KeyframeManager::EndModifyingKeyframeValue(Types::KeyframeableProperty property,
+                                                   Types::Keyframe& keyframeToModify)
+    {
+        ModifyValueAction* modifyAction =
+            new ModifyValueAction(property, beginningValueMap[keyframeToModify.id], keyframeToModify.tick);
+        actionHistory.push_back(modifyAction);
+        beginningValueMap.erase(keyframeToModify.id);
+    }
+
     void KeyframeManager::ModifyKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
                                               Types::KeyframeValue newValue)
     {
-        ModifyValueAction* modifyAction =
-            new ModifyValueAction(property, keyframeToModify.value, keyframeToModify.tick);
-        actionHistory.push_back(modifyAction);
+        if (beginningValueMap.find(keyframeToModify.id) == beginningValueMap.end())
+        {
+            ModifyValueAction* modifyAction =
+                new ModifyValueAction(property, keyframeToModify.value, keyframeToModify.tick);
+            actionHistory.push_back(modifyAction);
+        }
         keyframeToModify.value = newValue;
     }
 

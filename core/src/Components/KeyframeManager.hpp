@@ -84,6 +84,9 @@ namespace IWXMVM::Components
 
         void ModifyKeyframeTick(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
                                 uint32_t newTick);
+        bool IsKeyframeValueBeingModified(Types::Keyframe& keyframe);
+        void BeginModifyingKeyframeValue(Types::Keyframe& keyframeToModify);
+        void EndModifyingKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify);
         void ModifyKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify, Types::KeyframeValue newValue);
 
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
@@ -110,6 +113,7 @@ namespace IWXMVM::Components
 
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes;
         std::unordered_map<uint32_t, uint32_t> beginningTickMap;
+        std::unordered_map<uint32_t, Types::KeyframeValue> beginningValueMap;
         std::vector<Action*> actionHistory;
     };
 }  // namespace IWXMVM::Components
