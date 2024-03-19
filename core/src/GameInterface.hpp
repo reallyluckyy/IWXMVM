@@ -15,6 +15,7 @@
 #include "Types/Entity.hpp"
 #include "Types/PlaybackData.hpp"
 #include "Types/HudInfo.hpp"
+#include "Types/Features.hpp"
 
 namespace IWXMVM
 {
@@ -49,6 +50,11 @@ namespace IWXMVM
             return std::span{modules};
         }
         virtual void InitializeGameAddresses() = 0;
+
+        virtual Types::Features GetSupportedFeatures()
+        {
+            return Types::Features_None;
+        };
 
         virtual Types::DemoInfo GetDemoInfo() = 0;
         virtual std::string_view GetDemoExtension() = 0;

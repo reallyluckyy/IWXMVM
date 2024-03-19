@@ -70,6 +70,58 @@ namespace IWXMVM::IW3
             return Types::GameState::InGame;
         }
 
+        Types::Features GetSupportedFeatures() final
+        {
+            return Types::Features_ChangeAnimations;
+        }
+
+        void InitializeGameAddresses() final
+        {
+            GetGameAddresses();
+        }
+
+        static HMODULE GetCoD4xModuleHandle()
+        {
+            std::string moduleName = "cod4x_021.dll";
+            MODULEINFO moduleData{};
+
+            for (std::size_t i = 0; i < 1000; ++i)
+            {
+                if (!::GetModuleInformation(::GetCurrentProcess(), ::GetModuleHandle(moduleName.c_str()), &moduleData,
+                                            sizeof(moduleData)) ||
+                    moduleData.lpBaseOfDll)
+                {
+                    break;
+                }
+
+                moduleName = "cod4x_" + std::format("{:03}", i) + ".dll";
+            }
+
+            return static_cast<HMODULE>(moduleData.lpBaseOfDll);
+        }
+
+        std::optional<std::span<HMODULE>> GetModuleHandles(Types::ModuleType type = Types::ModuleType::BaseModule) final
+        {
+            static std::vector<HMODULE> modules = []() {
+                if (const HMODULE moduleCoD4X = GetCoD4xModuleHandle(); moduleCoD4X != 0)
+                    return std::vector<HMODULE>{::GetModuleHandle(nullptr), moduleCoD4X};
+                else
+                    return std::vector<HMODULE>{::GetModuleHandle(nullptr)};
+            }();
+
+            assert(modules.size() >= 1);
+
+            if (type == Types::ModuleType::BaseModule)
+                return std::span{modules.begin(), modules.begin() + 1};
+            else
+            {
+                if (modules.size() > 1)
+                    return std::span{modules.begin() + 1, modules.end()};
+                else
+                    return std::nullopt;
+            }
+        }
+
         Types::DemoInfo GetDemoInfo() final
         {
             static uint32_t lastValidTick = 0;
@@ -141,53 +193,6 @@ namespace IWXMVM::IW3
         bool IsConsoleOpen() final
         {
             return (Structures::GetClientUIActives()->keyCatchers & 1) != 0;
-        }
-
-        void InitializeGameAddresses() final
-        {
-            GetGameAddresses();
-        }
-
-        static HMODULE GetCoD4xModuleHandle()
-        {
-            std::string moduleName = "cod4x_021.dll";
-            MODULEINFO moduleData{};
-
-            for (std::size_t i = 0; i < 1000; ++i)
-            {
-                if (!::GetModuleInformation(::GetCurrentProcess(), ::GetModuleHandle(moduleName.c_str()), &moduleData,
-                                            sizeof(moduleData)) ||
-                    moduleData.lpBaseOfDll)
-                {
-                    break;
-                }
-
-                moduleName = "cod4x_" + std::format("{:03}", i) + ".dll";
-            }
-
-            return static_cast<HMODULE>(moduleData.lpBaseOfDll);
-        }
-
-        std::optional<std::span<HMODULE>> GetModuleHandles(Types::ModuleType type = Types::ModuleType::BaseModule) final
-        {
-            static std::vector<HMODULE> modules = []() {
-                if (const HMODULE moduleCoD4X = GetCoD4xModuleHandle(); moduleCoD4X != 0)
-                    return std::vector<HMODULE>{::GetModuleHandle(nullptr), moduleCoD4X};
-                else
-                    return std::vector<HMODULE>{::GetModuleHandle(nullptr)};
-            }();
-
-            assert(modules.size() >= 1);
-
-            if (type == Types::ModuleType::BaseModule)
-                return std::span{modules.begin(), modules.begin() + 1};
-            else
-            {
-                if (modules.size() > 1)
-                    return std::span{modules.begin() + 1, modules.end()};
-                else
-                    return std::nullopt;
-            }
         }
 
         std::optional<Types::Dvar> GetDvar(const std::string_view name) final

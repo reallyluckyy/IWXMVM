@@ -194,6 +194,7 @@
     <ClInclude Include="src\Types\Dof.hpp" />
     <ClInclude Include="src\Types\Dvar.hpp" />
     <ClInclude Include="src\Types\Entity.hpp" />
+    <ClInclude Include="src\Types\Features.hpp" />
     <ClInclude Include="src\Types\Filmtweaks.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
