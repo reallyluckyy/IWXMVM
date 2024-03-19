@@ -27,46 +27,46 @@ namespace IWXMVM::Components
             return keyframes[property];
         }
 
-        struct UndoAction
+        struct Action
         {
             Types::KeyframeableProperty property;
-            virtual ~UndoAction(){}
+            virtual ~Action(){}
 
-            UndoAction(const Types::KeyframeableProperty& prop) : property(prop){}
+            Action(const Types::KeyframeableProperty& prop) : property(prop){}
         };
 
-        struct AddAction : UndoAction
+        struct AddAction : Action
         {
-            Types::Keyframe keyframeToAdd;
+            Types::Keyframe keyframe;
 
             AddAction(const Types::KeyframeableProperty& prop, const Types::Keyframe& keyframe)
-                : UndoAction(prop), keyframeToAdd(keyframe){}
+                : Action(prop), keyframe(keyframe){}
         };
 
-        struct RemoveAction : UndoAction
+        struct RemoveAction : Action
         {
-            Types::Keyframe keyframeToRemove;
+            Types::Keyframe keyframe;
 
             RemoveAction(const Types::KeyframeableProperty& prop, const Types::Keyframe& keyframe)
-                : UndoAction(prop), keyframeToRemove(keyframe){}
+                : Action(prop), keyframe(keyframe){}
         };
 
-        struct ModifyTickAction : UndoAction
+        struct ModifyTickAction : Action
         {
             uint32_t oldTick;
             uint32_t newTick;
             ModifyTickAction(const Types::KeyframeableProperty& prop, uint32_t oTick, uint32_t tick)
-                : UndoAction(prop), oldTick(oTick), newTick(tick){}
+                : Action(prop), oldTick(oTick), newTick(tick){}
         };
 
-        struct ModifyValueAction : UndoAction
+        struct ModifyValueAction : Action
         {
             Types::KeyframeValue oldValue;
             Types::KeyframeValue newValue;
             Types::KeyframeValueType valueType;
             ModifyValueAction(const Types::KeyframeableProperty& prop, Types::KeyframeValue oValue,
                               Types::KeyframeValue nValue, Types::KeyframeValueType type)
-                : UndoAction(prop), oldValue(oValue), newValue(nValue), valueType(type)
+                : Action(prop), oldValue(oValue), newValue(nValue), valueType(type)
             {
             }
         };
@@ -96,9 +96,8 @@ namespace IWXMVM::Components
         void SortAndSaveKeyframes(std::vector<Types::Keyframe>& keyframes);
 
        private:
-        KeyframeManager()
-        {
-        }
+        KeyframeManager(){}
+        ~KeyframeManager();
 
         Types::KeyframeValue CubicInterpolate(Types::KeyframeValueType valueType, const auto& keyframes,
                                               const float tick) const;
@@ -106,6 +105,6 @@ namespace IWXMVM::Components
                                                  const float tick) const;
 
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes;
-        std::vector<UndoAction*> undoActions;
+        std::vector<Action*> actionHistory;
     };
 }  // namespace IWXMVM::Components

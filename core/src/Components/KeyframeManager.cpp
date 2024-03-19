@@ -160,23 +160,23 @@ namespace IWXMVM::Components
 
     void KeyframeManager::Undo()
     {
-        if (!undoActions.empty())
+        if (!actionHistory.empty())
         {
-            UndoAction* action = undoActions.back();
+            Action* action = actionHistory.back();
             if (AddAction* addAction = dynamic_cast<AddAction*>(action); addAction)
             {
-                keyframes[addAction->property].push_back(addAction->keyframeToAdd);
-            }
-            else if (RemoveAction* removeAction = dynamic_cast<RemoveAction*>(action); removeAction)
-            {
-                for (size_t i = 0; i < keyframes[removeAction->property].size(); i++)
+                for (size_t i = 0; i < keyframes[addAction->property].size(); i++)
                 {
-                    if (keyframes[removeAction->property][i].tick == removeAction->keyframeToRemove.tick)
+                    if (keyframes[addAction->property][i].tick == addAction->keyframe.tick)
                     {
-                        keyframes[removeAction->property].erase(keyframes[removeAction->property].begin() + i);
+                        keyframes[addAction->property].erase(keyframes[addAction->property].begin() + i);
                         break;
                     }
                 }
+            }
+            else if (RemoveAction* removeAction = dynamic_cast<RemoveAction*>(action); removeAction)
+            {
+                keyframes[removeAction->property].push_back(removeAction->keyframe);
             }
             else if (ModifyTickAction* modifyTickAction = dynamic_cast<ModifyTickAction*>(action); modifyTickAction)
             {
@@ -222,7 +222,7 @@ namespace IWXMVM::Components
                     }
                 }
             }
-            undoActions.pop_back();
+            actionHistory.pop_back();
             delete action;
         }
     }
@@ -230,14 +230,14 @@ namespace IWXMVM::Components
     void KeyframeManager::AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd)
     {
         keyframes[property].push_back(keyframeToAdd);
-        RemoveAction* removeAction = new RemoveAction(property, keyframeToAdd);
-        undoActions.push_back(removeAction);
+        AddAction* addAction = new AddAction(property, keyframeToAdd);
+        actionHistory.push_back(addAction);
     }
 
     void KeyframeManager::RemoveKeyframe(Types::KeyframeableProperty property, size_t indexToRemove)
     {
-        AddAction* addAction = new AddAction(property, keyframes[property].at(indexToRemove));
-        undoActions.push_back(addAction);
+        RemoveAction* removeAction = new RemoveAction(property, keyframes[property].at(indexToRemove));
+        actionHistory.push_back(removeAction);
         keyframes[property].erase(keyframes[property].begin() + indexToRemove);
     }
 
@@ -258,7 +258,7 @@ namespace IWXMVM::Components
                                          uint32_t newTick)
     {
         ModifyTickAction* modifyAction = new ModifyTickAction(property, keyframeToModify.tick, newTick);
-        undoActions.push_back(modifyAction);
+        actionHistory.push_back(modifyAction);
         keyframeToModify.tick = newTick;
     }
 
@@ -266,7 +266,7 @@ namespace IWXMVM::Components
                                               Types::KeyframeValue newValue, Types::KeyframeValueType newValueType)
     {
         ModifyValueAction* modifyAction = new ModifyValueAction(property, keyframeToModify.value, newValue, newValueType);
-        undoActions.push_back(modifyAction);
+        actionHistory.push_back(modifyAction);
         switch (newValueType)
         {
             case IWXMVM::Types::KeyframeValueType::FloatingPoint:
@@ -318,6 +318,14 @@ namespace IWXMVM::Components
         return Interpolate(property, static_cast<float>(tick));
     }
 
+
+    KeyframeManager::~KeyframeManager()
+    {
+        for (auto& action : actionHistory)
+        {
+            delete action;
+        }
+    }
 
     Types::KeyframeValue KeyframeManager::CubicInterpolate(Types::KeyframeValueType valueType,
                                                            const auto& keyframes,
