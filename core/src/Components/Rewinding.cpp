@@ -38,8 +38,7 @@ namespace IWXMVM::Components::Rewinding
 
     inline constexpr std::int32_t TICK_OFFSET = 150;
     inline constexpr std::int32_t NOT_IN_USE = -1;
-    inline constexpr std::int32_t RESTORING_DATA = -2;
-    inline constexpr std::int32_t SKIPPING_FORWARD = -3;
+    inline constexpr std::int32_t SKIPPING_FORWARD = -2;
 
     std::int32_t latestRewindTo = NOT_IN_USE;
     std::atomic<std::int32_t> rewindTo = NOT_IN_USE;
@@ -74,65 +73,71 @@ namespace IWXMVM::Components::Rewinding
         return true;
     }
 
-    void RestoreOldGamestate()
+    void RestoreOldGamestate(auto wouldReadDemoFooter)
     {
-        if (rewindTo.load() == SKIPPING_FORWARD)
+        if (initialGamestate == nullptr || latestRewindTo > 0)
             return;
+
+        if (wouldReadDemoFooter)
+        {
+            auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
+
+            LOG_DEBUG("Reached the footer / end of the demo, rewinding and pausing now");
+            rewindTo.store(*reinterpret_cast<int*>(addresses.cl.snap_serverTime) - 1000);
+
+            if (!Components::Playback::IsPaused())
+                Components::Playback::TogglePaused();
+        } 
+        else if (auto curRewindTo = rewindTo.load(); curRewindTo == NOT_IN_USE || curRewindTo == SKIPPING_FORWARD) 
+        {
+            // rewinding is not in progress, or the data has already been reset / restored
+            // and we're waiting for the game to catch up to the requested tick
+            return;
+        }
+
+        latestRewindTo = rewindTo.load();
+        assert(latestRewindTo > 0);
+
+        if (latestRewindTo - initialGamestate->serverTime <= 0)
+        {
+            // not sure why this happens yet, but this is an invalid value!
+            LOG_DEBUG("Cannot rewind past first tick: {}, instead rewinding to: {}",
+                        latestRewindTo, initialGamestate->serverTime);
+            latestRewindTo = initialGamestate->serverTime;
+        }
+
+        Mod::GetGameInterface()->ResetClientData(latestRewindTo);
+        Mod::GetGameInterface()->CL_FirstSnapshot();
+
+        LOG_DEBUG("Rewound and time is now: {}", latestRewindTo - initialGamestate->serverTime);
+        demoFileOffset = initialGamestate->fileOffset;
+        demoFile.seekg(demoFileOffset);
 
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
+        *reinterpret_cast<int*>(addresses.cl.parseEntitiesNum) = 0;
+        *reinterpret_cast<int*>(addresses.cl.parseClientsNum) = 0;
+        *reinterpret_cast<int*>(addresses.clc.lastExecutedServerCommand) = initialGamestate->lastExecutedServerCommand;
+        *reinterpret_cast<int*>(addresses.clc.serverCommandSequence) = initialGamestate->serverCommandSequence1;
+        *reinterpret_cast<int*>(addresses.cgs.serverCommandSequence) = initialGamestate->serverCommandSequence2;
+        *reinterpret_cast<int*>(addresses.killfeed) = 0;
 
-        if (latestRewindTo > 0)
+        // can be 0 as its cod4x only
+        if (addresses.clc.serverConfigDataSequence)
         {
-            auto curTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
-            if (curTime + 1000 >= latestRewindTo && curTime >= initialGamestate->serverTime + 1000)
-                rewindTo.store(SKIPPING_FORWARD);
-
-            return;
+            *reinterpret_cast<int*>(addresses.clc.serverConfigDataSequence) =
+                initialGamestate->serverConfigDataSequence;
         }
 
-        if (initialGamestate != nullptr)
-        {
-            latestRewindTo = rewindTo.exchange(RESTORING_DATA);
-            assert(latestRewindTo != NOT_IN_USE);
+        memset(reinterpret_cast<char*>(addresses.s_compassActors.address), 0, addresses.s_compassActors.size);
+        memset(reinterpret_cast<char*>(addresses.teamChatMsgs.address), 0, addresses.teamChatMsgs.size);
+        memset(reinterpret_cast<char*>(addresses.clc.serverCommands.address), 0, addresses.clc.serverCommands.size);
+        memset(reinterpret_cast<char*>(addresses.cg_entities.address), 0, addresses.cg_entities.size);
+        memcpy(reinterpret_cast<char*>(addresses.clientInfo.address), initialGamestate->clientInfo,
+                addresses.clientInfo.size);
+        memcpy(reinterpret_cast<char*>(addresses.gameState.address), initialGamestate->gameState,
+                addresses.gameState.size);
 
-            if (latestRewindTo - initialGamestate->serverTime <= 0)
-            {
-                // not sure why this happens yet, but this is an invalid value!
-                LOG_DEBUG("Cannot rewind past first tick: {}, instead rewinding to: {}",
-                          latestRewindTo - initialGamestate->serverTime, initialGamestate->serverTime);
-                latestRewindTo = initialGamestate->serverTime;
-            }
-
-            Mod::GetGameInterface()->ResetClientData(latestRewindTo);
-            Mod::GetGameInterface()->CL_FirstSnapshot();
-
-            LOG_DEBUG("Rewound and time is now: {}", latestRewindTo - initialGamestate->serverTime);
-            demoFileOffset = initialGamestate->fileOffset;
-            demoFile.seekg(demoFileOffset);
-
-            *reinterpret_cast<int*>(addresses.cl.parseEntitiesNum) = 0;
-            *reinterpret_cast<int*>(addresses.cl.parseClientsNum) = 0;
-            *reinterpret_cast<int*>(addresses.clc.lastExecutedServerCommand) = initialGamestate->lastExecutedServerCommand;
-            *reinterpret_cast<int*>(addresses.clc.serverCommandSequence) = initialGamestate->serverCommandSequence1;
-            *reinterpret_cast<int*>(addresses.cgs.serverCommandSequence) = initialGamestate->serverCommandSequence2;
-            *reinterpret_cast<int*>(addresses.killfeed) = 0;
-
-            // can be 0 as its cod4x only
-            if (addresses.clc.serverConfigDataSequence)
-            {
-                *reinterpret_cast<int*>(addresses.clc.serverConfigDataSequence) =
-                    initialGamestate->serverConfigDataSequence;
-            }
-
-            memset(reinterpret_cast<char*>(addresses.s_compassActors.address), 0, addresses.s_compassActors.size);
-            memset(reinterpret_cast<char*>(addresses.teamChatMsgs.address), 0, addresses.teamChatMsgs.size);
-            memset(reinterpret_cast<char*>(addresses.clc.serverCommands.address), 0, addresses.clc.serverCommands.size);
-            memset(reinterpret_cast<char*>(addresses.cg_entities.address), 0, addresses.cg_entities.size);
-            memcpy(reinterpret_cast<char*>(addresses.clientInfo.address), initialGamestate->clientInfo,
-                   addresses.clientInfo.size);
-            memcpy(reinterpret_cast<char*>(addresses.gameState.address), initialGamestate->gameState,
-                   addresses.gameState.size);
-        }
+        rewindTo.store(SKIPPING_FORWARD);
     }
     
     void StoreCurrentGamestate(int len)
@@ -207,20 +212,10 @@ namespace IWXMVM::Components::Rewinding
             return -1;
 
         // only reset when the game has just requested the one byte message type
-        auto wouldReadDemoFooter = demoFileOffset + 9 >= demoFileSize;
-        if (len == 1 && (rewindTo != NOT_IN_USE || wouldReadDemoFooter))
+        if (len == 1)
         {
-            if (wouldReadDemoFooter)
-            {
-                auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
-
-                LOG_DEBUG("Reached the footer / end of the demo, rewinding and pausing now");
-                rewindTo.store(*reinterpret_cast<int*>(addresses.cl.snap_serverTime) - 1000);
-
-                if (!Components::Playback::IsPaused())
-                    Components::Playback::TogglePaused();
-            }
-            RestoreOldGamestate();
+            auto wouldReadDemoFooter = demoFileOffset + 9 >= demoFileSize;
+            RestoreOldGamestate(wouldReadDemoFooter);
         }
         else if (len > 12)
         {
