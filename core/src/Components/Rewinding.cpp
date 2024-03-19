@@ -35,7 +35,14 @@ namespace IWXMVM::Components::Rewinding
     uint32_t demoFileSize = 0;
     uint32_t demoFileOffset = 0;
     std::unique_ptr<InitialGamestate> initialGamestate;
-    std::atomic<std::int32_t> rewindTo = -1;
+
+    inline constexpr std::int32_t TICK_OFFSET = 150;
+    inline constexpr std::int32_t NOT_IN_USE = -1;
+    inline constexpr std::int32_t RESTORING_DATA = -2;
+    inline constexpr std::int32_t SKIPPING_FORWARD = -3;
+
+    std::int32_t latestRewindTo = NOT_IN_USE;
+    std::atomic<std::int32_t> rewindTo = NOT_IN_USE;
 
     void ResetRewindData()
     {
@@ -48,12 +55,29 @@ namespace IWXMVM::Components::Rewinding
         demoFileSize = 0;
         demoFileOffset = 0;
         initialGamestate.reset();
-        rewindTo.store(-1);
+        latestRewindTo = NOT_IN_USE;
+        rewindTo.store(NOT_IN_USE);
+    }
+
+    bool CheckSkipForward()
+    {
+        if (rewindTo.load() != SKIPPING_FORWARD)
+            return false;
+
+        auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
+        auto curTime = *reinterpret_cast<int*>(addresses.cl.serverTime);
+ 
+        Components::Playback::SkipForward(latestRewindTo + TICK_OFFSET - curTime);
+        latestRewindTo = NOT_IN_USE;
+        rewindTo.store(NOT_IN_USE);
+        
+        return true;
     }
 
     void RestoreOldGamestate()
     {
-        static std::int32_t latestRewindTo = 0;
+        if (rewindTo.load() == SKIPPING_FORWARD)
+            return;
 
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
 
@@ -61,20 +85,15 @@ namespace IWXMVM::Components::Rewinding
         {
             auto curTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
             if (curTime + 1000 >= latestRewindTo && curTime >= initialGamestate->serverTime + 1000)
-            {
-                LOG_DEBUG("Finished rewinding. Requested server time: {}, actual server time: {}", latestRewindTo,
-                          *reinterpret_cast<int*>(addresses.cl.snap_serverTime));
-                latestRewindTo = 0;
-                rewindTo = -1;
-            }
+                rewindTo.store(SKIPPING_FORWARD);
 
             return;
         }
 
         if (initialGamestate != nullptr)
         {
-            latestRewindTo = rewindTo.exchange(-2);
-            assert(latestRewindTo != -1);
+            latestRewindTo = rewindTo.exchange(RESTORING_DATA);
+            assert(latestRewindTo != NOT_IN_USE);
 
             if (latestRewindTo - initialGamestate->serverTime <= 0)
             {
@@ -189,7 +208,7 @@ namespace IWXMVM::Components::Rewinding
 
         // only reset when the game has just requested the one byte message type
         auto wouldReadDemoFooter = demoFileOffset + 9 >= demoFileSize;
-        if (len == 1 && (rewindTo != -1 || wouldReadDemoFooter))
+        if (len == 1 && (rewindTo != NOT_IN_USE || wouldReadDemoFooter))
         {
             if (wouldReadDemoFooter)
             {
@@ -220,22 +239,29 @@ namespace IWXMVM::Components::Rewinding
 
     bool IsRewinding()
     {
-        return rewindTo.load() != -1;
+        return rewindTo.load() != NOT_IN_USE;
     }
 
     void RewindBy(std::int32_t ticks)
     {
+        if (ticks >= SKIPPING_FORWARD)
+        {
+            LOG_DEBUG("Cannot rewind invalid tick value {}", ticks);
+            return;
+        }
+
+        ticks -= TICK_OFFSET;
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
 
         // only set the rewind value if the main thread isn't using it
         auto curRewindTo = rewindTo.load();
-        if (rewindTo == -2 ||
+        if (curRewindTo != NOT_IN_USE ||
             !rewindTo.compare_exchange_strong(curRewindTo, *reinterpret_cast<int*>(addresses.cl.serverTime) + ticks))
         {
             LOG_DEBUG("Attempted to rewind back {} ticks", ticks);
             return;
         }
-      
+
         LOG_DEBUG("Rewinding back {} ticks", ticks);
     }
 

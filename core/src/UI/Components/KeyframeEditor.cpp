@@ -602,16 +602,6 @@ namespace IWXMVM::UI
 
     void DrawLeftArrow(const char* label, const Types::KeyframeableProperty& property)
     {
-        static auto lastKeyFrameTime = 0;
-        if (lastKeyFrameTime != 0 && !Components::Rewinding::IsRewinding())
-        {
-            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            auto currentTick = demoInfo.currentTick;
-            Components::Playback::SkipForward(lastKeyFrameTime - demoInfo.currentTick);
-
-            lastKeyFrameTime = 0;
-        }
-
         std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
         ImGui::SameLine();
         if (ImGui::ArrowButton(label, 0))
@@ -626,8 +616,7 @@ namespace IWXMVM::UI
             }
             if (previousKeyframe.tick < currentTick)
             {
-                lastKeyFrameTime = previousKeyframe.tick;
-                Components::Rewinding::RewindBy(previousKeyframe.tick - demoInfo.currentTick - 150);
+                Components::Rewinding::RewindBy(previousKeyframe.tick - demoInfo.currentTick);
             }
         }
     }
