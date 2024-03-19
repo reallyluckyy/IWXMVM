@@ -69,6 +69,15 @@ namespace IWXMVM::Components
                 : Action(prop), oldValue(oValue),tick(_tick){}
         };
 
+        struct ModifyTickAndValueAction : Action
+        {
+            uint32_t oldTick;
+            uint32_t newTick;
+            Types::KeyframeValue oldValue;
+            ModifyTickAndValueAction(const Types::KeyframeableProperty& prop, uint32_t oTick, uint32_t nTick, Types::KeyframeValue oValue)
+                : Action(prop), oldTick(oTick), newTick(nTick), oldValue(oValue){}
+        };
+
         void Undo();
 
         void AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd);
@@ -87,7 +96,18 @@ namespace IWXMVM::Components
         bool IsKeyframeValueBeingModified(Types::Keyframe& keyframe);
         void BeginModifyingKeyframeValue(Types::Keyframe& keyframeToModify);
         void EndModifyingKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify);
-        void ModifyKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify, Types::KeyframeValue newValue);
+        void ModifyKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
+                                 Types::KeyframeValue newValue);
+
+        bool IsKeyframeTickAndValueBeingModified(Types::Keyframe& keyframe);
+
+        void BeginModifyingKeyframeTickAndValue(Types::Keyframe& keyframeToModify);
+
+        void EndModifyingKeyframeTickAndValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify);
+
+        void ModifyKeyframeTickAndValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
+                                        uint32_t newTick,
+                                        Types::KeyframeValue newValue);
 
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
                                          const std::vector<Types::Keyframe>& keyframes, const float tick) const;
