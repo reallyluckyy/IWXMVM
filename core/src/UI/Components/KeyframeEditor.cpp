@@ -230,7 +230,7 @@ namespace IWXMVM::UI
                 {
                     Components::KeyframeManager::Get().BeginModifyingKeyframeTick(k);
                 }
-                Components::KeyframeManager::Get().ModifyKeyframeTick(property, k, tick);
+                k.tick = tick;
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
 
                 if (IsMouseReleased(ImGuiMouseButton_Left))
@@ -238,13 +238,17 @@ namespace IWXMVM::UI
                     selectedKeyframeId = std::nullopt;
                     selectedKeyframeValueIndex = std::nullopt;
 
-                    if (Components::KeyframeManager::Get().IsKeyframeTickAndValueBeingModified(k))
+                    
+                    if (Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
                     {
-                        Components::KeyframeManager::Get().EndModifyingKeyframeTickAndValue(property, k);
-                    }
-                    else if (Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k))
-                    {
-                        Components::KeyframeManager::Get().EndModifyingKeyframeTick(property, k);
+                        if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
+                        {
+                            Components::KeyframeManager::Get().EndModifyingKeyframeTickAndValue(property, k);
+                        }
+                        else
+                        {
+                            Components::KeyframeManager::Get().EndModifyingKeyframeTick(property, k);
+                        }
                     }
                 }
             }
@@ -463,16 +467,18 @@ namespace IWXMVM::UI
             {
                 auto [tick, value] =
                     GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
-
                 value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
-                Types::KeyframeValue newValue = k.value;
-                newValue.SetByIndex(keyframeValueIndex,
-                                    glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
-                if (!Components::KeyframeManager::Get().IsKeyframeTickAndValueBeingModified(k))
+                
+                if (!Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k) &&
+                    !Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
                 {
-                    Components::KeyframeManager::Get().BeginModifyingKeyframeTickAndValue(k);
+                    Components::KeyframeManager::Get().BeginModifyingKeyframeTick(k);
+                    Components::KeyframeManager::Get().BeginModifyingKeyframeValue(k);
                 }
-                Components::KeyframeManager::Get().ModifyKeyframeTickAndValue(property, k, tick, newValue);
+
+                k.tick = tick;
+                k.value.SetByIndex(keyframeValueIndex,
+                                   glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
 
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
                 if (IsMouseReleased(ImGuiMouseButton_Left))
@@ -480,7 +486,8 @@ namespace IWXMVM::UI
                     selectedKeyframeId = std::nullopt;
                     selectedKeyframeValueIndex = std::nullopt;
 
-                    if (Components::KeyframeManager::Get().IsKeyframeTickAndValueBeingModified(k))
+                    if (Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k) &&
+                        Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
                     {
                         Components::KeyframeManager::Get().EndModifyingKeyframeTickAndValue(property,k);
                     }
@@ -505,14 +512,14 @@ namespace IWXMVM::UI
                 ImGui::SetKeyboardFocusHere();
                 if (ImGui::DragFloat("##valueInput", &currentValue, 0.1f, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE,
                                      "%.2f"))
-                {
-                    Types::KeyframeValue newValue = k.value;
-                    newValue.SetByIndex(keyframeValueIndex, currentValue);
+                { 
                     if (!Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
                     {
                         Components::KeyframeManager::Get().BeginModifyingKeyframeValue(k);
                     }
-                    Components::KeyframeManager::Get().ModifyKeyframeValue(property, k, newValue);
+
+                    k.value.SetByIndex(keyframeValueIndex, currentValue);
+
                     Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
                 }
                 else
@@ -615,48 +622,35 @@ namespace IWXMVM::UI
 
         v = dvalue;
         ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6.0f);
+        auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        auto currentTick = demoInfo.currentTick;
+        auto keyframe = std::find_if(keyframes.begin(), keyframes.end(), [currentTick](const auto& k) { return k.tick == currentTick; });
         if (ImGui::DragFloat(label, &v, 0.1f, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE, "%.2f"))
         {
-            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            auto currentTick = demoInfo.currentTick;
             auto [tick, val] = std::make_tuple(currentTick, v);
-            if (std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; }) ==
-                keyframes.end())
+            if (keyframe == keyframes.end())
             {
                 auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
                 Components::KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, tick, value));
             }
             else
             {
-                
-                auto keyframe = std::find_if(keyframes.begin(), keyframes.end(), [tick](const auto& k) { return k.tick == tick; });
-                if (keyframe != keyframes.end())
+                if (!Components::KeyframeManager::Get().IsKeyframeValueBeingModified(*keyframe))
                 {
-                    auto& keyframeObject = *keyframe;
-                    if (!Components::KeyframeManager::Get().IsKeyframeValueBeingModified(keyframeObject))
-                    {
-                        Components::KeyframeManager::Get().BeginModifyingKeyframeValue(keyframeObject);
-                    }
-                    Types::KeyframeValue newValue = keyframe->value;
-                    newValue.SetByIndex(index, v);
-                    Components::KeyframeManager::Get().ModifyKeyframeValue(property, keyframeObject, newValue);
+                    Components::KeyframeManager::Get().BeginModifyingKeyframeValue(*keyframe);
                 }
-                
+                keyframe->value.SetByIndex(index, v);
             }
             Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
         }
         else
         {
-            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            auto currentTick = demoInfo.currentTick;
-            auto keyframe = std::find_if(keyframes.begin(), keyframes.end(),
-                                         [currentTick](const auto& k) { return k.tick == currentTick; });
+            
             if (keyframe != keyframes.end())
             {
-                auto& keyframeObject = *keyframe;
-                if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(keyframeObject))
+                if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(*keyframe))
                 {
-                    Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, keyframeObject);
+                    Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, *keyframe);
                 }
             }
             

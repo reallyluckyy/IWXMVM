@@ -88,26 +88,14 @@ namespace IWXMVM::Components
         bool IsKeyframeTickBeingModified(Types::Keyframe& keyframe);
 
         void BeginModifyingKeyframeTick(Types::Keyframe& keyframeToModify);
-
         void EndModifyingKeyframeTick(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify);
 
-        void ModifyKeyframeTick(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
-                                uint32_t newTick);
         bool IsKeyframeValueBeingModified(Types::Keyframe& keyframe);
+
         void BeginModifyingKeyframeValue(Types::Keyframe& keyframeToModify);
         void EndModifyingKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify);
-        void ModifyKeyframeValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
-                                 Types::KeyframeValue newValue);
-
-        bool IsKeyframeTickAndValueBeingModified(Types::Keyframe& keyframe);
-
-        void BeginModifyingKeyframeTickAndValue(Types::Keyframe& keyframeToModify);
 
         void EndModifyingKeyframeTickAndValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify);
-
-        void ModifyKeyframeTickAndValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify,
-                                        uint32_t newTick,
-                                        Types::KeyframeValue newValue);
 
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
                                          const std::vector<Types::Keyframe>& keyframes, const float tick) const;
