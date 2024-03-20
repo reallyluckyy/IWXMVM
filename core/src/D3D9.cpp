@@ -136,9 +136,16 @@ namespace IWXMVM::D3D9
             component->Release();
         }
 
+        GFX::GraphicsManager::Get().Uninitialize();
+
         ImGui_ImplDX9_InvalidateDeviceObjects();
         HRESULT hr = Reset(pDevice, pPresentationParameters);
         ImGui_ImplDX9_CreateDeviceObjects();
+
+        if (UI::UIManager::Get().IsInitialized())
+        {
+            GFX::GraphicsManager::Get().Initialize();
+        }
 
         return hr;
     }

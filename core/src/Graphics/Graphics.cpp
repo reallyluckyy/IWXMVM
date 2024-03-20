@@ -99,9 +99,21 @@ namespace IWXMVM::GFX
 
     void GraphicsManager::Uninitialize()
     {
-        vertexDeclaration->Release();
-        pixelShader->Release();
-        vertexShader->Release();
+        if (vertexDeclaration != nullptr)
+        {
+            vertexDeclaration->Release();
+            vertexDeclaration = nullptr;
+        }
+        if (pixelShader != nullptr)
+        {
+            pixelShader->Release();
+            pixelShader = nullptr;
+        }
+        if (vertexShader != nullptr)
+        {
+            vertexShader->Release();
+            vertexShader = nullptr;
+        }
         BufferManager::Get().Uninitialize();
     }
 
