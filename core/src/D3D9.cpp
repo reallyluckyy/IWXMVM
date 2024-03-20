@@ -67,15 +67,20 @@ namespace IWXMVM::D3D9
     {
         LOG_DEBUG("CreateDevice called with hwnd {0:x}", (std::uintptr_t)pPresentationParameters->hDeviceWindow);
 
+        for (const auto& component : UI::UIManager::Get().GetUIComponents())
+        {
+            component->Release();
+        }
+
+        GFX::GraphicsManager::Get().Uninitialize();
+        UI::UIManager::Get().ShutdownImGui();
+
         HRESULT hr = CreateDevice(pInterface, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters,
                                   ppReturnedDeviceInterface);
         if (hr != D3D_OK)
         {
             return hr;
         }
-
-        GFX::GraphicsManager::Get().Uninitialize();
-        UI::UIManager::Get().ShutdownImGui();
 
         device = *ppReturnedDeviceInterface;
 
