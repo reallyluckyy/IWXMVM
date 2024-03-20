@@ -51,10 +51,7 @@ namespace IWXMVM::Components
 
             if (Input::BindDown(Action::DollyClearNodes))
             {
-                while (KeyframeManager::Get().GetKeyframes(property).size() > 0)
-                {
-                    KeyframeManager::Get().RemoveKeyframe(property,0);
-                }
+                KeyframeManager::Get().ClearKeyframes(property);
 
                 LOG_DEBUG("Nodes cleared");
             }

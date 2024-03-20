@@ -141,6 +141,7 @@ namespace IWXMVM::Components
 
         Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
             ClearKeyframes();
+            ClearActionHistory();
             Components::KeyframeSerializer::ReadRecent();
         });
 
@@ -162,8 +163,24 @@ namespace IWXMVM::Components
     {
         for (auto& [p, k] : keyframes)
         {
-            k.clear();
+            ClearKeyframes(p);
         }
+    }
+
+    void KeyframeManager::ClearKeyframes(Types::KeyframeableProperty property)
+    {
+        ClearAction* clearAction = new ClearAction(property, keyframes[property]);
+        actionHistory.push_back(clearAction);
+        keyframes[property].clear();
+    }
+
+    void KeyframeManager::ClearActionHistory()
+    {
+        for (auto& action : actionHistory)
+        {
+            delete action;
+        }
+        actionHistory.clear();
     }
 
     void KeyframeManager::SortAndSaveKeyframes(std::vector<Types::Keyframe>& keyframes)
@@ -178,60 +195,71 @@ namespace IWXMVM::Components
         if (!actionHistory.empty())
         {
             Action* action = actionHistory.back();
-            if (AddAction* addAction = dynamic_cast<AddAction*>(action); addAction)
-            {
-                for (size_t i = 0; i < keyframes[addAction->property].size(); i++)
-                {
-                    if (keyframes[addAction->property][i].tick == addAction->keyframe.tick)
-                    {
-                        keyframes[addAction->property].erase(keyframes[addAction->property].begin() + i);
-                        break;
-                    }
-                }
-            }
-            else if (RemoveAction* removeAction = dynamic_cast<RemoveAction*>(action); removeAction)
-            {
-                keyframes[removeAction->property].push_back(removeAction->keyframe);
-            }
-            else if (ModifyTickAndValueAction* modifyTickAndValueAction =
-                         dynamic_cast<ModifyTickAndValueAction*>(action);
-                     modifyTickAndValueAction)
-            {
-                for (size_t i = 0; i < keyframes[modifyTickAndValueAction->property].size(); i++)
-                {
-                    if (keyframes[modifyTickAndValueAction->property][i].tick == modifyTickAndValueAction->newTick)
-                    {
-                        keyframes[modifyTickAndValueAction->property][i].tick = modifyTickAndValueAction->oldTick;
-                        keyframes[modifyTickAndValueAction->property][i].value = modifyTickAndValueAction->oldValue;
-                        break;
-                    }
-                }
-            }
-            else if (ModifyTickAction* modifyTickAction = dynamic_cast<ModifyTickAction*>(action); modifyTickAction)
-            {
-                for (size_t i = 0; i < keyframes[modifyTickAction->property].size(); i++)
-                {
-                    if (keyframes[modifyTickAction->property][i].tick == modifyTickAction->newTick)
-                    {
-                        keyframes[modifyTickAction->property][i].tick = modifyTickAction->oldTick;
-                        break;
-                    }
-                }
-            }
-            else if (ModifyValueAction* modifyValueAction = dynamic_cast<ModifyValueAction*>(action); modifyValueAction)
-            {
-                for (size_t i = 0; i < keyframes[modifyValueAction->property].size(); i++)
-                {
-                    if (keyframes[modifyValueAction->property][i].tick == modifyValueAction->tick)
-                    {
-                        keyframes[modifyValueAction->property][i].value = modifyValueAction->oldValue;
-                        break;
-                    }
-                }
-            }
-            Components::KeyframeManager::Get().SortAndSaveKeyframes(GetKeyframes(action->property));
             actionHistory.pop_back();
-            delete action; 
+            if (action)
+            {
+                if (AddAction* addAction = dynamic_cast<AddAction*>(action); addAction)
+                {
+                    for (size_t i = 0; i < keyframes[addAction->property].size(); i++)
+                    {
+                        if (keyframes[addAction->property][i].tick == addAction->keyframe.tick)
+                        {
+                            keyframes[addAction->property].erase(keyframes[addAction->property].begin() + i);
+                            break;
+                        }
+                    }
+                }
+                else if (RemoveAction* removeAction = dynamic_cast<RemoveAction*>(action); removeAction)
+                {
+                    keyframes[removeAction->property].emplace_back(removeAction->keyframe);
+                }
+                else if (ModifyTickAndValueAction* modifyTickAndValueAction =
+                             dynamic_cast<ModifyTickAndValueAction*>(action);
+                         modifyTickAndValueAction)
+                {
+                    for (size_t i = 0; i < keyframes[modifyTickAndValueAction->property].size(); i++)
+                    {
+                        if (keyframes[modifyTickAndValueAction->property][i].tick == modifyTickAndValueAction->newTick)
+                        {
+                            keyframes[modifyTickAndValueAction->property][i].tick = modifyTickAndValueAction->oldTick;
+                            keyframes[modifyTickAndValueAction->property][i].value = modifyTickAndValueAction->oldValue;
+                            break;
+                        }
+                    }
+                }
+                else if (ModifyTickAction* modifyTickAction = dynamic_cast<ModifyTickAction*>(action); modifyTickAction)
+                {
+                    for (size_t i = 0; i < keyframes[modifyTickAction->property].size(); i++)
+                    {
+                        if (keyframes[modifyTickAction->property][i].tick == modifyTickAction->newTick)
+                        {
+                            keyframes[modifyTickAction->property][i].tick = modifyTickAction->oldTick;
+                            break;
+                        }
+                    }
+                }
+                else if (ModifyValueAction* modifyValueAction = dynamic_cast<ModifyValueAction*>(action);
+                         modifyValueAction)
+                {
+                    for (size_t i = 0; i < keyframes[modifyValueAction->property].size(); i++)
+                    {
+                        if (keyframes[modifyValueAction->property][i].tick == modifyValueAction->tick)
+                        {
+                            keyframes[modifyValueAction->property][i].value = modifyValueAction->oldValue;
+                            break;
+                        }
+                    }
+                }
+                else if (ClearAction* clearAction = dynamic_cast<ClearAction*>(action); clearAction)
+                {
+                    for (auto& k : clearAction->clearedKeyframes)
+                    {
+                        keyframes[clearAction->property].emplace_back(k);
+                    }
+                }
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(GetKeyframes(action->property));
+                delete action; 
+            }
         }
     }
 
@@ -247,19 +275,6 @@ namespace IWXMVM::Components
         RemoveAction* removeAction = new RemoveAction(property, keyframes[property].at(indexToRemove));
         actionHistory.push_back(removeAction);
         keyframes[property].erase(keyframes[property].begin() + indexToRemove);
-    }
-
-
-    void KeyframeManager::RemoveKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToRemove)
-    {
-        for (size_t i = 0; i < keyframes[property].size(); i++)
-        {
-            if (keyframes[property][i].tick == keyframeToRemove.tick)
-            {
-                RemoveKeyframe(property,i);
-                return;
-            }
-        }
     }
 
     bool KeyframeManager::IsKeyframeTickBeingModified(Types::Keyframe& keyframe)

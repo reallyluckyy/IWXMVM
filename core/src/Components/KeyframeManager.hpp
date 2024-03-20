@@ -53,6 +53,13 @@ namespace IWXMVM::Components
                 : Action(prop), keyframe(keyframe){}
         };
 
+        struct ClearAction : Action
+        {
+            std::vector<Types::Keyframe> clearedKeyframes;
+            ClearAction(const Types::KeyframeableProperty& prop, std::vector<Types::Keyframe> keyframes)
+                : Action(prop), clearedKeyframes(keyframes){}
+        };
+
         struct ModifyTickAction : Action
         {
             uint32_t oldTick;
@@ -83,7 +90,6 @@ namespace IWXMVM::Components
         void AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd);
 
         void RemoveKeyframe(Types::KeyframeableProperty property, size_t indexToRemove);
-        void RemoveKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToRemove);
 
         bool IsKeyframeTickBeingModified(Types::Keyframe& keyframe);
 
@@ -97,6 +103,11 @@ namespace IWXMVM::Components
 
         void EndModifyingKeyframeTickAndValue(Types::KeyframeableProperty property, Types::Keyframe& keyframeToModify);
 
+        void ClearKeyframes();
+        void ClearKeyframes(Types::KeyframeableProperty property);
+
+        void ClearActionHistory();
+
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
                                          const std::vector<Types::Keyframe>& keyframes, const float tick) const;
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
@@ -106,7 +117,6 @@ namespace IWXMVM::Components
 
         const Types::KeyframeableProperty& GetProperty(const Types::KeyframeablePropertyType property) const;
 
-        void ClearKeyframes();
 
         void SortAndSaveKeyframes(std::vector<Types::Keyframe>& keyframes);
 
