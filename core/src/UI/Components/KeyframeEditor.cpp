@@ -524,7 +524,7 @@ namespace IWXMVM::UI
                 }
                 else
                 {
-                    if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
+                    if (!ImGui::IsMouseDown(ImGuiMouseButton_Left) && Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
                     {
                         Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, k);
                     }
@@ -645,14 +645,11 @@ namespace IWXMVM::UI
         }
         else
         {
-            if (!ImGui::IsMouseDown(ImGuiMouseButton_Left) && keyframe != keyframes.end())
+            if (!ImGui::IsMouseDown(ImGuiMouseButton_Left) && keyframe != keyframes.end() &&
+                Components::KeyframeManager::Get().IsKeyframeValueBeingModified(*keyframe))
             {
-                if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(*keyframe))
-                {
-                    Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, *keyframe);
-                }
+                Components::KeyframeManager::Get().EndModifyingKeyframeValue(property, *keyframe);
             }
-            
         }
     }
 
