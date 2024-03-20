@@ -645,8 +645,7 @@ namespace IWXMVM::UI
         }
         else
         {
-            
-            if (keyframe != keyframes.end())
+            if (!ImGui::IsMouseDown(ImGuiMouseButton_Left) && keyframe != keyframes.end())
             {
                 if (Components::KeyframeManager::Get().IsKeyframeValueBeingModified(*keyframe))
                 {
