@@ -4,6 +4,7 @@ namespace IWXMVM::Components
 {
     namespace Rewinding
     {
+        bool CheckSkipForward();
         bool IsRewinding();
         void RewindBy(std::int32_t ticks);
 

@@ -75,6 +75,12 @@ namespace IWXMVM::Components::Playback
             return captureManager.OnGameFrame();
         }
 
+        // check if we need to skip forward for exact rewinding
+        if (Components::Rewinding::CheckSkipForward())
+        {
+            return 0;
+        }
+
         // workaround for low timescales that would take a couple of seconds to trigger the rewind process to begin
         if (Components::Rewinding::IsRewinding())
         {
