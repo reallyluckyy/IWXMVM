@@ -34,29 +34,37 @@ namespace IWXMVM::Components
             Types::KeyframeableProperty property;
             Action(const Types::KeyframeableProperty& prop) : property(prop){}
 
-            virtual void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const = 0;
+            virtual void DoAction() const = 0;
+            virtual std::unique_ptr<KeyframeManager::Action> GetUndoAction() const = 0;
+
+           protected:
+            std::vector<Types::Keyframe>& GetKeyframes() const;
+            std::vector<Types::Keyframe>::iterator GetKeyframe(uint32_t id) const;
         };
 
-        struct AddAction : Action
+        struct AddAction : KeyframeManager::Action
         {
             Types::Keyframe keyframe;
 
-            AddAction(const Types::KeyframeableProperty& prop, const Types::Keyframe& kf) : Action(prop), keyframe(kf){}
+            AddAction(const Types::KeyframeableProperty& prop, const Types::Keyframe& kf)
+                : KeyframeManager::Action(prop), keyframe(kf){}
 
-            void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
+            void DoAction() const final;
+            std::unique_ptr<KeyframeManager::Action> GetUndoAction() const final;
         };
 
-        struct RemoveAction : Action
+        struct RemoveAction : KeyframeManager::Action
         {
             Types::Keyframe keyframe;
 
             RemoveAction(const Types::KeyframeableProperty& prop, const Types::Keyframe& kf)
-                : Action(prop), keyframe(kf){}
+                : KeyframeManager::Action(prop), keyframe(kf){}
 
-            void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
+            void DoAction() const final;
+            std::unique_ptr<KeyframeManager::Action> GetUndoAction() const final;
         };
 
-        struct ModifyAction : Action
+        struct ModifyAction : KeyframeManager::Action
         {
             uint32_t id;
             ModifyAction(const Types::KeyframeableProperty& prop, uint32_t keyframeID) : Action(prop), id(keyframeID){}
@@ -65,46 +73,70 @@ namespace IWXMVM::Components
         struct ModifyTickAndValueAction : ModifyAction
         {
             uint32_t oldTick;
+            uint32_t newTick;
             Types::KeyframeValue oldValue;
+            Types::KeyframeValue newValue;
 
-            ModifyTickAndValueAction(const Types::KeyframeableProperty& prop, uint32_t oTick,
-                                     Types::KeyframeValue oValue, uint32_t keyframeID)
-                : ModifyAction(prop, keyframeID), oldTick(oTick), oldValue(oValue){}
+            ModifyTickAndValueAction(const Types::KeyframeableProperty& prop, uint32_t oTick, uint32_t nTick,
+                                     Types::KeyframeValue oValue, Types::KeyframeValue nValue, uint32_t keyframeID)
+                : ModifyAction(prop, keyframeID), oldTick(oTick), newTick(nTick), oldValue(oValue), newValue(nValue){}
 
-            void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
+            void DoAction() const final;
+            std::unique_ptr<KeyframeManager::Action> GetUndoAction() const final;
         };
 
         struct ModifyTickAction : ModifyAction
         {
             uint32_t oldTick;
+            uint32_t newTick;
 
-            ModifyTickAction(const Types::KeyframeableProperty& prop, uint32_t oTick, uint32_t keyframeID)
-                : ModifyAction(prop,keyframeID), oldTick(oTick){}
+            ModifyTickAction(const Types::KeyframeableProperty& prop, uint32_t oTick, uint32_t nTick, uint32_t keyframeID)
+                : ModifyAction(prop,keyframeID), oldTick(oTick), newTick(nTick){}
 
-            void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
+            void DoAction() const final;
+            std::unique_ptr<KeyframeManager::Action> GetUndoAction() const final;
         };
 
         struct ModifyValueAction : ModifyAction
         {
             Types::KeyframeValue oldValue;
+            Types::KeyframeValue newValue;
 
-            ModifyValueAction(const Types::KeyframeableProperty& prop, Types::KeyframeValue oValue, uint32_t keyframeID)
-                : ModifyAction(prop, keyframeID), oldValue(oValue){}
+            ModifyValueAction(const Types::KeyframeableProperty& prop, Types::KeyframeValue oValue,
+                              Types::KeyframeValue nValue, uint32_t keyframeID)
+                : ModifyAction(prop, keyframeID), oldValue(oValue), newValue(nValue){}
 
-            void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
+            void DoAction() const final;
+            std::unique_ptr<KeyframeManager::Action> GetUndoAction() const final;
+        };
+        
+        struct ManyKeyframesAction : Action
+        {
+            std::vector<Types::Keyframe> keyframes;
+            ManyKeyframesAction(const Types::KeyframeableProperty& prop, std::vector<Types::Keyframe> keyframes)
+                : Action(prop), keyframes(keyframes){}
         };
 
-        struct ClearAction : Action
+        struct RemoveManyKeyframes : ManyKeyframesAction
         {
-            std::vector<Types::Keyframe> clearedKeyframes;
+            RemoveManyKeyframes(const Types::KeyframeableProperty& prop, std::vector<Types::Keyframe> keyframes)
+                : ManyKeyframesAction(prop,keyframes){}
 
-            ClearAction(const Types::KeyframeableProperty& prop, std::vector<Types::Keyframe> keyframes)
-                : Action(prop), clearedKeyframes(keyframes){}
+            virtual void DoAction() const final;
+            std::unique_ptr<KeyframeManager::Action> GetUndoAction() const final;
+        };
 
-            void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
+        struct AddManyKeyframes : ManyKeyframesAction
+        {
+            AddManyKeyframes(const Types::KeyframeableProperty& prop, std::vector<Types::Keyframe> keyframes)
+                : ManyKeyframesAction(prop, keyframes){}
+
+            virtual void DoAction() const final;
+            std::unique_ptr<KeyframeManager::Action> GetUndoAction() const final;
         };
 
         void Undo();
+        void Redo();
 
         void AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd);
 
@@ -147,17 +179,16 @@ namespace IWXMVM::Components
         Types::KeyframeValue LinearlyInterpolate(Types::KeyframeValueType valueType, const auto& keyframes,
                                                  const float tick) const;
 
-        void AddActionToHistory(std::shared_ptr<Action> action)
-        {
-            while (actionHistory.size() >= MAX_ACTIONHISTORY)
-                actionHistory.pop_front();
-            actionHistory.push_back(action);
-        }
+        void AddActionToHistory(std::shared_ptr<Action> action);
+        
+
+        void AddActionToUndidHistory(std::shared_ptr<Action> action);
 
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes;
         std::unordered_map<uint32_t, uint32_t> beginningTickMap;
         std::unordered_map<uint32_t, Types::KeyframeValue> beginningValueMap;
         const size_t MAX_ACTIONHISTORY = 25;
+        std::deque<std::shared_ptr<Action>> undidActionHistory;
         std::deque<std::shared_ptr<Action>> actionHistory;
     };
 }  // namespace IWXMVM::Components
