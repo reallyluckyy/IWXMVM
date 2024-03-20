@@ -147,9 +147,17 @@ namespace IWXMVM::Components
         Types::KeyframeValue LinearlyInterpolate(Types::KeyframeValueType valueType, const auto& keyframes,
                                                  const float tick) const;
 
+        void AddActionToHistory(std::shared_ptr<Action> action)
+        {
+            while (actionHistory.size() >= MAX_ACTIONHISTORY)
+                actionHistory.pop_front();
+            actionHistory.push_back(action);
+        }
+
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes;
         std::unordered_map<uint32_t, uint32_t> beginningTickMap;
         std::unordered_map<uint32_t, Types::KeyframeValue> beginningValueMap;
-        std::vector<std::shared_ptr<Action>> actionHistory;
+        const size_t MAX_ACTIONHISTORY = 25;
+        std::deque<std::shared_ptr<Action>> actionHistory;
     };
 }  // namespace IWXMVM::Components

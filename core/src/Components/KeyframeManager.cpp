@@ -172,7 +172,7 @@ namespace IWXMVM::Components
         if (!keyframes[property].empty())
         {
             std::shared_ptr<ClearAction> clearAction = std::make_shared<ClearAction>(property, keyframes[property]);
-            actionHistory.push_back(clearAction);
+            AddActionToHistory(clearAction);
             keyframes[property].clear();
         }
     }
@@ -225,13 +225,13 @@ namespace IWXMVM::Components
     {
         keyframes[property].emplace_back(keyframeToAdd);
         std::shared_ptr<AddAction> addAction = std::make_shared<AddAction>(property, keyframeToAdd);
-        actionHistory.push_back(addAction);
+        AddActionToHistory(addAction);
     }
 
     void KeyframeManager::RemoveKeyframe(Types::KeyframeableProperty property, size_t indexToRemove)
     {
         std::shared_ptr<RemoveAction> removeAction = std::make_shared<RemoveAction>(property, keyframes[property].at(indexToRemove));
-        actionHistory.push_back(removeAction);
+        AddActionToHistory(removeAction);
         keyframes[property].erase(keyframes[property].begin() + indexToRemove);
     }
 
@@ -252,7 +252,7 @@ namespace IWXMVM::Components
         LOG_DEBUG("End Tick " + std::to_string(keyframeToModify.id));
         std::shared_ptr<ModifyTickAction> modifyAction =
             std::make_shared<ModifyTickAction>(property, beginningTickMap[keyframeToModify.id], keyframeToModify.id);
-        actionHistory.push_back(modifyAction);
+        AddActionToHistory(modifyAction);
         beginningTickMap.erase(keyframeToModify.id);
     }
 
@@ -273,7 +273,7 @@ namespace IWXMVM::Components
         LOG_DEBUG("End Value " + std::to_string(keyframeToModify.id));
         std::shared_ptr<ModifyValueAction> modifyAction = std::make_shared<ModifyValueAction>(
             property, beginningValueMap[keyframeToModify.id], keyframeToModify.id);
-        actionHistory.push_back(modifyAction);
+        AddActionToHistory(modifyAction);
         beginningValueMap.erase(keyframeToModify.id);
     }
 
@@ -285,7 +285,7 @@ namespace IWXMVM::Components
         std::shared_ptr<ModifyTickAndValueAction> modifyAction =
             std::make_shared<ModifyTickAndValueAction>(property, beginningTickMap[keyframeToModify.id],
                                                        beginningValueMap[keyframeToModify.id], keyframeToModify.id);
-        actionHistory.push_back(modifyAction);
+        AddActionToHistory(modifyAction);
         beginningTickMap.erase(keyframeToModify.id);
         beginningValueMap.erase(keyframeToModify.id);
     }
