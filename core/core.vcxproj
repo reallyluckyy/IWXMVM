@@ -124,6 +124,7 @@
     <ClCompile Include="src\Components\OrbitCamera.cpp" />
     <ClCompile Include="src\Components\CaptureManager.cpp" />
     <ClCompile Include="src\Components\Playback.cpp" />
+    <ClCompile Include="src\Components\PlayerAnimation.cpp" />
     <ClCompile Include="src\Components\Rewinding.cpp" />
     <ClCompile Include="src\Components\VisualConfiguration.cpp" />
     <ClCompile Include="src\Configuration\Configuration.cpp" />
@@ -144,6 +145,7 @@
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
     <ClCompile Include="src\UI\Components\ControlsMenu.cpp" />
     <ClCompile Include="src\UI\Components\KeyframeEditor.cpp" />
+    <ClCompile Include="src\UI\Components\PlayerAnimationUI.cpp" />
     <ClCompile Include="src\UI\Components\Preferences.cpp" />
     <ClCompile Include="src\UI\Components\Readme.cpp" />
     <ClCompile Include="src\UI\ImGuiEx\ImGuiExtensions.cpp" />
@@ -178,6 +180,7 @@
     <ClInclude Include="src\Components\OrbitCamera.hpp" />
     <ClInclude Include="src\Components\CaptureManager.hpp" />
     <ClInclude Include="src\Components\Playback.hpp" />
+    <ClInclude Include="src\Components\PlayerAnimation.hpp" />
     <ClInclude Include="src\Components\Rewinding.hpp" />
     <ClInclude Include="src\Components\VisualConfiguration.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
@@ -191,6 +194,7 @@
     <ClInclude Include="src\Types\Dof.hpp" />
     <ClInclude Include="src\Types\Dvar.hpp" />
     <ClInclude Include="src\Types\Entity.hpp" />
+    <ClInclude Include="src\Types\Features.hpp" />
     <ClInclude Include="src\Types\Filmtweaks.hpp" />
     <ClInclude Include="src\Types\Game.hpp" />
     <ClInclude Include="src\Types\GameState.hpp" />
@@ -204,6 +208,7 @@
     <ClInclude Include="src\UI\Components\CameraMenu.hpp" />
     <ClInclude Include="src\UI\Components\ControlsMenu.hpp" />
     <ClInclude Include="src\UI\Components\KeyframeEditor.hpp" />
+    <ClInclude Include="src\UI\Components\PlayerAnimationUI.hpp" />
     <ClInclude Include="src\UI\Components\Preferences.hpp" />
     <ClInclude Include="src\UI\Components\Readme.hpp" />
     <ClInclude Include="src\UI\Components\VisualsMenu.hpp" />

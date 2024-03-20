@@ -62,6 +62,7 @@ namespace IWXMVM::UI
         if (!visible)
             return;
 
+        ImGui::SetNextWindowFocus();
         if (ImGui::Begin("Controls", &visible, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse))
         {
             if (ImGui::BeginTable("##controlsMenuTableOuter", 2, ImGuiTableFlags_SizingStretchSame))

@@ -71,6 +71,7 @@ namespace IWXMVM::UI
                 GetUIComponent(Component::ControlBar)->Render();
                 GetUIComponent(Component::ControlsMenu)->Render();
                 GetUIComponent(Component::Preferences)->Render();
+                GetUIComponent(Component::PlayerAnimation)->Render();
             }
 
             if (showImGuiDemo)

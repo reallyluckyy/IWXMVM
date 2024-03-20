@@ -55,6 +55,22 @@ namespace IWXMVM::UI
                 ImGui::EndMenu();
             }
 
+            if (ImGui::BeginMenu("Tools"))
+            {
+                ImGui::BeginDisabled(
+                    !(Mod::GetGameInterface()->GetSupportedFeatures() & Types::Features_ChangeAnimations)
+                );
+                
+                if (ImGui::MenuItem("Player Death Animations##0"))
+                {
+                    UIManager::Get().GetUIComponent<PlayerAnimation>(Component::PlayerAnimation)->ToggleVisibility();
+                }
+
+                ImGui::EndDisabled();
+
+                ImGui::EndMenu();
+            }
+
             if (ImGui::BeginMenu("About"))
             {
                 if (ImGui::MenuItem("Credits", ""))
