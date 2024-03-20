@@ -125,8 +125,6 @@ namespace IWXMVM::Components
         void ClearKeyframes();
         void ClearKeyframes(Types::KeyframeableProperty property);
 
-        void ClearActionHistory();
-
         bool AreKeyframesBeingModified();
 
         Types::KeyframeValue Interpolate(const Types::KeyframeableProperty& property,
@@ -143,7 +141,6 @@ namespace IWXMVM::Components
 
        private:
         KeyframeManager(){}
-        ~KeyframeManager();
 
         Types::KeyframeValue CubicInterpolate(Types::KeyframeValueType valueType, const auto& keyframes,
                                               const float tick) const;
@@ -153,6 +150,6 @@ namespace IWXMVM::Components
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>> keyframes;
         std::unordered_map<uint32_t, uint32_t> beginningTickMap;
         std::unordered_map<uint32_t, Types::KeyframeValue> beginningValueMap;
-        std::vector<Action*> actionHistory;
+        std::vector<std::shared_ptr<Action>> actionHistory;
     };
 }  // namespace IWXMVM::Components
