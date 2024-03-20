@@ -36,6 +36,7 @@ namespace IWXMVM
         virtual void InstallHooksAndPatches() = 0;
         virtual void SetupEventListeners() = 0;
 
+        virtual IDirect3DDevice9* GetGameDevicePtr() const = 0;
         virtual uintptr_t GetWndProc() = 0;
         virtual void SetMouseMode(Types::MouseMode mode) = 0;
         virtual Types::GameState GetGameState() = 0;
