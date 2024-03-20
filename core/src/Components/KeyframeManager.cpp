@@ -244,7 +244,9 @@ namespace IWXMVM::Components
                     if (castedAction)
                     {
                         castedAction->DoAction();
+                        nextActionWipes_undidActionHistory = false;
                         AddActionToHistory(castedAction);
+                        nextActionWipes_undidActionHistory = true;
                         Components::KeyframeManager::Get().SortAndSaveKeyframes(GetKeyframes(action->property));
                         return true;
                     }
@@ -459,6 +461,11 @@ namespace IWXMVM::Components
 
     void KeyframeManager::AddActionToHistory(std::shared_ptr<Action> action)
     {
+        if (nextActionWipes_undidActionHistory)
+        {
+            undidActionHistory.clear();
+            nextActionWipes_undidActionHistory = false;
+        }
         while (actionHistory.size() >= MAX_ACTIONHISTORY)
             actionHistory.pop_front();
         actionHistory.push_back(action);

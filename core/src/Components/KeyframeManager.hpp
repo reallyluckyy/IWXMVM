@@ -188,6 +188,7 @@ namespace IWXMVM::Components
         std::unordered_map<uint32_t, uint32_t> beginningTickMap;
         std::unordered_map<uint32_t, Types::KeyframeValue> beginningValueMap;
         const size_t MAX_ACTIONHISTORY = 25;
+        bool nextActionWipes_undidActionHistory;
         std::deque<std::shared_ptr<Action>> undidActionHistory;
         std::deque<std::shared_ptr<Action>> actionHistory;
     };
