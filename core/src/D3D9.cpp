@@ -90,7 +90,7 @@ namespace IWXMVM::D3D9
         return hr;
     }
 
-    std::optional<uintptr_t> reshadeOriginalEndSceneAddress;
+    std::optional<void*> reshadeEndSceneAddress;
 
     bool calledByEndscene = false;
     HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
@@ -113,7 +113,7 @@ namespace IWXMVM::D3D9
             GFX::GraphicsManager::Get().Render();
         }
 
-        if (!reshadeOriginalEndSceneAddress.has_value())
+        if (!reshadeEndSceneAddress.has_value())
         {
             UI::UIManager::Get().RunImGuiFrame();
         }
@@ -155,60 +155,18 @@ namespace IWXMVM::D3D9
         return hr;
     }
 
-    void TryFindOriginalEndScene(IDirect3DDevice9* device)
+    void CheckPresenceReshade()
     {
-        constexpr std::array<byte, 3> ORIGINAL_ENDSCENE_BYTES = {0x6A, 0x14, 0xB8};
+        auto device = Mod::GetGameInterface()->GetGameDevicePtr();
+        auto vTable = *reinterpret_cast<void***>(device);
+        auto orgEndScene = vTable[42];
 
-        reshadeOriginalEndSceneAddress = std::nullopt;
-
-        auto SafeRead = [](auto address) -> uintptr_t* { 
-            MEMORY_BASIC_INFORMATION mbi;
-            VirtualQuery(LPCVOID(address), &mbi, sizeof(mbi));
-
-            if (!(mbi.State & MEM_COMMIT))
-                return nullptr;
-
-            if ((mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS)))
-                return nullptr;
-
-            if (!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ |
-                                 PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)))
-                return nullptr;
-            
-            return *reinterpret_cast<uintptr_t**>(address);
-        };
-
-        // Witchcraft hackery to determine if reshade is present
-        // and get the address of the "real" EndScene function.
-        // This is not necessarily the most robust way to ensure reshade is present.
-        uintptr_t deviceAddress = (uintptr_t)device;
-        for (uintptr_t offset = 0x4; offset < 0x20; offset += 0x4)
+        if (orgEndScene != d3d9DeviceVTable[42])
         {
-            uintptr_t* originalDevice = SafeRead(deviceAddress + offset);
-            if (originalDevice == nullptr)
-                continue;
+            LOG_DEBUG("Detected Reshade presence; original EndScene address is {}, Reshade EndScene address is {}.",
+                      orgEndScene, d3d9DeviceVTable[42]);
 
-            uintptr_t* table = SafeRead(originalDevice);
-            if (table == nullptr)
-                continue;
-
-            auto endSceneCandidate = SafeRead(table + 42);
-            if (!endSceneCandidate)
-                continue;
-
-            if (!SafeRead(endSceneCandidate))
-                continue;
-            auto result = std::memcmp((void*)endSceneCandidate, ORIGINAL_ENDSCENE_BYTES.data(),
-                                        ORIGINAL_ENDSCENE_BYTES.size());
-            if (result == 0)
-            {
-                reshadeOriginalEndSceneAddress = (uintptr_t)endSceneCandidate;
-
-                LOG_DEBUG(
-                    "Detected reshade presence; original device is at offset {0:x}, real EndScene address: {1:x}",
-                    offset, reshadeOriginalEndSceneAddress.value());
-                break;
-            }
+            reshadeEndSceneAddress = std::exchange(d3d9DeviceVTable[42], orgEndScene);
         }
     }
 
@@ -240,7 +198,7 @@ namespace IWXMVM::D3D9
 
         LOG_DEBUG("Created dummy D3D device");
 
-        TryFindOriginalEndScene(dummyDevice);
+        CheckPresenceReshade();
 
         dummyDevice->Release();
         d3dObj->Release();
@@ -261,9 +219,10 @@ namespace IWXMVM::D3D9
         HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[42], (std::uintptr_t)EndScene_Hook,
                                 (std::uintptr_t*)&EndScene);
         
-        if (reshadeOriginalEndSceneAddress.has_value())
+        if (reshadeEndSceneAddress.has_value())
         {
-            HookManager::CreateHook(reshadeOriginalEndSceneAddress.value(), (std::uintptr_t)ReshadeOriginalEndScene_Hook,
+            HookManager::CreateHook((std::uintptr_t)reshadeEndSceneAddress.value(),
+                                    (std::uintptr_t)ReshadeOriginalEndScene_Hook,
                                     (std::uintptr_t*)&ReshadeOriginalEndScene);
         }
     }
