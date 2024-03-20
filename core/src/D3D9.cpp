@@ -202,12 +202,6 @@ namespace IWXMVM::D3D9
 
     void CreateDummyDevice()
     {
-        HWND hwnd = D3D9::FindWindowHandle();
-        if (!hwnd)
-        {
-            throw std::runtime_error("Failed to find HWND");
-        }
-
         IDirect3D9* d3dObj = Direct3DCreate9(D3D_SDK_VERSION);
         if (!d3dObj)
         {
@@ -215,27 +209,14 @@ namespace IWXMVM::D3D9
         }
 
         IDirect3DDevice9* dummyDevice = nullptr;
-
-        D3DPRESENT_PARAMETERS d3d_params = {};
-        d3d_params.SwapEffect = D3DSWAPEFFECT_DISCARD;
-        d3d_params.hDeviceWindow = hwnd;
-        d3d_params.Windowed = true;
+        D3DPRESENT_PARAMETERS d3d_params{};
 
         // Try to create device - will fail if in fullscreen
-        HRESULT result = d3dObj->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d_params.hDeviceWindow,
+        HRESULT result = d3dObj->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, NULL,
                                               D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT,
                                               &d3d_params, &dummyDevice);
 
-        // Try again in case it's fullscreen
-        if (FAILED(result) || !dummyDevice)
-        {
-            d3d_params.Windowed = false;
-            result = d3dObj->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d_params.hDeviceWindow,
-                                          D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_DISABLE_DRIVER_MANAGEMENT,
-                                          &d3d_params, &dummyDevice);
-        }
-
-        // Fail again -> death
+        // Fail -> death
         if (FAILED(result) || !dummyDevice)
         {
             d3dObj->Release();
