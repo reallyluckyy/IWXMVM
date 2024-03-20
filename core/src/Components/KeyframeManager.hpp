@@ -56,37 +56,40 @@ namespace IWXMVM::Components
             void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
         };
 
-        struct ModifyTickAndValueAction : Action
+        struct ModifyAction : Action
+        {
+            uint32_t id;
+            ModifyAction(const Types::KeyframeableProperty& prop, uint32_t keyframeID) : Action(prop), id(keyframeID){}
+        };
+
+        struct ModifyTickAndValueAction : ModifyAction
         {
             uint32_t oldTick;
-            uint32_t newTick;
             Types::KeyframeValue oldValue;
 
-            ModifyTickAndValueAction(const Types::KeyframeableProperty& prop, uint32_t oTick, uint32_t nTick,
-                                     Types::KeyframeValue oValue)
-                : Action(prop), oldTick(oTick), newTick(nTick), oldValue(oValue){}
+            ModifyTickAndValueAction(const Types::KeyframeableProperty& prop, uint32_t oTick,
+                                     Types::KeyframeValue oValue, uint32_t keyframeID)
+                : ModifyAction(prop, keyframeID), oldTick(oTick), oldValue(oValue){}
 
             void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
         };
 
-        struct ModifyTickAction : Action
+        struct ModifyTickAction : ModifyAction
         {
             uint32_t oldTick;
-            uint32_t newTick;
 
-            ModifyTickAction(const Types::KeyframeableProperty& prop, uint32_t oTick, uint32_t nTick)
-                : Action(prop), oldTick(oTick), newTick(nTick){}
+            ModifyTickAction(const Types::KeyframeableProperty& prop, uint32_t oTick, uint32_t keyframeID)
+                : ModifyAction(prop,keyframeID), oldTick(oTick){}
 
             void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
         };
 
-        struct ModifyValueAction : Action
+        struct ModifyValueAction : ModifyAction
         {
-            uint32_t tick;
             Types::KeyframeValue oldValue;
 
-            ModifyValueAction(const Types::KeyframeableProperty& prop, Types::KeyframeValue oValue, uint32_t _tick)
-                : Action(prop), oldValue(oValue), tick(_tick){}
+            ModifyValueAction(const Types::KeyframeableProperty& prop, Types::KeyframeValue oValue, uint32_t keyframeID)
+                : ModifyAction(prop, keyframeID), oldValue(oValue){}
 
             void Undo(std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const final;
         };

@@ -169,9 +169,12 @@ namespace IWXMVM::Components
 
     void KeyframeManager::ClearKeyframes(Types::KeyframeableProperty property)
     {
-        ClearAction* clearAction = new ClearAction(property, keyframes[property]);
-        actionHistory.push_back(clearAction);
-        keyframes[property].clear();
+        if (!keyframes[property].empty())
+        {
+            ClearAction* clearAction = new ClearAction(property, keyframes[property]);
+            actionHistory.push_back(clearAction);
+            keyframes[property].clear();
+        }
     }
 
     void KeyframeManager::ClearActionHistory()
@@ -250,16 +253,16 @@ namespace IWXMVM::Components
 
     void KeyframeManager::BeginModifyingKeyframeTick(Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("Begin Tick");
+        LOG_DEBUG("Begin Tick " + std::to_string(keyframeToModify.id));
         beginningTickMap[keyframeToModify.id] = keyframeToModify.tick;
     }
 
     void KeyframeManager::EndModifyingKeyframeTick(Types::KeyframeableProperty property,
                                                    Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("End Tick");
+        LOG_DEBUG("End Tick " + std::to_string(keyframeToModify.id));
         ModifyTickAction* modifyAction =
-            new ModifyTickAction(property, beginningTickMap[keyframeToModify.id], keyframeToModify.tick);
+            new ModifyTickAction(property, beginningTickMap[keyframeToModify.id], keyframeToModify.id);
         actionHistory.push_back(modifyAction);
         beginningTickMap.erase(keyframeToModify.id);
     }
@@ -271,16 +274,16 @@ namespace IWXMVM::Components
 
     void KeyframeManager::BeginModifyingKeyframeValue(Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("Begin Value");
+        LOG_DEBUG("Begin Value " + std::to_string(keyframeToModify.id));
         beginningValueMap[keyframeToModify.id] = keyframeToModify.value;
     }
 
     void KeyframeManager::EndModifyingKeyframeValue(Types::KeyframeableProperty property,
                                                    Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("End Value");
+        LOG_DEBUG("End Value " + std::to_string(keyframeToModify.id));
         ModifyValueAction* modifyAction =
-            new ModifyValueAction(property, beginningValueMap[keyframeToModify.id], keyframeToModify.tick);
+            new ModifyValueAction(property, beginningValueMap[keyframeToModify.id], keyframeToModify.id);
         actionHistory.push_back(modifyAction);
         beginningValueMap.erase(keyframeToModify.id);
     }
@@ -288,9 +291,9 @@ namespace IWXMVM::Components
     void KeyframeManager::EndModifyingKeyframeTickAndValue(Types::KeyframeableProperty property,
                                                     Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("End BOTH");
-        ModifyTickAndValueAction* modifyAction = new ModifyTickAndValueAction(property, beginningTickMap[keyframeToModify.id], keyframeToModify.tick,
-                                         beginningValueMap[keyframeToModify.id]);
+        LOG_DEBUG("End BOTH " + std::to_string(keyframeToModify.id));
+        ModifyTickAndValueAction* modifyAction = new ModifyTickAndValueAction(property, beginningTickMap[keyframeToModify.id],
+                                         beginningValueMap[keyframeToModify.id], keyframeToModify.id);
         actionHistory.push_back(modifyAction);
         beginningTickMap.erase(keyframeToModify.id);
         beginningValueMap.erase(keyframeToModify.id);
@@ -425,7 +428,7 @@ namespace IWXMVM::Components
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const
     {
         auto it = std::find_if(keyframes[property].begin(), keyframes[property].end(),
-                               [&](const Types::Keyframe& kf) { return kf.tick == keyframe.tick; });
+                               [&](const Types::Keyframe& kf) { return kf.id == keyframe.id; });
         if (it != keyframes[property].end())
             keyframes[property].erase(it);
     }
@@ -440,7 +443,7 @@ namespace IWXMVM::Components
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const
     {
         auto it = std::find_if(keyframes[property].begin(), keyframes[property].end(),
-                               [&](const Types::Keyframe& kf) { return kf.tick == newTick; });
+                               [&](const Types::Keyframe& kf) { return kf.id == id; });
         if (it != keyframes[property].end())
         {
             it->tick = oldTick;
@@ -452,7 +455,7 @@ namespace IWXMVM::Components
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const
     {
         auto it = std::find_if(keyframes[property].begin(), keyframes[property].end(),
-                               [&](const Types::Keyframe& kf) { return kf.tick == newTick; });
+                               [&](const Types::Keyframe& kf) { return kf.id == id; });
         if (it != keyframes[property].end())
             it->tick = oldTick;
     }
@@ -461,7 +464,7 @@ namespace IWXMVM::Components
         std::map<Types::KeyframeableProperty, std::vector<Types::Keyframe>>& keyframes) const
     {
         auto it = std::find_if(keyframes[property].begin(), keyframes[property].end(),
-                               [&](const Types::Keyframe& kf) { return kf.tick == tick; });
+                               [&](const Types::Keyframe& kf) { return kf.id == id; });
         if (it != keyframes[property].end())
             it->value = oldValue;
     }
