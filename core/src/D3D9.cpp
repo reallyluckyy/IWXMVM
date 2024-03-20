@@ -263,31 +263,25 @@ namespace IWXMVM::D3D9
         LOG_DEBUG("Hooked D3D9");
     }
 
-    BOOL CALLBACK CheckWindowPID(HWND hwnd, LPARAM lParam)
-    {
-        DWORD lpdwPID;
-        GetWindowThreadProcessId(hwnd, &lpdwPID);
-
-        // It's possible the console window will be found instead of the game one
-        // So we need to check against GetConsoleWindow()
-        if (lpdwPID == lParam && hwnd != GetConsoleWindow())
-        {
-            gameWindowHandle = hwnd;
-            return FALSE;
-        }
-
-        return TRUE;
-    }
-
     HWND FindWindowHandle()
     {
-        if (EnumWindows(CheckWindowPID, (LPARAM)GetCurrentProcessId()))
+        auto* device = GetDevice();
+        if (device == nullptr)
         {
-            LOG_CRITICAL("Failed to find the game window");
+            LOG_CRITICAL("Failed to get the game window");
             return nullptr;
         }
 
-        return gameWindowHandle;
+        D3DDEVICE_CREATION_PARAMETERS params{};
+        device->GetCreationParameters(&params);
+
+        if (params.hFocusWindow == nullptr)
+        {
+            LOG_CRITICAL("Failed to get the game window");
+            return nullptr;
+        }
+
+        return gameWindowHandle = params.hFocusWindow;
     }
 
     IDirect3DDevice9* GetDevice()
