@@ -113,6 +113,8 @@ namespace IWXMVM::Components
             std::unique_ptr<KeyframeManager::Action> GetUndoAction() const final;
         };
 
+        void UseActionHistory(std::deque<std::shared_ptr<Action>>& actions,
+                              const std::function<void(std::shared_ptr<Action>)>& handleAction);
         void Undo();
         void Redo();
 

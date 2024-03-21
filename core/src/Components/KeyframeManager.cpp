@@ -198,69 +198,38 @@ namespace IWXMVM::Components
         Components::KeyframeSerializer::WriteRecent();
     }
 
-    void KeyframeManager::Undo()
+    void KeyframeManager::UseActionHistory(std::deque<std::shared_ptr<Action>>& actions,
+                                           const std::function<void(std::shared_ptr<Action>)>& handleAction)
     {
-        if (!actionHistory.empty() && !AreKeyframesBeingModified())
+        if (!actions.empty() && !AreKeyframesBeingModified())
         {
-            std::shared_ptr<Action> action = actionHistory.back();
-            actionHistory.pop_back();
+            std::shared_ptr<Action> action = actions.back();
+            actions.pop_back();
             if (action)
             {
-                auto handleAction = [&](std::shared_ptr<Action> castedAction) 
-                {
-                    if (castedAction)
-                    {
-                        castedAction->GetUndoAction()->DoAction();
-                        AddAction(undidActionHistory, castedAction);
-                        nextActionWipeUndidHistory = true;
-                        Components::KeyframeManager::Get().SortAndSaveKeyframes(GetKeyframes(action->property));
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                };
-
-                if (handleAction(std::dynamic_pointer_cast<ModifyTickAndValueAction>(action))) return;
-                if (handleAction(std::dynamic_pointer_cast<ModifyTickAction>(action))) return;
-                if (handleAction(std::dynamic_pointer_cast<ModifyValueAction>(action))) return;
-                if (handleAction(std::dynamic_pointer_cast<RemoveKeyframesAction>(action))) return;
-                if (handleAction(std::dynamic_pointer_cast<AddKeyframesAction>(action))) return;
+                handleAction(action);
+                Components::KeyframeManager::Get().SortAndSaveKeyframes(GetKeyframes(action->property));
             }
         }
     }
 
+    void KeyframeManager::Undo()
+    {
+        UseActionHistory(actionHistory, [&](std::shared_ptr<Action> action)
+            {
+                action->GetUndoAction()->DoAction();
+                AddAction(undidActionHistory, action);
+                nextActionWipeUndidHistory = true;
+            });
+    }
+
     void KeyframeManager::Redo()
     {
-        if (!undidActionHistory.empty() && !AreKeyframesBeingModified())
-        {
-            std::shared_ptr<Action> action = undidActionHistory.back();
-            undidActionHistory.pop_back();
-            if (action)
+        UseActionHistory(undidActionHistory, [&](std::shared_ptr<Action> action) 
             {
-                auto handleAction = [&](std::shared_ptr<Action> castedAction)
-                {
-                    if (castedAction)
-                    {
-                        castedAction->DoAction();
-                        AddAction(actionHistory,castedAction);
-                        Components::KeyframeManager::Get().SortAndSaveKeyframes(GetKeyframes(action->property));
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                };
-
-                if (handleAction(std::dynamic_pointer_cast<ModifyTickAndValueAction>(action)))return;
-                if (handleAction(std::dynamic_pointer_cast<ModifyTickAction>(action)))return;
-                if (handleAction(std::dynamic_pointer_cast<ModifyValueAction>(action)))return;
-                if (handleAction(std::dynamic_pointer_cast<RemoveKeyframesAction>(action)))return;
-                if (handleAction(std::dynamic_pointer_cast<AddKeyframesAction>(action)))return;
-            }
-        }
+                action->DoAction();
+                AddAction(actionHistory, action);
+            });
     }
 
     void KeyframeManager::AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd)
