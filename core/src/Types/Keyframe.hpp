@@ -8,10 +8,6 @@ namespace IWXMVM::Types
         glm::vec3 position;
         glm::vec3 rotation;
         float fov;
-        bool operator==(const CameraData& other) const
-        {
-            return position == other.position && rotation == other.rotation && fov == other.fov;
-        }
     };
 
     union KeyframeValue
@@ -19,11 +15,6 @@ namespace IWXMVM::Types
         float floatingPoint;
         glm::vec3 vector3;
         CameraData cameraData;
-
-        KeyframeValue()
-        {
-
-        }
 
         KeyframeValue(float floatingPoint) : floatingPoint(floatingPoint)
         {
