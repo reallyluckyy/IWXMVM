@@ -365,17 +365,19 @@ namespace IWXMVM::UI
 
     void DemoLoader::RenderSearchBar()
     {
-        bool isConsoleOpen = Mod::GetGameInterface()->IsConsoleOpen();
-        if (isConsoleOpen)
+        int flags = ImGuiInputTextFlags_CallbackResize;
+        bool disableInputText =
+            Mod::GetGameInterface()->IsConsoleOpen() ||
+            (UI::UIManager::Get().IsControllableCameraModeSelected() && UI::UIManager::Get().GetUIComponent(UI::Component::GameView)->HasFocus());
+        if (disableInputText)
         {
-            ImGui::SetKeyboardFocusHere(-1);
             ImGui::BeginDisabled();
+            flags = flags | ImGuiInputTextFlags_ReadOnly;
         }
-
+        
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputTextWithHint(
-            "##SearchInput", "Search...", &searchBarText[0], searchBarText.capacity() + 1,
-            ImGuiInputTextFlags_CallbackResize,
+            "##SearchInput", "Search...", &searchBarText[0], searchBarText.capacity() + 1, flags,
             [](ImGuiInputTextCallbackData* data) -> int
             {
                 if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
@@ -388,7 +390,7 @@ namespace IWXMVM::UI
             },
             &searchBarText);
 
-        if (isConsoleOpen)
+        if (disableInputText)
         {
             ImGui::EndDisabled();
         }
