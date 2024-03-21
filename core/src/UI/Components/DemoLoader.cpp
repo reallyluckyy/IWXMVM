@@ -365,6 +365,13 @@ namespace IWXMVM::UI
 
     void DemoLoader::RenderSearchBar()
     {
+        bool isConsoleOpen = Mod::GetGameInterface()->IsConsoleOpen();
+        if (isConsoleOpen)
+        {
+            ImGui::SetKeyboardFocusHere(-1);
+            ImGui::BeginDisabled();
+        }
+
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputTextWithHint(
             "##SearchInput", "Search...", &searchBarText[0], searchBarText.capacity() + 1,
@@ -380,6 +387,11 @@ namespace IWXMVM::UI
                 return 0;
             },
             &searchBarText);
+
+        if (isConsoleOpen)
+        {
+            ImGui::EndDisabled();
+        }
 
         if (lastSearchBarText != searchBarText)
         {
