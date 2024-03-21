@@ -219,7 +219,7 @@ namespace IWXMVM::UI
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Right))
             {
-                Components::KeyframeManager::Get().RemoveKeyframe(property, std::distance(keyframes.begin(), it));
+                Components::KeyframeManager::Get().RemoveKeyframe(property, it);
                 break;
             }
 
@@ -540,7 +540,7 @@ namespace IWXMVM::UI
 
             if (hovered && IsMouseClicked(ImGuiMouseButton_Right))
             {
-                Components::KeyframeManager::Get().RemoveKeyframe(property, std::distance(keyframes.begin(),it));
+                Components::KeyframeManager::Get().RemoveKeyframe(property, it);
                 break;
             }
 

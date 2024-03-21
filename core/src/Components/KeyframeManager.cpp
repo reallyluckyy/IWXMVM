@@ -178,12 +178,7 @@ namespace IWXMVM::Components
 
     void KeyframeManager::ClearKeyframes(Types::KeyframeableProperty property)
     {
-        if (!keyframes[property].empty())
-        {
-            std::shared_ptr<RemoveKeyframesAction> clearAction = std::make_shared<RemoveKeyframesAction>(property, keyframes[property]);
-            clearAction->DoAction();
-            AddActionToHistory(clearAction);
-        }
+        RemoveKeyframes(property, keyframes[property]);
     }
 
     bool KeyframeManager::AreKeyframesBeingModified()
@@ -198,12 +193,12 @@ namespace IWXMVM::Components
         Components::KeyframeSerializer::WriteRecent();
     }
 
-    void KeyframeManager::UseActionHistory(std::deque<std::shared_ptr<Action>>& actions,
-                                           const std::function<void(std::shared_ptr<Action>)>& handleAction)
+    void KeyframeManager::UseMostRecentAction(std::deque<std::shared_ptr<KeyframeAction>>& actions,
+                                           const std::function<void(std::shared_ptr<KeyframeAction>)>& handleAction)
     {
         if (!actions.empty() && !AreKeyframesBeingModified())
         {
-            std::shared_ptr<Action> action = actions.back();
+            std::shared_ptr<KeyframeAction> action = actions.back();
             actions.pop_back();
             if (action)
             {
@@ -215,36 +210,57 @@ namespace IWXMVM::Components
 
     void KeyframeManager::Undo()
     {
-        UseActionHistory(actionHistory, [&](std::shared_ptr<Action> action)
+        UseMostRecentAction(actionHistory, [&](std::shared_ptr<KeyframeAction> action)
             {
                 action->GetUndoAction()->DoAction();
-                AddAction(undidActionHistory, action);
+                AddAction_Internal(undidActionHistory, action);
                 nextActionWipeUndidHistory = true;
             });
     }
 
     void KeyframeManager::Redo()
     {
-        UseActionHistory(undidActionHistory, [&](std::shared_ptr<Action> action) 
+        UseMostRecentAction(undidActionHistory, [&](std::shared_ptr<KeyframeAction> action) 
             {
                 action->DoAction();
-                AddAction(actionHistory, action);
+                AddAction_Internal(actionHistory, action);
             });
     }
 
     void KeyframeManager::AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd)
     {
-        std::shared_ptr<AddKeyframesAction> addAction = std::make_shared<AddKeyframesAction>(property, std::vector<Types::Keyframe>{keyframeToAdd});
+        AddKeyframes(property, std::vector<Types::Keyframe>{keyframeToAdd});
+    }
+
+    void KeyframeManager::AddKeyframes(Types::KeyframeableProperty property,
+                                       const std::vector<Types::Keyframe> keyframesToAdd)
+    {
+        std::shared_ptr<AddKeyframesAction> addAction = std::make_shared<AddKeyframesAction>(property, keyframesToAdd);
         addAction->DoAction();
         AddActionToHistory(addAction);
     }
 
+    void KeyframeManager::RemoveKeyframe(Types::KeyframeableProperty property,
+                                         std::vector<Types::Keyframe>::iterator it)
+    {
+        RemoveKeyframes(property, {*it});
+    }
+
     void KeyframeManager::RemoveKeyframe(Types::KeyframeableProperty property, size_t indexToRemove)
     {
-        std::shared_ptr<RemoveKeyframesAction> removeAction = std::make_shared<RemoveKeyframesAction>(
-            property, std::vector<Types::Keyframe>{keyframes[property].at(indexToRemove)});
-        removeAction->DoAction();
-        AddActionToHistory(removeAction);
+        RemoveKeyframes(property, {keyframes[property].at(indexToRemove)});
+    }
+
+    void KeyframeManager::RemoveKeyframes(Types::KeyframeableProperty property,
+                                          std::vector<Types::Keyframe> keyframesToRemove)
+    {
+        if (!keyframes[property].empty())
+        {
+            std::shared_ptr<RemoveKeyframesAction> removeAction =
+                std::make_shared<RemoveKeyframesAction>(property, keyframesToRemove);
+            removeAction->DoAction();
+            AddActionToHistory(removeAction);
+        }
     }
 
     bool KeyframeManager::IsKeyframeTickBeingModified(Types::Keyframe& keyframe)
@@ -419,21 +435,21 @@ namespace IWXMVM::Components
     }
 
 
-    void KeyframeManager::AddAction(std::deque<std::shared_ptr<Action>>& actionQue, std::shared_ptr<Action> action) const
+    void KeyframeManager::AddAction_Internal(std::deque<std::shared_ptr<KeyframeAction>>& actionQue, std::shared_ptr<KeyframeAction> action) const
     {
         while (actionQue.size() >= MAX_ACTIONHISTORY)
             actionQue.pop_front();
         actionQue.push_back(action);
     }
 
-    void KeyframeManager::AddActionToHistory(std::shared_ptr<Action> action)
+    void KeyframeManager::AddActionToHistory(std::shared_ptr<KeyframeAction> action)
     {
         if (nextActionWipeUndidHistory)
         {
             undidActionHistory.clear();
             nextActionWipeUndidHistory = false;
         }
-        AddAction(actionHistory , action);
+        AddAction_Internal(actionHistory , action);
     }
 
     void KeyframeManager::ModifyTickAction::DoAction() const
@@ -442,19 +458,19 @@ namespace IWXMVM::Components
             it->tick = newTick;
     }
 
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::ModifyTickAction::GetUndoAction() const
+    std::unique_ptr<KeyframeManager::KeyframeAction> KeyframeManager::ModifyTickAction::GetUndoAction() const
     {
         return std::make_unique<ModifyTickAction>(property,newTick,oldTick,id);
     }
 
-    std::vector<Types::Keyframe>::iterator KeyframeManager::Action::GetKeyframe(uint32_t id) const
+    std::vector<Types::Keyframe>::iterator KeyframeManager::KeyframeAction::GetKeyframe(uint32_t id) const
     {
         auto& keyframes = GetKeyframes();
         auto it = std::find_if(keyframes.begin(), keyframes.end(), [&](const Types::Keyframe& kf) { return kf.id == id; });
         return it;
     }
 
-    std::vector<Types::Keyframe>& KeyframeManager::Action::GetKeyframes() const
+    std::vector<Types::Keyframe>& KeyframeManager::KeyframeAction::GetKeyframes() const
     {
         return KeyframeManager::Get().GetKeyframes(property);
     }
@@ -465,7 +481,7 @@ namespace IWXMVM::Components
             it->value = newValue;
     }
 
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::ModifyValueAction::GetUndoAction() const
+    std::unique_ptr<KeyframeManager::KeyframeAction> KeyframeManager::ModifyValueAction::GetUndoAction() const
     {
         return std::make_unique<ModifyValueAction>(property, newValue, oldValue, id);
     }
@@ -479,7 +495,7 @@ namespace IWXMVM::Components
         }
     }
 
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::ModifyTickAndValueAction::GetUndoAction() const
+    std::unique_ptr<KeyframeManager::KeyframeAction> KeyframeManager::ModifyTickAndValueAction::GetUndoAction() const
     {
         return std::make_unique<ModifyTickAndValueAction>(property,newTick,oldTick,newValue,oldValue,id);
     }
@@ -495,7 +511,7 @@ namespace IWXMVM::Components
         }
     }
 
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::RemoveKeyframesAction::GetUndoAction() const
+    std::unique_ptr<KeyframeManager::KeyframeAction> KeyframeManager::RemoveKeyframesAction::GetUndoAction() const
     {
         return std::make_unique<AddKeyframesAction>(property,keyframes);
     }
@@ -508,7 +524,7 @@ namespace IWXMVM::Components
         }
     }
 
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::AddKeyframesAction::GetUndoAction() const
+    std::unique_ptr<KeyframeManager::KeyframeAction> KeyframeManager::AddKeyframesAction::GetUndoAction() const
     {
         return std::make_unique<RemoveKeyframesAction>(property, keyframes);
     }
