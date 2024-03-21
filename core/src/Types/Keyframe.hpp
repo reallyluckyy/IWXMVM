@@ -16,6 +16,10 @@ namespace IWXMVM::Types
         glm::vec3 vector3;
         CameraData cameraData;
 
+        KeyframeValue() : floatingPoint(0.0f)
+        {
+        }
+
         KeyframeValue(float floatingPoint) : floatingPoint(floatingPoint)
         {
         }

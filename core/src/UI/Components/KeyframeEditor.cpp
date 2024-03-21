@@ -207,7 +207,8 @@ namespace IWXMVM::UI
 
             isAnyKeyframeHovered |= hovered;
 
-            if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
+            if (hovered && IsMouseClicked(ImGuiMouseButton_Left) && selectedKeyframeId == std::nullopt &&
+                selectedKeyframeValueIndex == std::nullopt)
             {
                 selectedKeyframeId = k.id;
                 selectedKeyframeValueIndex = std::nullopt;
@@ -447,7 +448,8 @@ namespace IWXMVM::UI
 
             isAnyKeyframeHovered |= hovered;
 
-            if (hovered && IsMouseClicked(ImGuiMouseButton_Left))
+            if (hovered && IsMouseClicked(ImGuiMouseButton_Left) && selectedKeyframeId ==
+                    std::nullopt && selectedKeyframeValueIndex == std::nullopt)
             {
                 selectedKeyframeId = k.id;
                 selectedKeyframeValueIndex = keyframeValueIndex;
@@ -463,12 +465,8 @@ namespace IWXMVM::UI
             window->DrawList->AddText(ImVec2(text_bb.Max.x + 2, text_bb.Min.y), GetColorU32(ImGuiCol_Text),
                                       keyframeValueLabel.c_str());
 
-            if (selectedKeyframeId == k.id && selectedKeyframeValueIndex == keyframeValueIndex)
+            if (selectedKeyframeId == k.id && selectedKeyframeValueIndex == keyframeValueIndex )
             {
-                auto [tick, value] =
-                    GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
-                value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
-                
                 if (!Components::KeyframeManager::Get().IsKeyframeTickBeingModified(k) &&
                     !Components::KeyframeManager::Get().IsKeyframeValueBeingModified(k))
                 {
@@ -476,11 +474,16 @@ namespace IWXMVM::UI
                     Components::KeyframeManager::Get().BeginModifyingKeyframeValue(k);
                 }
 
+                auto [tick, value] =
+                    GetKeyframeForPosition(GetMousePos(), frame_bb, displayStartTick, displayEndTick, valueBoundaries);
+
                 k.tick = tick;
+
+                value.floatingPoint = glm::fclamp(value.floatingPoint, valueBoundaries.x, valueBoundaries.y);
                 k.value.SetByIndex(keyframeValueIndex,
                                    glm::fclamp(value.floatingPoint, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE));
-
                 Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
+
                 if (IsMouseReleased(ImGuiMouseButton_Left))
                 {
                     selectedKeyframeId = std::nullopt;
