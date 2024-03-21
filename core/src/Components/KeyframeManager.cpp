@@ -150,6 +150,7 @@ namespace IWXMVM::Components
         Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
             ClearKeyframes();
             actionHistory.clear();
+            undidActionHistory.clear();
             Components::KeyframeSerializer::ReadRecent();
         });
 
@@ -179,9 +180,9 @@ namespace IWXMVM::Components
     {
         if (!keyframes[property].empty())
         {
-            std::shared_ptr<RemoveManyKeyframes> clearAction = std::make_shared<RemoveManyKeyframes>(property, keyframes[property]);
+            std::shared_ptr<RemoveKeyframesAction> clearAction = std::make_shared<RemoveKeyframesAction>(property, keyframes[property]);
+            clearAction->DoAction();
             AddActionToHistory(clearAction);
-            keyframes[property].clear();
         }
     }
 
@@ -210,7 +211,8 @@ namespace IWXMVM::Components
                     if (castedAction)
                     {
                         castedAction->GetUndoAction()->DoAction();
-                        AddActionToUndidHistory(castedAction);
+                        AddAction(undidActionHistory, castedAction);
+                        nextActionWipeUndidHistory = true;
                         Components::KeyframeManager::Get().SortAndSaveKeyframes(GetKeyframes(action->property));
                         return true;
                     }
@@ -220,13 +222,11 @@ namespace IWXMVM::Components
                     }
                 };
 
-                if (handleAction(std::dynamic_pointer_cast<AddAction>(action))) return;
-                if (handleAction(std::dynamic_pointer_cast<RemoveAction>(action))) return;
                 if (handleAction(std::dynamic_pointer_cast<ModifyTickAndValueAction>(action))) return;
                 if (handleAction(std::dynamic_pointer_cast<ModifyTickAction>(action))) return;
                 if (handleAction(std::dynamic_pointer_cast<ModifyValueAction>(action))) return;
-                if (handleAction(std::dynamic_pointer_cast<RemoveManyKeyframes>(action))) return;
-                if (handleAction(std::dynamic_pointer_cast<AddManyKeyframes>(action))) return;
+                if (handleAction(std::dynamic_pointer_cast<RemoveKeyframesAction>(action))) return;
+                if (handleAction(std::dynamic_pointer_cast<AddKeyframesAction>(action))) return;
             }
         }
     }
@@ -244,9 +244,7 @@ namespace IWXMVM::Components
                     if (castedAction)
                     {
                         castedAction->DoAction();
-                        nextActionWipes_undidActionHistory = false;
-                        AddActionToHistory(castedAction);
-                        nextActionWipes_undidActionHistory = true;
+                        AddAction(actionHistory,castedAction);
                         Components::KeyframeManager::Get().SortAndSaveKeyframes(GetKeyframes(action->property));
                         return true;
                     }
@@ -256,29 +254,28 @@ namespace IWXMVM::Components
                     }
                 };
 
-                if (handleAction(std::dynamic_pointer_cast<AddAction>(action)))return;
-                if (handleAction(std::dynamic_pointer_cast<RemoveAction>(action)))return;
                 if (handleAction(std::dynamic_pointer_cast<ModifyTickAndValueAction>(action)))return;
                 if (handleAction(std::dynamic_pointer_cast<ModifyTickAction>(action)))return;
                 if (handleAction(std::dynamic_pointer_cast<ModifyValueAction>(action)))return;
-                if (handleAction(std::dynamic_pointer_cast<RemoveManyKeyframes>(action)))return;
-                if (handleAction(std::dynamic_pointer_cast<AddManyKeyframes>(action)))return;
+                if (handleAction(std::dynamic_pointer_cast<RemoveKeyframesAction>(action)))return;
+                if (handleAction(std::dynamic_pointer_cast<AddKeyframesAction>(action)))return;
             }
         }
     }
 
     void KeyframeManager::AddKeyframe(Types::KeyframeableProperty property, Types::Keyframe keyframeToAdd)
     {
-        std::shared_ptr<AddAction> addAction = std::make_shared<AddAction>(property, keyframeToAdd);
-        AddActionToHistory(addAction);
+        std::shared_ptr<AddKeyframesAction> addAction = std::make_shared<AddKeyframesAction>(property, std::vector<Types::Keyframe>{keyframeToAdd});
         addAction->DoAction();
+        AddActionToHistory(addAction);
     }
 
     void KeyframeManager::RemoveKeyframe(Types::KeyframeableProperty property, size_t indexToRemove)
     {
-        std::shared_ptr<RemoveAction> removeAction = std::make_shared<RemoveAction>(property, keyframes[property].at(indexToRemove));
-        AddActionToHistory(removeAction);
+        std::shared_ptr<RemoveKeyframesAction> removeAction = std::make_shared<RemoveKeyframesAction>(
+            property, std::vector<Types::Keyframe>{keyframes[property].at(indexToRemove)});
         removeAction->DoAction();
+        AddActionToHistory(removeAction);
     }
 
     bool KeyframeManager::IsKeyframeTickBeingModified(Types::Keyframe& keyframe)
@@ -452,44 +449,22 @@ namespace IWXMVM::Components
         }
     }
 
-    void KeyframeManager::AddActionToUndidHistory(std::shared_ptr<Action> action)
+
+    void KeyframeManager::AddAction(std::deque<std::shared_ptr<Action>>& actionQue, std::shared_ptr<Action> action) const
     {
-        while (undidActionHistory.size() >= MAX_ACTIONHISTORY)
-            undidActionHistory.pop_front();
-        undidActionHistory.push_back(action);
+        while (actionQue.size() >= MAX_ACTIONHISTORY)
+            actionQue.pop_front();
+        actionQue.push_back(action);
     }
 
     void KeyframeManager::AddActionToHistory(std::shared_ptr<Action> action)
     {
-        if (nextActionWipes_undidActionHistory)
+        if (nextActionWipeUndidHistory)
         {
             undidActionHistory.clear();
-            nextActionWipes_undidActionHistory = false;
+            nextActionWipeUndidHistory = false;
         }
-        while (actionHistory.size() >= MAX_ACTIONHISTORY)
-            actionHistory.pop_front();
-        actionHistory.push_back(action);
-    }
-
-    void KeyframeManager::AddAction::DoAction() const
-    {
-        GetKeyframes().emplace_back(keyframe);
-    }
-
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::AddAction::GetUndoAction() const
-    {
-        return std::make_unique<RemoveAction>(property, keyframe);
-    }
-
-    void KeyframeManager::RemoveAction::DoAction() const
-    {
-        if (auto it = GetKeyframe(keyframe.id); it != GetKeyframes().end())
-            GetKeyframes().erase(it);
-    }
-
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::RemoveAction::GetUndoAction() const
-    {
-        return std::make_unique<AddAction>(property, keyframe);
+        AddAction(actionHistory , action);
     }
 
     void KeyframeManager::ModifyTickAction::DoAction() const
@@ -540,7 +515,7 @@ namespace IWXMVM::Components
         return std::make_unique<ModifyTickAndValueAction>(property,newTick,oldTick,newValue,oldValue,id);
     }
 
-    void KeyframeManager::RemoveManyKeyframes::DoAction() const
+    void KeyframeManager::RemoveKeyframesAction::DoAction() const
     {
         for (auto& keyframe : keyframes)
         {
@@ -551,12 +526,12 @@ namespace IWXMVM::Components
         }
     }
 
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::RemoveManyKeyframes::GetUndoAction() const
+    std::unique_ptr<KeyframeManager::Action> KeyframeManager::RemoveKeyframesAction::GetUndoAction() const
     {
-        return std::make_unique<AddManyKeyframes>(property,keyframes);
+        return std::make_unique<AddKeyframesAction>(property,keyframes);
     }
 
-    void KeyframeManager::AddManyKeyframes::DoAction() const
+    void KeyframeManager::AddKeyframesAction::DoAction() const
     {
         for (auto& keyframe : keyframes)
         {
@@ -564,9 +539,9 @@ namespace IWXMVM::Components
         }
     }
 
-    std::unique_ptr<KeyframeManager::Action> KeyframeManager::AddManyKeyframes::GetUndoAction() const
+    std::unique_ptr<KeyframeManager::Action> KeyframeManager::AddKeyframesAction::GetUndoAction() const
     {
-        return std::make_unique<RemoveManyKeyframes>(property, keyframes);
+        return std::make_unique<RemoveKeyframesAction>(property, keyframes);
     }
 
 }  // namespace IWXMVM::Components
