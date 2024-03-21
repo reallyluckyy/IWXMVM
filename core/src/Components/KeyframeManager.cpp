@@ -270,14 +270,14 @@ namespace IWXMVM::Components
 
     void KeyframeManager::BeginModifyingKeyframeTick(Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("Begin Tick " + std::to_string(keyframeToModify.id));
+        LOG_DEBUG("Begin Modifying Tick " + std::to_string(keyframeToModify.id));
         beginningTickMap[keyframeToModify.id] = keyframeToModify.tick;
     }
 
     void KeyframeManager::EndModifyingKeyframeTick(Types::KeyframeableProperty property,
                                                    Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("End Tick " + std::to_string(keyframeToModify.id));
+        LOG_DEBUG("End Modifying Tick " + std::to_string(keyframeToModify.id));
         std::shared_ptr<ModifyTickAction> modifyAction = std::make_shared<ModifyTickAction>(
             property, beginningTickMap[keyframeToModify.id], keyframeToModify.tick, keyframeToModify.id);
         AddActionToHistory(modifyAction);
@@ -291,14 +291,14 @@ namespace IWXMVM::Components
 
     void KeyframeManager::BeginModifyingKeyframeValue(Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("Begin Value " + std::to_string(keyframeToModify.id));
+        LOG_DEBUG("Begin Modifying Value " + std::to_string(keyframeToModify.id));
         beginningValueMap[keyframeToModify.id] = keyframeToModify.value;
     }
 
     void KeyframeManager::EndModifyingKeyframeValue(Types::KeyframeableProperty property,
                                                    Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("End Value " + std::to_string(keyframeToModify.id));
+        LOG_DEBUG("End Modifying Value " + std::to_string(keyframeToModify.id));
         std::shared_ptr<ModifyValueAction> modifyAction = std::make_shared<ModifyValueAction>(
             property, beginningValueMap[keyframeToModify.id], keyframeToModify.value, keyframeToModify.id);
         AddActionToHistory(modifyAction);
@@ -308,7 +308,7 @@ namespace IWXMVM::Components
     void KeyframeManager::EndModifyingKeyframeTickAndValue(Types::KeyframeableProperty property,
                                                     Types::Keyframe& keyframeToModify)
     {
-        LOG_DEBUG("End BOTH " + std::to_string(keyframeToModify.id));
+        LOG_DEBUG("End Modifying Tick & Value " + std::to_string(keyframeToModify.id));
         
         std::shared_ptr<ModifyTickAndValueAction> modifyAction = std::make_shared<ModifyTickAndValueAction>(
             property, beginningTickMap[keyframeToModify.id], keyframeToModify.tick,
