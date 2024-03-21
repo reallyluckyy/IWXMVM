@@ -15,7 +15,6 @@
 #include "Components/Playback.hpp"
 #include "Events.hpp"
 #include "Utilities/PathUtils.hpp"
-#include "Components/KeyframeManager.hpp"
 
 namespace IWXMVM::UI
 {
