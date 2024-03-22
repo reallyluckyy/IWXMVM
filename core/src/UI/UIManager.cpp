@@ -108,7 +108,7 @@ namespace IWXMVM::UI
     {
         auto& uiManager = UIManager::Get();
         auto& gameView = uiManager.GetUIComponent(UI::Component::GameView);
-        if ((gameView->HasFocus() && uiManager.IsControllableCameraModeSelected()))
+        if (gameView->HasFocus() && uiManager.IsControllableCameraModeSelected())
         {
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         }
