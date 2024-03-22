@@ -46,9 +46,9 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
         {
             auto& torsoAnim = reinterpret_cast<std::uint32_t&>(centity.nextState.torsoAnim);
 
-            // promod animation bugs fix
             if ((torsoAnim & 511) == 255 || (torsoAnim & 511) == 278)
             {
+                // promod animation bugs fix
                 torsoAnim = 0;
             }
         }
@@ -62,10 +62,12 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
 
                 if ((legsAnim & 511) < std::min(ANIM_COUNT, animations.size()))
                 {
-                    // replace death animation
                     const std::string_view animName{animations[(legsAnim & 511)].name};
                     if (animName.find("death") != std::string_view::npos)
+                    {
+                        // replace death animation
                         Components::PlayerAnimation::SetPlayerAnimation(animName, legsAnim);
+                    } 
                 }
             }
 
