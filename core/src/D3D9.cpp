@@ -91,6 +91,10 @@ namespace IWXMVM::D3D9
     }
 
     std::optional<void*> reshadeEndSceneAddress;
+    bool IsReshadePresent()
+    {
+        return reshadeEndSceneAddress.has_value();
+    }
 
     bool calledByEndscene = false;
     HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
