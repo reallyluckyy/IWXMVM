@@ -70,10 +70,6 @@ namespace IWXMVM
 
             // TODO: extract the entire resource release operation to a single function?
             // this is done for d3d9 reset, d3d9 create device, and here below
-            for (const auto& component : UI::UIManager::Get().GetUIComponents())
-            {
-                component->Release();
-            }
             GFX::GraphicsManager::Get().Uninitialize();
             LOG_DEBUG("Released UI and graphic resources");
             UI::UIManager::Get().ShutdownImGui();

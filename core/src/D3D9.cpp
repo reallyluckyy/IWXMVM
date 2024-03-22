@@ -67,11 +67,6 @@ namespace IWXMVM::D3D9
     {
         LOG_DEBUG("CreateDevice called with hwnd {0:x}", (std::uintptr_t)pPresentationParameters->hDeviceWindow);
 
-        for (const auto& component : UI::UIManager::Get().GetUIComponents())
-        {
-            component->Release();
-        }
-
         GFX::GraphicsManager::Get().Uninitialize();
         UI::UIManager::Get().ShutdownImGui();
 
@@ -150,6 +145,8 @@ namespace IWXMVM::D3D9
         ImGui_ImplDX9_InvalidateDeviceObjects();
         HRESULT hr = Reset(pDevice, pPresentationParameters);
         ImGui_ImplDX9_CreateDeviceObjects();
+
+        // do we need to re-initialize the UI components?
 
         if (UI::UIManager::Get().IsInitialized())
         {
