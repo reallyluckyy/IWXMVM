@@ -906,9 +906,22 @@ namespace IWXMVM::IW3::Structures
         int duration;
     };
 
+    struct animation_t
+    {
+        char name[64];
+        int initialLerp;
+        float moveSpeed;
+        int duration;
+        int nameHash;
+        int flags;
+        int64_t movetype;
+        int noteType;
+    };
+
     struct animScriptData_t
     {
-        byte pad[0x9A9D0];
+        animation_t animations[512];
+        byte pad[0x9A9D0 - sizeof(animations)];
     };
 
     struct $0867E0FC4F8157A276DAB76B1612E229
