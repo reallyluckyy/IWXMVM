@@ -40,7 +40,7 @@ namespace IWXMVM::UI
             ImGui::Dummy(ImVec2(0, 20));
 
             ImGui::PushFont(UIManager::Get().GetBoldFont()); 
-            ImGui::TextWrapped(ICON_FA_SIGNS_POST " THE INTERFACE");
+            ImGui::TextWrapped(ICON_FA_SIGNS_POST "  THE INTERFACE");
             ImGui::PopFont();
 
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
@@ -49,18 +49,18 @@ namespace IWXMVM::UI
             ImGui::TextWrapped(
                 "The game view in the top left shows the game. The bottom area will contain the playback controls and the keyframe editor as soon as you load a demo. To the right of the game view is the main settings section, consisting of 4 tabs:");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
-            ImGui::BulletText(ICON_FA_FILE " DEMOS: for loading demos");
+            ImGui::BulletText(ICON_FA_FILE "  DEMOS: for loading demos");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
             ImGui::BulletText(ICON_FA_VIDEO "  CAMERA: for camera related settings; currently mostly a placeholder");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
-            ImGui::BulletText(ICON_FA_SLIDERS " VISUALS: for modifying settings such as filmtweaks, sun, dof, hud, etc.");
+            ImGui::BulletText(ICON_FA_SLIDERS "  VISUALS: for modifying settings such as filmtweaks, sun, dof, hud, etc.");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
-            ImGui::BulletText(ICON_FA_CIRCLE " RECORD: for exporting videos right from within the mod");
+            ImGui::BulletText(ICON_FA_CIRCLE "  RECORD: for exporting videos right from within the mod");
 
             ImGui::Dummy(ImVec2(0, 10));
 
             ImGui::PushFont(UIManager::Get().GetBoldFont()); 
-            ImGui::TextWrapped(ICON_FA_COMPASS " GETTING STARTED");
+            ImGui::TextWrapped(ICON_FA_COMPASS "  GETTING STARTED");
             ImGui::PopFont();
 
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
@@ -70,11 +70,24 @@ namespace IWXMVM::UI
                 "Once thats loaded up you should have the demo controls, the keyframe editor, the tabs on the right as "
                 "well as the camera controls available to you.");
 
+            if (D3D9::IsReshadePresent()) 
+            {
+                ImGui::Dummy(ImVec2(0, 10));
+
+                ImGui::PushFont(UIManager::Get().GetBoldFont());
+                ImGui::TextWrapped(ICON_FA_TRIANGLE_EXCLAMATION "  USING RESHADE");
+                ImGui::PopFont();
+
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
+                ImGui::TextWrapped(
+                    "To interact with Reshade it is recommended you turn off the UI first by pressing F1."
+                    "\nAlternatively, you may click on Debug -> Toggle IWXMVM UI.");
+            }
             
             ImGui::Dummy(ImVec2(0, 20));
 
             ImGui::PushFont(UIManager::Get().GetBoldFont());
-            ImGui::TextWrapped(ICON_FA_CLIPBOARD " FINAL NOTES");
+            ImGui::TextWrapped(ICON_FA_CLIPBOARD "  FINAL NOTES");
             ImGui::PopFont();
 
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
