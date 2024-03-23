@@ -278,7 +278,7 @@ namespace IWXMVM::GFX
     
     void GraphicsManager::DrawGizmoComponent(Mesh& mesh, glm::mat4 model, int32_t axisIndex)
     {
-        if (heldAxis.has_value() && heldAxis.value() != axisIndex)
+        if (heldAxis.has_value() && heldAxis.value().axisIndex != axisIndex)
         {
             return;
         }
@@ -289,7 +289,7 @@ namespace IWXMVM::GFX
             objectHoveredThisFrame |= mouseIntersects;
             if (mouseIntersects && Input::KeyDown(ImGuiKey_MouseLeft))
             {
-                heldAxis = axisIndex;
+                heldAxis.emplace(TranslationGizmoData{axisIndex, glm::vec3{}});
             }
         }
 
@@ -327,6 +327,7 @@ namespace IWXMVM::GFX
             heldAxis = std::nullopt;
         }
 
+        const bool isHeld = heldAxis.has_value();
         DrawGizmoComponent(gizmo_translate_x, scaledModel, 0);
 
         auto rotatedY = glm::rotate(scaledModel, glm::radians(90.0f), glm::vec3(0, 0, 1));
@@ -338,7 +339,7 @@ namespace IWXMVM::GFX
         if (heldAxis.has_value())
         {
             auto axisDirection = glm::vec3(0, 0, 0);
-            axisDirection[heldAxis.value()] = 1.0f;
+            axisDirection[heldAxis.value().axisIndex] = 1.0f;
             axisDirection = glm::vec3(rotation * glm::vec4(axisDirection, 1.0f));
             axisDirection = glm::normalize(axisDirection);
 
@@ -350,7 +351,7 @@ namespace IWXMVM::GFX
             for (int i = 0; i < 2; i++)
             {
                 auto axisNormal = glm::vec3(0, 0, 0);
-                axisNormal[(heldAxis.value() + i + 1) % 3] = 1.0f;
+                axisNormal[(heldAxis.value().axisIndex + i + 1) % 3] = 1.0f;
                 axisNormal = glm::vec3(rotation * glm::vec4(axisNormal, 1.0f));
                 axisNormal = glm::normalize(axisNormal);
 
@@ -365,9 +366,20 @@ namespace IWXMVM::GFX
             auto intersection = GetMousePositionOnPlane(position, bestPlaneNormal);
             if (intersection.has_value())
             {
-                auto dot = glm::dot(glm::normalize(intersection.value() - position), axisDirection);
-                auto distance = glm::distance(intersection.value(), position);
-                position = position + axisDirection * dot * distance;
+                if (!isHeld) 
+                {
+                    // store offset to account for the distance between object position and mouse position,
+                    // so that the object moves relative to the mouse cursor
+                    heldAxis.value().objectOffset = intersection.value() - position;
+                }
+
+                intersection.value() -= heldAxis.value().objectOffset;
+                if (intersection.value() != position)
+                {
+                    auto dot = glm::dot(glm::normalize(intersection.value() - position), axisDirection);
+                    auto distance = glm::distance(intersection.value(), position);
+                    position = position + axisDirection * dot * distance;
+                }
             }
         }
     }
@@ -399,9 +411,9 @@ namespace IWXMVM::GFX
 
             auto quat = glm::toQuat(rotate);
 
-            auto selectedAxis = heldAxis.value();
-            selectedAxis = heldAxis.value() == 1 ? 2 : selectedAxis;
-            selectedAxis = heldAxis.value() == 2 ? 1 : selectedAxis;
+            auto selectedAxis = heldAxis.value().axisIndex;
+            selectedAxis = heldAxis.value().axisIndex == 1 ? 2 : selectedAxis;
+            selectedAxis = heldAxis.value().axisIndex == 2 ? 1 : selectedAxis;
             auto axis = glm::vec3(0, 0, 0);
             axis[selectedAxis] = 1;
 
