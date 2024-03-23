@@ -190,8 +190,14 @@ namespace IWXMVM::GFX
         const auto& camera = Components::CameraManager::Get().GetActiveCamera();
         const auto sun = Mod::GetGameInterface()->GetSun();
         const auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
-        const glm::vec4 sunLightColor = {sun.color.x, sun.color.y, sun.color.z, 0.0f};
-        const glm::vec4 sunLightDirection = {sun.direction.x, sun.direction.y, sun.direction.z, 0.0f};
+
+        const float pitch = glm::radians(-sun.direction.x);
+        const float yaw = glm::radians(sun.direction.y);
+        const float sunDirX = glm::cos(yaw) * glm::cos(pitch);
+        const float sunDirY = glm::sin(yaw) * glm::cos(pitch);
+        const float sunDirZ = glm::sin(pitch);
+        const glm::vec4 sunLightDirection = {sunDirX, sunDirY, sunDirZ, 0.0f};
+        const glm::vec4 sunLightColor = glm::vec4{sun.color.x, sun.color.y, sun.color.z, 0.0f} * sun.brightness;
         const glm::vec4 cameraPosition = glm::vec4(camera->GetPosition(), 0);
 
         glm::vec4 filmtweaksParams = {};
