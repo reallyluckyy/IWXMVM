@@ -510,7 +510,8 @@ namespace IWXMVM::IW3
                 "j_shoulder_le",
                 "j_shoulder_ri",
                 "j_ankle_le",
-                "j_ankle_ri"
+                "j_ankle_ri",
+                "tag_origin"
             };
         }
 
