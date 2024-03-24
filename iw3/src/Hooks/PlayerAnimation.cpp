@@ -44,14 +44,15 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
         static std::array<std::uint8_t, 64> weaponIndices;
 
         const auto& ps = Structures::GetClientGlobals()->predictedPlayerState;
-        if (static_cast<std::size_t>(ps.clientNum) < 64 && ps.weapon != 0)
+        if (static_cast<std::size_t>(ps.clientNum) < weaponIndices.size() && ps.weapon != 0)
         {
             weaponIndices[ps.clientNum] = ps.weapon;
         }
 
         if (centity.nextState.eType == entityType_t::ET_PLAYER)
         {
-            if (static_cast<std::size_t>(centity.nextState.clientNum) < 64 && centity.nextState.weapon != 0)
+            if (static_cast<std::size_t>(centity.nextState.clientNum) < weaponIndices.size() &&
+                centity.nextState.weapon != 0)
             {
                 weaponIndices[centity.nextState.clientNum] = centity.nextState.weapon;
             }
@@ -93,7 +94,7 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
 
             if (Components::PlayerAnimation::AttachWeaponToCorpse()) 
             {
-                if (static_cast<std::size_t>(centity.nextState.clientNum) < 64)
+                if (static_cast<std::size_t>(centity.nextState.clientNum) < weaponIndices.size())
                 {
                     // attach weapon to corpse
                     centity.nextState.weapon = weaponIndices[centity.nextState.clientNum];
