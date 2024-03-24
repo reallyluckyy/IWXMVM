@@ -40,20 +40,18 @@ namespace IWXMVM::Components
                 node.rotation = activeCamera->GetRotation();
                 node.fov = activeCamera->GetFov();
 
-                auto& keyframes = KeyframeManager::Get().GetKeyframes(property);
-                keyframes.push_back(
-                    Types::Keyframe(property, tick, node));
+                KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, tick, node));
 
                 LOG_DEBUG("Placed node at (x: {}; y: {}; z: {}) with (pitch: {}; yaw: {}; roll: {}) at tick {}",
                           node.position.x, node.position.y, node.position.z, node.rotation.x, node.rotation.y,
                           node.rotation.z, tick);
 
-                KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
+                KeyframeManager::Get().SortAndSaveKeyframes(KeyframeManager::Get().GetKeyframes(property));
             }
 
             if (Input::BindDown(Action::DollyClearNodes))
             {
-                KeyframeManager::Get().GetKeyframes(property).clear();
+                KeyframeManager::Get().ClearKeyframes(property);
 
                 LOG_DEBUG("Nodes cleared");
             }

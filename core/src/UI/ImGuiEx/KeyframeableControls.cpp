@@ -44,11 +44,9 @@ namespace ImGuiEx::Keyframeable
         const auto& keyframes = keyframeManager.GetKeyframes(property);
         DrawKeyframeButton(std::format("##{0}{1}KeyframeButton", label, magic_enum::enum_name(propertyType)).c_str(),
                            keyframes.empty(), [&]() {
-            keyframeManager.GetKeyframes(property).emplace_back(
-                property, 
-                IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
-                *v
-            );
+                keyframeManager.AddKeyframe(
+                    property,
+                    Types::Keyframe(property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick, *v));
         });
 
         ImGui::Text(label);
@@ -92,10 +90,10 @@ namespace ImGuiEx::Keyframeable
         const auto& keyframes = keyframeManager.GetKeyframes(property);
         DrawKeyframeButton(std::format("##{0}{1}KeyframeButton", label, magic_enum::enum_name(propertyType)).c_str(),
                            keyframes.empty(), [&]() {
-                               keyframeManager.GetKeyframes(property).emplace_back(
-                                   property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
-                                   glm::vec3(v[0], v[1], v[2])
-                                );
+                               keyframeManager.AddKeyframe(
+                                   property,
+                                   Types::Keyframe(property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
+                                                   glm::vec3(v[0], v[1], v[2])));
                            });
 
         ImGui::Text(label);
@@ -140,11 +138,9 @@ namespace ImGuiEx::Keyframeable
 
         const auto& keyframes = keyframeManager.GetKeyframes(property);
         DrawKeyframeButton(label, keyframes.empty(), [&]() {
-            keyframeManager.GetKeyframes(property).emplace_back(
-                property, 
-                IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick, 
-                glm::vec3(col[0], col[1], col[2])
-            );
+            keyframeManager.AddKeyframe(
+                property, Types::Keyframe(property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
+                                          glm::vec3(col[0], col[1], col[2])));
         });
 
         ImGui::Text(label);
