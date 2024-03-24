@@ -21,6 +21,12 @@ namespace IWXMVM::GFX
         Count
     };
 
+    struct TranslationGizmoData
+    {
+        std::int32_t axisIndex{};
+        glm::vec3 objectOffset{};
+    };
+
     class GraphicsManager
     {
        public:
@@ -90,7 +96,7 @@ namespace IWXMVM::GFX
         Mesh campath;
 
         std::optional<int32_t> selectedNodeId = std::nullopt;
-        std::optional<int32_t> heldAxis = std::nullopt;
+        std::optional<TranslationGizmoData> heldAxis = std::nullopt;
         bool objectHoveredThisFrame = false;
         GizmoMode gizmoMode = GizmoMode::TranslateLocal;
     };
