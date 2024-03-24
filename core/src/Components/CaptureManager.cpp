@@ -119,7 +119,7 @@ namespace IWXMVM::Components
 
     void CaptureManager::OnRenderFrame()
     {
-        if (!isCapturing)
+        if (!isCapturing || Rewinding::IsRewinding())
             return;
 
         IDirect3DDevice9* device = D3D9::GetDevice();
