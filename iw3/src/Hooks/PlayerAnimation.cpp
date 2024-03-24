@@ -44,9 +44,18 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
 
         if (centity.nextState.eType == entityType_t::ET_PLAYER)
         {
-            auto& torsoAnim = reinterpret_cast<std::uint32_t&>(centity.nextState.torsoAnim);
 
-            if ((torsoAnim & 511) == 255 || (torsoAnim & 511) == 278)
+            auto IsBadIndex = [](auto index)
+            {
+                static constexpr std::array animIndexRanges{std::array{253, 264}, std::array{273, 280}};
+
+                return std::any_of(animIndexRanges.begin(), animIndexRanges.end(), [index](const auto range) {
+                    return index >= range.front() && index <= range.back();
+                });
+            };
+
+            auto& torsoAnim = centity.nextState.torsoAnim;
+            if (IsBadIndex(torsoAnim & 511))
             {
                 // promod animation bugs fix
                 torsoAnim = 0;
