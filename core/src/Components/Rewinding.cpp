@@ -178,7 +178,11 @@ namespace IWXMVM::Components::Rewinding
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
         auto curTime = *reinterpret_cast<int*>(addresses.cl.serverTime);
 
-        Components::Playback::SkipForward(latestRewindTo - curTime);
+        if (latestRewindTo > curTime)
+        {
+            Components::Playback::SkipForward(latestRewindTo - curTime);
+        }
+        
         latestRewindTo = NOT_IN_USE;
         rewindTo.store(NOT_IN_USE);
 
