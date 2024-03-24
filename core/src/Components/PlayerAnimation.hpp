@@ -8,4 +8,5 @@ namespace IWXMVM::Components::PlayerAnimation
     std::string_view GetLatestAnimationName();
     const std::vector<std::pair<std::string_view, std::uint32_t>>& GetAnimations();
     void SetSelectedAnimIndex(std::int32_t index);
+    bool& AttachWeaponToCorpse();
 }  // namespace IWXMVM::Components::PlayerAnimation

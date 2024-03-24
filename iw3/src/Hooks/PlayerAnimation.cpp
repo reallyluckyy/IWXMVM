@@ -1,80 +1,115 @@
 #include "StdInclude.hpp"
 #include "PlayerAnimation.hpp"
 
-#include "Utilities/HookManager.hpp"
 #include "../Addresses.hpp"
-#include "Mod.hpp"
+#include "../Structures.hpp"
 #include "Components/PlayerAnimation.hpp"
+#include "Mod.hpp"
+#include "Utilities/HookManager.hpp"
 
 namespace IWXMVM::IW3::Hooks::PlayerAnimation
-{
-    void BG_RunLerpFrameRate_Hook_Internal(const std::uint32_t& curAnimIndex, std::uint32_t& newAnimIndex)
+{    
+    inline constexpr std::size_t ANIM_COUNT = 318;
+
+    bool GetAnimationNames()
     {
-        // bgs_t bg_s -> animScriptData_t animScriptData -> animation_t animations
-        static constexpr std::size_t ANIM_NAME_OFFSET = 104; 
-        static constexpr std::size_t ANIM_COUNT = 318;
+        const auto animations = std::span{Structures::GetClientGlobals()->bgs.animScriptData.animations};
+        std::vector<std::pair<std::string_view, std::uint32_t>> anims;
+        anims.reserve(24);
 
-        static const char* rootAnim = []() -> const char* 
+        for (std::uint32_t i = 1; i < std::min(ANIM_COUNT, animations.size()); ++i)
         {
-            const auto address = **reinterpret_cast<const char***>(GetGameAddresses().BG_RunLerpFrameRate() + 0x8B);
-            const std::string_view sv{address, std::find(address, address + 5, '\0')};
-
-            if (sv == "root")
+            const std::string_view animName{animations[i].name};
+            if (animName.find("death") != std::string_view::npos)
             {
-                std::vector<std::pair<std::string_view, std::uint32_t>> anims;
-                anims.reserve(24);
+                anims.emplace_back(std::pair{animName, i});
+            }
+        }
 
-                for (std::uint32_t i = 1; i < ANIM_COUNT; ++i)
+        if (anims.size() > 0)
+        {
+            Components::PlayerAnimation::PopulateAnimationData(anims);
+            return true;
+        }
+
+        LOG_ERROR("Getting death animation names was unsuccessful!");
+        return false;
+    }
+
+    void CG_ProcessEntity_Hook_Internal(Structures::centity_s& centity)
+    {
+        using namespace Structures;
+
+        static bool foundDeathAnimations = GetAnimationNames();
+
+        if (centity.nextState.eType == entityType_t::ET_PLAYER)
+        {
+            auto& torsoAnim = reinterpret_cast<std::uint32_t&>(centity.nextState.torsoAnim);
+
+            if ((torsoAnim & 511) == 255 || (torsoAnim & 511) == 278)
+            {
+                // promod animation bugs fix
+                torsoAnim = 0;
+            }
+        }
+        else if (centity.nextState.eType == entityType_t::ET_PLAYER_CORPSE)
+        {
+            auto& legsAnim = reinterpret_cast<std::uint32_t&>(centity.nextState.legsAnim);
+
+            if ((legsAnim & 511) != 0 && foundDeathAnimations)
+            {
+                const auto animations = std::span{GetClientGlobals()->bgs.animScriptData.animations};
+
+                if ((legsAnim & 511) < std::min(ANIM_COUNT, animations.size()))
                 {
-                    const auto ptr = sv.data() + i * ANIM_NAME_OFFSET;
-                    const std::string_view animName(ptr, std::find(ptr, ptr + ANIM_NAME_OFFSET, '\0'));
-
+                    const std::string_view animName{animations[(legsAnim & 511)].name};
                     if (animName.find("death") != std::string_view::npos)
-                        anims.emplace_back(std::pair{animName, i});
-                }
-
-                if (anims.size() > 0)
-                {
-                    Components::PlayerAnimation::PopulateAnimationData(anims);
-                    return sv.data();
+                    {
+                        // replace death animation
+                        Components::PlayerAnimation::SetPlayerAnimation(animName, legsAnim);
+                    } 
                 }
             }
 
-            return nullptr;
-        }();
-
-        if (rootAnim != nullptr && newAnimIndex != curAnimIndex && (newAnimIndex % 512) < ANIM_COUNT)
-        {
-            const std::string_view animName(rootAnim + (newAnimIndex % 512) * ANIM_NAME_OFFSET);
-            if (animName.find("death") != std::string_view::npos)
-                Components::PlayerAnimation::SetPlayerAnimation(animName, newAnimIndex);
+            if (Components::PlayerAnimation::AttachWeaponToCorpse()) 
+            {
+                if (const auto* centities = GetEntities(); static_cast<std::size_t>(centity.nextState.clientNum) < 64)
+                {
+                    if (centity.nextState.clientNum == centities[centity.nextState.clientNum].nextState.clientNum)
+                    {
+                        // attach weapon to corpse
+                        centity.nextState.weapon = centities[centity.nextState.clientNum].nextState.weapon;
+                    }
+                }
+            }
         }
-
-        // promod animation bugs fix
-        if (newAnimIndex != curAnimIndex && (newAnimIndex % 512 == 255 || newAnimIndex % 512 == 278))
-            newAnimIndex = 0;
+        else if (centity.nextState.eType == entityType_t::ET_ITEM)
+        {
+            if (Components::PlayerAnimation::AttachWeaponToCorpse())
+            {
+                // hide dropped weapons
+                centity.nextState.lerp.eFlags = 32;
+            }
+        }
     }
 
-    std::uintptr_t BG_RunLerpFrameRate_Trampoline;
-    void __declspec(naked) BG_RunLerpFrameRate_Hook()
+    std::uintptr_t CG_ProcessEntity_Trampoline;
+    void __declspec(naked) CG_ProcessEntity_Hook()
     {
         __asm
         {
             pushad
-            lea ebx, [eax + 0x10]
-            lea eax, [esp + 0x28]
-            push eax
-            push ebx
-            call BG_RunLerpFrameRate_Hook_Internal
-            add esp, 0x8
+            push esi
+            call CG_ProcessEntity_Hook_Internal
+            add esp, 0x4
             popad
-            jmp BG_RunLerpFrameRate_Trampoline
+            jmp CG_ProcessEntity_Trampoline
         }
     }
 
     void Install()
     {
-        HookManager::CreateHook(GetGameAddresses().BG_RunLerpFrameRate(), (std::uintptr_t)BG_RunLerpFrameRate_Hook,
-                                &BG_RunLerpFrameRate_Trampoline);
+        HookManager::CreateHook(GetGameAddresses().CG_ProcessEntity(), (std::uintptr_t)CG_ProcessEntity_Hook,
+                                &CG_ProcessEntity_Trampoline);
     }
 }  // namespace IWXMVM::IW3::Hooks::PlayerAnimation

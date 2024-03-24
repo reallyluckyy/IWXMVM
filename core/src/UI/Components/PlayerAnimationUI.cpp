@@ -41,8 +41,11 @@ namespace IWXMVM::UI
         if (ImGui::Begin("Player Death Animations##2", &visible, ImGuiWindowFlags_NoCollapse))
         {
             static std::int32_t selected = -1;
-            if (DrawHeaderAndResetButton(ICON_FA_PERSON_FALLING "  Select a death animation   "))
+            if (DrawHeaderAndResetButton(ICON_FA_PERSON_FALLING "  Select a death animation   ")) 
+            {
                 Components::PlayerAnimation::SetSelectedAnimIndex(selected = -1);
+                Components::PlayerAnimation::AttachWeaponToCorpse() = false;
+            }
         
             const auto& anims = Components::PlayerAnimation::GetAnimations();
             for (std::int32_t i = 0; i < std::ssize(anims); ++i)
@@ -53,6 +56,8 @@ namespace IWXMVM::UI
                     Components::PlayerAnimation::SetSelectedAnimIndex(selected = i);
             }
 
+            ImGui::NewLine();
+            ImGui::Checkbox("Attach weapon to player", &Components::PlayerAnimation::AttachWeaponToCorpse());
             ImGui::NewLine();
 
             if (const auto animName = Components::PlayerAnimation::GetLatestAnimationName(); !animName.empty())

@@ -70,9 +70,8 @@ namespace IWXMVM::IW3::Signatures
         //Sig("6A 0E E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? A1", GAType::Code, -9) > CG_ReadNextSnapshotWarning;
         Sig("8B C7 69 C0 58 02 00 00", GAType::Code, -5) > CG_MapRestartSetThirdpersonCall;
 
-        // for changing death animations
-        Sig("?? ?? ?? ?? ?? 8B 6C 24 ?? 57 8B F8 8B 47", GAType::Code,
-            0) > BG_RunLerpFrameRate;  // intercept player animation indices
+        // for changing (death) animations
+        Sig("E8 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 83 F8 0E 0F 87", GAType::Code, 5) > CG_ProcessEntity;
 
         Sig("55 8B 6C 24 38 85 ED", GAType::Code, -5) > R_AddCmdDrawTextWithEffects;
         Sig("E8 ?? ?? ?? ?? 85 C0 74 35", GAType::Code, -6) > IN_Frame;
