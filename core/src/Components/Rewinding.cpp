@@ -36,7 +36,6 @@ namespace IWXMVM::Components::Rewinding
     uint32_t demoFileOffset = 0;
     std::unique_ptr<InitialGamestate> initialGamestate;
 
-    inline constexpr std::int32_t TICK_OFFSET = 150;
     inline constexpr std::int32_t NOT_IN_USE = -1;
     inline constexpr std::int32_t SKIPPING_FORWARD = -2;
 
@@ -91,10 +90,10 @@ namespace IWXMVM::Components::Rewinding
             latestRewindTo = initialGamestate->serverTime;
         }
 
-        Mod::GetGameInterface()->ResetClientData(latestRewindTo);
+        Mod::GetGameInterface()->ResetClientData(initialGamestate->serverTime);
         Mod::GetGameInterface()->CL_FirstSnapshot();
 
-        LOG_DEBUG("Rewound and time is now: {}", latestRewindTo - initialGamestate->serverTime);
+        LOG_DEBUG("Rewound and time is now: {}", initialGamestate->serverTime);
         demoFileOffset = initialGamestate->fileOffset;
         demoFile.seekg(demoFileOffset);
 
@@ -179,7 +178,7 @@ namespace IWXMVM::Components::Rewinding
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
         auto curTime = *reinterpret_cast<int*>(addresses.cl.serverTime);
 
-        Components::Playback::SkipForward(latestRewindTo + TICK_OFFSET - curTime);
+        Components::Playback::SkipForward(latestRewindTo - curTime);
         latestRewindTo = NOT_IN_USE;
         rewindTo.store(NOT_IN_USE);
 
@@ -199,7 +198,6 @@ namespace IWXMVM::Components::Rewinding
             return;
         }
 
-        ticks -= TICK_OFFSET;
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
 
         // only set the rewind value if the main thread isn't using it
