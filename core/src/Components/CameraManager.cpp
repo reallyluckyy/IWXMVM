@@ -67,7 +67,7 @@ namespace IWXMVM::Components
             {
                 case Camera::Mode::Free:
                 {
-                    if (previousActiveCamera->GetMode() == Camera::Mode::FirstPerson())
+                    if (previousActiveCamera->GetMode() == Camera::Mode::FirstPerson)
                     {
                         activeCamera->GetPosition() = previousActiveCamera->GetPosition() - previousActiveCamera->GetForwardVector() * 100;
                     }
