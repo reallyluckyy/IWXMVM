@@ -41,9 +41,20 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
         using namespace Structures;
 
         static bool foundDeathAnimations = GetAnimationNames();
+        static std::array<std::uint8_t, 64> weaponIndices;
+
+        const auto& ps = Structures::GetClientGlobals()->predictedPlayerState;
+        if (static_cast<std::size_t>(ps.clientNum) < 64 && ps.weapon != 0)
+        {
+            weaponIndices[ps.clientNum] = ps.weapon;
+        }
 
         if (centity.nextState.eType == entityType_t::ET_PLAYER)
         {
+            if (static_cast<std::size_t>(centity.nextState.clientNum) < 64 && centity.nextState.weapon != 0)
+            {
+                weaponIndices[centity.nextState.clientNum] = centity.nextState.weapon;
+            }
 
             auto IsBadIndex = [](auto index)
             {
@@ -82,13 +93,10 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
 
             if (Components::PlayerAnimation::AttachWeaponToCorpse()) 
             {
-                if (const auto* centities = GetEntities(); static_cast<std::size_t>(centity.nextState.clientNum) < 64)
+                if (static_cast<std::size_t>(centity.nextState.clientNum) < 64)
                 {
-                    if (centity.nextState.clientNum == centities[centity.nextState.clientNum].nextState.clientNum)
-                    {
-                        // attach weapon to corpse
-                        centity.nextState.weapon = centities[centity.nextState.clientNum].nextState.weapon;
-                    }
+                    // attach weapon to corpse
+                    centity.nextState.weapon = weaponIndices[centity.nextState.clientNum];
                 }
             }
         }
