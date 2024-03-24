@@ -37,7 +37,7 @@ namespace IWXMVM::Components::PlayerAnimation
     {
         if (static_cast<std::uint32_t>(selectedAnimIndex) < cachedAnims.size())
         {
-            if (animIndex != cachedAnims[static_cast<std::uint32_t>(selectedAnimIndex)].second)
+            if ((animIndex & 511) != cachedAnims[static_cast<std::uint32_t>(selectedAnimIndex)].second)
             {
                 animIndex = cachedAnims[static_cast<std::uint32_t>(selectedAnimIndex)].second;
                 latestAnimName = animName;
