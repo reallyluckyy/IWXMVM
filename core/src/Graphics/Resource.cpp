@@ -219,7 +219,11 @@ namespace IWXMVM::GFX
             handle->Unlock();
         }
 
-        handle->Release();
+        if (handle != nullptr)
+        {
+            handle->Release();
+            handle = nullptr;
+        }
     }
 
     void BufferManager::IndexBuffer::Add(std::span<Types::Index> elems)
@@ -342,7 +346,11 @@ namespace IWXMVM::GFX
             handle->Unlock();
         }
 
-        handle->Release();
+        if (handle != nullptr)
+        {
+            handle->Release();
+            handle = nullptr;
+        }
     }
 
     void BufferManager::VertexBuffer::Add(std::span<Types::Vertex> elems)

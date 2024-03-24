@@ -10,6 +10,7 @@
 #include "Utilities/MemoryUtils.hpp"
 #include "UI/UIManager.hpp"
 #include "Configuration/Configuration.hpp"
+#include "Graphics/Graphics.hpp"
 
 namespace IWXMVM
 {
@@ -66,6 +67,11 @@ namespace IWXMVM
 
             HookManager::Unhook();
             LOG_DEBUG("Unhooked");
+
+            // TODO: extract the entire resource release operation to a single function?
+            // this is done for d3d9 reset, d3d9 create device, and here below
+            GFX::GraphicsManager::Get().Uninitialize();
+            LOG_DEBUG("Released UI and graphic resources");
             UI::UIManager::Get().ShutdownImGui();
             LOG_DEBUG("ImGui successfully shutdown");
 

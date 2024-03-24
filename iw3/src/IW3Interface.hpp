@@ -46,6 +46,11 @@ namespace IWXMVM::IW3
             });
         }
 
+        IDirect3DDevice9* GetGameDevicePtr() const final
+        {
+            return **(IDirect3DDevice9***)GetGameAddresses().d3d9DevicePointer();
+        }
+
         uintptr_t GetWndProc() final
         {
             return (uintptr_t)GetGameAddresses().MainWndProc();

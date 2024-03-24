@@ -52,6 +52,7 @@ namespace IWXMVM::IW3::Signatures
         Sig("03 44 24 04 0F B7 04 45", GAType::Data, 8, Lambda::DereferenceAddress) > clientObjMap;
         Sig("0F BF F0 6B F6 64 81 C6", GAType::Data, 8, Lambda::DereferenceAddress) > objBuf;
         Sig("0F B6 80 ?? ?? ?? ?? FF 24 85 ?? ?? ?? ?? 83 3D ?? ?? ?? ?? 00 75", GAType::Code, 22) > CL_KeyEvent;
+        Sig("8B 0D ?? ?? ?? ?? 8B 40 04 8B 11 83 C6 04", GAType::Data, 2) > d3d9DevicePointer;
 
         // for rewinding
         Sig("83 C4 ?? 53 57 56 ?? ?? ?? ?? ?? 83 C4", GAType::Code, 6, Lambda::FollowCodeFlow) > FS_Read;
