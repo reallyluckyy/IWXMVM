@@ -32,10 +32,11 @@ namespace IWXMVM::UI
 
             auto indent = 10;
 
-            ImGui::TextWrapped("First off, thank you for testing and providing feedback on this mod!");
+            ImGui::TextWrapped("This is an early access, beta version of IWXMVM.");
+            ImGui::TextWrapped("This is *not* the final version of the mod yet. There are features missing.");
             ImGui::TextWrapped(
                 "Hearing how you use the mod, what kind of issues you experience and where you expected a better "
-                "experience will help us make IWXMVM the best it can be.");
+                "experience will help us make IWXMVM the best it can be. Please send us all the feedback you may have!");
 
             ImGui::Dummy(ImVec2(0, 20));
 

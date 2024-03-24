@@ -76,10 +76,6 @@ namespace IWXMVM::UI
                 if (ImGui::MenuItem("Credits", ""))
                 {
                 }
-                ImGui::Separator();
-                if (ImGui::MenuItem("Open Debug Panel", "CTRL+D"))
-                {
-                }
                 ImGui::EndMenu();
             }
 
