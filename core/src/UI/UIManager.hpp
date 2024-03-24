@@ -18,6 +18,7 @@
 #include "Components/Preferences.hpp"
 #include "Components/PlayerAnimationUI.hpp"
 #include "Components/Readme.hpp"
+#include "Components/Credits.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -42,6 +43,7 @@ namespace IWXMVM::UI
             Preferences,
             PlayerAnimation,
             Readme,
+            Credits,
 
             Count,
         };
@@ -137,6 +139,7 @@ namespace IWXMVM::UI
             std::make_unique<VisualsMenu>(), std::make_unique<CaptureMenu>(), std::make_unique<ControlBar>(),
             std::make_unique<DebugPanel>(),  std::make_unique<KeyframeEditor>(), std::make_unique<ControlsMenu>(),
             std::make_unique<Preferences>(), std::make_unique<PlayerAnimation>(), std::make_unique<Readme>(),
+            std::make_unique<Credits>(),
         };
 
         Tab selectedTab = Tab::Demos;

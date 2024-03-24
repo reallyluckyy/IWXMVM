@@ -144,6 +144,7 @@
     <ClCompile Include="src\UI\Components\CaptureMenu.cpp" />
     <ClCompile Include="src\UI\Components\ControlBar.cpp" />
     <ClCompile Include="src\UI\Components\ControlsMenu.cpp" />
+    <ClCompile Include="src\UI\Components\Credits.cpp" />
     <ClCompile Include="src\UI\Components\KeyframeEditor.cpp" />
     <ClCompile Include="src\UI\Components\PlayerAnimationUI.cpp" />
     <ClCompile Include="src\UI\Components\Preferences.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="src\Types\Vertex.hpp" />
     <ClInclude Include="src\UI\Components\CameraMenu.hpp" />
     <ClInclude Include="src\UI\Components\ControlsMenu.hpp" />
+    <ClInclude Include="src\UI\Components\Credits.hpp" />
     <ClInclude Include="src\UI\Components\KeyframeEditor.hpp" />
     <ClInclude Include="src\UI\Components\PlayerAnimationUI.hpp" />
     <ClInclude Include="src\UI\Components\Preferences.hpp" />

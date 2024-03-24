@@ -75,6 +75,7 @@ namespace IWXMVM::UI
             {
                 if (ImGui::MenuItem("Credits", ""))
                 {
+                    UIManager::Get().GetUIComponent<Credits>(Component::Credits)->ToggleVisibility();
                 }
                 ImGui::EndMenu();
             }
