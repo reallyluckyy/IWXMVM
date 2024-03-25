@@ -58,9 +58,9 @@ namespace IWXMVM::Components
 
             if (Input::BindDown(Action::DollyPlayPath))
             {
+                CameraManager::Get().SetActiveCamera(Camera::Mode::Dolly);
                 if (!KeyframeManager::Get().GetKeyframes(property).empty())
                 {
-                    CameraManager::Get().SetActiveCamera(Camera::Mode::Dolly);
                     Playback::SetTickDelta(KeyframeManager::Get().GetKeyframes(property).front().tick -
                                                Mod::GetGameInterface()->GetDemoInfo().currentTick, true);
                 }
