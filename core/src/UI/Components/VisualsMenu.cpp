@@ -288,7 +288,7 @@ namespace IWXMVM::UI
             "Far Start", &visuals.dof.farStart, 0, 5000,
             Types::KeyframeablePropertyType::DepthOfFieldFarStart) || modified;
         modified = ImGuiEx::Keyframeable::SliderFloat(
-            "Far End", &visuals.dof.farEnd, 0, 5000,
+            "Far End", &visuals.dof.farEnd, 0, 10000,
             Types::KeyframeablePropertyType::DepthOfFieldFarEnd) || modified;
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing
