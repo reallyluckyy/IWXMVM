@@ -32,7 +32,10 @@ namespace IWXMVM::Components
                 for (const auto& keyframe : KeyframeManager::Get().GetKeyframes(property))
                 {
                     if (keyframe.tick == tick)
+                    {
+                        LOG_WARN("A campath node already exists at the current tick. Not creating a new one.");
                         return;
+                    }
                 }
 
                 Types::CameraData node;
