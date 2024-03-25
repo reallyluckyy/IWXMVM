@@ -41,12 +41,33 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
         using namespace Structures;
 
         static bool foundDeathAnimations = GetAnimationNames();
+        static std::array<std::uint8_t, 64> weaponIndices;
+
+        const auto& ps = Structures::GetClientGlobals()->predictedPlayerState;
+        if (static_cast<std::size_t>(ps.clientNum) < weaponIndices.size() && ps.weapon != 0)
+        {
+            weaponIndices[ps.clientNum] = ps.weapon;
+        }
 
         if (centity.nextState.eType == entityType_t::ET_PLAYER)
         {
-            auto& torsoAnim = reinterpret_cast<std::uint32_t&>(centity.nextState.torsoAnim);
+            if (static_cast<std::size_t>(centity.nextState.clientNum) < weaponIndices.size() &&
+                centity.nextState.weapon != 0)
+            {
+                weaponIndices[centity.nextState.clientNum] = centity.nextState.weapon;
+            }
 
-            if ((torsoAnim & 511) == 255 || (torsoAnim & 511) == 278)
+            auto IsBadIndex = [](auto index)
+            {
+                static constexpr std::array animIndexRanges{std::array{253, 264}, std::array{273, 280}};
+
+                return std::any_of(animIndexRanges.begin(), animIndexRanges.end(), [index](const auto range) {
+                    return index >= range.front() && index <= range.back();
+                });
+            };
+
+            auto& torsoAnim = centity.nextState.torsoAnim;
+            if (IsBadIndex(torsoAnim & 511))
             {
                 // promod animation bugs fix
                 torsoAnim = 0;
@@ -73,13 +94,10 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
 
             if (Components::PlayerAnimation::AttachWeaponToCorpse()) 
             {
-                if (const auto* centities = GetEntities(); static_cast<std::size_t>(centity.nextState.clientNum) < 64)
+                if (static_cast<std::size_t>(centity.nextState.clientNum) < weaponIndices.size())
                 {
-                    if (centity.nextState.clientNum == centities[centity.nextState.clientNum].nextState.clientNum)
-                    {
-                        // attach weapon to corpse
-                        centity.nextState.weapon = centities[centity.nextState.clientNum].nextState.weapon;
-                    }
+                    // attach weapon to corpse
+                    centity.nextState.weapon = weaponIndices[centity.nextState.clientNum];
                 }
             }
         }
