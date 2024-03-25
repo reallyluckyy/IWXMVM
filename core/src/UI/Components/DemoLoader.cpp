@@ -472,11 +472,13 @@ namespace IWXMVM::UI
 
                 ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttonSize.x * 2 - ImGui::GetStyle().ItemSpacing.x -
                                      ImGui::GetStyle().WindowPadding.x);
-
+                
+                ImGui::BeginDisabled();
                 if (ImGui::Button(addPathButtonLabel.c_str(), buttonSize))
                 {
                     // TODO: Implement
                 }
+                ImGui::EndDisabled();
 
                 ImGui::SameLine();
 
