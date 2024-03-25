@@ -31,14 +31,28 @@ namespace IWXMVM::IW3
             Patches::GetGamePatches();
         }
 
+        void DisableRawInput()
+        {
+            // disable raw_input because it messes with our IN_Frame patch
+            // on cod4x
+            auto raw_input = Functions::FindDvar("raw_input");
+            if (raw_input)
+            {
+                raw_input->current.enabled = false;
+            }
+        }
+
         void SetupEventListeners() final
         {
+            DisableRawInput();
+
             Events::RegisterListener(EventType::PostDemoLoad, DemoParser::Run);
 
             Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
 
-            Events::RegisterListener(EventType::PostDemoLoad, []() { 
+            Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
                 Functions::FindDvar("sv_cheats")->current.enabled = true; 
+                DisableRawInput();
                     
                 // ensure these are set to their defaults, so our killfeed toggle works properly
                 Functions::FindDvar("con_gamemsgwindow0msgtime")->current.value = 5;
