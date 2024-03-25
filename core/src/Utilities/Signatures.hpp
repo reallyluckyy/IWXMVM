@@ -33,6 +33,10 @@ namespace IWXMVM::Signatures
 
             return (address == orgAddress) ? 0 : address;
         };
+
+        inline auto FollowCodeFlowMinusOne = [](std::uintptr_t address) { 
+            return FollowCodeFlow(address - 1);
+        };
     }  // namespace Lambdas
 
     inline constexpr std::uint16_t maskValue = UINT8_MAX + 1;

@@ -12,11 +12,18 @@ namespace IWXMVM::IW3::Functions
         typedef Structures::dvar_s*(__cdecl * Dvar_FindVar_t)();
         Dvar_FindVar_t Dvar_FindVar_Internal = (Dvar_FindVar_t)GetGameAddresses().Dvar_FindMalleableVar();
 
-        __asm {
+        Structures::dvar_s* returnValue{};
+
+        __asm
+        {
             mov edi, _name
+            push edi
+            call Dvar_FindVar_Internal
+            add esp, 0x4
+            mov returnValue, eax
         }
 
-        return Dvar_FindVar_Internal();
+        return returnValue;
     }
 
     std::string GetFilePath(const std::string_view demoName)
