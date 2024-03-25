@@ -620,20 +620,20 @@ namespace IWXMVM::UI
     void DrawKeyframeValueInput(const char* label, float dvalue, const Types::KeyframeableProperty& property, int index)
     {
         std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
-        static float v = 0;
-
-        v = dvalue;
-        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6.0f);
-        auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-        auto currentTick = demoInfo.currentTick;
+        
+        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
         auto keyframe = std::find_if(keyframes.begin(), keyframes.end(), [currentTick](const auto& k) { return k.tick == currentTick; });
-        if (ImGui::DragFloat(label, &v, 0.1f, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE, "%.2f"))
+
+        auto [rangeLow, rangeHigh] = property.defaultValueRange;
+        auto granularity = (rangeHigh - rangeLow) * 0.0001f;
+
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6.0f);
+        if (ImGui::DragFloat(label, &dvalue, granularity, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE, "%.2f"))
         {
-            auto [tick, val] = std::make_tuple(currentTick, v);
             if (keyframe == keyframes.end())
             {
-                auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
-                Components::KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, tick, value));
+                auto value = Components::KeyframeManager::Get().Interpolate(property, currentTick);
+                Components::KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, currentTick, value));
             }
             else
             {
@@ -641,7 +641,7 @@ namespace IWXMVM::UI
                 {
                     Components::KeyframeManager::Get().BeginModifyingKeyframeValue(*keyframe);
                 }
-                keyframe->value.SetByIndex(index, v);
+                keyframe->value.SetByIndex(index, dvalue);
             }
             Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
         }
