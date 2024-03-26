@@ -156,18 +156,58 @@ namespace IWXMVM::D3D9
         return hr;
     }
 
-    void CheckPresenceReshade()
+    void CheckPresenceReshade(IDirect3DDevice9* device)
     {
-        auto device = Mod::GetGameInterface()->GetGameDevicePtr();
-        auto vTable = *reinterpret_cast<void***>(device);
-        auto orgEndScene = vTable[42];
+        constexpr std::array<byte, 3> ORIGINAL_ENDSCENE_BYTES = {0x6A, 0x14, 0xB8};
 
-        if (orgEndScene != d3d9DeviceVTable[42])
+        reshadeEndSceneAddress = std::nullopt;
+
+        auto SafeRead = [](auto address) -> uintptr_t* {
+            MEMORY_BASIC_INFORMATION mbi;
+            VirtualQuery(LPCVOID(address), &mbi, sizeof(mbi));
+
+            if (!(mbi.State & MEM_COMMIT))
+                return nullptr;
+
+            if ((mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS)))
+                return nullptr;
+
+            if (!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ |
+                                 PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)))
+                return nullptr;
+
+            return *reinterpret_cast<uintptr_t**>(address);
+        };
+
+        // Witchcraft hackery to determine if reshade is present
+        // and get the address of the "real" EndScene function.
+        // This is not necessarily the most robust way to ensure reshade is present.
+        uintptr_t deviceAddress = (uintptr_t)device;
+        for (uintptr_t offset = 0x4; offset < 0x20; offset += 0x4)
         {
-            LOG_DEBUG("Detected Reshade presence; original EndScene address is {}, Reshade EndScene address is {}.",
-                      orgEndScene, d3d9DeviceVTable[42]);
+            uintptr_t* originalDevice = SafeRead(deviceAddress + offset);
+            if (originalDevice == nullptr)
+                continue;
 
-            reshadeEndSceneAddress = std::exchange(d3d9DeviceVTable[42], orgEndScene);
+            uintptr_t* table = SafeRead(originalDevice);
+            if (table == nullptr)
+                continue;
+
+            auto endSceneCandidate = SafeRead(table + 42);
+            if (!endSceneCandidate)
+                continue;
+
+            if (!SafeRead(endSceneCandidate))
+                continue;
+            auto result =
+                std::memcmp((void*)endSceneCandidate, ORIGINAL_ENDSCENE_BYTES.data(), ORIGINAL_ENDSCENE_BYTES.size());
+            if (result == 0)
+            {
+                reshadeEndSceneAddress = endSceneCandidate;
+                LOG_DEBUG("Detected reshade presence; original device is at offset {0:x}, real EndScene address: {1:x}",
+                          offset, (uintptr_t)reshadeEndSceneAddress.value());
+                break;
+            }
         }
     }
 
@@ -199,7 +239,7 @@ namespace IWXMVM::D3D9
 
         LOG_DEBUG("Created dummy D3D device");
 
-        CheckPresenceReshade();
+        CheckPresenceReshade(dummyDevice);
 
         dummyDevice->Release();
         d3dObj->Release();
