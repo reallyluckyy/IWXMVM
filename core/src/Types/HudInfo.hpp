@@ -10,6 +10,7 @@ namespace IWXMVM::Types
         bool showShellshock;
         bool showCrosshair;
         bool showScore;
+        bool showOtherText;
 
         bool showKillfeed;
         glm::vec3 killfeedTeam1Color;

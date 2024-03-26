@@ -112,6 +112,7 @@
     <ClCompile Include="src\Hooks.cpp" />
     <ClCompile Include="src\Hooks\Commands.cpp" />
     <ClCompile Include="src\Hooks\Camera.cpp" />
+    <ClCompile Include="src\Hooks\HUD.cpp" />
     <ClCompile Include="src\Hooks\Playback.cpp" />
     <ClCompile Include="src\Hooks\PlayerAnimation.cpp" />
     <ClCompile Include="src\IW3Interface.hpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="src\Hooks.hpp" />
     <ClInclude Include="src\Hooks\Commands.hpp" />
     <ClInclude Include="src\Hooks\Camera.hpp" />
+    <ClInclude Include="src\Hooks\HUD.hpp" />
     <ClInclude Include="src\Hooks\Playback.hpp" />
     <ClInclude Include="src\Hooks\PlayerAnimation.hpp" />
     <ClInclude Include="src\Patches.hpp" />

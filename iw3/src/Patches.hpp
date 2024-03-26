@@ -34,9 +34,6 @@ namespace IWXMVM::IW3::Patches
         NopPatch<5> CG_MapRestart{GetGameAddresses().CG_MapRestartSetThirdpersonCall(),
                                   PatchApplySetting::Immediately};  // Prevents cg_thirdperson from being reset
          
-        ReturnPatch R_AddCmdDrawTextWithEffects{GetGameAddresses().R_AddCmdDrawTextWithEffects(),
-                                                PatchApplySetting::Deferred};
-
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };
 

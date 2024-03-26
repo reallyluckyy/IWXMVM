@@ -9,6 +9,7 @@
 #include "DemoParser.hpp"
 #include "Hooks/Camera.hpp"
 #include "Hooks/Playback.hpp"
+#include "Hooks/HUD.hpp"
 #include "Addresses.hpp"
 #include "Patches.hpp"
 #include "Components/Rewinding.hpp"
@@ -316,7 +317,8 @@ namespace IWXMVM::IW3
                 !Functions::FindDvar("ui_hud_hardcore")->current.enabled,
                 Functions::FindDvar("cg_drawShellshock")->current.value,
                 Functions::FindDvar("ui_drawCrosshair")->current.enabled, 
-                !Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.IsApplied(),
+                Hooks::HUD::showScore,
+                Hooks::HUD::showOtherText,
                 Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
                 teamColorAllies,   
                 teamColorAxis
@@ -394,17 +396,16 @@ namespace IWXMVM::IW3
 
             Functions::FindDvar("ui_hud_hardcore")->current.enabled = !hudInfo.showPlayerHUD;
             Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5 : 0;
+            Functions::FindDvar("cg_overheadranksize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
             Functions::FindDvar("cg_overheadnamessize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
             Functions::FindDvar("cg_overheadiconsize")->current.value = hudInfo.showPlayerHUD ? 0.7f : 0;
 
             Functions::FindDvar("cg_drawShellshock")->current.value = hudInfo.showShellshock;
             Functions::FindDvar("ui_hud_obituaries")->current.string = hudInfo.showKillfeed ? "1" : "0";
             Functions::FindDvar("ui_drawCrosshair")->current.enabled = hudInfo.showCrosshair;
-            if (hudInfo.showScore)
-                Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.Revert();
-            else
-                Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.Apply();
-            
+            Hooks::HUD::showScore = hudInfo.showScore;
+            Hooks::HUD::showOtherText = hudInfo.showOtherText;
+
             std::stringstream teamColorAllies;
             teamColorAllies << hudInfo.killfeedTeam1Color[0] << " " << hudInfo.killfeedTeam1Color[1] << " "
                             << hudInfo.killfeedTeam1Color[2] << " 1\0";
