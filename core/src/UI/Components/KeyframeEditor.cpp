@@ -775,7 +775,9 @@ namespace IWXMVM::UI
                 auto firstColumnSize = ImGui::GetFontSize() * 1.4f + GetSize().x / 8 + padding.x * 3;
 
                 ImGui::TableSetupColumn("Properties", ImGuiTableColumnFlags_NoSort, firstColumnSize);
-                ImGui::TableSetupColumn("Keyframes", ImGuiTableColumnFlags_NoSort, GetSize().x / 8 * 7);
+                ImGui::TableSetupColumn(
+                    "Keyframes", ImGuiTableColumnFlags_NoSort,
+                    GetSize().x / 8 * 7 + ImGui::GetStyle().ItemSpacing.x + ImGui::GetFontSize() * 1.4f);
 
                 for (const auto& pair : propertyKeyframes)
                 {
@@ -831,6 +833,16 @@ namespace IWXMVM::UI
                     ImGui::SetNextItemWidth(progressBarWidth);
                     ImGui::TableSetColumnIndex(1);
                     wasInnerAreaHovered = DrawKeyframeSlider(property) || wasInnerAreaHovered;
+
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 0.1f, 0.1f, 1));
+                    if (ImGui::Button(std::format(ICON_FA_TRASH "##deleteProperty{}Button", property.name).c_str(), 
+                                      ImVec2(1, 1) * (ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2.0f)))
+                    {
+                        Components::KeyframeManager::Get().GetKeyframes(property).clear();
+                        propertyVisible[property] = false;
+                    }
+                    ImGui::PopStyleColor();
 
                     if (showCurve)
                     {
