@@ -96,7 +96,22 @@ namespace IWXMVM::IW3
 
         void InitializeGameAddresses() final
         {
-            GetGameAddresses();
+            try
+            {
+                GetGameAddresses();
+            }
+            catch (std::exception& ex)
+            {
+                LOG_ERROR("Failed to find required signature");
+                MessageBoxA(
+                    NULL, 
+                    "It seems like you are running an unsupported game version.\nYou can download a supported version of COD4 at the following link:\n\n"
+                    "https://codmvm.com/data/iwxmvm/iw3mp.exe\n\nSimply replace the iw3mp.exe in your COD4 directory with this one.", 
+                    "Unsupported game version", 
+                    MB_OK
+                );
+                ExitProcess(0);
+            }
         }
 
         static HMODULE GetCoD4xModuleHandle()
