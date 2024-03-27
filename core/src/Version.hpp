@@ -2,5 +2,5 @@
 
 namespace IWXMVM
 {
-    constexpr const char* IWXMVM_VERSION = "Beta 0.3.0";
+    constexpr const char* IWXMVM_VERSION = "Beta 0.3.1";
 }
