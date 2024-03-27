@@ -31,6 +31,7 @@
 #include <Windows.h>
 #include <psapi.h>
 #include <shobjidl.h>
+#include <Propkey.h>
 
 #include "Logger.hpp"
 
