@@ -189,12 +189,12 @@ namespace IWXMVM::D3D9
             CoUninitialize();
         }
 
-        if (reshadeFound)
-        {
-            auto device = Mod::GetGameInterface()->GetGameDevicePtr();
-            auto vTable = *reinterpret_cast<void***>(device);
-            auto orgEndScene = vTable[42];
+        auto device = Mod::GetGameInterface()->GetGameDevicePtr();
+        auto vTable = *reinterpret_cast<void***>(device);
+        auto orgEndScene = vTable[42];
 
+        if (reshadeFound && orgEndScene != d3d9DeviceVTable[42])
+        {
             LOG_DEBUG("Detected Reshade presence; original EndScene address is {}, Reshade EndScene address is {}.",
                       orgEndScene, d3d9DeviceVTable[42]);
 
