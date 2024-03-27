@@ -182,6 +182,7 @@ namespace IWXMVM::D3D9
                     {
                         reshadeFound = true;
                     }
+                    CoTaskMemFree(fileDesc);
                 }
                 pShellItem->Release();
             }
