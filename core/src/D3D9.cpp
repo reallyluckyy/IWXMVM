@@ -6,6 +6,7 @@
 #include "Events.hpp"
 #include "Graphics/Graphics.hpp"
 #include "Utilities/HookManager.hpp"
+#include "Utilities/PathUtils.hpp"
 #include "Mod.hpp"
 
 #include "UI/UIManager.hpp"
@@ -158,12 +159,41 @@ namespace IWXMVM::D3D9
 
     void CheckPresenceReshade()
     {
-        auto device = Mod::GetGameInterface()->GetGameDevicePtr();
-        auto vTable = *reinterpret_cast<void***>(device);
-        auto orgEndScene = vTable[42];
-
-        if (orgEndScene != d3d9DeviceVTable[42])
+        const std::filesystem::path gamePath(PathUtils::GetCurrentGameDirectory());
+        const auto reshadePath = gamePath / "d3d9.dll";
+        if (!std::filesystem::exists(reshadePath))
         {
+            return;
+        }
+
+        bool reshadeFound = false;
+        HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+        if (SUCCEEDED(hr))
+        {
+            IShellItem2* pShellItem;
+            hr = SHCreateItemFromParsingName(reshadePath.wstring().c_str(), nullptr, IID_PPV_ARGS(&pShellItem));
+            if (SUCCEEDED(hr))
+            {
+                LPWSTR fileDesc = nullptr;
+                hr = pShellItem->GetString(PKEY_FileDescription, &fileDesc);
+                if (SUCCEEDED(hr))
+                {
+                    if (std::wstring_view(fileDesc).find(L"ReShade"))
+                    {
+                        reshadeFound = true;
+                    }
+                }
+                pShellItem->Release();
+            }
+            CoUninitialize();
+        }
+
+        if (reshadeFound)
+        {
+            auto device = Mod::GetGameInterface()->GetGameDevicePtr();
+            auto vTable = *reinterpret_cast<void***>(device);
+            auto orgEndScene = vTable[42];
+
             LOG_DEBUG("Detected Reshade presence; original EndScene address is {}, Reshade EndScene address is {}.",
                       orgEndScene, d3d9DeviceVTable[42]);
 
