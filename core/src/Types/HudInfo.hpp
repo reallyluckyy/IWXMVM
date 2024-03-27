@@ -11,6 +11,7 @@ namespace IWXMVM::Types
         bool showCrosshair;
         bool showScore;
         bool showOtherText;
+        bool showBloodOverlay;
 
         bool showKillfeed;
         glm::vec3 killfeedTeam1Color;

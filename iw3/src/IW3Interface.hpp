@@ -318,7 +318,8 @@ namespace IWXMVM::IW3
                 Functions::FindDvar("cg_drawShellshock")->current.value,
                 Functions::FindDvar("ui_drawCrosshair")->current.enabled, 
                 Hooks::HUD::showScore,
-                Hooks::HUD::showOtherText,
+                Hooks::HUD::showOtherText, 
+                !Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.IsApplied(),
                 Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
                 teamColorAllies,   
                 teamColorAxis
@@ -405,6 +406,10 @@ namespace IWXMVM::IW3
             Functions::FindDvar("ui_drawCrosshair")->current.enabled = hudInfo.showCrosshair;
             Hooks::HUD::showScore = hudInfo.showScore;
             Hooks::HUD::showOtherText = hudInfo.showOtherText;
+            if (hudInfo.showBloodOverlay)
+                Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Revert();
+            else
+                Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Apply();
 
             std::stringstream teamColorAllies;
             teamColorAllies << hudInfo.killfeedTeam1Color[0] << " " << hudInfo.killfeedTeam1Color[1] << " "

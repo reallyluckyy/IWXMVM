@@ -206,6 +206,13 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
             modified = ImGui::Checkbox("##showOtherTextCheckbox", &visuals.hudInfo.showOtherText) || modified;
 
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show Blood Overlay");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(checkboxColumnPosition);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::Checkbox("##showBloodOverlayCheckbox", &visuals.hudInfo.showBloodOverlay) || modified;
+
             ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
             ImGui::AlignTextToFramePadding();

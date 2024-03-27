@@ -76,7 +76,7 @@ namespace IWXMVM::IW3::Signatures
 
         Sig("55 8B 6C 24 38 85 ED", GAType::Code, -5) > R_AddCmdDrawTextWithEffects;
         Sig("83 3D ?? ?? ?? ?? 09 75 ?? ?? ?? ?? ?? ?? 8B CD", GAType::Code, 9, Lambda::FollowCodeFlow) > IN_Frame;
-
+        Sig("83 C4 2C 5D 5B 59", GAType::Code, -5) > CG_DrawPlayerLowHealthOverlay;
 
         // cod4x
         using MType = Types::ModuleType;
