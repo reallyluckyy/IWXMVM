@@ -271,8 +271,11 @@ namespace IWXMVM::UI
                 auto totalFrames = (captureSettings.endTick - captureSettings.startTick) * (captureSettings.framerate/1000.0f);
                 ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImGui::GetColorU32(ImGuiCol_Button));
                 ImGui::ProgressBar((float)captureManager.GetCapturedFrameCount() / totalFrames, ImVec2(-1, 0), "");
+                UIManager::Get().SetTaskbarProgress((int)captureManager.GetCapturedFrameCount(), totalFrames);
                 ImGui::PopStyleColor();
             }
+            else
+                UIManager::Get().SetTaskbarState(TBPF_NOPROGRESS);
 
             ImGui::End();
         }

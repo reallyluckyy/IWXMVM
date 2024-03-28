@@ -10,6 +10,7 @@
 #include "Components/CameraManager.hpp"
 #include "Utilities/MathUtils.hpp"
 
+
 namespace IWXMVM::UI
 {
     void UIManager::ShutdownImGui()
@@ -24,6 +25,8 @@ namespace IWXMVM::UI
             component->Release();
         }
         uiComponentsInitialized = false;
+
+        delete taskbarList;
 
         ImGui_ImplDX9_Shutdown();
         ImGui_ImplWin32_Shutdown();
@@ -140,6 +143,17 @@ namespace IWXMVM::UI
         return mode == Components::Camera::Mode::Free || mode == Components::Camera::Mode::Bone;
     }
 
+    void UIManager::SetTaskbarProgress(int current, int maximum)
+    {
+        taskbarList->SetProgressState(TBPF_NORMAL);
+        taskbarList->SetProgressValue(current, maximum);
+    }
+
+    void UIManager::SetTaskbarState(TBPFLAG state)
+    {
+        taskbarList->SetProgressState(state);
+    }
+
     ImVec2 UIManager::GetWindowSize(HWND hwnd)
     {
         RECT windowRect = {};
@@ -246,6 +260,7 @@ namespace IWXMVM::UI
             isInitialized = true;
 
             Components::CaptureManager::Get().Initialize();
+            taskbarList = new IWXMVM::TaskbarList::TaskbarList(hwnd);
 
             LOG_INFO("Initialized UI");
         }
