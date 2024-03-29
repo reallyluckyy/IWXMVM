@@ -241,10 +241,13 @@ namespace IWXMVM::Components
                     filename = std::format("output{0}.mov", ++i);
                 }
 
+                char shortPath[MAX_PATH];
+                GetShortPathName(path.string().c_str(), shortPath, MAX_PATH);
+
                 return std::format(
                     "{} -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -c:v prores -profile:v {} -q:v 1 "
                     "-pix_fmt {} -vf scale={}:{} -y \"{}\\{}\" > ffmpeg_log.txt 2>&1",
-                    path.string(), screenDimensions.width, screenDimensions.height, captureSettings.framerate, profile,
+                    std::string(shortPath), screenDimensions.width, screenDimensions.height, captureSettings.framerate, profile,
                     pixelFormat, captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string(), filename);
             }
             default:
