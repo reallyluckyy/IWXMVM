@@ -191,13 +191,16 @@ namespace IWXMVM::Components
     std::string GetFFmpegCommand(const Components::CaptureSettings& captureSettings, const std::filesystem::path& outputDirectory, const Resolution screenDimensions)
     {
         auto path = GetFFmpegPath();
+        char shortPathBuf[MAX_PATH];
+        GetShortPathName(path.string().c_str(), shortPathBuf, MAX_PATH);
+        std::string shortPath = shortPathBuf;
         switch (captureSettings.outputFormat)
         {
             case OutputFormat::ImageSequence:
                 return std::format(
                     "{} -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -q:v 0 "
                     "-vf scale={}:{} -y \"{}\\output_%06d.tga\" > ffmpeg_log.txt 2>&1",
-                    path.string(),
+                    shortPath,
                     screenDimensions.width, screenDimensions.height, captureSettings.framerate,
                     captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string());
             case OutputFormat::Video:
@@ -244,7 +247,7 @@ namespace IWXMVM::Components
                 return std::format(
                     "{} -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -c:v prores -profile:v {} -q:v 1 "
                     "-pix_fmt {} -vf scale={}:{} -y \"{}\\{}\" > ffmpeg_log.txt 2>&1",
-                    path.string(), screenDimensions.width, screenDimensions.height, captureSettings.framerate, profile,
+                    shortPath, screenDimensions.width, screenDimensions.height, captureSettings.framerate, profile,
                     pixelFormat, captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string(), filename);
             }
             default:
