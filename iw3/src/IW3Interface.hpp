@@ -97,20 +97,33 @@ namespace IWXMVM::IW3
 
         void InitializeGameAddresses() final
         {
+            bool isRunningIW3xo = GetModuleHandle("iw3x") != NULL;
+            LOG_DEBUG("Using IW3xo: {}", isRunningIW3xo);
+
             try
             {
                 GetGameAddresses();
             }
             catch (std::exception& ex)
             {
-                LOG_ERROR("Failed to find required signature");
-                MessageBoxA(
-                    NULL, 
-                    "It seems like you are running an unsupported game version.\nYou can download a supported version of COD4 at the following link:\n\n"
-                    "https://codmvm.com/data/iwxmvm/iw3mp.exe\n\nSimply replace the iw3mp.exe in your COD4 directory with this one.", 
-                    "Unsupported game version", 
-                    MB_OK
-                );
+                LOG_ERROR("Failed to find required signature: {}", ex.what());
+                if (isRunningIW3xo)
+                {
+                    MessageBoxA(NULL,
+                                "It seems like you are running an unsupported iw3xo version.\nPlease make sure "
+                                "you are running the latest iw3xo version, which you can find here:\n\n"
+                                "https://github.com/xoxor4d/iw3xo-dev/releases\n\nWe can confirm IWXMVM works with IW3xo 3495!",
+                                "Unsupported iw3xo version", MB_OK);
+                }
+                else
+                {
+                    MessageBoxA(NULL,
+                                "It seems like you are running an unsupported game version.\nYou can download a "
+                                "supported version of COD4 (1.7) at the following link:\n\n"
+                                "https://codmvm.com/data/iwxmvm/iw3mp.exe\n\nSimply replace the iw3mp.exe in your COD4 "
+                                "directory with this one.",
+                                "Unsupported game version", MB_OK);
+                }
                 ExitProcess(0);
             }
         }
