@@ -70,7 +70,7 @@ namespace IWXMVM::IW3::Functions
     bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity /*@<eax>*/, int boneIndex /*@<ecx>*/, 
                                    float* matrix /*@<esi>*/, Structures::DObj_s* dobj, float* origin)
     {
-        static uintptr_t address = GetGameAddresses().CG_DObjGetWorldBoneMatrix.GetAddress();
+        static uintptr_t address = GetGameAddresses().CG_DObjGetWorldBoneMatrix();
         __asm 
         {
             mov eax, entity
@@ -80,6 +80,18 @@ namespace IWXMVM::IW3::Functions
             push dobj
             call address
             add esp, 8
+        }
+    }
+
+    void Dvar_SetStringByName(const char* dvarName, const char* value)
+    {
+        static uintptr_t address = GetGameAddresses().Dvar_SetStringByName();
+        __asm 
+        {
+            mov eax, dvarName
+            push value
+            call address
+            add esp, 4
         }
     }
 

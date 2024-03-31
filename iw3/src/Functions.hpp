@@ -13,4 +13,6 @@ namespace IWXMVM::IW3::Functions
 
     bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity /*@<eax>*/, int boneIndex /*@<ecx>*/,
                                         float* matrix /*@<esi>*/, Structures::DObj_s* dobj, float* origin);
+
+    void Dvar_SetStringByName(const char* dvarName, const char* value);
 }  // namespace IWXMVM::IW3::Structures

@@ -427,12 +427,13 @@ namespace IWXMVM::IW3
             std::stringstream teamColorAllies;
             teamColorAllies << hudInfo.killfeedTeam1Color[0] << " " << hudInfo.killfeedTeam1Color[1] << " "
                             << hudInfo.killfeedTeam1Color[2] << " 1\0";
-            std::strcpy((char*)Functions::FindDvar("g_TeamColor_Allies")->current.string, teamColorAllies.str().c_str());
+
+            Functions::Dvar_SetStringByName("g_TeamColor_Allies", teamColorAllies.str().c_str());
 
             std::stringstream teamColorAxis;
             teamColorAxis << hudInfo.killfeedTeam2Color[0] << " " << hudInfo.killfeedTeam2Color[1] << " " 
                           << hudInfo.killfeedTeam2Color[2] << " 1\0";
-            std::strcpy((char*)Functions::FindDvar("g_TeamColor_Axis")->current.string, teamColorAxis.str().c_str());
+            Functions::Dvar_SetStringByName("g_TeamColor_Axis", teamColorAxis.str().c_str());
         }
         
         std::vector<Types::Entity> GetEntities() final
