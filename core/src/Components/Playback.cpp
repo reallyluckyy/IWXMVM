@@ -20,6 +20,12 @@ namespace IWXMVM::Components::Playback
     
     void SkipForward(std::int32_t ticks)
     {
+        if (Mod::GetGameInterface()->AreCinematicsFrozen()) 
+        {
+            Mod::GetGameInterface()->ModifyLastValidTick(false, ticks);
+            return;
+        }
+
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
         auto realtime = reinterpret_cast<int32_t*>(addresses.cls.realtime);
         *realtime = *realtime + ticks;
