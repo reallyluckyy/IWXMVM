@@ -58,6 +58,7 @@ namespace IWXMVM
         };
 
         virtual bool& AreCinematicsFrozen() = 0;
+        virtual void ModifyLastValidTick(bool isPaused, std::int32_t gameMsec) = 0;
 
         virtual Types::DemoInfo GetDemoInfo() = 0;
         virtual std::string_view GetDemoExtension() = 0;

@@ -170,6 +170,7 @@ namespace IWXMVM::IW3
             }
         }
 
+        std::uint32_t lastValidTick = 0;
         bool areCinematicsFrozen{};
 
         bool& AreCinematicsFrozen() final
@@ -177,8 +178,25 @@ namespace IWXMVM::IW3
             return areCinematicsFrozen;
         }
 
+        void ModifyLastValidTick(bool isPaused, std::int32_t gameMsec) final
         {
-            static uint32_t lastValidTick = 0;
+            assert(areCinematicsFrozen);
+
+            if (gameMsec < 0 && static_cast<std::uint32_t>(0 - gameMsec) > lastValidTick)
+            {
+                LOG_DEBUG("Cannot rewind more than {}", lastValidTick);
+                gameMsec = 0 - lastValidTick;
+            }
+
+            const auto [demoStartTick, demoEndTick] = DemoParser::GetDemoTickRange();
+
+            if (!isPaused &&
+                static_cast<std::uint32_t>(demoStartTick) + lastValidTick + static_cast<std::uint32_t>(gameMsec) <
+                    static_cast<std::uint32_t>(demoEndTick))
+            {
+                lastValidTick += gameMsec;
+            }
+        }
 
         Types::DemoInfo GetDemoInfo() final
         {
@@ -195,8 +213,12 @@ namespace IWXMVM::IW3
             auto [demoStartTick, demoEndTick] = DemoParser::GetDemoTickRange();
 
             const auto serverTime = Structures::GetClientActive()->serverTime;
-            if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding())
+            if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding() &&
+                !AreCinematicsFrozen())
+            {
                 lastValidTick = serverTime - demoStartTick;
+            }
+
             demoInfo.currentTick = lastValidTick;
             demoInfo.endTick = demoEndTick - demoStartTick;
 
