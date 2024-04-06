@@ -222,6 +222,8 @@ namespace IWXMVM::UI
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
+        ImGui::Checkbox("Enable frozen cinematics", &Mod::GetGameInterface()->AreCinematicsFrozen());
+
         switch (cameraManager.GetActiveCamera()->GetMode())
         {
             case Components::Camera::Mode::FirstPerson:

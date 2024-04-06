@@ -57,6 +57,8 @@ namespace IWXMVM
             return Types::Features_None;
         };
 
+        virtual bool& AreCinematicsFrozen() = 0;
+
         virtual Types::DemoInfo GetDemoInfo() = 0;
         virtual std::string_view GetDemoExtension() = 0;
 

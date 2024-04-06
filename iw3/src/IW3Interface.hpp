@@ -170,10 +170,18 @@ namespace IWXMVM::IW3
             }
         }
 
-        Types::DemoInfo GetDemoInfo() final
+        bool areCinematicsFrozen{};
+
+        bool& AreCinematicsFrozen() final
+        {
+            return areCinematicsFrozen;
+        }
+
         {
             static uint32_t lastValidTick = 0;
 
+        Types::DemoInfo GetDemoInfo() final
+        {
             Types::DemoInfo demoInfo;
             demoInfo.name = Structures::GetClientStatic()->servername;
             demoInfo.name = demoInfo.name.starts_with(DEMO_TEMP_DIRECTORY)
