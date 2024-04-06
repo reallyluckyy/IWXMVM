@@ -165,6 +165,12 @@ namespace IWXMVM::Components::Playback
         else if (patternIndex % 1000 == 0)
             GeneratePattern(pattern, ImGui::GetIO().Framerate, timescale.value().value->floating_point);
 
+        if (useFrozenCinematics)
+        {
+            Mod::GetGameInterface()->ModifyLastValidTick(IsPaused(), pattern[patternIndex++ % 1000]);
+            return 0;
+        }
+
         // advance (1ms) or pause(0ms) based on the pattern
         return pattern[patternIndex++ % 1000];
     }
