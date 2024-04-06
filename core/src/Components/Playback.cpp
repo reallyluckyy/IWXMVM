@@ -111,7 +111,14 @@ namespace IWXMVM::Components::Playback
         // we can use the original msec value when its value is greater than 1, and/or when timescale is equal or
         // greater than 1.0
         if (gameMsec > 1 || !timescale.has_value() || timescale.value().value->floating_point >= 1.0f)
+        {
+            if (useFrozenCinematics)
+            {
+                Mod::GetGameInterface()->ModifyLastValidTick(IsPaused(), gameMsec);
+                return 0;
+            }
             return gameMsec;
+        }
 
         const std::optional<Types::Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
         if (!com_maxfps.has_value())
