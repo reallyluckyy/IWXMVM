@@ -75,13 +75,13 @@ namespace IWXMVM::Components::Playback
 
     std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec)
     {
+        const auto useFrozenCinematics = Mod::GetGameInterface()->AreCinematicsFrozen();
+
         // check if we need to skip forward for exact rewinding
-        if (Components::Rewinding::CheckSkipForward())
+        if (!useFrozenCinematics && Components::Rewinding::CheckSkipForward())
         {
             return 0;
         }
-
-        const auto useFrozenCinematics = Mod::GetGameInterface()->AreCinematicsFrozen();
 
         auto& captureManager = Components::CaptureManager::Get();
         if (captureManager.IsCapturing())
