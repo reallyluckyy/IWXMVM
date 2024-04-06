@@ -122,7 +122,14 @@ namespace IWXMVM::Components::Playback
 
         const std::optional<Types::Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
         if (!com_maxfps.has_value())
+        {
+            if (useFrozenCinematics)
+            {
+                Mod::GetGameInterface()->ModifyLastValidTick(IsPaused(), gameMsec);
+                return 0;
+            }
             return gameMsec;
+        }
 
         static float lastTimeScale = timescale.value().value->floating_point;
         static std::int32_t lastMaxFps = com_maxfps.value().value->int32;
