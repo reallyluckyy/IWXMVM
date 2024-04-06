@@ -81,6 +81,8 @@ namespace IWXMVM::Components::Playback
             return 0;
         }
 
+        const auto useFrozenCinematics = Mod::GetGameInterface()->AreCinematicsFrozen();
+
         auto& captureManager = Components::CaptureManager::Get();
         if (captureManager.IsCapturing())
         {
