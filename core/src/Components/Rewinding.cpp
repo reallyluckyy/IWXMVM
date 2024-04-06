@@ -196,6 +196,12 @@ namespace IWXMVM::Components::Rewinding
 
     void RewindBy(std::int32_t ticks)
     {
+        if (Mod::GetGameInterface()->AreCinematicsFrozen())
+        {
+            Mod::GetGameInterface()->ModifyLastValidTick(false, ticks);
+            return;
+        }
+
         if (ticks >= SKIPPING_FORWARD)
         {
             LOG_DEBUG("Cannot rewind invalid tick value {}", ticks);
