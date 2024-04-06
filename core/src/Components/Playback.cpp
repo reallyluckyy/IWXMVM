@@ -86,6 +86,11 @@ namespace IWXMVM::Components::Playback
         auto& captureManager = Components::CaptureManager::Get();
         if (captureManager.IsCapturing())
         {
+            if (useFrozenCinematics)
+            {
+                Mod::GetGameInterface()->ModifyLastValidTick(false, captureManager.OnGameFrame());
+                return 0;
+            }
             return captureManager.OnGameFrame();
         }
 
