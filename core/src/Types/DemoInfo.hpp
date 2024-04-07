@@ -9,5 +9,6 @@ namespace IWXMVM::Types
 
         uint32_t currentTick;
         uint32_t endTick;
+        std::optional<uint32_t> frozenTick;
     };
 }  // namespace IWXMVM::Types
