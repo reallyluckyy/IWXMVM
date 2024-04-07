@@ -291,9 +291,6 @@ namespace IWXMVM::UI
         }
     }
 
-    INCBIN_EXTERN(IMG_PLAY_BUTTON);
-    INCBIN_EXTERN(IMG_PAUSE_BUTTON);
-
     void ControlBar::Render()
     {
         if (Mod::GetGameInterface()->GetGameState() == Types::GameState::MainMenu)
@@ -332,11 +329,9 @@ namespace IWXMVM::UI
             ImGui::SetCursorPosX(padding.x);
             ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
 
-            const auto image = UIImage::FromResource(
-                Components::Playback::IsPaused() ? IMG_PLAY_BUTTON_data : IMG_PAUSE_BUTTON_data,
-                Components::Playback::IsPaused() ? IMG_PLAY_BUTTON_size : IMG_PAUSE_BUTTON_size);
+            ImGui::AlignTextToFramePadding();
 
-            if (ImGui::ImageButton(image.GetTextureID(), pauseButtonSize, ImVec2(0, 0), ImVec2(1, 1), 1))
+            if (ImGui::Button(Components::Playback::IsPaused() ? ICON_FA_PLAY : ICON_FA_PAUSE, buttonSize * 1.1f))
             {
                 Components::Playback::TogglePaused();
             }
@@ -395,8 +390,5 @@ namespace IWXMVM::UI
     }
 
     void ControlBar::Release()
-    {
-        UIImage::ReleaseResource(IMG_PLAY_BUTTON_data);
-        UIImage::ReleaseResource(IMG_PAUSE_BUTTON_data);
-    }
+    {}
 }  // namespace IWXMVM::UI

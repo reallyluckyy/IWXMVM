@@ -3,9 +3,6 @@
 
 namespace IWXMVM::Resources
 {
-    INCBIN(IMG_PLAY_BUTTON, "resources/play_button.png");
-    INCBIN(IMG_PAUSE_BUTTON, "resources/pause_button.png");
-
     INCBIN(IBMPLEX_FONT, "resources/IBMPlexSans-Regular.ttf");
     INCBIN(TASA_ORBITER_FONT, "resources/TASAOrbiterDisplay-Regular.ttf");
     INCBIN(TASA_ORBITER_BOLD_FONT, "resources/TASAOrbiterDisplay-Bold.ttf");
