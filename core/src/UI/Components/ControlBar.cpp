@@ -26,10 +26,13 @@ namespace IWXMVM::UI
     {
         // Skip forward/backward by the desired amount of ticks, while snapping to the closest capturing marker if 
         // there is one between where we are and where we want to go
+        // added skip forward/backward to frozen tick marker
         
         auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
         auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        auto frozenTick = Mod::GetGameInterface()->GetDemoInfo().frozenTick;
         auto targetTick = currentTick + value;
+
         if (value > 0)
         {
             // skipping forward
@@ -41,6 +44,12 @@ namespace IWXMVM::UI
             else if (captureSettings.endTick > currentTick && captureSettings.endTick < targetTick)
             {
                 Components::Playback::SetTickDelta(captureSettings.endTick - currentTick);
+                return;
+            }
+
+            if (frozenTick.has_value() && frozenTick.value() > currentTick && frozenTick.value() < targetTick)
+            {
+                Components::Playback::SetTickDelta(frozenTick.value() - currentTick);
                 return;
             }
         }
@@ -55,6 +64,12 @@ namespace IWXMVM::UI
             else if (captureSettings.startTick < currentTick && captureSettings.startTick > targetTick)
             {
                 Components::Playback::SetTickDelta(captureSettings.startTick - currentTick, true);
+                return;
+            }
+
+            if (frozenTick.has_value() && frozenTick.value() < currentTick && frozenTick.value() > targetTick)
+            {
+                Components::Playback::SetTickDelta(frozenTick.value() - currentTick, true);
                 return;
             }
         }
