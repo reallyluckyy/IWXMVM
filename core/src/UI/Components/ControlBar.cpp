@@ -119,7 +119,8 @@ namespace IWXMVM::UI
         }
     }
 
-    bool ControlBar::DrawDemoProgressBar(uint32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick, uint32_t startTick, uint32_t endTick)
+    bool ControlBar::DrawDemoProgressBar(uint32_t* currentTick, uint32_t displayStartTick, uint32_t displayEndTick,
+                                         uint32_t startTick, uint32_t endTick, std::optional<uint32_t> frozenTick)
     {
         using namespace ImGui;
         auto label = "##demoProgressBar";
@@ -198,7 +199,7 @@ namespace IWXMVM::UI
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
         }
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, endTick);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, endTick, frozenTick);
 
         return value_changed;
     }
@@ -369,7 +370,7 @@ namespace IWXMVM::UI
                 ImGui::SetCursorPosX(progressBarX);
                 ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
                 const auto draggedProgressBar =
-                    DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick);
+                    DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick, demoInfo.frozenTick);
 
                 if (draggedProgressBar && !Components::Rewinding::IsRewinding())
                 {

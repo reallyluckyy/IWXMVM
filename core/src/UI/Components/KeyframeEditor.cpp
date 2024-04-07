@@ -151,7 +151,8 @@ namespace IWXMVM::UI
 
     bool KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                     uint32_t displayStartTick, uint32_t displayEndTick,
-                                                    std::vector<Types::Keyframe>& keyframes, uint32_t demoLength)
+                                                    std::vector<Types::Keyframe>& keyframes, uint32_t demoLength,
+                                                    std::optional<uint32_t> frozenTick)
     {
         using namespace ImGui;
 
@@ -188,7 +189,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength, frozenTick);
 
         bool isAnyKeyframeHovered = false;
 
@@ -353,7 +354,7 @@ namespace IWXMVM::UI
     bool KeyframeEditor::DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                  uint32_t displayStartTick, uint32_t displayEndTick, const float width,
                                                  std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
-                                                 uint32_t demoLength)
+                                                 uint32_t demoLength, std::optional<uint32_t> frozenTick)
     {
         using namespace ImGui;
 
@@ -391,7 +392,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength, frozenTick);
 
         bool isAnyKeyframeHovered = false;
 
@@ -599,7 +600,8 @@ namespace IWXMVM::UI
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
         return DrawKeyframeSliderInternal(property, &currentTick, displayStartTick, displayEndTick,
-                                          Components::KeyframeManager::Get().GetKeyframes(property), demoInfo.endTick);
+                                          Components::KeyframeManager::Get().GetKeyframes(property), demoInfo.endTick,
+                                          demoInfo.frozenTick);
     }
 
     bool KeyframeEditor::DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width)
@@ -612,7 +614,8 @@ namespace IWXMVM::UI
         for (int i = 0; i < property.GetValueCount(); i++)
         {
             result = DrawCurveEditorInternal(property, &currentTick, displayStartTick, displayEndTick, width,
-                                             Components::KeyframeManager::Get().GetKeyframes(property), i, demoInfo.endTick) || result;
+                                             Components::KeyframeManager::Get().GetKeyframes(property), i,
+                                             demoInfo.endTick, demoInfo.frozenTick) || result;
         }
         return result;
     }
