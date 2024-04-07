@@ -340,11 +340,31 @@ namespace IWXMVM::UI
                                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
         if (ImGui::Begin("Playback Controls", nullptr, flags))
         {
-            const auto pauseButtonSize = ImVec2(ImGui::GetFontSize() * 1.4f, ImGui::GetFontSize() * 1.4f);
+            const auto buttonSize =
+                ImVec2(ImGui::GetFontSize() * 1.4f, ImGui::GetFontSize() * 1.4f);  // frozen tick and pause buttons
 
             ImGui::SetCursorPosX(padding.x);
-            ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
+            ImGui::SetCursorPosY(GetSize().y / 2 - buttonSize.y / 2);
+            ImGui::AlignTextToFramePadding();
 
+            const bool frozen = Mod::GetGameInterface()->IsTickFrozen().has_value();
+            if (frozen)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.0f, 0.667f));
+            }
+
+            if (ImGui::Button(!frozen ? ICON_FA_LOCK_OPEN : ICON_FA_LOCK, buttonSize * 1.1f))
+            {
+                Mod::GetGameInterface()->ToggleFrozenTick();
+            }
+
+            if (frozen)
+            {
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::SetCursorPosX(padding.x + buttonSize.x + ImGui::GetFontSize() * 0.8f);
+            ImGui::SetCursorPosY(GetSize().y / 2 - buttonSize.y / 2);
             ImGui::AlignTextToFramePadding();
 
             if (ImGui::Button(Components::Playback::IsPaused() ? ICON_FA_PLAY : ICON_FA_PAUSE, buttonSize * 1.1f))
@@ -354,9 +374,9 @@ namespace IWXMVM::UI
 
             const auto playbackSpeedSliderWidth = GetSize().x / 8;
 
-            ImGui::SetNextItemWidth(playbackSpeedSliderWidth);
-            ImGui::SetCursorPosX(padding.x + pauseButtonSize.x + ImGui::GetFontSize() * 0.8f);
-            ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
+            ImGui::SetNextItemWidth(playbackSpeedSliderWidth - buttonSize.x - ImGui::GetFontSize() * 0.8f);
+            ImGui::SetCursorPosX(padding.x + 2 * buttonSize.x + 2 * ImGui::GetFontSize() * 0.8f);
+            ImGui::SetCursorPosY(GetSize().y / 2 - buttonSize.y / 2);
             ImGuiEx::TimescaleSlider("##1", &timescale.value().value->floating_point, 
                 Components::Playback::TIMESCALE_STEPS.front(),
                 Components::Playback::TIMESCALE_STEPS.back(),
@@ -366,24 +386,24 @@ namespace IWXMVM::UI
             const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
             if (demoInfo.currentTick < demoInfo.endTick)
             {
-                const auto progressBarX = padding.x + pauseButtonSize.x + playbackSpeedSliderWidth + padding.x * 3;
+                const auto progressBarX = padding.x + buttonSize.x + playbackSpeedSliderWidth + padding.x * 3;
                 const auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - padding.x;
 
                 ImGui::SetCursorPosX(progressBarX + progressBarWidth + ImGui::GetFontSize() * 0.8f);
-                ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
+                ImGui::SetCursorPosY(GetSize().y / 2 - buttonSize.y / 2);
                 ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());
 
                 const auto keyframeEditor =
                     UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
                 const auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();
 
-               DrawCaptureRangeIndicators(displayStartTick, displayEndTick, progressBarX, progressBarWidth, pauseButtonSize);
+                DrawCaptureRangeIndicators(displayStartTick, displayEndTick, progressBarX, progressBarWidth, buttonSize);
 
                 ImGui::SetNextItemWidth(progressBarWidth);
                 static uint32_t tickValue{};
 
                 ImGui::SetCursorPosX(progressBarX);
-                ImGui::SetCursorPosY(GetSize().y / 2 - pauseButtonSize.y / 2);
+                ImGui::SetCursorPosY(GetSize().y / 2 - buttonSize.y / 2);
                 const auto draggedProgressBar =
                     DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick, demoInfo.frozenTick);
 
