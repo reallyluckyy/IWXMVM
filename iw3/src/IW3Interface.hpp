@@ -170,37 +170,52 @@ namespace IWXMVM::IW3
             }
         }
 
-        std::uint32_t lastValidTick = 0;
-        bool areCinematicsFrozen{};
+        Types::DemoInfo demoInfo;
 
-        bool& AreCinematicsFrozen() final
+        std::optional<uint32_t> IsTickFrozen() final
         {
-            return areCinematicsFrozen;
+            return demoInfo.frozenTick;
         }
 
-        void ModifyLastValidTick(bool isPaused, std::int32_t gameMsec) final
+        void ToggleFrozenTick() final
         {
-            assert(areCinematicsFrozen);
+            const auto currentTick = demoInfo.currentTick;
+            auto& frozenTick = demoInfo.frozenTick;
 
-            if (gameMsec < 0 && static_cast<std::uint32_t>(0 - gameMsec) > lastValidTick)
+            if (frozenTick.has_value())
             {
-                LOG_DEBUG("Cannot rewind more than {}", lastValidTick);
-                gameMsec = 0 - lastValidTick;
+                frozenTick.reset();
+            }
+            else
+            {
+                frozenTick.emplace(currentTick);
+            }
+        }
+
+        void UpdateFrozenTick(bool isPaused, std::int32_t gameMsec) final
+        {
+            auto& currentTick = demoInfo.currentTick;
+            const auto frozenTick = demoInfo.frozenTick;
+            assert(frozenTick);
+
+            if (gameMsec < 0 && static_cast<std::uint32_t>(0 - gameMsec) > currentTick)
+            {
+                LOG_DEBUG("Cannot rewind more than {}", currentTick);
+                gameMsec = 0 - currentTick;
             }
 
             const auto [demoStartTick, demoEndTick] = DemoParser::GetDemoTickRange();
 
             if (!isPaused &&
-                static_cast<std::uint32_t>(demoStartTick) + lastValidTick + static_cast<std::uint32_t>(gameMsec) <
+                static_cast<std::uint32_t>(demoStartTick) + currentTick + static_cast<std::uint32_t>(gameMsec) <
                     static_cast<std::uint32_t>(demoEndTick))
             {
-                lastValidTick += gameMsec;
+                currentTick += gameMsec;
             }
         }
 
         Types::DemoInfo GetDemoInfo() final
         {
-            Types::DemoInfo demoInfo;
             demoInfo.name = Structures::GetClientStatic()->servername;
             demoInfo.name = demoInfo.name.starts_with(DEMO_TEMP_DIRECTORY)
                                 ? demoInfo.name.substr(strlen(DEMO_TEMP_DIRECTORY) + 1)
@@ -214,12 +229,10 @@ namespace IWXMVM::IW3
 
             const auto serverTime = Structures::GetClientActive()->serverTime;
             if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding() &&
-                !AreCinematicsFrozen())
+                !demoInfo.frozenTick.has_value())
             {
-                lastValidTick = serverTime - demoStartTick;
+                demoInfo.currentTick = serverTime - demoStartTick;
             }
-
-            demoInfo.currentTick = lastValidTick;
             demoInfo.endTick = demoEndTick - demoStartTick;
 
             return demoInfo;
