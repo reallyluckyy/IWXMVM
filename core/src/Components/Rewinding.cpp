@@ -196,9 +196,9 @@ namespace IWXMVM::Components::Rewinding
 
     void RewindBy(std::int32_t ticks)
     {
-        if (Mod::GetGameInterface()->AreCinematicsFrozen())
+        if (Mod::GetGameInterface()->IsTickFrozen().has_value())
         {
-            Mod::GetGameInterface()->ModifyLastValidTick(false, ticks);
+            Mod::GetGameInterface()->UpdateFrozenTick(false, ticks);
             return;
         }
 

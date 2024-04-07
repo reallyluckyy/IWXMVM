@@ -20,9 +20,9 @@ namespace IWXMVM::Components::Playback
     
     void SkipForward(std::int32_t ticks)
     {
-        if (Mod::GetGameInterface()->AreCinematicsFrozen()) 
+        if (Mod::GetGameInterface()->IsTickFrozen().has_value())
         {
-            Mod::GetGameInterface()->ModifyLastValidTick(false, ticks);
+            Mod::GetGameInterface()->UpdateFrozenTick(false, ticks);
             return;
         }
 
@@ -75,10 +75,10 @@ namespace IWXMVM::Components::Playback
 
     std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec)
     {
-        const auto useFrozenCinematics = Mod::GetGameInterface()->AreCinematicsFrozen();
+        const bool useFrozenTick = Mod::GetGameInterface()->IsTickFrozen().has_value();
 
         // check if we need to skip forward for exact rewinding
-        if (!useFrozenCinematics && Components::Rewinding::CheckSkipForward())
+        if (!useFrozenTick && Components::Rewinding::CheckSkipForward())
         {
             return 0;
         }
@@ -86,22 +86,22 @@ namespace IWXMVM::Components::Playback
         auto& captureManager = Components::CaptureManager::Get();
         if (captureManager.IsCapturing())
         {
-            if (useFrozenCinematics)
+            if (useFrozenTick)
             {
-                Mod::GetGameInterface()->ModifyLastValidTick(false, captureManager.OnGameFrame());
+                Mod::GetGameInterface()->UpdateFrozenTick(false, captureManager.OnGameFrame());
                 return 0;
             }
             return captureManager.OnGameFrame();
         }
 
         // workaround for low timescales that would take a couple of seconds to trigger the rewind process to begin
-        if (!useFrozenCinematics && Components::Rewinding::IsRewinding())
+        if (!useFrozenTick && Components::Rewinding::IsRewinding())
         {
             return 50;
         }
 
         // always return 0 msec when pausing demo playback
-        if (!useFrozenCinematics && IsPaused())
+        if (!useFrozenTick && IsPaused())
         {
             return 0;
         }
@@ -112,9 +112,9 @@ namespace IWXMVM::Components::Playback
         // greater than 1.0
         if (gameMsec > 1 || !timescale.has_value() || timescale.value().value->floating_point >= 1.0f)
         {
-            if (useFrozenCinematics)
+            if (useFrozenTick)
             {
-                Mod::GetGameInterface()->ModifyLastValidTick(IsPaused(), gameMsec);
+                Mod::GetGameInterface()->UpdateFrozenTick(IsPaused(), gameMsec);
                 return 0;
             }
             return gameMsec;
@@ -123,9 +123,9 @@ namespace IWXMVM::Components::Playback
         const std::optional<Types::Dvar> com_maxfps = Mod::GetGameInterface()->GetDvar("com_maxfps");
         if (!com_maxfps.has_value())
         {
-            if (useFrozenCinematics)
+            if (useFrozenTick)
             {
-                Mod::GetGameInterface()->ModifyLastValidTick(IsPaused(), gameMsec);
+                Mod::GetGameInterface()->UpdateFrozenTick(IsPaused(), gameMsec);
                 return 0;
             }
             return gameMsec;
@@ -165,9 +165,9 @@ namespace IWXMVM::Components::Playback
         else if (patternIndex % 1000 == 0)
             GeneratePattern(pattern, ImGui::GetIO().Framerate, timescale.value().value->floating_point);
 
-        if (useFrozenCinematics)
+        if (useFrozenTick)
         {
-            Mod::GetGameInterface()->ModifyLastValidTick(IsPaused(), pattern[patternIndex++ % 1000]);
+            Mod::GetGameInterface()->UpdateFrozenTick(IsPaused(), pattern[patternIndex++ % 1000]);
             return 0;
         }
 
