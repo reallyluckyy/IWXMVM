@@ -86,7 +86,7 @@ namespace ImGuiEx
 
         if (frozenTick)
         {
-            DrawProgressLineAtTick(rect, frozenTick.value(), GetColorU32(ImVec4(1, 1, 0, 1)), 2, displayStartTick,
+            DrawProgressLineAtTick(rect, frozenTick.value(), GetColorU32(ImVec4(1, 0.9f, 0, 1)), 2, displayStartTick,
                                    displayEndTick);
         }
     }

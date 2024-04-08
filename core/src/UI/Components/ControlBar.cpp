@@ -350,7 +350,8 @@ namespace IWXMVM::UI
             const bool frozen = Mod::GetGameInterface()->IsTickFrozen().has_value();
             if (frozen)
             {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.0f, 0.667f));
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.9f, 0.0f, 0.95f));
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.05f, 0.05f, 0.05f, 1.0f));
             }
 
             if (ImGui::Button(!frozen ? ICON_FA_LOCK_OPEN : ICON_FA_LOCK, buttonSize * 1.1f))
@@ -360,7 +361,7 @@ namespace IWXMVM::UI
 
             if (frozen)
             {
-                ImGui::PopStyleColor();
+                ImGui::PopStyleColor(2);
             }
 
             ImGui::SetCursorPosX(padding.x + buttonSize.x + ImGui::GetFontSize() * 0.8f);
