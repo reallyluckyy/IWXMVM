@@ -328,7 +328,7 @@ namespace IWXMVM::IW3
             Types::HudInfo hudInfo = {
                 Functions::FindDvar("cg_draw2D")->current.enabled,
                 !Functions::FindDvar("ui_hud_hardcore")->current.enabled,
-                Functions::FindDvar("cg_drawShellshock")->current.value,
+                Functions::FindDvar("cg_drawShellshock")->current.enabled,
                 Functions::FindDvar("ui_drawCrosshair")->current.enabled, 
                 Hooks::HUD::showScore,
                 Hooks::HUD::showOtherText, 
@@ -409,12 +409,12 @@ namespace IWXMVM::IW3
             Functions::FindDvar("cg_draw2D")->current.enabled = hudInfo.show2DElements;
 
             Functions::FindDvar("ui_hud_hardcore")->current.enabled = !hudInfo.showPlayerHUD;
-            Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5 : 0;
+            Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5.0f : 0.0f;
             Functions::FindDvar("cg_overheadranksize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
             Functions::FindDvar("cg_overheadnamessize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
             Functions::FindDvar("cg_overheadiconsize")->current.value = hudInfo.showPlayerHUD ? 0.7f : 0;
 
-            Functions::FindDvar("cg_drawShellshock")->current.value = hudInfo.showShellshock;
+            Functions::FindDvar("cg_drawShellshock")->current.enabled = hudInfo.showShellshock;
             Functions::FindDvar("ui_hud_obituaries")->current.string = hudInfo.showKillfeed ? "1" : "0";
             Functions::FindDvar("ui_drawCrosshair")->current.enabled = hudInfo.showCrosshair;
             Hooks::HUD::showScore = hudInfo.showScore;

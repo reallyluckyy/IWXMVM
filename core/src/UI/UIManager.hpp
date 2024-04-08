@@ -85,6 +85,7 @@ namespace IWXMVM::UI
             return uiComponents[component];
         }
 
+        #pragma warning (disable: 4172)
         template <typename T>
         T* const& GetUIComponent(Component::Component component) const
         {

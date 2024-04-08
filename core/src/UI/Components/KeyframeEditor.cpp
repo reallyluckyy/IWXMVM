@@ -278,7 +278,7 @@ namespace IWXMVM::UI
     }
 
 
-    ImVec2& GetValueDisplayRange(const Types::KeyframeableProperty& property,
+    ImVec2 GetValueDisplayRange(const Types::KeyframeableProperty& property,
                                                   const std::vector<Types::Keyframe>& keyframes,
                                                   int32_t keyframeValueIndex)
     {
