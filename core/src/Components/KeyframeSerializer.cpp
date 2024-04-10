@@ -6,11 +6,13 @@
 #include "Utilities/PathUtils.hpp"
 #include "KeyframeManager.hpp"
 #include "Mod.hpp"
+#include "Playback.hpp"
 
 namespace IWXMVM::Components
 {
     constexpr std::string_view NODE_GAME_NAME = "game";
     constexpr std::string_view NODE_DEMO_NAME = "demo";
+    constexpr std::string_view NODE_FROZEN_TICK = "frozen tick";
     constexpr std::string_view NODE_PROPERTIES = "properties";
     constexpr std::string_view NODE_PROPERTY = "property";
     constexpr std::string_view NODE_TICK = "tick";
@@ -31,6 +33,10 @@ namespace IWXMVM::Components
         json rootNode;
         rootNode[NODE_GAME_NAME] = magic_enum::enum_name(Mod::GetGameInterface()->GetGame());
         rootNode[NODE_DEMO_NAME] = Mod::GetGameInterface()->GetDemoInfo().name;
+        if (const auto optFrozenTick = Mod::GetGameInterface()->GetDemoInfo().frozenTick; optFrozenTick.has_value())
+        {
+            rootNode[NODE_FROZEN_TICK] = optFrozenTick.value();
+        }
         
         json properties = json::array();
 
@@ -135,6 +141,10 @@ namespace IWXMVM::Components
                 LOG_WARN("Expected: {0}", demoName);
                 LOG_WARN("Actual: {0}", currentDemoName);
             }
+
+            auto optFrozenTick = rootNode[NODE_FROZEN_TICK];
+            Components::Playback::HandleImportedFrozenTickLogic(
+                !optFrozenTick.is_null() ? std::optional{optFrozenTick.get<std::uint32_t>()} : std::nullopt);
 
             auto properties = rootNode[NODE_PROPERTIES];
             for (json::iterator propertyObject = properties.begin(); propertyObject != properties.end();
