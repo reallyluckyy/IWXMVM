@@ -110,13 +110,14 @@ namespace IWXMVM::Components::Playback
 
     std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec)
     {
-        const bool useFrozenTick = Mod::GetGameInterface()->IsTickFrozen().has_value();
-
         // check if we need to skip forward for exact rewinding
-        if (!useFrozenTick && Components::Rewinding::CheckSkipForward())
+        if (Components::Rewinding::CheckSkipForward())
         {
+            // don't check for frozen tick otherwise keyframe importing with frozen tick doesn't work as expected
             return 0;
         }
+
+        const bool useFrozenTick = Mod::GetGameInterface()->IsTickFrozen().has_value();
 
         auto& captureManager = Components::CaptureManager::Get();
         if (captureManager.IsCapturing())
@@ -130,8 +131,9 @@ namespace IWXMVM::Components::Playback
         }
 
         // workaround for low timescales that would take a couple of seconds to trigger the rewind process to begin
-        if (!useFrozenTick && Components::Rewinding::IsRewinding())
+        if (Components::Rewinding::IsRewinding())
         {
+            // don't check for frozen tick otherwise keyframe importing with frozen tick doesn't work as expected
             return 50;
         }
 

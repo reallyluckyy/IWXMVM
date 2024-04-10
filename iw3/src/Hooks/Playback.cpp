@@ -15,7 +15,6 @@ namespace IWXMVM::IW3::Hooks::Playback
     void SV_Frame_Internal(std::int32_t& msec)
     {
         msec = Components::Playback::CalculatePlaybackDelta(msec);
-        assert(!Mod::GetGameInterface()->IsTickFrozen().has_value() || msec == 0);
     }
 
     void __declspec(naked) SV_Frame_Hook()
