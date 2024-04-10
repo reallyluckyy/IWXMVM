@@ -24,6 +24,9 @@ namespace IWXMVM::D3D9
     EndScene_t ReshadeOriginalEndScene;
     typedef HRESULT(__stdcall* Reset_t)(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
     Reset_t Reset;
+    typedef HRESULT(__stdcall* Present_t)(IDirect3DDevice9* pDevice, const RECT* pSourceRect, const RECT* pDestRect,
+                                          HWND hDestWindowOverride, const RGNDATA* pDirtyRegion, DWORD dwFlags);
+    Present_t SwapChainPresent;
     typedef HRESULT(__stdcall* CreateDevice_t)(IDirect3D9* pInterface, UINT Adapter, D3DDEVTYPE DeviceType,
                                                HWND hFocusWindow, DWORD BehaviorFlags,
                                                D3DPRESENT_PARAMETERS* pPresentationParameters,
@@ -158,6 +161,12 @@ namespace IWXMVM::D3D9
         return hr;
     }
 
+    HRESULT __stdcall SwapChainPresent_Hook(IDirect3DDevice9* pDevice, const RECT* pSourceRect, const RECT* pDestRect,
+                                   HWND hDestWindowOverride, const RGNDATA* pDirtyRegion, DWORD dwFlags)
+    {
+        return SwapChainPresent(pDevice, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion, dwFlags);
+    }
+
     void CheckPresenceReshade()
     {
         auto IsReshadeDllPresent = [](auto dllName) {
@@ -276,6 +285,8 @@ namespace IWXMVM::D3D9
                                 (std::uintptr_t*)&CreateDevice);
         HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[16], (std::uintptr_t)Reset_Hook,
                                 (std::uintptr_t*)&Reset);
+        HookManager::CreateHook((std::uintptr_t)d3d9SwapChainVTable[3], (std::uintptr_t)SwapChainPresent_Hook,
+                                (std::uintptr_t*)&SwapChainPresent);
         HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[42], (std::uintptr_t)EndScene_Hook,
                                 (std::uintptr_t*)&EndScene);
         
