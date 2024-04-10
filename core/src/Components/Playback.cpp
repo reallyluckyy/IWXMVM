@@ -18,9 +18,9 @@ namespace IWXMVM::Components::Playback
         return isPlaybackPaused;
     }
     
-    void SkipForward(std::int32_t ticks)
+    void SkipForward(std::int32_t ticks, bool ignoreFrozenTick)
     {
-        if (Mod::GetGameInterface()->IsTickFrozen().has_value())
+        if (!ignoreFrozenTick && Mod::GetGameInterface()->IsTickFrozen().has_value())
         {
             Mod::GetGameInterface()->UpdateFrozenTick(false, ticks);
             return;

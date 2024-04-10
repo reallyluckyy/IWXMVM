@@ -180,7 +180,7 @@ namespace IWXMVM::Components::Rewinding
 
         if (latestRewindTo > curTime)
         {
-            Components::Playback::SkipForward(latestRewindTo - curTime);
+            Components::Playback::SkipForward(latestRewindTo - curTime, true);
         }
         
         latestRewindTo = NOT_IN_USE;

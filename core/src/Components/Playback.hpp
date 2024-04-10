@@ -13,7 +13,7 @@ namespace IWXMVM::Components
         void TogglePaused();
         bool IsPaused();
 
-        void SkipForward(std::int32_t ticks);
+        void SkipForward(std::int32_t ticks, bool ignoreFrozenTick = false);
         void SetTickDelta(std::int32_t value, bool ignoreDeadzone = false);
 
         std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec);
