@@ -177,7 +177,7 @@ namespace IWXMVM::IW3
             return demoInfo.frozenTick;
         }
 
-        void ToggleFrozenTick() final
+        void ToggleFrozenTick(std::optional<std::uint32_t> newFrozenTick) final
         {
             const auto currentTick = demoInfo.currentTick;
             auto& frozenTick = demoInfo.frozenTick;
@@ -188,7 +188,7 @@ namespace IWXMVM::IW3
             }
             else
             {
-                frozenTick.emplace(currentTick);
+                frozenTick.emplace(newFrozenTick.has_value() ? newFrozenTick.value() : currentTick);
             }
         }
 
