@@ -40,6 +40,41 @@ namespace IWXMVM::Components::Playback
             Rewinding::RewindBy(value);
     }
 
+    void HandleImportedFrozenTickLogic(std::optional<std::uint32_t> frozenTick)
+    {
+        const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+
+        if (!frozenTick.has_value())
+        {
+            if (demoInfo.frozenTick.has_value())
+            {
+                // toggle frozen tick off because it isn't set for the imported file
+                Mod::GetGameInterface()->ToggleFrozenTick();
+            }
+            return;
+        }
+
+        if (demoInfo.frozenTick.has_value())
+        {
+            // toggle frozen tick off so we can rewind the actual state of the game
+            Mod::GetGameInterface()->ToggleFrozenTick();
+        }
+
+        // set actual tick
+        Playback::SetTickDelta(frozenTick.value() - demoInfo.currentTick, true);
+
+        // (re)enable frozen tick with specified value
+        Mod::GetGameInterface()->ToggleFrozenTick(frozenTick);
+
+        // update current frozen tick
+        Mod::GetGameInterface()->UpdateFrozenTick(false, frozenTick.value() - demoInfo.currentTick);
+
+        if (!Playback::IsPaused())
+        {
+            Playback::TogglePaused();
+        }
+    }
+
     void GeneratePattern(auto& pattern, float fps, float timescale)
     {
         // SV_Frame is called once per frame, so we calculate the number of calls it takes to advance 1000 ms

@@ -15,6 +15,7 @@ namespace IWXMVM::Components
 
         void SkipForward(std::int32_t ticks, bool ignoreFrozenTick = false);
         void SetTickDelta(std::int32_t value, bool ignoreDeadzone = false);
+        void HandleImportedFrozenTickLogic(std::optional<std::uint32_t> frozenTick);
 
         std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec);
     } // namespace Playback
