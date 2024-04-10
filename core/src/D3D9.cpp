@@ -15,6 +15,7 @@ namespace IWXMVM::D3D9
 {
     HWND gameWindowHandle = nullptr;
     void* d3d9DeviceVTable[119];
+    void* d3d9SwapChainVTable[10];
     void* d3d9VTable[17];
     IDirect3DDevice9* device = nullptr;
 
@@ -209,6 +210,26 @@ namespace IWXMVM::D3D9
         }
     }
 
+    void FindSwapChain()
+    {
+        const auto device = Mod::GetGameInterface()->GetGameDevicePtr();
+
+        IDirect3DSwapChain9* pSwapChain = nullptr;
+        const HRESULT hr = device->GetSwapChain(0, &pSwapChain);
+
+        if (FAILED(hr) || !pSwapChain)
+        {
+            throw std::runtime_error("Failed to find D3D9 SwapChain!");
+        }
+        else
+        {
+            memcpy(d3d9SwapChainVTable, *(void**)pSwapChain, 10 * sizeof(void*));
+            pSwapChain->Release();
+
+            LOG_DEBUG("Found D3D9 SwapChain Present address: {}", d3d9SwapChainVTable[3]);
+        }
+    }
+
     void CreateDummyDevice()
     {
         IDirect3D9* d3dObj = Direct3DCreate9(D3D_SDK_VERSION);
@@ -268,6 +289,7 @@ namespace IWXMVM::D3D9
 
     void Initialize()
     {
+        FindSwapChain();
         CreateDummyDevice();
         Hook();
         LOG_DEBUG("Hooked D3D9");
