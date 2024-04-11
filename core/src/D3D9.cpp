@@ -96,7 +96,7 @@ namespace IWXMVM::D3D9
         return reshadeEndSceneAddress.has_value();
     }
 
-    std::pair<std::size_t, std::size_t> endSceneCallCounts;
+    std::size_t reshadeEndSceneCallCount;
     HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
     {
         const std::uintptr_t returnAddress = reinterpret_cast<std::uintptr_t>(_ReturnAddress());
@@ -104,12 +104,6 @@ namespace IWXMVM::D3D9
         {
             return EndScene(pDevice);
         }
-
-        if (endSceneCallCounts.first > 0)
-        {
-            return EndScene(pDevice);
-        }
-        ++endSceneCallCounts.first;
 
         if (!UI::UIManager::Get().IsInitialized())
         {
@@ -134,11 +128,11 @@ namespace IWXMVM::D3D9
     // This is only called if reshade is present
     HRESULT __stdcall ReshadeOriginalEndScene_Hook(IDirect3DDevice9* pDevice)
     {
-        if (endSceneCallCounts.second > 0)
+        if (reshadeEndSceneCallCount > 0)
         {
             return ReshadeOriginalEndScene(pDevice);
         }
-        ++endSceneCallCounts.second;
+        ++reshadeEndSceneCallCount;
 
         UI::UIManager::Get().RunImGuiFrame();
         return ReshadeOriginalEndScene(pDevice);
@@ -170,7 +164,7 @@ namespace IWXMVM::D3D9
     HRESULT __stdcall SwapChainPresent_Hook(IDirect3DDevice9* pDevice, const RECT* pSourceRect, const RECT* pDestRect,
                                    HWND hDestWindowOverride, const RGNDATA* pDirtyRegion, DWORD dwFlags)
     {
-        endSceneCallCounts = {};
+        reshadeEndSceneCallCount = 0;
         return SwapChainPresent(pDevice, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion, dwFlags);
     }
 
