@@ -66,7 +66,7 @@ namespace IWXMVM::Components::Playback
         // (re)enable frozen tick with specified value
         Mod::GetGameInterface()->ToggleFrozenTick(frozenTick);
 
-        // update current frozen tick
+        // update current (frozen) tick
         Mod::GetGameInterface()->UpdateFrozenTick(false, frozenTick.value() - demoInfo.currentTick);
 
         if (!Playback::IsPaused())
