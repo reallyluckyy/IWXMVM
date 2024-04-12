@@ -64,6 +64,8 @@ namespace IWXMVM::PathUtils
     // TODO: Unicode directories will break this
     std::optional<std::filesystem::path> OpenFolderBrowseDialog()
     {
+        std::optional<std::filesystem::path> result = std::nullopt;
+
         // Create FileOpenDialog object
         IFileOpenDialog* pFileOpen = nullptr;
         HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_IFileOpenDialog,
@@ -110,7 +112,7 @@ namespace IWXMVM::PathUtils
 
                     if (SUCCEEDED(hr))
                     {
-                        return std::filesystem::path(pszFilePath);
+                        result = std::filesystem::path(pszFilePath);
                     }
 
                     CoTaskMemFree(pszFilePath);
@@ -120,6 +122,6 @@ namespace IWXMVM::PathUtils
             pFileOpen->Release();
         }
 
-        return std::nullopt;
+        return result;
     }
 }  // namespace IWXMVM::PathUtils
