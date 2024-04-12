@@ -15,6 +15,7 @@
 #include "Types/Entity.hpp"
 #include "Types/PlaybackData.hpp"
 #include "Types/HudInfo.hpp"
+#include "Types/RenderingFlags.hpp"
 #include "Types/Features.hpp"
 
 namespace IWXMVM

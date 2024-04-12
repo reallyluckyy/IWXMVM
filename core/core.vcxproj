@@ -125,6 +125,7 @@
     <ClCompile Include="src\Components\CaptureManager.cpp" />
     <ClCompile Include="src\Components\Playback.cpp" />
     <ClCompile Include="src\Components\PlayerAnimation.cpp" />
+    <ClCompile Include="src\Components\Rendering.cpp" />
     <ClCompile Include="src\Components\Rewinding.cpp" />
     <ClCompile Include="src\Components\VisualConfiguration.cpp" />
     <ClCompile Include="src\Configuration\Configuration.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="src\Components\CaptureManager.hpp" />
     <ClInclude Include="src\Components\Playback.hpp" />
     <ClInclude Include="src\Components\PlayerAnimation.hpp" />
+    <ClInclude Include="src\Components\Rendering.hpp" />
     <ClInclude Include="src\Components\Rewinding.hpp" />
     <ClInclude Include="src\Components\VisualConfiguration.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
@@ -204,6 +206,7 @@
     <ClInclude Include="src\Types\KeyframeableProperty.hpp" />
     <ClInclude Include="src\Types\MouseMode.hpp" />
     <ClInclude Include="src\Types\PlaybackData.hpp" />
+    <ClInclude Include="src\Types\RenderingFlags.hpp" />
     <ClInclude Include="src\Types\Sun.hpp" />
     <ClInclude Include="src\Types\Vertex.hpp" />
     <ClInclude Include="src\UI\Components\CameraMenu.hpp" />

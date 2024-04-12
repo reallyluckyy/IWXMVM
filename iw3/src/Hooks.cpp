@@ -4,6 +4,7 @@
 #include "Hooks/Commands.hpp"
 #include "Hooks/Playback.hpp"
 #include "Hooks/Camera.hpp"
+#include "Hooks/Rendering.hpp"
 #include "Hooks/PlayerAnimation.hpp"
 
 namespace IWXMVM::IW3::Hooks
@@ -14,5 +15,6 @@ namespace IWXMVM::IW3::Hooks
         Hooks::Commands::Install();
         Hooks::Camera::Install();
         Hooks::PlayerAnimation::Install();
+        Hooks::Rendering::Install();
     }
 }  // namespace IWXMVM::IW3::Hooks

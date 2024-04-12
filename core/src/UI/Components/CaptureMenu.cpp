@@ -11,8 +11,132 @@
 
 namespace IWXMVM::UI
 {
+    enum class MenuMode
+    {
+        SinglePass,
+        MultiPass
+    };
+
     void CaptureMenu::Initialize()
     {
+    }
+
+    constexpr auto fieldLayoutPercentage = 0.4f;
+    std::optional<int32_t> displayPassIndex = std::nullopt;
+
+    void DrawStreamsSection(Components::CaptureSettings& captureSettings)
+    {
+        using namespace Components;
+
+        ImGui::Dummy(ImVec2(0, 5));
+        ImGui::Indent();
+
+        for (auto it = captureSettings.passes.begin(); it != captureSettings.passes.end();)
+        {
+            auto i = std::distance(captureSettings.passes.begin(), it);
+            ImGui::PushID(std::format("##pass{}", i).c_str());
+
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetFontSize() * 0.1f);
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text(ICON_FA_LAYER_GROUP "  Pass %d", i);
+
+            auto comboWidth = ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
+                              ImGui::GetStyle().WindowPadding.x - ImGui::GetStyle().ItemSpacing.x * 2 -
+                              ImGui::GetFontSize() * 1.2f * 2;
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
+            ImGui::SetNextItemWidth(comboWidth);
+            if (ImGui::BeginCombo("##passTypeCombo", magic_enum::enum_name(it->type).data()))
+            {
+                for (auto p = 0; p < (int)PassType::Count; p++)
+                {
+                    bool isSelected = it->type == (PassType)p;
+                    if (ImGui::Selectable(magic_enum::enum_name((PassType)p).data(), isSelected))
+                    {
+                        it->type = (PassType)p;
+                    }
+
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+
+            if (displayPassIndex.has_value() && displayPassIndex.value() == i)
+            {
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_EYE_SLASH))
+                {
+                    displayPassIndex = std::nullopt;
+
+                    // TODO: all of this below could be moved to another wrapper function
+                    Components::Rendering::SetRenderingFlags(Types::RenderingFlags_DrawEverything);
+                    // TODO: do other stuff necessary for the pass type (depth, normal, set clear color to 0 1 0 for
+                    // greenscreen, etc)
+                    // TODO: hide viewmodel if DrawViewmodel is not set, because we cant do that via our R_SetMaterial
+                    // hook
+                }
+            }
+            else if (!displayPassIndex.has_value())
+            {
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_EYE))
+                {
+                    displayPassIndex = i;
+                    Components::Rendering::SetRenderingFlags(it->renderingFlags);
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_MINUS))
+                {
+                    captureSettings.passes.erase(it);
+                    ImGui::PopID();
+                    break;
+                }
+            }
+
+            if (D3D9::IsReshadePresent())
+            {
+                ImGui::Checkbox("Enable Reshade", &it->useReshade);
+            }
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
+            ImGui::SetNextItemWidth(comboWidth);
+            if (ImGui::BeginTable("##selectableTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+            {
+                auto DrawSelectable = [&](const char* label, Types::RenderingFlags flags) {
+                    if (ImGui::Selectable(label, it->renderingFlags & flags))
+                    {
+                        it->renderingFlags = static_cast<Types::RenderingFlags>(it->renderingFlags ^ flags);
+                    }
+                };
+
+                ImGui::TableNextColumn();
+                DrawSelectable("Players", Types::RenderingFlags_DrawPlayers);
+                ImGui::TableNextColumn();
+                DrawSelectable("World", Types::RenderingFlags_DrawWorld);
+                ImGui::TableNextColumn();
+                DrawSelectable("Viewmodel", Types::RenderingFlags_DrawViewmodel);
+                ImGui::TableNextColumn();
+                DrawSelectable("Muzzle Flash", Types::RenderingFlags_DrawMuzzleFlash);
+                ImGui::EndTable();
+            }
+
+            ImGui::Dummy(ImVec2(0, 3));
+
+            ImGui::PopID();
+            it++;
+        }
+
+        ImGui::Dummy(ImVec2(0, 3));
+        if (ImGui::Button(ICON_FA_PLUS " Add Pass"))
+        {
+            captureSettings.passes.push_back({PassType::Default, Types::RenderingFlags_DrawEverything});
+        }
+
+        ImGui::Unindent();
     }
 
     void CaptureMenu::Render()
@@ -32,8 +156,6 @@ namespace IWXMVM::UI
             auto& cameraManager = CameraManager::Get();
             auto& captureManager = CaptureManager::Get();
             auto& captureSettings = captureManager.GetCaptureSettings();
-
-            const auto fieldLayoutPercentage = 0.4f;
 
             ImGui::BeginDisabled(captureManager.IsCapturing());
 
@@ -143,12 +265,12 @@ namespace IWXMVM::UI
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
                                     ImGui::GetStyle().WindowPadding.x);
-            if (ImGui::BeginCombo("##captureMenuFramerateCombo", std::format("{0}", captureSettings.framerate).c_str()))
+            if (ImGui::BeginCombo("##captureMenuFramerateCombo", std::to_string(captureSettings.framerate).c_str()))
             {
                 for (auto framerate : captureManager.GetSupportedFramerates())
                 {
                     bool isSelected = captureSettings.framerate == framerate;
-                    if (ImGui::Selectable(std::format("{0}", framerate).c_str(),
+                    if (ImGui::Selectable(std::to_string(framerate).c_str(),
                                           captureSettings.framerate == framerate))
                     {
                         captureSettings.framerate = framerate;
@@ -160,6 +282,42 @@ namespace IWXMVM::UI
                     }
                 }
                 ImGui::EndCombo();
+            }
+
+            ImGui::Dummy(ImVec2(0, 10));
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Mode");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
+                                    ImGui::GetStyle().WindowPadding.x);
+
+            static MenuMode menuMode;
+            if (ImGui::BeginCombo("##captureMenuModeCombo", magic_enum::enum_name(menuMode).data()))
+            {
+                if (ImGui::Selectable(magic_enum::enum_name(MenuMode::SinglePass).data(),
+                                      menuMode == MenuMode::SinglePass))
+                {
+                    menuMode = MenuMode::SinglePass;
+                }
+
+                if (ImGui::Selectable(magic_enum::enum_name(MenuMode::MultiPass).data(),
+                                      menuMode == MenuMode::MultiPass))
+                {
+                    menuMode = MenuMode::MultiPass;
+                }
+
+                ImGui::EndCombo();
+            }
+
+            if (menuMode == MenuMode::MultiPass)
+            {
+                DrawStreamsSection(captureSettings);
+            }
+            else
+            {
+                captureSettings.passes.clear();
             }
 
             ImGui::EndDisabled();
@@ -268,9 +426,18 @@ namespace IWXMVM::UI
                 ImGui::Text("Progress");
                 ImGui::PopFont();
                 ImGui::Text("Captured %d frames", captureManager.GetCapturedFrameCount());
-                auto totalFrames = (captureSettings.endTick - captureSettings.startTick) * (captureSettings.framerate/1000.0f);
+
+                auto totalFrames = (captureSettings.endTick - captureSettings.startTick) * (captureSettings.framerate / 1000.0f);
                 ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImGui::GetColorU32(ImGuiCol_Button));
-                ImGui::ProgressBar((float)captureManager.GetCapturedFrameCount() / totalFrames, ImVec2(-1, 0), "");
+
+                if (CaptureManager::Get().MultiPassEnabled())
+                {
+                    ImGui::ProgressBar((float)(captureManager.GetCapturedFrameCount() / captureSettings.passes.size()) / totalFrames, ImVec2(-1, 0), "");
+                }
+                else
+                {
+                    ImGui::ProgressBar((float)captureManager.GetCapturedFrameCount() / totalFrames, ImVec2(-1, 0), "");
+                }
                 ImGui::PopStyleColor();
             }
 

@@ -22,4 +22,7 @@ namespace IWXMVM::Resources
 
     INCBIN(VERTEX_SHADER, "resources/shaders/vertex.hlsl");
     INCBIN(PIXEL_SHADER, "resources/shaders/pixel.hlsl");
+
+    INCBIN(DEPTH_VERTEX_SHADER, "resources/shaders/depth_vs.hlsl");
+    INCBIN(DEPTH_PIXEL_SHADER, "resources/shaders/depth_ps.hlsl");
 };  // namespace IWXMVM::Resources
