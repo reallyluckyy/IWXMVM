@@ -693,7 +693,10 @@ namespace IWXMVM::GFX
 
         device->SetTexture(0, depthTexture);
 
+        const auto gameSize = ImGui::GetIO().DisplaySize;
+        const float texelOffset[4] = { -1.0f / gameSize.x, 1.0f / gameSize.y, 0.0f, 0.0f };
         device->SetVertexDeclaration(depthPassVDecl);
+        device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(&texelOffset), 1);
         device->SetVertexShader(depthPassVS);
         device->SetPixelShader(depthPassPS);
         device->SetStreamSource(0, depthPassVertices, 0, sizeof(Types::FSVertex));
