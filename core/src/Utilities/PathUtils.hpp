@@ -8,4 +8,5 @@ namespace IWXMVM::PathUtils
     std::optional<std::filesystem::path> OpenFileDialog(bool saveDialog, DWORD flags, const char* filterString,
                                                         const char* extension, 
                                                         std::optional<std::filesystem::path> initialDir = std::nullopt);
+    std::optional<std::filesystem::path> OpenFolderBrowseDialog();
 }  // namespace IWXMVM::PathUtils
