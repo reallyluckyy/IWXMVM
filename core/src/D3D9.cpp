@@ -15,6 +15,7 @@ namespace IWXMVM::D3D9
 {
     HWND gameWindowHandle = nullptr;
     void* d3d9DeviceVTable[119];
+    void* d3d9SwapChainVTable[10];
     void* d3d9VTable[17];
     IDirect3DDevice9* device = nullptr;
 
@@ -23,6 +24,9 @@ namespace IWXMVM::D3D9
     EndScene_t ReshadeOriginalEndScene;
     typedef HRESULT(__stdcall* Reset_t)(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
     Reset_t Reset;
+    typedef HRESULT(__stdcall* Present_t)(IDirect3DDevice9* pDevice, const RECT* pSourceRect, const RECT* pDestRect,
+                                          HWND hDestWindowOverride, const RGNDATA* pDirtyRegion, DWORD dwFlags);
+    Present_t SwapChainPresent;
     typedef HRESULT(__stdcall* CreateDevice_t)(IDirect3D9* pInterface, UINT Adapter, D3DDEVTYPE DeviceType,
                                                HWND hFocusWindow, DWORD BehaviorFlags,
                                                D3DPRESENT_PARAMETERS* pPresentationParameters,
@@ -92,7 +96,7 @@ namespace IWXMVM::D3D9
         return reshadeEndSceneAddress.has_value();
     }
 
-    bool calledByEndscene = false;
+    std::size_t reshadeEndSceneCallCount;
     HRESULT __stdcall EndScene_Hook(IDirect3DDevice9* pDevice)
     {
         const std::uintptr_t returnAddress = reinterpret_cast<std::uintptr_t>(_ReturnAddress());
@@ -118,18 +122,18 @@ namespace IWXMVM::D3D9
             UI::UIManager::Get().RunImGuiFrame();
         }
 
-        calledByEndscene = true;
         return EndScene(pDevice);
     }
 
     // This is only called if reshade is present
     HRESULT __stdcall ReshadeOriginalEndScene_Hook(IDirect3DDevice9* pDevice)
     {
-        if (calledByEndscene)
+        if (reshadeEndSceneCallCount > 0)
         {
-            calledByEndscene = false;
             return ReshadeOriginalEndScene(pDevice);
         }
+        ++reshadeEndSceneCallCount;
+
         UI::UIManager::Get().RunImGuiFrame();
         return ReshadeOriginalEndScene(pDevice);
     }
@@ -155,6 +159,13 @@ namespace IWXMVM::D3D9
         }
 
         return hr;
+    }
+
+    HRESULT __stdcall SwapChainPresent_Hook(IDirect3DDevice9* pDevice, const RECT* pSourceRect, const RECT* pDestRect,
+                                   HWND hDestWindowOverride, const RGNDATA* pDirtyRegion, DWORD dwFlags)
+    {
+        reshadeEndSceneCallCount = 0;
+        return SwapChainPresent(pDevice, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion, dwFlags);
     }
 
     void CheckPresenceReshade()
@@ -209,6 +220,26 @@ namespace IWXMVM::D3D9
         }
     }
 
+    void FindSwapChain()
+    {
+        const auto device = Mod::GetGameInterface()->GetGameDevicePtr();
+
+        IDirect3DSwapChain9* pSwapChain = nullptr;
+        const HRESULT hr = device->GetSwapChain(0, &pSwapChain);
+
+        if (FAILED(hr) || !pSwapChain)
+        {
+            throw std::runtime_error("Failed to find D3D9 SwapChain!");
+        }
+        else
+        {
+            memcpy(d3d9SwapChainVTable, *(void**)pSwapChain, 10 * sizeof(void*));
+            pSwapChain->Release();
+
+            LOG_DEBUG("Found D3D9 SwapChain Present address: {}", d3d9SwapChainVTable[3]);
+        }
+    }
+
     void CreateDummyDevice()
     {
         IDirect3D9* d3dObj = Direct3DCreate9(D3D_SDK_VERSION);
@@ -255,6 +286,8 @@ namespace IWXMVM::D3D9
                                 (std::uintptr_t*)&CreateDevice);
         HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[16], (std::uintptr_t)Reset_Hook,
                                 (std::uintptr_t*)&Reset);
+        HookManager::CreateHook((std::uintptr_t)d3d9SwapChainVTable[3], (std::uintptr_t)SwapChainPresent_Hook,
+                                (std::uintptr_t*)&SwapChainPresent);
         HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[42], (std::uintptr_t)EndScene_Hook,
                                 (std::uintptr_t*)&EndScene);
         
@@ -268,6 +301,7 @@ namespace IWXMVM::D3D9
 
     void Initialize()
     {
+        FindSwapChain();
         CreateDummyDevice();
         Hook();
         LOG_DEBUG("Hooked D3D9");
