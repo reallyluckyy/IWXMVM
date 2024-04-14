@@ -29,8 +29,8 @@ namespace IWXMVM::UI
         // added skip forward/backward to frozen tick marker
         
         auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
-        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
-        auto frozenTick = Mod::GetGameInterface()->GetDemoInfo().frozenTick;
+        auto currentTick = Components::Playback::GetTimelineTick();
+        auto frozenTick = Components::Playback::GetFrozenTick();
         auto targetTick = currentTick + value;
 
         if (value > 0)
@@ -121,16 +121,14 @@ namespace IWXMVM::UI
         {
             auto& captureManager = Components::CaptureManager::Get();
             auto& captureSettings = captureManager.GetCaptureSettings();
-            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            captureSettings.startTick = demoInfo.currentTick;
+            captureSettings.startTick = Components::Playback::GetTimelineTick();
         }
 
         if (Input::BindDown(Action::TimeFrameMoveEnd))
         {
             auto& captureManager = Components::CaptureManager::Get();
             auto& captureSettings = captureManager.GetCaptureSettings();
-            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            captureSettings.endTick = demoInfo.currentTick;
+            captureSettings.endTick = Components::Playback::GetTimelineTick();
         }
     }
 
@@ -347,7 +345,7 @@ namespace IWXMVM::UI
             ImGui::SetCursorPosY(GetSize().y / 2 - buttonSize.y / 2);
             ImGui::AlignTextToFramePadding();
 
-            const bool frozen = Mod::GetGameInterface()->IsTickFrozen().has_value();
+            const bool frozen = Components::Playback::IsGameFrozen();
             if (frozen)
             {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.9f, 0.0f, 0.95f));
@@ -356,7 +354,7 @@ namespace IWXMVM::UI
 
             if (ImGui::Button(!frozen ? ICON_FA_LOCK_OPEN : ICON_FA_LOCK, buttonSize * 1.1f))
             {
-                Mod::GetGameInterface()->ToggleFrozenTick();
+                Components::Playback::ToggleFrozenTick();
             }
 
             if (frozen)
@@ -385,14 +383,15 @@ namespace IWXMVM::UI
                 ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoInput);
 
             const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            if (demoInfo.currentTick < demoInfo.endTick)
+            const auto currentTick = Components::Playback::GetTimelineTick();
+            if (currentTick < demoInfo.endTick)
             {
                 const auto progressBarX = padding.x + buttonSize.x + playbackSpeedSliderWidth + padding.x * 3;
                 const auto progressBarWidth = GetSize().x - progressBarX - GetSize().x * 0.05f - padding.x;
 
                 ImGui::SetCursorPosX(progressBarX + progressBarWidth + ImGui::GetFontSize() * 0.8f);
                 ImGui::SetCursorPosY(GetSize().y / 2 - buttonSize.y / 2);
-                ImGui::Text("%s", std::format("{0}", demoInfo.currentTick).c_str());
+                ImGui::Text("%s", std::format("{0}", currentTick).c_str());
 
                 const auto keyframeEditor =
                     UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
@@ -406,15 +405,15 @@ namespace IWXMVM::UI
                 ImGui::SetCursorPosX(progressBarX);
                 ImGui::SetCursorPosY(GetSize().y / 2 - buttonSize.y / 2);
                 const auto draggedProgressBar =
-                    DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick, demoInfo.frozenTick);
+                    DrawDemoProgressBar(&tickValue, displayStartTick, displayEndTick, 0, demoInfo.endTick, Components::Playback::GetFrozenTick());
 
                 if (draggedProgressBar && !Components::Rewinding::IsRewinding())
                 {
-                    Components::Playback::SetTickDelta(tickValue - demoInfo.currentTick);
+                    Components::Playback::SetTickDelta(tickValue - currentTick);
                 }
                 else
                 {
-                    tickValue = demoInfo.currentTick;
+                    tickValue = currentTick;
                 }
             }
         }

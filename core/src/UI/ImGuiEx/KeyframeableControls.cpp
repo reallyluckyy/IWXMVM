@@ -2,6 +2,7 @@
 #include "KeyframeableControls.hpp"
 
 #include "Components/KeyframeManager.hpp"
+#include "Components/Playback.hpp"
 #include "Mod.hpp"
 #include "Resources.hpp"
 
@@ -46,7 +47,7 @@ namespace ImGuiEx::Keyframeable
                            keyframes.empty(), [&]() {
                 keyframeManager.AddKeyframe(
                     property,
-                    Types::Keyframe(property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick, *v));
+                    Types::Keyframe(property, Components::Playback::GetTimelineTick(), *v));
         });
 
         ImGui::Text(label);
@@ -62,8 +63,7 @@ namespace ImGuiEx::Keyframeable
         }
         else
         {
-            auto interpolatedValue =
-                keyframeManager.Interpolate(property, Mod::GetGameInterface()->GetDemoInfo().currentTick);
+            auto interpolatedValue = keyframeManager.Interpolate(property, Components::Playback::GetTimelineTick());
 
             *v = interpolatedValue.floatingPoint;
 
@@ -91,8 +91,7 @@ namespace ImGuiEx::Keyframeable
         DrawKeyframeButton(std::format("##{0}{1}KeyframeButton", label, magic_enum::enum_name(propertyType)).c_str(),
                            keyframes.empty(), [&]() {
                                keyframeManager.AddKeyframe(
-                                   property,
-                                   Types::Keyframe(property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
+                                   property, Types::Keyframe(property, Components::Playback::GetTimelineTick(),
                                                    glm::vec3(v[0], v[1], v[2])));
                            });
 
@@ -110,8 +109,7 @@ namespace ImGuiEx::Keyframeable
         }
         else
         {
-            auto interpolatedValue =
-                keyframeManager.Interpolate(property, Mod::GetGameInterface()->GetDemoInfo().currentTick);
+            auto interpolatedValue = keyframeManager.Interpolate(property, Components::Playback::GetTimelineTick());
 
             v[0] = interpolatedValue.vector3.x;
             v[1] = interpolatedValue.vector3.y;
@@ -138,8 +136,7 @@ namespace ImGuiEx::Keyframeable
 
         const auto& keyframes = keyframeManager.GetKeyframes(property);
         DrawKeyframeButton(label, keyframes.empty(), [&]() {
-            keyframeManager.AddKeyframe(
-                property, Types::Keyframe(property, IWXMVM::Mod::GetGameInterface()->GetDemoInfo().currentTick,
+            keyframeManager.AddKeyframe(property, Types::Keyframe(property, Components::Playback::GetTimelineTick(),
                                           glm::vec3(col[0], col[1], col[2])));
         });
 
@@ -155,8 +152,7 @@ namespace ImGuiEx::Keyframeable
         }
         else
         {
-            auto interpolatedValue =
-                keyframeManager.Interpolate(property, Mod::GetGameInterface()->GetDemoInfo().currentTick);
+            auto interpolatedValue = keyframeManager.Interpolate(property, Components::Playback::GetTimelineTick());
 
             col[0] = interpolatedValue.vector3.x;
             col[1] = interpolatedValue.vector3.y;

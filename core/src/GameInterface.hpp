@@ -57,10 +57,6 @@ namespace IWXMVM
             return Types::Features_None;
         };
 
-        virtual std::optional<uint32_t> IsTickFrozen() = 0;
-        virtual void ToggleFrozenTick(std::optional<std::uint32_t> newFrozenTick = {}) = 0;
-        virtual void UpdateFrozenTick(bool isPaused, std::int32_t gameMsec) = 0;
-
         virtual Types::DemoInfo GetDemoInfo() = 0;
         virtual std::string_view GetDemoExtension() = 0;
 

@@ -3,6 +3,7 @@
 
 #include "Mod.hpp"
 #include "Components/Rewinding.hpp"
+#include "Components/Playback.hpp"
 
 namespace IWXMVM::Components
 {
@@ -21,7 +22,7 @@ namespace IWXMVM::Components
         if (keyframeManager.GetKeyframes(property).empty())
             return;
 
-        const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        const auto currentTick = Playback::GetTimelineTick();
         const auto interpolatedValue = keyframeManager.Interpolate(property, currentTick);
 
         this->GetPosition() = interpolatedValue.cameraData.position;

@@ -12,7 +12,7 @@ namespace IWXMVM::Components
 {
     constexpr std::string_view NODE_GAME_NAME = "game";
     constexpr std::string_view NODE_DEMO_NAME = "demo";
-    constexpr std::string_view NODE_FROZEN_TICK = "frozen tick";
+    constexpr std::string_view NODE_FROZEN_TICK = "frozenTick";
     constexpr std::string_view NODE_PROPERTIES = "properties";
     constexpr std::string_view NODE_PROPERTY = "property";
     constexpr std::string_view NODE_TICK = "tick";
@@ -33,9 +33,9 @@ namespace IWXMVM::Components
         json rootNode;
         rootNode[NODE_GAME_NAME] = magic_enum::enum_name(Mod::GetGameInterface()->GetGame());
         rootNode[NODE_DEMO_NAME] = Mod::GetGameInterface()->GetDemoInfo().name;
-        if (const auto optFrozenTick = Mod::GetGameInterface()->GetDemoInfo().frozenTick; optFrozenTick.has_value())
+        if (Components::Playback::IsGameFrozen())
         {
-            rootNode[NODE_FROZEN_TICK] = optFrozenTick.value();
+            rootNode[NODE_FROZEN_TICK] = Components::Playback::GetFrozenTick().value();
         }
         
         json properties = json::array();

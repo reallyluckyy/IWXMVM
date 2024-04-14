@@ -180,7 +180,7 @@ namespace IWXMVM::Components::Rewinding
 
         if (latestRewindTo > curTime)
         {
-            Components::Playback::SkipForward(latestRewindTo - curTime, true);
+            Components::Playback::SkipDemoForward(latestRewindTo - curTime);
         }
         
         latestRewindTo = NOT_IN_USE;
@@ -196,9 +196,9 @@ namespace IWXMVM::Components::Rewinding
 
     void RewindBy(std::int32_t ticks)
     {
-        if (Mod::GetGameInterface()->IsTickFrozen().has_value())
+        if (Playback::IsGameFrozen())
         {
-            Mod::GetGameInterface()->UpdateFrozenTick(false, ticks);
+            Playback::SetTimelineTick(Playback::GetTimelineTick() + ticks);
             return;
         }
 

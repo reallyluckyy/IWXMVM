@@ -172,48 +172,6 @@ namespace IWXMVM::IW3
 
         Types::DemoInfo demoInfo;
 
-        std::optional<uint32_t> IsTickFrozen() final
-        {
-            return demoInfo.frozenTick;
-        }
-
-        void ToggleFrozenTick(std::optional<std::uint32_t> newFrozenTick) final
-        {
-            const auto currentTick = demoInfo.currentTick;
-            auto& frozenTick = demoInfo.frozenTick;
-
-            if (frozenTick.has_value())
-            {
-                frozenTick.reset();
-            }
-            else
-            {
-                frozenTick.emplace(newFrozenTick.has_value() ? newFrozenTick.value() : currentTick);
-            }
-        }
-
-        void UpdateFrozenTick(bool isPaused, std::int32_t gameMsec) final
-        {
-            auto& currentTick = demoInfo.currentTick;
-            const auto frozenTick = demoInfo.frozenTick;
-            assert(frozenTick);
-
-            if (gameMsec < 0 && static_cast<std::uint32_t>(0 - gameMsec) > currentTick)
-            {
-                LOG_DEBUG("Cannot rewind more than {}", currentTick);
-                gameMsec = 0 - currentTick;
-            }
-
-            const auto [demoStartTick, demoEndTick] = DemoParser::GetDemoTickRange();
-
-            if (!isPaused &&
-                static_cast<std::uint32_t>(demoStartTick) + currentTick + static_cast<std::uint32_t>(gameMsec) <
-                    static_cast<std::uint32_t>(demoEndTick))
-            {
-                currentTick += gameMsec;
-            }
-        }
-
         Types::DemoInfo GetDemoInfo() final
         {
             demoInfo.name = Structures::GetClientStatic()->servername;
@@ -228,10 +186,9 @@ namespace IWXMVM::IW3
             auto [demoStartTick, demoEndTick] = DemoParser::GetDemoTickRange();
 
             const auto serverTime = Structures::GetClientActive()->serverTime;
-            if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding() &&
-                !demoInfo.frozenTick.has_value())
+            if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding())
             {
-                demoInfo.currentTick = serverTime - demoStartTick;
+                demoInfo.gameTick = serverTime - demoStartTick;
             }
             demoInfo.endTick = demoEndTick - demoStartTick;
 
