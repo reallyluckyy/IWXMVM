@@ -229,10 +229,9 @@ namespace IWXMVM::UI
 
         ImGui::Separator();
 
-        if (modified)
-        {
-            UpdateHudInfo();
-        }
+        // Since the hud occasionally re-appears more or less randomly,
+        // we update the hud settings every frame, regardless of whether they were modified
+        UpdateHudInfo();
     }
 
     void VisualsMenu::RenderFilmtweaks()
