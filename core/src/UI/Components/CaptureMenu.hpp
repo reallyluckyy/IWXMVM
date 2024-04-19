@@ -9,6 +9,8 @@ namespace IWXMVM::UI
         void Render() final;
         void Release() final;
 
+        std::optional<int32_t> GetDisplayPassIndex() const;
+
        private:
         void Initialize() final;
     };

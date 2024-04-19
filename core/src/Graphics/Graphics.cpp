@@ -838,10 +838,17 @@ namespace IWXMVM::GFX
             }
         }
 
-        if (Input::KeyHeld(ImGuiKey_F5))
+        auto captureMenu = UI::UIManager::Get().GetUIComponent<UI::CaptureMenu>(UI::Component::Component::CaptureMenu);
+        if (captureMenu->GetDisplayPassIndex().has_value())
         {
-            DrawDepth();
-        }
+            auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
+            auto& pass = captureSettings.passes[captureMenu->GetDisplayPassIndex().value()];
+
+            if (pass.type == Components::PassType::Depth)
+            {
+                GFX::GraphicsManager::Get().DrawDepth();
+            }
+		}
 
         // Restore the DX9 transform
         device->SetTransform(D3DTS_WORLD, &last_world);

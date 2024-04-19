@@ -2,6 +2,8 @@
 #include "CaptureMenu.hpp"
 
 #include "Resources.hpp"
+#include "Graphics/Graphics.hpp"
+#include "Events.hpp"
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
 #include "Components/CaptureManager.hpp"
@@ -17,12 +19,17 @@ namespace IWXMVM::UI
         MultiPass
     };
 
+    constexpr auto fieldLayoutPercentage = 0.4f;
+    std::optional<int32_t> displayPassIndex = std::nullopt;
+
+    std::optional<int32_t> CaptureMenu::GetDisplayPassIndex() const
+    {
+        return displayPassIndex;
+    }
+
     void CaptureMenu::Initialize()
     {
     }
-
-    constexpr auto fieldLayoutPercentage = 0.4f;
-    std::optional<int32_t> displayPassIndex = std::nullopt;
 
     void DrawStreamsSection(Components::CaptureSettings& captureSettings)
     {
@@ -70,13 +77,11 @@ namespace IWXMVM::UI
                 if (ImGui::Button(ICON_FA_EYE_SLASH))
                 {
                     displayPassIndex = std::nullopt;
-
-                    // TODO: all of this below could be moved to another wrapper function
                     Components::Rendering::SetRenderingFlags(Types::RenderingFlags_DrawEverything);
-                    // TODO: do other stuff necessary for the pass type (depth, normal, set clear color to 0 1 0 for
-                    // greenscreen, etc)
-                    // TODO: hide viewmodel if DrawViewmodel is not set, because we cant do that via our R_SetMaterial
-                    // hook
+                }
+                else
+                {
+                    Components::Rendering::SetRenderingFlags(it->renderingFlags);
                 }
             }
             else if (!displayPassIndex.has_value())
@@ -97,6 +102,8 @@ namespace IWXMVM::UI
                 }
             }
 
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
+            ImGui::SetNextItemWidth(comboWidth);
             if (D3D9::IsReshadePresent())
             {
                 ImGui::Checkbox("Enable Reshade", &it->useReshade);
@@ -293,6 +300,7 @@ namespace IWXMVM::UI
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1 - fieldLayoutPercentage) -
                                     ImGui::GetStyle().WindowPadding.x);
 
+            ImGui::BeginDisabled(displayPassIndex.has_value());
             static MenuMode menuMode;
             if (ImGui::BeginCombo("##captureMenuModeCombo", magic_enum::enum_name(menuMode).data()))
             {
@@ -310,6 +318,7 @@ namespace IWXMVM::UI
 
                 ImGui::EndCombo();
             }
+            ImGui::EndDisabled();
 
             if (menuMode == MenuMode::MultiPass)
             {
