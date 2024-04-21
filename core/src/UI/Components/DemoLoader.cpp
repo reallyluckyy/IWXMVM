@@ -207,6 +207,10 @@ namespace IWXMVM::UI
 
     void DemoLoader::FindAllDemos()
     {
+        if (isScanningDemoPaths.load())
+			return;
+
+        LOG_DEBUG("Searching for demo files...");
         isScanningDemoPaths.store(true);
 
         demoDirectories.clear();
@@ -219,6 +223,7 @@ namespace IWXMVM::UI
         // directory
         MarkDirsRelevancy();
 
+        LOG_DEBUG("Found {0} demo files", demoPaths.size());
         isScanningDemoPaths.store(false);
     }
 
@@ -436,7 +441,6 @@ namespace IWXMVM::UI
 
     void DemoLoader::Initialize()
     {
-        isScanningDemoPaths.store(true);
         std::thread([&] { FindAllDemos(); }).detach();
     }
 
@@ -482,7 +486,6 @@ namespace IWXMVM::UI
 
                 if (ImGui::Button(refreshButtonLabel.c_str(), buttonSize))
                 {
-                    isScanningDemoPaths.store(true);
                     std::thread([&] { FindAllDemos(); }).detach();
                     ImGui::End();
                     return;

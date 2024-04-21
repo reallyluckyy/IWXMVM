@@ -22,12 +22,8 @@ namespace IWXMVM::IW3::Signatures
         Sig("8B C5 E8 ?? ?? ?? ?? BA", GAType::Code, 17) > CG_CalcViewValues;  // first call to AnglesToAxis we need to replace
         Sig("5C 24 ?? 55 8B 6C 24 ?? 56 8D 44 24 ?? 50 51 8B CB C6 44 24", GAType::Code, -5) > CG_DObjGetWorldTagMatrix;
         Sig("00 53 56 57 8B F0 0F 85 ?? ?? ?? ?? 8D 44 24", GAType::Code, -9) > CG_DrawDisconnect;
-        Sig("6B FF ?? 81 C7 ?? ?? ?? ?? ?? ?? ?? ?? ?? 8D 74 24 ?? F3 A5 83 05 ?? ?? ?? ?? 01", GAType::Code,
-            9) > CG_DrawTracer;
         Sig("8D 74 24 ?? D9 5C 24 ?? ?? ?? ?? ?? ?? 5F 5E 5B 8B E5 5D C3", GAType::Code,
             8) > CG_OffsetThirdPersonView;  // second call to AnglesToAxis we need to replace
-        Sig("53 55 56 8B F0 05 ?? ?? ?? ?? 8B C8 57 8B", GAType::Code, -8) > CL_SystemInfoChanged;
-        Sig("81 EC ?? ?? 00 00 A1 ?? ?? ?? ?? 53 33 DB 39", GAType::Code, -6) > CL_Vid_Restart_f;
         Sig("85 C0 74 ?? 8B FE E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? D9 41 ?? D8 4C 24 0C D9 5E 0C 5F 5E C3", GAType::Code,
             -5, Lambda::FollowCodeFlow) > Dvar_FindMalleableVar;
         Sig("83 EC ?? D9 46 ?? D9 1D ?? ?? ?? ?? D9 46 ?? D9 1D", GAType::Code, -6) > FX_SetupCamera;
@@ -81,10 +77,6 @@ namespace IWXMVM::IW3::Signatures
         Sig("A1 ?? ?? ?? ?? C3 A1 ?? ?? ?? ?? 80 78 0C 00", GAType::Code, -5) > Material_RegisterHandle;
         Sig("E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 33 C0 A3", GAType::Data, -4, Lambda::DereferenceAddress) > rgp;
 
-        // cod4x
-        using MType = Types::ModuleType;
-        Sig("00 00 E8 ?? ?? ?? ?? 29 C4 C7 04 24 01 00 00 00 E8", GAType::Code, -7), MType::SecondaryModules
-                                                                                         > CL_SystemInfoChangedCoD4X;
 
 #undef Sig
 #undef Lambda

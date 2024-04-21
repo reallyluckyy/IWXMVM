@@ -358,6 +358,12 @@ namespace IWXMVM::D3D9
         CreateDummyDevice();
         Hook();
         LOG_DEBUG("Hooked D3D9");
+
+        if (!IsReshadePresent())
+        {
+            LOG_DEBUG("Triggering vid_restart since Reshade is not present");
+            Mod::GetGameInterface()->Vid_Restart();
+        }
     }
 
     HWND FindWindowHandle()

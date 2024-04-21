@@ -63,6 +63,7 @@ namespace IWXMVM
 
         virtual void PlayDemo(std::filesystem::path demoPath) = 0;
         virtual void Disconnect() = 0;
+        virtual void Vid_Restart() = 0;
 
         virtual bool IsConsoleOpen() = 0;
 

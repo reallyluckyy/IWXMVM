@@ -195,6 +195,11 @@ namespace IWXMVM::IW3
             Functions::Cbuf_AddText("disconnect");
         }
 
+        void Vid_Restart()
+        {
+            Functions::Cbuf_AddText("vid_restart");
+        }
+
         bool IsConsoleOpen() final
         {
             return (Structures::GetClientUIActives()->keyCatchers & 1) != 0;
