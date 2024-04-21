@@ -4,6 +4,7 @@
 #include "Graphics/Resource.hpp"
 #include "Resources.hpp"
 #include "Types/Keyframe.hpp"
+#include "Components/CaptureManager.hpp"
 
 namespace IWXMVM::GFX
 {
@@ -78,7 +79,7 @@ namespace IWXMVM::GFX
         void DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation);
         void DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation);
 
-        void DrawStreamsShader(bool drawDepth, bool onlyDrawViewmodel) const;
+        void DrawStreamsShader(Components::PassType passType, bool onlyDrawViewmodel) const;
         
         void BuildCampathMesh();
         void SetupRenderState() const noexcept;

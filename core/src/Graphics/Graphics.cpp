@@ -637,7 +637,7 @@ namespace IWXMVM::GFX
         }
     }
 
-    void GraphicsManager::DrawStreamsShader(bool drawDepth, bool onlyDrawViewmodel) const
+    void GraphicsManager::DrawStreamsShader(Components::PassType passType, bool onlyDrawViewmodel) const
     {
         IDirect3DDevice9* device = D3D9::GetDevice();
         IDirect3DTexture9* depthTexture = D3D9::GetDepthTexture();
@@ -697,8 +697,33 @@ namespace IWXMVM::GFX
         device->SetVertexDeclaration(depthPassVDecl);
         device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(&texelOffset), 1);
         device->SetVertexShader(depthPassVS);
-        device->SetPixelShaderConstantF(0, std::array<float, 4>{drawDepth ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f}.data(), 1);
-        device->SetPixelShaderConstantB(6, (BOOL*)&onlyDrawViewmodel, 1);
+        device->SetPixelShaderConstantF(
+            0, 
+            std::array<float, 4>{
+                passType == Components::PassType::Depth ? 1.0f : 0.0f, 
+                0.0f, 0.0f, 0.0f
+            }.data(), 
+            1
+        );
+        device->SetPixelShaderConstantF(
+            4,
+            std::array<float, 4>{
+                passType == Components::PassType::Normal ? 1.0f : 0.0f,
+                0.0f, 0.0f, 0.0f
+            }.data(),
+            1
+        );
+        device->SetPixelShaderConstantF(
+            8,
+            std::array<float, 4>{
+                onlyDrawViewmodel ? 1.0f : 0.0f, 
+                0.0f, 0.0f, 0.0f
+            }.data(),
+            1
+        );
+        //device->SetPixelShaderConstantF(
+        //    1, std::array<float, 4>{passType == Components::PassType::Normal ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f}.data(), 1);
+        //device->SetPixelShaderConstantB(6, (BOOL*)&onlyDrawViewmodel, 1);
         device->SetPixelShader(depthPassPS);
         device->SetStreamSource(0, depthPassVertices, 0, sizeof(Types::FSVertex));
         device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
@@ -718,10 +743,10 @@ namespace IWXMVM::GFX
         auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
         auto& pass = captureSettings.passes[passIndex];
         
-        if (pass.type == Components::PassType::Depth || pass.elements == Components::VisibleElements::OnlyGun)
+        if (pass.type != Components::PassType::Default || pass.elements == Components::VisibleElements::OnlyGun)
         {
             DrawStreamsShader(
-                pass.type == Components::PassType::Depth,
+                pass.type,
                 pass.elements == Components::VisibleElements::OnlyGun
             );
         }

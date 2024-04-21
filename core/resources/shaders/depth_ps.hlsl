@@ -7,7 +7,8 @@ struct PS_INPUT
 
 sampler2D depthTex : register(s10);
 float depthBlend : register(c0);
-bool onlyDrawViewmodel : register(b6);
+float normalBlend : register(c4);
+float onlyDrawViewmodel : register(c8);
 
 float GetLinearizedDepth(float2 texcoord)
 {
@@ -34,21 +35,24 @@ float3 GetScreenSpaceNormal(float2 texcoord)
 
 float4 main(PS_INPUT input) : COLOR
 {
-    // float3 normal = GetScreenSpaceNormal(input.uv);
-
+    float3 normal = GetScreenSpaceNormal(input.uv);
     float depth = GetLinearizedDepth(input.uv);
 
-    if (onlyDrawViewmodel) 
+    if (onlyDrawViewmodel > 0.0f) 
     {
         if (depth < 0.001f)
         {
-            return lerp(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), depthBlend);
+            float4 result = lerp(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), depthBlend);
+            return lerp(result, float4(normal, 1.0f), normalBlend);
         }
         else 
         {
-            return lerp(float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f), depthBlend);
+            float4 result = lerp(float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f), depthBlend);
+            return lerp(result, float4(0.0f, 0.0f, 0.0f, 1.0f), normalBlend);
         }
 	}
     
-    return lerp(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(depth, depth, depth, 1.0f), depthBlend);
+    float4 result = lerp(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(depth, depth, depth, 1.0f), depthBlend);
+    result = lerp(result, float4(normal, 1.0f), normalBlend);
+    return result;
 }
