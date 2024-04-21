@@ -7,11 +7,17 @@ namespace IWXMVM::Components::Rendering
 {
     std::atomic<Types::RenderingFlags> renderingFlags;
 
-    void SetGreenscreenColor()
+    void SetGreenscreenColor(uint32_t color)
     {
         auto r_clearcolor = Mod::GetGameInterface()->GetDvar("r_clearcolor").value();
-        r_clearcolor.value->uint32 = 0xFF00FF00;
+        r_clearcolor.value->uint32 = color;
     }
+
+    void SetDrawGun(bool drawGun)
+    {
+		auto cg_drawgun = Mod::GetGameInterface()->GetDvar("cg_drawgun").value();
+		cg_drawgun.value->int32 = drawGun;
+	}
 
     Types::RenderingFlags GetRenderingFlags()
     {
@@ -21,15 +27,51 @@ namespace IWXMVM::Components::Rendering
     void SetRenderingFlags(Types::RenderingFlags flags)
     {
         renderingFlags = flags;
+    }
 
-        // Since we cant hide the viewmodel via the R_SetMaterial, we set the cg_drawgun
-		auto cg_drawgun = Mod::GetGameInterface()->GetDvar("cg_drawgun").value();
-        cg_drawgun.value->int32 = flags & Types::RenderingFlags_DrawViewmodel ? 1 : 0;
-
-        if (flags != Types::RenderingFlags_DrawEverything)
-		{
-			SetGreenscreenColor();
+    void SetVisibleElements(VisibleElements elements)
+    {
+        if (elements == VisibleElements::Everything)
+        {
+            ResetVisibleElements();
+			return;
 		}
+
+        SetGreenscreenColor(0xFF00FF00);
+
+        if (elements == VisibleElements::WorldAndPlayers)
+        {
+			SetRenderingFlags(Types::RenderingFlags_DrawEverything);
+            SetDrawGun(0);
+		} 
+        else if (elements == VisibleElements::OnlyGun)
+        {
+            SetDrawGun(1);
+
+            // The visuals for this will be drawn via a shader, 
+            // see Graphics/Graphics.cpp
+        }
+        else if (elements == VisibleElements::OnlyWorld)
+        {
+			SetRenderingFlags(Types::RenderingFlags_DrawWorld);
+            SetDrawGun(0);
+		}
+        else if (elements == VisibleElements::OnlyPlayers)
+        {
+            SetRenderingFlags(Types::RenderingFlags_DrawPlayers);
+            SetDrawGun(0);
+        }
+        else
+        {
+			LOG_WARN("Unknown pass elements: {0}", magic_enum::enum_name(elements));
+		}
+    }
+
+    void ResetVisibleElements()
+    {
+        SetRenderingFlags(Types::RenderingFlags_DrawEverything);
+        SetDrawGun(1);
+        SetGreenscreenColor(0xFF000000);
     }
 
     void Initialize()

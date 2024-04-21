@@ -68,11 +68,12 @@ namespace IWXMVM::IW3::Hooks::Rendering
         {
             ReplaceMaterial(drawSurf, Functions::Material_RegisterHandle("overlay_low_health"));
         }
-        if ((renderingFlags & Types::RenderingFlags_DrawMuzzleFlash) == 0 &&
-            IsMaterialOneOf(material->info.name, muzzleFlashAndTracersMaterials))
-        {
-            ReplaceMaterial(drawSurf, Functions::Material_RegisterHandle("overlay_low_health"));
-        }
+
+        //if ((renderingFlags & Types::RenderingFlags_DrawMuzzleFlash) == 0 &&
+        //    IsMaterialOneOf(material->info.name, muzzleFlashAndTracersMaterials))
+        //{
+        //    ReplaceMaterial(drawSurf, Functions::Material_RegisterHandle("overlay_low_health"));
+        //}
 
         bool isWorldMaterial = !IsMaterialOneOf(material->info.name, playerMaterials) &&
                                !IsMaterialOneOf(material->info.name, muzzleFlashAndTracersMaterials);

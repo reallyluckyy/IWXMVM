@@ -126,14 +126,9 @@ namespace IWXMVM::Components
         if (MultiPassEnabled())
         {
             const auto passIndex = static_cast<std::size_t>(capturedFrameCount) % captureSettings.passes.size();
-            const auto& pass = captureSettings.passes[passIndex];
+            GFX::GraphicsManager::Get().DrawShaderForPassIndex(passIndex);
 
-            if (pass.type == PassType::Depth)
-            {
-                GFX::GraphicsManager::Get().DrawDepth();
-            }
-
-            outputPipe = pass.pipe;
+            outputPipe = captureSettings.passes[passIndex].pipe;
         }
 
         IDirect3DDevice9* device = D3D9::GetDevice();
@@ -189,7 +184,7 @@ namespace IWXMVM::Components
             const auto passIndex = static_cast<std::size_t>(capturedFrameCount) % captureSettings.passes.size();
             const auto& pass = captureSettings.passes[passIndex];
 
-            Rendering::SetRenderingFlags(pass.renderingFlags);
+            Rendering::SetVisibleElements(pass.elements);
         }
 
         framePrepared = true;
@@ -401,7 +396,7 @@ namespace IWXMVM::Components
         LOG_INFO("Stopped capture (wrote {0} frames)", capturedFrameCount);
         isCapturing.store(false);
 
-        Rendering::SetRenderingFlags(Types::RenderingFlags_DrawEverything);
+        Rendering::ResetVisibleElements();
         framePrepared = false;
 
         if (pipe)

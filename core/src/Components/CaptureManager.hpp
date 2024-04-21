@@ -21,10 +21,20 @@ namespace IWXMVM::Components
         Count
     };
 
+    enum class VisibleElements
+    {
+        Everything,
+        WorldAndPlayers,
+        OnlyGun,
+        OnlyWorld,
+        OnlyPlayers,
+        Count
+    };
+
     struct PassData
     {
         PassType type;
-        Types::RenderingFlags renderingFlags;
+        VisibleElements elements;
         FILE* pipe = nullptr;
         bool useReshade = true;
     };

@@ -77,11 +77,11 @@ namespace IWXMVM::UI
                 if (ImGui::Button(ICON_FA_EYE_SLASH))
                 {
                     displayPassIndex = std::nullopt;
-                    Components::Rendering::SetRenderingFlags(Types::RenderingFlags_DrawEverything);
+                    Components::Rendering::ResetVisibleElements();
                 }
                 else
                 {
-                    Components::Rendering::SetRenderingFlags(it->renderingFlags);
+                    Components::Rendering::SetVisibleElements(it->elements);
                 }
             }
             else if (!displayPassIndex.has_value())
@@ -90,7 +90,7 @@ namespace IWXMVM::UI
                 if (ImGui::Button(ICON_FA_EYE))
                 {
                     displayPassIndex = i;
-                    Components::Rendering::SetRenderingFlags(it->renderingFlags);
+                    Components::Rendering::SetVisibleElements(it->elements);
                 }
 
                 ImGui::SameLine();
@@ -104,31 +104,36 @@ namespace IWXMVM::UI
 
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(comboWidth);
-            if (D3D9::IsReshadePresent())
+            if (ImGui::BeginCombo("##elementsCombo", magic_enum::enum_name(it->elements).data()))
             {
-                ImGui::Checkbox("Enable Reshade", &it->useReshade);
+                for (auto p = 0; p < (int)VisibleElements::Count; p++)
+                {
+                    bool isSelected = it->elements == (VisibleElements)p;
+                    if (ImGui::Selectable(magic_enum::enum_name((VisibleElements)p).data(), isSelected))
+                    {
+                        it->elements = (VisibleElements)p;
+                    }
+
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
             }
 
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
             ImGui::SetNextItemWidth(comboWidth);
-            if (ImGui::BeginTable("##selectableTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings))
+            if (D3D9::IsReshadePresent())
             {
-                auto DrawSelectable = [&](const char* label, Types::RenderingFlags flags) {
-                    if (ImGui::Selectable(label, it->renderingFlags & flags))
-                    {
-                        it->renderingFlags = static_cast<Types::RenderingFlags>(it->renderingFlags ^ flags);
-                    }
-                };
-
-                ImGui::TableNextColumn();
-                DrawSelectable("Players", Types::RenderingFlags_DrawPlayers);
-                ImGui::TableNextColumn();
-                DrawSelectable("World", Types::RenderingFlags_DrawWorld);
-                ImGui::TableNextColumn();
-                DrawSelectable("Viewmodel", Types::RenderingFlags_DrawViewmodel);
-                ImGui::TableNextColumn();
-                DrawSelectable("Muzzle Flash", Types::RenderingFlags_DrawMuzzleFlash);
-                ImGui::EndTable();
+                if (it->type == PassType::Default)
+                {
+                    ImGui::Checkbox("Enable Reshade", &it->useReshade);
+                }
+                else
+                {
+                    it->useReshade = false;
+                }
             }
 
             ImGui::Dummy(ImVec2(0, 3));
@@ -140,7 +145,7 @@ namespace IWXMVM::UI
         ImGui::Dummy(ImVec2(0, 3));
         if (ImGui::Button(ICON_FA_PLUS " Add Pass"))
         {
-            captureSettings.passes.push_back({PassType::Default, Types::RenderingFlags_DrawEverything});
+            captureSettings.passes.push_back({PassType::Default, VisibleElements::Everything});
         }
 
         ImGui::Unindent();

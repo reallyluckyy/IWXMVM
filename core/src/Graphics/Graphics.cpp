@@ -1,5 +1,4 @@
 #include "StdInclude.hpp"
-
 #include "Graphics.hpp"
 
 #include "UI/UIManager.hpp"
@@ -638,7 +637,7 @@ namespace IWXMVM::GFX
         }
     }
 
-    void GraphicsManager::DrawDepth() const
+    void GraphicsManager::DrawStreamsShader(bool drawDepth, bool onlyDrawViewmodel) const
     {
         IDirect3DDevice9* device = D3D9::GetDevice();
         IDirect3DTexture9* depthTexture = D3D9::GetDepthTexture();
@@ -691,13 +690,15 @@ namespace IWXMVM::GFX
         device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
         device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
 
-        device->SetTexture(0, depthTexture);
+        device->SetTexture(10, depthTexture);
 
         const auto gameSize = ImGui::GetIO().DisplaySize;
         const float texelOffset[4] = { -1.0f / gameSize.x, 1.0f / gameSize.y, 0.0f, 0.0f };
         device->SetVertexDeclaration(depthPassVDecl);
         device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(&texelOffset), 1);
         device->SetVertexShader(depthPassVS);
+        device->SetPixelShaderConstantF(0, std::array<float, 4>{drawDepth ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f}.data(), 1);
+        device->SetPixelShaderConstantB(6, (BOOL*)&onlyDrawViewmodel, 1);
         device->SetPixelShader(depthPassPS);
         device->SetStreamSource(0, depthPassVertices, 0, sizeof(Types::FSVertex));
         device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
@@ -710,6 +711,20 @@ namespace IWXMVM::GFX
         // Restore the DX9 state
         d3d9_state_block->Apply();
         d3d9_state_block->Release();
+    }
+
+    void GraphicsManager::DrawShaderForPassIndex(int32_t passIndex)
+    {
+        auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
+        auto& pass = captureSettings.passes[passIndex];
+        
+        if (pass.type == Components::PassType::Depth || pass.elements == Components::VisibleElements::OnlyGun)
+        {
+            DrawStreamsShader(
+                pass.type == Components::PassType::Depth,
+                pass.elements == Components::VisibleElements::OnlyGun
+            );
+        }
     }
 
     void GraphicsManager::Render()
@@ -841,13 +856,7 @@ namespace IWXMVM::GFX
         auto captureMenu = UI::UIManager::Get().GetUIComponent<UI::CaptureMenu>(UI::Component::Component::CaptureMenu);
         if (captureMenu->GetDisplayPassIndex().has_value())
         {
-            auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
-            auto& pass = captureSettings.passes[captureMenu->GetDisplayPassIndex().value()];
-
-            if (pass.type == Components::PassType::Depth)
-            {
-                GFX::GraphicsManager::Get().DrawDepth();
-            }
+            DrawShaderForPassIndex(captureMenu->GetDisplayPassIndex().value());
 		}
 
         // Restore the DX9 transform

@@ -42,7 +42,7 @@ namespace IWXMVM::GFX
         void Initialize();
         void Uninitialize();
         void Render();
-        void DrawDepth() const;
+        void DrawShaderForPassIndex(int32_t passIndex);
 
         std::optional<int32_t> GetSelectedNodeId() const { return selectedNodeId; }
         bool WasObjectHoveredThisFrame() const { return objectHoveredThisFrame; }
@@ -78,6 +78,7 @@ namespace IWXMVM::GFX
         void DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation);
         void DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation);
 
+        void DrawStreamsShader(bool drawDepth, bool onlyDrawViewmodel) const;
         
         void BuildCampathMesh();
         void SetupRenderState() const noexcept;
