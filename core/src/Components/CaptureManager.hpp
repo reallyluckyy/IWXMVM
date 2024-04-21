@@ -169,7 +169,6 @@ namespace IWXMVM::Components
         std::int32_t capturedFrameCount = 0;
         bool ffmpegNotFound = false;
         bool framePrepared = false;
-        bool captureDepth = false;
         FILE* pipe = nullptr;
     };
 }  // namespace IWXMVM::Components

@@ -181,6 +181,9 @@ namespace IWXMVM::Components
 
     void CaptureManager::PrepareFrame()
     {
+        if (!isCapturing.load())
+        	return;
+
         if (MultiPassEnabled())
         {
             const auto passIndex = static_cast<std::size_t>(capturedFrameCount) % captureSettings.passes.size();
@@ -399,6 +402,7 @@ namespace IWXMVM::Components
         isCapturing.store(false);
 
         Rendering::SetRenderingFlags(Types::RenderingFlags_DrawEverything);
+        framePrepared = false;
 
         if (pipe)
         {
