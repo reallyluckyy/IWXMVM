@@ -15,4 +15,4 @@ namespace IWXMVM::IW3::Functions
                                         float* matrix /*@<esi>*/, Structures::DObj_s* dobj, float* origin);
 
     void Dvar_SetStringByName(const char* dvarName, const char* value);
-}  // namespace IWXMVM::IW3::Structures
+}  // namespace IWXMVM::IW3::Functions
