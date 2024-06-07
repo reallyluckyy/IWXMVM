@@ -40,7 +40,6 @@ namespace IWXMVM::IW3::Functions
         return "";
     }
 
-    // TODO: now this should really not belong in a file called "Structures.cpp"...
     void Cbuf_AddText(std::string command)
     {
         LOG_DEBUG("Executing command \"{0}\"", command);
@@ -95,4 +94,4 @@ namespace IWXMVM::IW3::Functions
         }
     }
 
-}  // namespace IWXMVM::IW3::Structures
+}  // namespace IWXMVM::IW3::Functions
