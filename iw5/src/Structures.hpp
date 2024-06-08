@@ -232,6 +232,77 @@ namespace IWXMVM::IW5::Structures
         bool cameraModeChanged;
     };
 
+    // I believe this is originally just part of cg_s
+    struct demoCameraData_t
+    {
+        float demoCameraOrigin[3];
+        float demoCameraAngles[3];
+        float demoCameraVelocity[3];
+    };
+
+    struct GfxViewport
+    {
+        int x;
+        int y;
+        int width;
+        int height;
+    };
+
+    struct RefdefView
+    {
+        float tanHalfFovX;
+        float tanHalfFovY;
+        float org[3];
+        float axis[3][3];
+        float zNear;
+    };
+
+    struct refdef_t
+    {
+        GfxViewport displayViewport;
+        RefdefView view;
+        float viewOffset[3];
+        int time;
+        float blurRadius;
+        bool uiBlur;
+        // ...
+    };
+
+    struct cg_s
+    {
+        int8_t padding[0x6B1EC];
+        int time;
+        int oldTime;
+        int physicsTime;
+        int groundEntityTime;
+        int mapRestart;
+        int renderingThirdPerson;
+        float landChange;
+        int landTime;
+        float heightToCeiling;
+        refdef_t refdef;
+        // incomplete since refdef is incomplete
+    };
+
+    struct clientStatic_t
+    {
+        int quit;
+        int hunkUsersStarted;
+        char servername[256];
+        int rendererStarted;
+        int soundStarted;
+        int inUpdateSound;
+        int uiStarted;
+        int devGuiStarted;
+        int frametime;
+        float frametime_base;
+        int realtime;
+        // ...
+    };
+
     clientConnection_t* GetClientConnection();
+    cg_s* GetClientGlobals();
+    clientStatic_t* GetClientStatic();
     clientDemoPlayback_t* GetClientDemoPlayback();
+    demoCameraData_t* GetDemoCameraData();
 }  // namespace IWXMVM::IW5::Structures
