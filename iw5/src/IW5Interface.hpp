@@ -25,40 +25,51 @@ namespace IWXMVM::IW5
         {
             Structures::clientDemoPlayback_t* playback = new Structures::clientDemoPlayback_t;
 
-            LOG_DEBUG("first {}", (uintptr_t)&playback->localClientNum);
-            LOG_DEBUG("cameraMode {}", (uintptr_t)&playback->cameraMode);
-            LOG_DEBUG("diff {}", ((uintptr_t)&playback->cameraMode) - (uintptr_t)&playback->localClientNum);
-
-
             Hooks::Install();
             Patches::GetGamePatches();
         }
 
         void SetupEventListeners() final
         {
-            //Events::RegisterListener(EventType::PostDemoLoad, DemoParser::Run);
-            
             Events::RegisterListener(EventType::OnCameraChanged, []() {
                 auto& camera = Components::CameraManager::Get().GetActiveCamera();
                 auto isFreeCamera = camera->IsModControlledCameraMode();
 
-                Structures::GetClientDemoPlayback()->cameraMode = isFreeCamera ? 2 : 1;
+                auto demoPlayback = Structures::GetClientDemoPlayback();
+                demoPlayback->cameraMode = isFreeCamera ? 2 : 0;
+                demoPlayback->cameraModeChanged = 1;
+
                 Functions::FindDvar("cg_draw2d")->current.boolean = isFreeCamera ? 0 : 1;
             });
 
-            Events::RegisterListener(EventType::OnFrame, []() {
+            Events::RegisterListener(EventType::OnFrame, [this]() {
+                if (GetGameState() != Types::GameState::InDemo)
+                    return;
+
                 auto& camera = Components::CameraManager::Get().GetActiveCamera();
+                auto demoCamera = Structures::GetDemoCameraData();
+                auto cg = Structures::GetClientGlobals();
+
                 if (!camera->IsModControlledCameraMode())
                 {
+                    camera->GetPosition() = *reinterpret_cast<glm::vec3*>(cg->refdef.view.org);
+                    // TODO: set camera rotation
+                    camera->GetFov() = glm::degrees(std::atan(cg->refdef.view.tanHalfFovX) * 2.0f);
                     return;
                 }
 
-                // TODO: set camera position, rotation, fov
+                demoCamera->demoCameraOrigin[0] = camera->GetPosition()[0];
+                demoCamera->demoCameraOrigin[1] = camera->GetPosition()[1];
+                demoCamera->demoCameraOrigin[2] = camera->GetPosition()[2];
+
+                demoCamera->demoCameraAngles[0] = camera->GetRotation()[0];
+                demoCamera->demoCameraAngles[1] = camera->GetRotation()[1];
+                demoCamera->demoCameraAngles[2] = camera->GetRotation()[2];
+                
+                // TODO: set fov
             });
 
             Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
-                Functions::FindDvar("sv_cheats")->current.boolean= true; 
-                    
                 // ensure these are set to their defaults, so our killfeed toggle works properly
                 Functions::FindDvar("con_gamemsgwindow0msgtime")->current.value = 5;
                 Functions::FindDvar("con_gamemsgwindow0linecount")->current.integer = 4;
@@ -156,29 +167,19 @@ namespace IWXMVM::IW5
 
         Types::DemoInfo GetDemoInfo() final
         {
-            //static uint32_t lastValidTick = 0;
-            //
-            //Types::DemoInfo demoInfo;
-            //demoInfo.name = Structures::GetClientStatic()->servername;
-            //demoInfo.name = demoInfo.name.starts_with(DEMO_TEMP_DIRECTORY)
-            //                    ? demoInfo.name.substr(strlen(DEMO_TEMP_DIRECTORY) + 1)
-            //                    : demoInfo.name;
-            //
-            //std::string str = static_cast<std::string>(Structures::GetClientStatic()->servername);
-            //str += (str.ends_with(".dm_1")) ? "" : ".dm_1";
-            //demoInfo.path = Functions::GetFilePath(std::move(str));
-            //
-            //auto [demoStartTick, demoEndTick] = DemoParser::GetDemoTickRange();
-            //
-            //const auto serverTime = Structures::GetClientActive()->serverTime;
-            //if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding())
-            //    lastValidTick = serverTime - demoStartTick;
-            //demoInfo.currentTick = lastValidTick;
-            //demoInfo.endTick = demoEndTick - demoStartTick;
+            static int demoStartTick, demoEndTick;
+            Functions::CL_Demo_GetStartAndEndTime(&demoStartTick, &demoEndTick);
 
-            // TODO:
+            Types::DemoInfo demoInfo;
+            demoInfo.name = Structures::GetClientStatic()->servername;
+            demoInfo.path = "";
 
-            return {};
+            // I dont really know why the range **isnt** demoStartTick to demoEndTick,
+            // but it seems to work this way.
+            demoInfo.endTick = demoEndTick;
+            demoInfo.currentTick = Structures::GetClientGlobals()->time;
+
+            return demoInfo;
         }
 
         std::string_view GetDemoExtension() final
@@ -226,9 +227,8 @@ namespace IWXMVM::IW5
 
         bool IsConsoleOpen() final
         {
-            // TODO: 
+            // Theres no console on IW5
             return false;
-            //return (Structures::GetClientUIActives()->keyCatchers & 1) != 0;
         }
 
         std::optional<Types::Dvar> GetDvar(const std::string_view name) final
@@ -238,6 +238,12 @@ namespace IWXMVM::IW5
             {
                 static float znear = 0.1f;
                 return Types::Dvar{name, (Types::Dvar::Value*)&znear};
+            }
+
+             // TODO: Hack #2. I would, once again, strongly advise against exposing dvars directly to core...
+            if (name.compare("timescale") == 0)
+            {
+                return Types::Dvar{name, (Types::Dvar::Value*)&Structures::GetClientDemoPlayback()->timeScale};
             }
 
             const auto gameDvar = Functions::FindDvar(name);
@@ -254,7 +260,6 @@ namespace IWXMVM::IW5
 
         void SetFov(float fov) final
         {
-            LOG_DEBUG("{}", Structures::GetClientDemoPlayback()->cameraMode);
             Functions::FindDvar("cg_fov")->current.value = fov;
         }
 
@@ -356,4 +361,4 @@ namespace IWXMVM::IW5
             return {};
         }
     };
-}  // namespace IWXMVM::IW3
+}  // namespace IWXMVM::IW5
