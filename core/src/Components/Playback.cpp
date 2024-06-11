@@ -229,7 +229,10 @@ namespace IWXMVM::Components::Playback
 
         if (IsGameFrozen() && !Components::Rewinding::IsRewinding())
         {
-            SetTimelineTick(GetTimelineTick() + delta);
+            const auto timelineTick = GetTimelineTick();
+            const auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
+            SetTimelineTick((timelineTick + delta + 1 >= endTick) ? endTick - 1 : timelineTick + delta);
+
             return 0;
         }
 
