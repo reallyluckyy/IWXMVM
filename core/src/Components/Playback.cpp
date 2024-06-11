@@ -227,7 +227,7 @@ namespace IWXMVM::Components::Playback
     {
         auto delta = CalculatePlaybackDeltaInternal(gameMsec);
 
-        if (IsGameFrozen())
+        if (IsGameFrozen() && !Components::Rewinding::IsRewinding())
         {
             SetTimelineTick(GetTimelineTick() + delta);
             return 0;
