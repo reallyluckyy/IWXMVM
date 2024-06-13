@@ -9,6 +9,7 @@
 #include "Input.hpp"
 #include "Components/CameraManager.hpp"
 #include "Utilities/MathUtils.hpp"
+#include "UI/TaskbarProgress.hpp"
 
 namespace IWXMVM::UI
 {
@@ -24,6 +25,8 @@ namespace IWXMVM::UI
             component->Release();
         }
         uiComponentsInitialized = false;
+
+        TaskbarProgress::Shutdown();
 
         ImGui_ImplDX9_Shutdown();
         ImGui_ImplWin32_Shutdown();
@@ -246,6 +249,7 @@ namespace IWXMVM::UI
             isInitialized = true;
 
             Components::CaptureManager::Get().Initialize();
+            TaskbarProgress::Initialize(hwnd);
 
             LOG_INFO("Initialized UI");
         }
