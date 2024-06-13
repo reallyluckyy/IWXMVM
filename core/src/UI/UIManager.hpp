@@ -19,7 +19,6 @@
 #include "Components/PlayerAnimationUI.hpp"
 #include "Components/Readme.hpp"
 #include "Components/Credits.hpp"
-#include "Utilities/TaskbarList.hpp"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -129,9 +128,6 @@ namespace IWXMVM::UI
 			return ImGui::GetIO().Fonts->Fonts[1];
 		}
 
-        void SetTaskbarProgress(int, int);
-        void SetTaskbarState(TBPFLAG);
-
        private:
         UIManager()
         {
@@ -155,7 +151,5 @@ namespace IWXMVM::UI
         bool showDebugPanel = false;
 
         WNDPROC originalGameWndProc = nullptr;
-
-        IWXMVM::TaskbarList::TaskbarList* taskbarList = nullptr;
     };
 }  // namespace IWXMVM::UI

@@ -1,15 +1,13 @@
 #include "StdInclude.hpp"
-#include "TaskbarList.hpp"
+#include "TaskbarProgress.hpp"
 
-namespace IWXMVM::TaskbarList
+namespace IWXMVM::UI
 {
-    TaskbarList::TaskbarList(HWND hwnd)
-    {
-        pTaskbarList = nullptr;
-        taskbarHWND = hwnd;
-        Initialize(hwnd);
-    }
-    void TaskbarList::Initialize(HWND hwnd)
+    ITaskbarList3* pTaskbarList = nullptr;
+    HWND taskbarHWND = nullptr;
+    TBPFLAG state = TBPF_NOPROGRESS;
+
+    void TaskbarProgress::Initialize(HWND hwnd)
     {
         taskbarHWND = hwnd;
         HRESULT hr = CoInitialize(NULL);
@@ -17,8 +15,6 @@ namespace IWXMVM::TaskbarList
         {
             LOG_ERROR("Failed to initialize COM library");
         }
-
-
         
         hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pTaskbarList));
         if (FAILED(hr))
@@ -27,21 +23,8 @@ namespace IWXMVM::TaskbarList
             LOG_ERROR("CoCreateInstance failed");
         }
     }
-    void TaskbarList::SetProgressState(TBPFLAG newState)
-    {
-        if (state != newState) 
-        {
-            state = newState;
-            if (pTaskbarList)
-                pTaskbarList->SetProgressState(taskbarHWND, state);
-        }
-    }
-    void TaskbarList::SetProgressValue(unsigned long long current, unsigned long long max)
-    {
-        if (pTaskbarList)
-            pTaskbarList->SetProgressValue(taskbarHWND, current, max);
-    }
-    TaskbarList::~TaskbarList()
+
+    void TaskbarProgress::Shutdown()
     {
         if (pTaskbarList)
         {
@@ -49,5 +32,25 @@ namespace IWXMVM::TaskbarList
             pTaskbarList->Release();
         }
         CoUninitialize();
+    }
+
+    void TaskbarProgress::SetProgressState(TBPFLAG newState)
+    {
+        if (state != newState) 
+        {
+            state = newState;
+            if (pTaskbarList)
+            {
+                pTaskbarList->SetProgressState(taskbarHWND, state);
+            }
+        }
+    }
+
+    void TaskbarProgress::SetProgressValue(unsigned long long current, unsigned long long max)
+    {
+        if (pTaskbarList)
+        {
+            pTaskbarList->SetProgressValue(taskbarHWND, current, max);
+        }
     }
 }

@@ -8,6 +8,7 @@
 #include "Components/CameraManager.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Configuration/PreferencesConfiguration.hpp"
+#include "UI/TaskbarProgress.hpp"
 
 namespace IWXMVM::UI
 {
@@ -271,11 +272,15 @@ namespace IWXMVM::UI
                 auto totalFrames = (captureSettings.endTick - captureSettings.startTick) * (captureSettings.framerate/1000.0f);
                 ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImGui::GetColorU32(ImGuiCol_Button));
                 ImGui::ProgressBar((float)captureManager.GetCapturedFrameCount() / totalFrames, ImVec2(-1, 0), "");
-                UIManager::Get().SetTaskbarProgress((int)captureManager.GetCapturedFrameCount(), totalFrames);
                 ImGui::PopStyleColor();
+
+                TaskbarProgress::SetProgressValue((int)captureManager.GetCapturedFrameCount(), totalFrames);
+                TaskbarProgress::SetProgressState(TBPF_NORMAL);
             }
             else
-                UIManager::Get().SetTaskbarState(TBPF_NOPROGRESS);
+            {
+                TaskbarProgress::SetProgressState(TBPF_NOPROGRESS);
+            }
 
             ImGui::End();
         }
