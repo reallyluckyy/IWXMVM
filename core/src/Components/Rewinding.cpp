@@ -180,7 +180,7 @@ namespace IWXMVM::Components::Rewinding
 
         if (latestRewindTo > curTime)
         {
-            Components::Playback::SkipForward(latestRewindTo - curTime);
+            Components::Playback::SkipDemoForward(latestRewindTo - curTime);
         }
         
         latestRewindTo = NOT_IN_USE;
@@ -196,6 +196,12 @@ namespace IWXMVM::Components::Rewinding
 
     void RewindBy(std::int32_t ticks)
     {
+        if (Playback::IsGameFrozen())
+        {
+            Playback::SetTimelineTick(Playback::GetTimelineTick() + ticks);
+            return;
+        }
+
         if (ticks >= SKIPPING_FORWARD)
         {
             LOG_DEBUG("Cannot rewind invalid tick value {}", ticks);

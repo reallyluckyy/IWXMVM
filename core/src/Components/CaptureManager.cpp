@@ -157,7 +157,7 @@ namespace IWXMVM::Components
             return;
         }
 
-        const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        const auto currentTick = Playback::GetTimelineTick();
         if (!Rewinding::IsRewinding() && currentTick > captureSettings.endTick)
         {
             StopCapture();
@@ -272,7 +272,7 @@ namespace IWXMVM::Components
         }
 
         // skip to start tick
-        auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+        auto currentTick = Playback::GetTimelineTick();
         Playback::SetTickDelta(captureSettings.startTick - currentTick, true);
 
         capturedFrameCount = 0;

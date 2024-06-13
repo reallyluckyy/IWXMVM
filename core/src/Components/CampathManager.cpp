@@ -27,7 +27,7 @@ namespace IWXMVM::Components
 
             if (Input::BindDown(Action::DollyAddNode))
             {
-                const auto tick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+                const auto tick = Components::Playback::GetTimelineTick();
                 
                 for (const auto& keyframe : KeyframeManager::Get().GetKeyframes(property))
                 {
@@ -65,7 +65,7 @@ namespace IWXMVM::Components
                 if (!KeyframeManager::Get().GetKeyframes(property).empty())
                 {
                     Playback::SetTickDelta(KeyframeManager::Get().GetKeyframes(property).front().tick -
-                                               Mod::GetGameInterface()->GetDemoInfo().currentTick, true);
+                                               Components::Playback::GetTimelineTick(), true);
                 }
             }
 

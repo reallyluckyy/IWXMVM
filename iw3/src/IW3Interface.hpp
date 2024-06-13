@@ -170,11 +170,10 @@ namespace IWXMVM::IW3
             }
         }
 
+        Types::DemoInfo demoInfo;
+
         Types::DemoInfo GetDemoInfo() final
         {
-            static uint32_t lastValidTick = 0;
-
-            Types::DemoInfo demoInfo;
             demoInfo.name = Structures::GetClientStatic()->servername;
             demoInfo.name = demoInfo.name.starts_with(DEMO_TEMP_DIRECTORY)
                                 ? demoInfo.name.substr(strlen(DEMO_TEMP_DIRECTORY) + 1)
@@ -188,8 +187,9 @@ namespace IWXMVM::IW3
 
             const auto serverTime = Structures::GetClientActive()->serverTime;
             if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding())
-                lastValidTick = serverTime - demoStartTick;
-            demoInfo.currentTick = lastValidTick;
+            {
+                demoInfo.gameTick = serverTime - demoStartTick;
+            }
             demoInfo.endTick = demoEndTick - demoStartTick;
 
             return demoInfo;

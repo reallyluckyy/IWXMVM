@@ -10,5 +10,5 @@ namespace ImGuiEx
     bool TimescaleSlider(const char* label, float* v, float v_min, float v_max, const char* format,
                          ImGuiSliderFlags flags);
     void DemoProgressBarLines(ImRect rect, std::uint32_t currentTick, std::uint32_t displayStartTick,
-                              std::uint32_t displayEndTick, std::uint32_t demoLength);
+                              std::uint32_t displayEndTick, std::uint32_t demoLength, std::optional<uint32_t> frozenTick);
 }  // namespace ImGuiEx

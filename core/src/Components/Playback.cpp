@@ -7,6 +7,8 @@
 namespace IWXMVM::Components::Playback
 {
     bool isPlaybackPaused = false;
+    uint32_t timelineTick = 0;
+    std::optional<uint32_t> frozenTick = std::nullopt;
 
     void TogglePaused()
     {
@@ -17,8 +19,56 @@ namespace IWXMVM::Components::Playback
     {
         return isPlaybackPaused;
     }
+
+    uint32_t GetTimelineTick()
+    {
+        if (!frozenTick.has_value())
+        {
+            timelineTick = Mod::GetGameInterface()->GetDemoInfo().gameTick;
+        }
+
+        return timelineTick;
+	}
+
+    void SetTimelineTick(uint32_t tick)
+    {
+        timelineTick = tick;
+    }
+
+    std::optional<uint32_t> GetFrozenTick()
+    {
+        return frozenTick;
+    }
+
+    bool IsGameFrozen()
+    {
+        return frozenTick.has_value();
+    }
+
+    void ToggleFrozenTick()
+    {
+        if (frozenTick.has_value())
+        {
+            frozenTick.reset();
+        }
+        else
+        {
+            frozenTick.emplace(GetTimelineTick());
+        }
+    }
     
     void SkipForward(std::int32_t ticks)
+    {
+        if (frozenTick.has_value())
+        {
+            timelineTick += ticks;
+            return;
+        }
+
+        SkipDemoForward(ticks);
+    }
+
+    void SkipDemoForward(std::int32_t ticks)
     {
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
         auto realtime = reinterpret_cast<int32_t*>(addresses.cls.realtime);
@@ -32,6 +82,37 @@ namespace IWXMVM::Components::Playback
             SkipForward(value);
         else if ((value < -REWIND_DEADZONE) || (value < 0 && ignoreDeadzone))
             Rewinding::RewindBy(value);
+    }
+
+    void HandleImportedFrozenTickLogic(std::optional<std::uint32_t> importedFrozenTick)
+    {
+        const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+        
+        if (frozenTick.has_value())
+        {
+            // toggle frozen tick off so we can rewind the actual state of the game
+            frozenTick.reset();
+        }
+
+        if (!importedFrozenTick.has_value())
+        {
+            // since no frozen tick is set in the imported file, we're done here
+            return;
+        }
+        
+        // set actual tick
+        Playback::SetTickDelta(importedFrozenTick.value() - demoInfo.gameTick, true);
+        
+        // (re)enable frozen tick with specified value
+        frozenTick.emplace(importedFrozenTick.value());
+        
+        // update current (frozen) tick
+        SetTimelineTick(importedFrozenTick.value());
+        
+        if (!Playback::IsPaused())
+        {
+            Playback::TogglePaused();
+        }
     }
 
     void GeneratePattern(auto& pattern, float fps, float timescale)
@@ -67,7 +148,7 @@ namespace IWXMVM::Components::Playback
         assert(std::accumulate(pattern.begin(), pattern.end(), 0) > 0);
     }
 
-    std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec)
+    std::int32_t CalculatePlaybackDeltaInternal(std::int32_t gameMsec)
     {
         // check if we need to skip forward for exact rewinding
         if (Components::Rewinding::CheckSkipForward())
@@ -140,5 +221,21 @@ namespace IWXMVM::Components::Playback
 
         // advance (1ms) or pause(0ms) based on the pattern
         return pattern[patternIndex++ % 1000];
+    }
+
+    std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec)
+    {
+        auto delta = CalculatePlaybackDeltaInternal(gameMsec);
+
+        if (IsGameFrozen() && !Components::Rewinding::IsRewinding())
+        {
+            const auto timelineTick = GetTimelineTick();
+            const auto endTick = Mod::GetGameInterface()->GetDemoInfo().endTick;
+            SetTimelineTick((timelineTick + delta >= endTick) ? endTick - 1 : timelineTick + delta);
+
+            return 0;
+        }
+
+        return delta;
     }
 }  // namespace IWXMVM::Components::Playback

@@ -147,14 +147,24 @@ namespace IWXMVM::Components
         InitializeProperty(dofNearEnd);
         InitializeProperty(dofBias);
 
+        static bool justLoadedDemo = false;
+
         Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
             ClearKeyframes();
             actionHistory.clear();
             undidActionHistory.clear();
-            Components::KeyframeSerializer::ReadRecent();
+            justLoadedDemo = true;
         });
 
-        Events::RegisterListener(EventType::OnFrame, [&]() { HandleInput(); });
+        Events::RegisterListener(EventType::OnFrame, [&]() { 
+            HandleInput(); 
+
+            if (IWXMVM::Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo && justLoadedDemo)
+            {
+                Components::KeyframeSerializer::ReadRecent();
+                justLoadedDemo = false;
+            }
+        });
     }
 
     const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const
