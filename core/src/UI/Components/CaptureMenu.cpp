@@ -222,7 +222,7 @@ namespace IWXMVM::UI
                 ImGui::ProgressBar((float)captureManager.GetCapturedFrameCount() / totalFrames, ImVec2(-1, 0), "");
                 ImGui::PopStyleColor();
 
-                TaskbarProgress::SetProgressValue((int)captureManager.GetCapturedFrameCount(), totalFrames);
+                TaskbarProgress::SetProgressValue((int)captureManager.GetCapturedFrameCount(), (unsigned long long)totalFrames);
                 TaskbarProgress::SetProgressState(TBPF_NORMAL);
             }
             else
