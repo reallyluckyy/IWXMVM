@@ -129,7 +129,7 @@ namespace IWXMVM::Components::Rewinding
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
 
         // TODO: find a more robust method of detecting a gamestate message
-        if (len >= 10'000)
+        if (len >= 10'000 || demoFileOffset == 9)
         {
             // first message with the gamestate; triggers the game to load a map
             if (initialGamestate != nullptr)
@@ -143,6 +143,7 @@ namespace IWXMVM::Components::Rewinding
             // after gamestate before first snapshot
             initialGamestate = std::make_unique<InitialGamestate>();
             initialGamestate->fileOffset = demoFileOffset - 9;
+            assert(initialGamestate->fileOffset > 0);
 
             initialGamestate->lastExecutedServerCommand =
                 *reinterpret_cast<int*>(addresses.clc.lastExecutedServerCommand);
@@ -167,6 +168,7 @@ namespace IWXMVM::Components::Rewinding
             // after first snapshot and before second snapshot
             initialGamestate->populated = true;
             initialGamestate->serverTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
+            assert(initialGamestate->serverTime > 0);
         }
     }
 
