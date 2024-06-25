@@ -105,6 +105,17 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
                 // deattach any previously attached weapon from corpse
                 centity.nextState.weapon = 0;
             }
+
+            if (Components::PlayerAnimation::HideAllCorpses())
+            {
+                // hide corpses
+                centity.nextState.lerp.eFlags |= 32;
+            }
+            else
+            {
+                // reveal corpses
+                centity.nextState.lerp.eFlags &= ~32;
+            }
         }
         else if (centity.nextState.eType == entityType_t::ET_ITEM)
         {
