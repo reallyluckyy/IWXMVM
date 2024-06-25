@@ -118,7 +118,7 @@ namespace IWXMVM::IW3::DemoParser
 
             LOG_DEBUG("Determined demo bounds as {0} and {1}", demoStartTick, demoEndTick);
 
-            if (demoStartTick == 0 || demoEndTick == 0)
+            if (demoStartTick == 0 || demoEndTick == 0 || demoEndTick - demoStartTick > 24 * 3600 * 1000)
             {
                 demoStartTick = demoEndTick = 0;
                 LOG_ERROR("Could not determine demo length due to invalid archives. Cannot render timeline.");
