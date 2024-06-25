@@ -3,6 +3,7 @@
 
 namespace IWXMVM::Components::PlayerAnimation
 {
+    bool hideAllCorpses = false;
     bool attachWeaponToCorpse = false;
     std::string_view latestAnimName;
     std::int32_t selectedAnimIndex = -1;
@@ -26,6 +27,11 @@ namespace IWXMVM::Components::PlayerAnimation
     void SetSelectedAnimIndex(std::int32_t index)
     {
         selectedAnimIndex = index;
+    }
+
+    bool& HideAllCorpses()
+    {
+        return hideAllCorpses;
     }
 
     bool& AttachWeaponToCorpse()

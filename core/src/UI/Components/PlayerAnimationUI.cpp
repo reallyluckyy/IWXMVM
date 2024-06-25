@@ -44,6 +44,7 @@ namespace IWXMVM::UI
             if (DrawHeaderAndResetButton(ICON_FA_PERSON_FALLING "  Select a death animation   ")) 
             {
                 Components::PlayerAnimation::SetSelectedAnimIndex(selected = -1);
+                Components::PlayerAnimation::HideAllCorpses() = false;
                 Components::PlayerAnimation::AttachWeaponToCorpse() = false;
             }
         
@@ -57,6 +58,10 @@ namespace IWXMVM::UI
             }
 
             ImGui::NewLine();
+            if (ImGui::Checkbox("Hide all corpses", &Components::PlayerAnimation::HideAllCorpses()))
+            {
+                Components::PlayerAnimation::SetSelectedAnimIndex(selected = -1);
+            }
             ImGui::Checkbox("Attach weapon to player", &Components::PlayerAnimation::AttachWeaponToCorpse());
             ImGui::NewLine();
 

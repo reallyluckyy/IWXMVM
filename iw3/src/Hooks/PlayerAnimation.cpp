@@ -100,13 +100,34 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
                     centity.nextState.weapon = weaponIndices[centity.nextState.clientNum];
                 }
             }
+            else
+            {
+                // detach any previously attached weapon from corpse
+                centity.nextState.weapon = 0;
+            }
+
+            if (Components::PlayerAnimation::HideAllCorpses())
+            {
+                // hide corpses
+                centity.nextState.lerp.eFlags |= 32;
+            }
+            else
+            {
+                // reveal corpses
+                centity.nextState.lerp.eFlags &= ~32;
+            }
         }
         else if (centity.nextState.eType == entityType_t::ET_ITEM)
         {
             if (Components::PlayerAnimation::AttachWeaponToCorpse())
             {
                 // hide dropped weapons
-                centity.nextState.lerp.eFlags = 32;
+                centity.nextState.lerp.eFlags |= 32;
+            }
+            else
+            {
+                // reveal dropped weapons
+                centity.nextState.lerp.eFlags &= ~32;
             }
         }
     }
