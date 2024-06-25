@@ -90,21 +90,44 @@ namespace IWXMVM::IW3::DemoParser
             }
         }
 
+        demoStartTick = 0;
+        demoEndTick = 0;
+
         if (archives.size() > 256)
         {
             // some of the first 256 archives are outdated (cod4)
-            demoStartTick = archives[0].serverTime;
-            demoEndTick = archives.back().serverTime + 500;
+            for (auto itr = archives.begin(); itr != archives.end(); ++itr)
+            {
+                // don't use server times that are <= 0
+                if (itr->serverTime > 0)
+                {
+                    demoStartTick = static_cast<std::uint32_t>(itr->serverTime);
+                    break;
+                }
+            }
+
+            for (auto itr = archives.rbegin(); itr != archives.rend(); ++itr)
+            {
+                // don't use server times that are <= demo start tick
+                if (itr->serverTime > static_cast<std::int32_t>(demoStartTick))
+                {
+                    demoEndTick = static_cast<std::uint32_t>(itr->serverTime);
+                    break;
+                }
+            }
 
             LOG_DEBUG("Determined demo bounds as {0} and {1}", demoStartTick, demoEndTick);
+
+            if (demoStartTick == 0 || demoEndTick == 0)
+            {
+                demoStartTick = demoEndTick = 0;
+                LOG_ERROR("Could not determine demo length due to invalid archives. Cannot render timeline.");
+            }
 
             Events::Invoke(EventType::OnDemoBoundsDetermined);
         }
         else
         {
-            demoStartTick = 0;
-            demoEndTick = 0;
-
             LOG_ERROR("Could not determine demo length due to lack of 256 client archives (found {0})",
                       archives.size());
         }
