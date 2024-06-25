@@ -111,7 +111,7 @@ namespace IWXMVM::IW3::DemoParser
                 // don't use server times that are <= demo start tick
                 if (itr->serverTime > static_cast<std::int32_t>(demoStartTick))
                 {
-                    demoEndTick = static_cast<std::uint32_t>(itr->serverTime);
+                    demoEndTick = 500 + static_cast<std::uint32_t>(itr->serverTime);
                     break;
                 }
             }
