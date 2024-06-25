@@ -102,7 +102,7 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
             }
             else
             {
-                // deattach any previously attached weapon from corpse
+                // detach any previously attached weapon from corpse
                 centity.nextState.weapon = 0;
             }
 
