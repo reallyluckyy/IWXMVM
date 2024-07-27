@@ -14,6 +14,7 @@ namespace IWXMVM::IW5::Patches
         ReturnPatch CL_Demo_FollowCameraMove{GetGameAddresses().CL_Demo_FollowCameraMove(),
                                              PatchApplySetting::Immediately};
 
+        NopPatch<5> Con_TimeJumped{GetGameAddresses().Con_TimeJumped_Call(), PatchApplySetting::Deferred};
 
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };

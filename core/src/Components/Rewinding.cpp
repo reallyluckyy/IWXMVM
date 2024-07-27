@@ -103,7 +103,7 @@ namespace IWXMVM::Components::Rewinding
         *reinterpret_cast<int*>(addresses.clc.lastExecutedServerCommand) = initialGamestate->lastExecutedServerCommand;
         *reinterpret_cast<int*>(addresses.clc.serverCommandSequence) = initialGamestate->serverCommandSequence1;
         *reinterpret_cast<int*>(addresses.cgs.serverCommandSequence) = initialGamestate->serverCommandSequence2;
-        *reinterpret_cast<int*>(addresses.killfeed) = 0;
+        //*reinterpret_cast<int*>(addresses.killfeed) = 0;
 
         // can be 0 as its cod4x only
         if (addresses.clc.serverConfigDataSequence)
@@ -112,8 +112,8 @@ namespace IWXMVM::Components::Rewinding
                 initialGamestate->serverConfigDataSequence;
         }
 
-        memset(reinterpret_cast<char*>(addresses.s_compassActors.address), 0, addresses.s_compassActors.size);
-        memset(reinterpret_cast<char*>(addresses.teamChatMsgs.address), 0, addresses.teamChatMsgs.size);
+        //memset(reinterpret_cast<char*>(addresses.s_compassActors.address), 0, addresses.s_compassActors.size);
+        //memset(reinterpret_cast<char*>(addresses.teamChatMsgs.address), 0, addresses.teamChatMsgs.size);
         memset(reinterpret_cast<char*>(addresses.clc.serverCommands.address), 0, addresses.clc.serverCommands.size);
         memset(reinterpret_cast<char*>(addresses.cg_entities.address), 0, addresses.cg_entities.size);
         memcpy(reinterpret_cast<char*>(addresses.clientInfo.address), initialGamestate->clientInfo,
@@ -268,9 +268,33 @@ namespace IWXMVM::Components::Rewinding
         demoFileOffset += len;
 
         // gets triggered when a demo is loaded when playing another demo!
-        assert(demoFileOffset == demoFile.tellg());
+        //assert(demoFileOffset == demoFile.tellg());
 
         return len;
+    }
+
+    int FS_Seek(int offset, int origin)
+    {
+        if (origin)
+        {
+            if (origin == 1)
+            {
+                origin = 2;
+            }
+            else
+            {
+                origin = 0;
+            }
+        }
+        else
+        {
+            origin = 1;
+        }
+
+        LOG_DEBUG("Seeking to offset: {} with origin: {}", offset, origin);
+        demoFile.seekg(offset, origin); // tODO:
+        demoFileOffset = (uint32_t)demoFile.tellg();
+        return 0;
     }
 
     void Initialize()

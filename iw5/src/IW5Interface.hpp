@@ -172,7 +172,13 @@ namespace IWXMVM::IW5
 
             Types::DemoInfo demoInfo;
             demoInfo.name = Structures::GetClientStatic()->servername;
-            demoInfo.path = "";
+            demoInfo.name = demoInfo.name.starts_with(DEMO_TEMP_DIRECTORY)
+                                ? demoInfo.name.substr(strlen(DEMO_TEMP_DIRECTORY) + 1)
+                                : demoInfo.name;
+
+            // TODO: 
+            demoInfo.path = 
+                "G:\\SteamLibrary\\steamapps\\common\\Call of Duty Modern Warfare 3\\main\\demo\\IWXTMP\\0_20_parish_l11_4k_plus_3k.demo";
 
             // I dont really know why the range **isnt** demoStartTick to demoEndTick,
             // but it seems to work this way.
@@ -347,18 +353,106 @@ namespace IWXMVM::IW5
 
         void CL_FirstSnapshot()
         {
-            // TODO:
+            uintptr_t CL_FirstSnapshot = GetGameAddresses().CL_FirstSnapshot();
+
+            Patches::GetGamePatches().Con_TimeJumped.Apply();
+
+            _asm
+            {
+                pushad
+                xor esi, esi
+                call CL_FirstSnapshot
+                popad
+             }
+
+            Patches::GetGamePatches().Con_TimeJumped.Revert();
         }
 
         void ResetClientData(int serverTime)
         {
-            // TODO:
+            auto cl = Structures::GetClientActive();
+            for (auto& snapshot : std::span{cl->snapshots})
+                snapshot.valid = 0;
+
+            cl->snap.serverTime = serverTime;
+            cl->serverTime = 0;
+            cl->oldFrameServerTime = 0;
+            cl->serverTimeDelta = 0;
+
+            auto clc = Structures::GetClientConnection();
+            //clc->timeDemoFrames = 0;
+            //clc->timeDemoStart = 0;
+            //clc->timeDemoPrev = 0;
+            //clc->timeDemoBaseTime = 0;
+
+            auto cls = Structures::GetClientStatic();
+            cls->realtime = 0;
+            //cls->realFrametime = 0;
+
+            auto cgs = Structures::GetClientGlobalsStatic();
+            cgs->processedSnapshotNum = 0;
+
+            auto cg = Structures::GetClientGlobals();
+            cg->latestSnapshotNum = 0;
+            cg->latestSnapshotTime = 0;
+            cg->snap = 0;
+            cg->nextSnap = 0;
+            cg->landTime = 0;
         }
 
         Types::PlaybackData GetPlaybackDataAddresses() const
         {
-            // TODO:
-            return {};
+            auto cl = Structures::GetClientActive();
+            auto clc = Structures::GetClientConnection();
+            auto cgs = Structures::GetClientGlobalsStatic();
+            auto cls = Structures::GetClientStatic();
+
+            return Types::PlaybackData{
+                .cl =
+                    {
+                        .snap_serverTime = reinterpret_cast<uintptr_t>(&cl->snap.serverTime),
+                        .serverTime = reinterpret_cast<uintptr_t>(&cl->serverTime),
+                        .parseEntitiesNum = reinterpret_cast<uintptr_t>(&cl->parseEntitiesIndex),
+                        .parseClientsNum = reinterpret_cast<uintptr_t>(&cl->parseClientsIndex),
+                    },
+                .clc = {
+                    .serverCommandSequence = 0xB5F874,  // reinterpret_cast < uintptr_t > (&clc->serverCommandSequence),
+                    .lastExecutedServerCommand = 0xB5F878,// reinterpret_cast<uintptr_t>(&clc->lastExecutedServerCommand),
+                        .serverCommands = {.address = 0xB5F87C,// reinterpret_cast<uintptr_t>(&clc->serverCommands),
+                                        .size = 128 * 1024},
+                    .serverConfigDataSequence = 0
+                },
+                .cgs =
+                {
+                    .serverCommandSequence = reinterpret_cast<uintptr_t>(&cgs->serverCommandSequence),
+                },
+                .cls =
+                {
+                    .realtime = reinterpret_cast<uintptr_t>(&cls->realtime) - 4,
+                },
+                //.s_compassActors = {.address = GetGameAddresses().s_compassActors(), .size = 64 * 48},
+                //.teamChatMsgs = 
+                //{
+                //    .address = reinterpret_cast<uintptr_t>(Structures::GetClientGlobalsStatic()->teamChatMsgs),
+                //    .size = 8 * 160 + 4 * 8 + 4 + 4
+                //},
+                .cg_entities = 
+                {
+                    .address = reinterpret_cast<uintptr_t>(Structures::GetEntities()), 
+                    .size = 0x800 * sizeof(Structures::centity_s)
+                },
+                .clientInfo = 
+                {
+                    .address = reinterpret_cast<uintptr_t>(Structures::GetClientInfo()),
+                    .size = 18 * sizeof(Structures::clientInfo_t)
+                },
+                .gameState = 
+                {
+                    .address = reinterpret_cast<uintptr_t>(Structures::GetGameState()),
+                    .size = sizeof(Structures::gameState_t)
+                },
+                //.killfeed = GetGameAddresses().conGameMsgWindow0()
+            };
         }
     };
 }  // namespace IWXMVM::IW5
