@@ -257,6 +257,9 @@ namespace IWXMVM::Components::Rewinding
         }
         else if (len > 12)
         {
+            // execute server commands here otherwise they may be lost when skipping forward a lot
+            Mod::GetGameInterface()->ExecuteNewServerCommands();
+
             // to exclude client archives (and CoD4X protocol header)
             StoreCurrentGamestate(len);
         }

@@ -26,6 +26,30 @@ namespace IWXMVM::IW3
         {
         }
 
+        void ExecuteNewServerCommands() final
+        {
+            const auto clc = Structures::GetClientConnection();
+            const auto cgs = Structures::GetClientGlobalsStatic();
+
+            if (cgs->serverCommandSequence > 0 && cgs->serverCommandSequence < clc->serverCommandSequence)
+            {
+                const auto CG_ExecuteNewServerCommands = 0x44C630;
+                const auto serverCommandSequence = clc->serverCommandSequence;
+
+                __asm
+                {
+                    pushad
+                    mov edi, serverCommandSequence
+                    push edi // serverCommandNum
+                    xor esi, esi
+                    push esi // localClientNum
+                    call CG_ExecuteNewServerCommands
+                    add esp, 8
+                    popad
+                }
+            }
+        }
+
         void InstallHooksAndPatches() final
         {
             Hooks::Install();
