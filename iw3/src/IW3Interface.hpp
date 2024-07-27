@@ -31,21 +31,38 @@ namespace IWXMVM::IW3
             const auto clc = Structures::GetClientConnection();
             const auto cgs = Structures::GetClientGlobalsStatic();
 
-            if (cgs->serverCommandSequence > 0 && cgs->serverCommandSequence < clc->serverCommandSequence)
-            {
-                const auto CG_ExecuteNewServerCommands = GetGameAddresses().CG_ExecuteNewServerCommands();
-                const auto serverCommandSequence = clc->serverCommandSequence;
+            const auto oldServerCommandSequence = cgs->serverCommandSequence;
+            const auto newServerCommandSequence = clc->serverCommandSequence;
 
+            // check if the command string backlog is equal to or greater than half the size of command string buffer (128 / 2 = 64)
+            if (oldServerCommandSequence > 0 && oldServerCommandSequence + std::ssize(clc->serverCommands) / 2 <= newServerCommandSequence)
+            {
+                for (auto i = oldServerCommandSequence + 1; i <= newServerCommandSequence; ++i)
+                {
+                    if (static constexpr auto dvar = 'd'; clc->serverCommands[i & 127][0] != dvar)
+                    {
+                        // erase all server commands that do not modify the gamestate strings
+                        clc->serverCommands[i & 127][0] = '\0';
+                    }
+                }
+
+                const auto CG_ExecuteNewServerCommands = GetGameAddresses().CG_ExecuteNewServerCommands();
                 __asm
                 {
                     pushad
-                    mov edi, serverCommandSequence
-                    push edi // serverCommandNum
-                    xor esi, esi
-                    push esi // localClientNum
+                    mov edi, newServerCommandSequence
+                    xor esi, esi // localClientNum
+                    push edi
+                    push esi
                     call CG_ExecuteNewServerCommands
                     add esp, 8
                     popad
+                }
+
+                for (auto i = oldServerCommandSequence + 1; i <= newServerCommandSequence; ++i)
+                {
+                    // erase server commands to prevent double processing; shouldn't be necessary but just to be sure
+                    clc->serverCommands[i & 127][0] = '\0';
                 }
             }
         }
