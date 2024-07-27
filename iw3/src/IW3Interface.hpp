@@ -33,7 +33,7 @@ namespace IWXMVM::IW3
 
             if (cgs->serverCommandSequence > 0 && cgs->serverCommandSequence < clc->serverCommandSequence)
             {
-                const auto CG_ExecuteNewServerCommands = 0x44C630;
+                const auto CG_ExecuteNewServerCommands = GetGameAddresses().CG_ExecuteNewServerCommands();
                 const auto serverCommandSequence = clc->serverCommandSequence;
 
                 __asm
