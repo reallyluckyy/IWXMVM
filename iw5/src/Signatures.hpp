@@ -21,6 +21,10 @@ namespace IWXMVM::IW5::Signatures
         Sig("83 EC 34 53 56 8B 75 08 57", GAType::Code, -6) > CL_Demo_FollowCameraMove;
         Sig("33 C0 83 C4 40 89 44 24 60", GAType::Code, -5, Lambda::FollowCodeFlow) > CL_Demo_GetStartAndEndTime;
         Sig("8B 04 8D ?? ?? ?? ?? 81 EC 4C 02 00 00", GAType::Code, -6) > CL_Demo_Play;
+        Sig("56 74 2A A1 ?? ?? ?? ?? 8B 0D", GAType::Code, -7) > CL_Demo_ReadInternal;
+
+        Sig("0F 85 94 00 00 00 53 E8", GAType::Code, -10) > CL_FirstSnapshot;
+        Sig("56 E8 ?? ?? ?? ?? 50 E8 ?? ?? ?? ?? 83 C4 20 E8", GAType::Code, -5) > Con_TimeJumped_Call;
 
         Sig("C6 05 ?? ?? ?? ?? ?? 8B 08 8B 91 A4 00 00 00", GAType::Data, -4) > d3d9DevicePointer;
         Sig("6A 02 FF 15 ?? ?? ?? ?? 8B 6C 24 48", GAType::Code, -5) > MainWndProc;
