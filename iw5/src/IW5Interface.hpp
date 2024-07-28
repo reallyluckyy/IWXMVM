@@ -167,7 +167,7 @@ namespace IWXMVM::IW5
 
         Types::DemoInfo GetDemoInfo() final
         {
-            static int demoStartTick, demoEndTick;
+            static uint32_t demoStartTick, demoEndTick;
             Functions::CL_Demo_GetStartAndEndTime(&demoStartTick, &demoEndTick);
 
             Types::DemoInfo demoInfo;
@@ -178,12 +178,10 @@ namespace IWXMVM::IW5
 
             // TODO: 
             demoInfo.path = 
-                "G:\\SteamLibrary\\steamapps\\common\\Call of Duty Modern Warfare 3\\main\\demo\\IWXTMP\\0_20_parish_l11_4k_plus_3k.demo";
+                "G:\\SteamLibrary\\steamapps\\common\\Call of Duty Modern Warfare 3\\main\\demo\\IWXTMP\\3_45_black_box_l11.demo";
 
-            // I dont really know why the range **isnt** demoStartTick to demoEndTick,
-            // but it seems to work this way.
-            demoInfo.endTick = demoEndTick;
-            demoInfo.currentTick = Structures::GetClientGlobals()->time;
+            demoInfo.endTick = demoEndTick - demoStartTick;
+            demoInfo.currentTick = Structures::GetClientGlobals()->oldTime - demoStartTick; // i believe this is not cg->oldTime, but cg->time, which is what we want
 
             return demoInfo;
         }

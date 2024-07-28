@@ -7,5 +7,5 @@ namespace IWXMVM::IW5::Functions
 
     void Cbuf_AddText(std::string command);
 
-    void CL_Demo_GetStartAndEndTime(int* start, int* end);
+    void CL_Demo_GetStartAndEndTime(uint32_t* start, uint32_t* end);
 }  // namespace IWXMVM::IW5::Functions
