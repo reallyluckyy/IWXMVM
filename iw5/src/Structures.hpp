@@ -686,8 +686,9 @@ namespace IWXMVM::IW5::Structures
     struct clSnapshot_t
     {
         playerState_s ps;
-        byte pad[0x18];
+        byte pad[0x14];
         int valid;
+        byte pad2[0x4];
         int snapFlags;
         int serverTime;
         int messageNum; // 0x1065AB0
@@ -750,7 +751,7 @@ namespace IWXMVM::IW5::Structures
 
     struct gameState_t
     {
-        byte content[0x3CA8];
+        byte content[0x23CAC];
     };
 
     clientConnection_t* GetClientConnection();

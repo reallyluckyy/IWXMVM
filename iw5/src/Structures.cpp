@@ -13,7 +13,7 @@ namespace IWXMVM::IW5::Structures
     cgs_t* GetClientGlobalsStatic()
     {
         return reinterpret_cast<cgs_t*>(0x8FCA20);
-	}
+    }
 
     clientActive_t* GetClientActive()
     {
@@ -38,7 +38,7 @@ namespace IWXMVM::IW5::Structures
     gameState_t* GetGameState()
     {
         return reinterpret_cast<gameState_t*>(0xFF7434);
-	}
+    }
 
     clientConnection_t* GetClientConnection()
     {
@@ -51,7 +51,7 @@ namespace IWXMVM::IW5::Structures
     }
 
     demoCameraData_t* GetDemoCameraData()
-	{
+    {
         return reinterpret_cast<demoCameraData_t*>(0x970D60);
-	}
+    }
 }  // namespace IWXMVM::IW5::Structures

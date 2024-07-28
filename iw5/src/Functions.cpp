@@ -25,9 +25,9 @@ namespace IWXMVM::IW5::Functions
         Cbuf_AddText(0, command.c_str());
     }
 
-    void CL_Demo_GetStartAndEndTime(int* start, int* end)
+    void CL_Demo_GetStartAndEndTime(uint32_t* start, uint32_t* end)
 	{
-        typedef void(__cdecl * CL_Demo_GetStartAndEndTime_t)(int localClientNum, int* start, int* end);
+        typedef void(__cdecl * CL_Demo_GetStartAndEndTime_t)(int localClientNum, uint32_t* start, uint32_t* end);
 		CL_Demo_GetStartAndEndTime_t CL_Demo_GetStartAndEndTime = (CL_Demo_GetStartAndEndTime_t)GetGameAddresses().CL_Demo_GetStartAndEndTime();
 
 		CL_Demo_GetStartAndEndTime(0, start, end);
