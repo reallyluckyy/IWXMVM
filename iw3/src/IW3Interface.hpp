@@ -41,7 +41,7 @@ namespace IWXMVM::IW3
                 {
                     if (static constexpr auto dvar = 'd'; clc->serverCommands[i & 127][0] != dvar)
                     {
-                        // erase all server commands that do not modify the gamestate strings
+                        // erase server commands that do not modify the gamestate strings
                         clc->serverCommands[i & 127][0] = '\0';
                     }
                 }
