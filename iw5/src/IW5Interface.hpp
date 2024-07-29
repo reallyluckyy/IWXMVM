@@ -8,6 +8,7 @@
 #include "Functions.hpp"
 #include "Hooks.hpp"
 #include "Components/Rewinding.hpp"
+#include "Utilities/PathUtils.hpp"
 
 #include "glm/vec3.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -100,7 +101,7 @@ namespace IWXMVM::IW5
             if (!Functions::FindDvar("cl_ingame")->current.boolean)
                 return Types::GameState::MainMenu;
             
-            if (Structures::GetClientConnection()->demoActive)
+            if (Structures::GetClientConnection()->clientDemo.state == 2)
                 return Types::GameState::InDemo;
             
             return Types::GameState::InGame;
@@ -165,6 +166,11 @@ namespace IWXMVM::IW5
             }
         }
 
+        std::filesystem::path GetDemoDirectory()
+        {
+            return std::filesystem::path(GetDvar("fs_basepath")->value->string) / "main" / "demo";
+        }
+
         Types::DemoInfo GetDemoInfo() final
         {
             static uint32_t demoStartTick, demoEndTick;
@@ -176,9 +182,7 @@ namespace IWXMVM::IW5
                                 ? demoInfo.name.substr(strlen(DEMO_TEMP_DIRECTORY) + 1)
                                 : demoInfo.name;
 
-            // TODO: 
-            demoInfo.path = 
-                "G:\\SteamLibrary\\steamapps\\common\\Call of Duty Modern Warfare 3\\main\\demo\\IWXTMP\\3_45_black_box_l11.demo";
+            demoInfo.path = (GetDemoDirectory() / demoInfo.name).string();
 
             demoInfo.endTick = demoEndTick - demoStartTick;
             demoInfo.currentTick = Structures::GetClientGlobals()->time - demoStartTick;
@@ -195,8 +199,7 @@ namespace IWXMVM::IW5
         {
             Events::Invoke(EventType::PreDemoLoad);
             
-            const auto demoDirectory =
-                std::filesystem::path(GetDvar("fs_basepath")->value->string) / "main" / "demo";
+            const auto demoDirectory = GetDemoDirectory();
 
             try
             {
@@ -414,9 +417,9 @@ namespace IWXMVM::IW5
                         .parseClientsNum = reinterpret_cast<uintptr_t>(&cl->parseClientsIndex),
                     },
                 .clc = {
-                    .serverCommandSequence = 0xB5F874,  // reinterpret_cast < uintptr_t > (&clc->serverCommandSequence),
-                    .lastExecutedServerCommand = 0xB5F878,// reinterpret_cast<uintptr_t>(&clc->lastExecutedServerCommand),
-                        .serverCommands = {.address = 0xB5F87C,// reinterpret_cast<uintptr_t>(&clc->serverCommands),
+                    .serverCommandSequence = reinterpret_cast < uintptr_t > (&clc->serverCommandSequence),
+                    .lastExecutedServerCommand = reinterpret_cast<uintptr_t>(&clc->lastExecutedServerCommand),
+                        .serverCommands = {.address = reinterpret_cast<uintptr_t>(&clc->serverCommands),
                                         .size = 128 * 1024},
                     .serverConfigDataSequence = 0
                 },

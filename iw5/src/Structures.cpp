@@ -42,7 +42,7 @@ namespace IWXMVM::IW5::Structures
 
     clientConnection_t* GetClientConnection()
     {
-        return *reinterpret_cast<clientConnection_t**>(0x10625F4);
+        return reinterpret_cast<clientConnection_t*>(0xB3F730);
     }
 
     clientDemoPlayback_t* GetClientDemoPlayback()
