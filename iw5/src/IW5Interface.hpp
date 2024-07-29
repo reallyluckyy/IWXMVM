@@ -181,7 +181,7 @@ namespace IWXMVM::IW5
                 "G:\\SteamLibrary\\steamapps\\common\\Call of Duty Modern Warfare 3\\main\\demo\\IWXTMP\\3_45_black_box_l11.demo";
 
             demoInfo.endTick = demoEndTick - demoStartTick;
-            demoInfo.currentTick = Structures::GetClientGlobals()->oldTime - demoStartTick; // i believe this is not cg->oldTime, but cg->time, which is what we want
+            demoInfo.currentTick = Structures::GetClientGlobals()->time - demoStartTick;
 
             return demoInfo;
         }
