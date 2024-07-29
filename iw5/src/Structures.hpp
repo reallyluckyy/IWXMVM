@@ -391,7 +391,6 @@ namespace IWXMVM::IW5::Structures
         snapshot_s* nextSnap;
         snapshot_s activeSnapshots[2];
         float frameInterpolation;
-        int frameInterpolationError;
         int frametime;
         int time;
         int oldTime;
