@@ -59,30 +59,36 @@ namespace IWXMVM::IW5::Structures
         uint32_t routerHandle;
     };
 
+    struct clientDemoMain_t
+    {
+        char demoName[256];
+        int demoEnumFileIndex;
+        void* demoFileHandle;
+        int state;
+        // ... (incomplete)
+    };
+
     struct clientConnection_t
     {
-        uint32_t qport;
-        int32_t clientNum;
-        uint32_t lastPacketSendTime;
-        uint32_t lastPacketTime;
+        int qport;
+        int clientNum;
+        int lastPacketSentTime;
+        int lastPacketTime;
         netadr_t serverAddress;
-        uint32_t connectTime;
-        uint32_t connectPacketCount;
-        uint8_t serverMessage[256];
-        uint32_t challenge;
-        uint32_t checksumFeed;
-        uint32_t reliableSequence;
-        uint32_t reliableAcknowledge;
-        uint8_t reliableCommands[128][1024];
-        uint32_t serverMessageSequence;
-        uint32_t serverCommandSequence;
-        uint32_t lastExecutedServerCommand;
-        uint8_t serverCommands[128][1024];
-        uint32_t isServerRestarting;
-        uint8_t demoName[256];
-        uint32_t demoActive;
-        uint32_t demoRecording;
-        uint32_t demoState;
+        int connectTime;
+        int connectPacketCount;
+        char serverMessage[256];
+        int challenge;
+        int checksumFeed;
+        int reliableSequence;
+        int reliableAcknowledge;
+        char reliableCommands[128][1024];
+        int serverMessageSequence;
+        int serverCommandSequence;
+        int lastExecutedServerCommand;
+        char serverCommands[128][1024];
+        bool isServerRestarting;
+        clientDemoMain_t clientDemo;
         uint8_t unk1[0x3FC4];
         // ...
     };
