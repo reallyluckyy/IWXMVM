@@ -59,7 +59,7 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
 
             auto IsBadIndex = [](auto index)
             {
-                static constexpr std::array animIndexRanges{std::array{253, 264}, std::array{273, 280}};
+                static constexpr std::array animIndexRanges{std::array{253, 260}, std::array{273, 280}};
 
                 return std::any_of(animIndexRanges.begin(), animIndexRanges.end(), [index](const auto range) {
                     return index >= range.front() && index <= range.back();
