@@ -78,6 +78,8 @@ namespace IWXMVM::IW3::Signatures
         Sig("83 3D ?? ?? ?? ?? 09 75 ?? ?? ?? ?? ?? ?? 8B CD", GAType::Code, 9, Lambda::FollowCodeFlow) > IN_Frame;
         Sig("83 C4 2C 5D 5B 59", GAType::Code, -5) > CG_DrawPlayerLowHealthOverlay;
         Sig("83 EC 14 53 8B 5D 08 56 57 8B F8 E8 ?? ?? ?? ?? 8B F0 85 F6 74 0E", GAType::Code, -6) > Dvar_SetStringByName;
+        Sig("E8 ?? ?? ?? ?? 8B BB ?? ?? ?? ?? 8B F5", GAType::Code, 13,
+            Lambda::FollowCodeFlow) > CG_ExecuteNewServerCommands;
 
         // cod4x
         using MType = Types::ModuleType;
