@@ -88,6 +88,10 @@ namespace IWXMVM
         virtual void CL_FirstSnapshot() = 0;
         virtual void ResetClientData(int serverTime) = 0;
         virtual Types::PlaybackData GetPlaybackDataAddresses() const = 0;
+        virtual void HideScoreboard() = 0;
+
+        virtual uint32_t GetDemoFooterSize() { return 0; }
+        virtual uint32_t GetDemoHeaderSize() { return 0; }
 
        private:
         Types::Game game;

@@ -410,13 +410,14 @@ namespace IWXMVM::IW5
 
             return Types::PlaybackData{
                 .cl =
-                    {
-                        .snap_serverTime = reinterpret_cast<uintptr_t>(&cl->snap.serverTime),
-                        .serverTime = reinterpret_cast<uintptr_t>(&cl->serverTime),
-                        .parseEntitiesNum = reinterpret_cast<uintptr_t>(&cl->parseEntitiesIndex),
-                        .parseClientsNum = reinterpret_cast<uintptr_t>(&cl->parseClientsIndex),
-                    },
-                .clc = {
+                {
+                    .snap_serverTime = reinterpret_cast<uintptr_t>(&cl->snap.serverTime),
+                    .serverTime = reinterpret_cast<uintptr_t>(&cl->serverTime),
+                    .parseEntitiesNum = reinterpret_cast<uintptr_t>(&cl->parseEntitiesIndex),
+                    .parseClientsNum = reinterpret_cast<uintptr_t>(&cl->parseClientsIndex),
+                },
+                .clc = 
+                {
                     .serverCommandSequence = reinterpret_cast < uintptr_t > (&clc->serverCommandSequence),
                     .lastExecutedServerCommand = reinterpret_cast<uintptr_t>(&clc->lastExecutedServerCommand),
                         .serverCommands = {.address = reinterpret_cast<uintptr_t>(&clc->serverCommands),
@@ -431,7 +432,7 @@ namespace IWXMVM::IW5
                 {
                     .realtime = reinterpret_cast<uintptr_t>(&cls->realtime) - 4,
                 },
-                //.s_compassActors = {.address = GetGameAddresses().s_compassActors(), .size = 64 * 48},
+                .s_compassActors = {.address = 0x8F4828, .size = 18 * sizeof(Structures::CompassActor)},
                 //.teamChatMsgs = 
                 //{
                 //    .address = reinterpret_cast<uintptr_t>(Structures::GetClientGlobalsStatic()->teamChatMsgs),
@@ -454,6 +455,34 @@ namespace IWXMVM::IW5
                 },
                 //.killfeed = GetGameAddresses().conGameMsgWindow0()
             };
+        }
+
+        
+        void HideScoreboard() final
+        {
+            typedef void (*CG_ScoresUp_t)(int localClientNum);
+            CG_ScoresUp_t CG_ScoresUp = (CG_ScoresUp_t)GetGameAddresses().CG_ScoresUp();
+
+            CG_ScoresUp(0);
+
+            // We need to set this to 1 in case we were in a match ending killcam
+            // before the rewind happened
+            float* com_codeTimescale = (float*)GetGameAddresses().com_codeTimeScale();
+            *com_codeTimescale = 1.0f;
+        }
+
+        // IW5 demos have both a header and a footer that contain some metadata.
+        // We need to account for these when reading the demo file ourselves to determine when the
+        // end of the demo file is reached.
+
+        uint32_t GetDemoFooterSize() final
+        {
+			return 596;
+		}
+
+        uint32_t GetDemoHeaderSize() final
+        {
+            return 12320;
         }
     };
 }  // namespace IWXMVM::IW5

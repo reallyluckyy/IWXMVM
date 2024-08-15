@@ -112,7 +112,7 @@ namespace IWXMVM::Components::Rewinding
                 initialGamestate->serverConfigDataSequence;
         }
 
-        //memset(reinterpret_cast<char*>(addresses.s_compassActors.address), 0, addresses.s_compassActors.size);
+        memset(reinterpret_cast<char*>(addresses.s_compassActors.address), 0, addresses.s_compassActors.size);
         //memset(reinterpret_cast<char*>(addresses.teamChatMsgs.address), 0, addresses.teamChatMsgs.size);
         memset(reinterpret_cast<char*>(addresses.clc.serverCommands.address), 0, addresses.clc.serverCommands.size);
         memset(reinterpret_cast<char*>(addresses.cg_entities.address), 0, addresses.cg_entities.size);
@@ -188,6 +188,8 @@ namespace IWXMVM::Components::Rewinding
         latestRewindTo = NOT_IN_USE;
         rewindTo.store(NOT_IN_USE);
 
+        Mod::GetGameInterface()->HideScoreboard();
+
         return true;
     }
 
@@ -252,7 +254,10 @@ namespace IWXMVM::Components::Rewinding
         // only reset when the game has just requested the one byte message type
         if (len == 1)
         {
-            auto wouldReadDemoFooter = demoFileOffset + 9 >= demoFileSize;
+            auto wouldReadDemoFooter = 
+                demoFileOffset + 
+                Mod::GetGameInterface()->GetDemoFooterSize() +
+                Mod::GetGameInterface()->GetDemoHeaderSize() + 9 >= demoFileSize;
             RestoreOldGamestate(wouldReadDemoFooter);
         }
         else if (len > 12)
@@ -292,7 +297,7 @@ namespace IWXMVM::Components::Rewinding
         }
 
         LOG_DEBUG("Seeking to offset: {} with origin: {}", offset, origin);
-        demoFile.seekg(offset, origin); // tODO:
+        demoFile.seekg(offset, origin);
         demoFileOffset = (uint32_t)demoFile.tellg();
         return 0;
     }

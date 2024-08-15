@@ -713,5 +713,10 @@ namespace IWXMVM::IW3
                 .killfeed = GetGameAddresses().conGameMsgWindow0()
             };
         }
+
+        void HideScoreboard() final
+        {
+            // TODO: implement this
+        }
     };
 }  // namespace IWXMVM::IW3

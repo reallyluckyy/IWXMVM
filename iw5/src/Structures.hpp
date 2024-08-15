@@ -385,7 +385,13 @@ namespace IWXMVM::IW5::Structures
 
     struct snapshot_s
     {
-        byte pad[0x33F3C];
+        struct PlayerState
+        {
+            int commandTime;
+            int pm_type;
+        } ps;
+
+        byte pad[0x33F3C - 0x8];
     };
 
     struct cg_s
@@ -424,6 +430,9 @@ namespace IWXMVM::IW5::Structures
         float demoCameraOrigin[3];
         float demoCameraAngles[3];
         float demoCameraVelocity[3];
+        byte padding2[0x6884 + 0x4AC8];
+        int scoreFadeTime;
+        int scoresTop;
         // ...
     };
 
@@ -757,6 +766,23 @@ namespace IWXMVM::IW5::Structures
     struct gameState_t
     {
         byte content[0x23CAC];
+    };
+
+    struct CompassActor
+    {
+        int lastUpdate;
+        float lastPos[3];
+        float lastEnemyPos[3];
+        float lastEnemyYaw;
+        float lastVel;
+        float lastYaw;
+        int pingTime;
+        int beginFadeTime;
+        int beginRadarFadeTime;
+        int beginVoiceFadeTime;
+        int flags;
+        unsigned int perks[2];
+        int nextPortableRadarPingTimeList[18];
     };
 
     clientConnection_t* GetClientConnection();
