@@ -110,6 +110,7 @@
     <ClCompile Include="src\Entrypoint.cpp" />
     <ClCompile Include="src\Functions.cpp" />
     <ClCompile Include="src\Hooks.cpp" />
+    <ClCompile Include="src\Hooks\Camera.cpp" />
     <ClCompile Include="src\Hooks\Playback.cpp" />
     <ClCompile Include="src\IW5Interface.hpp" />
     <ClCompile Include="src\StdInclude.cpp">
@@ -122,6 +123,7 @@
     <ClInclude Include="src\Addresses.hpp" />
     <ClInclude Include="src\Functions.hpp" />
     <ClInclude Include="src\Hooks.hpp" />
+    <ClInclude Include="src\Hooks\Camera.hpp" />
     <ClInclude Include="src\Hooks\Playback.hpp" />
     <ClInclude Include="src\Patches.hpp" />
     <ClInclude Include="src\Signatures.hpp" />

@@ -432,7 +432,8 @@ namespace IWXMVM::IW5
                 {
                     .realtime = reinterpret_cast<uintptr_t>(&cls->realtime) - 4,
                 },
-                .s_compassActors = {.address = 0x8F4828, .size = 18 * sizeof(Structures::CompassActor)},
+                .s_compassActors = {.address = GetGameAddresses().s_compassActors(),
+                                    .size = 18 * sizeof(Structures::CompassActor)},
                 //.teamChatMsgs = 
                 //{
                 //    .address = reinterpret_cast<uintptr_t>(Structures::GetClientGlobalsStatic()->teamChatMsgs),

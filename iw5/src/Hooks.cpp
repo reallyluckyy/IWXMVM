@@ -6,6 +6,7 @@
 #include "Events.hpp"
 
 #include "Hooks/Playback.hpp"
+#include "Hooks/Camera.hpp"
 
 namespace IWXMVM::IW5::Hooks
 {
@@ -26,5 +27,6 @@ namespace IWXMVM::IW5::Hooks
                                 (uintptr_t*)&CL_Demo_Play_Trampoline);
 
         Hooks::Playback::Install();
+        Hooks::Camera::Install();
     }
 }  // namespace IWXMVM::IW5::Hooks
