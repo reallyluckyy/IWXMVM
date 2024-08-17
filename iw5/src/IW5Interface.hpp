@@ -464,6 +464,23 @@ namespace IWXMVM::IW5
             const auto oldServerCommandSequence = cgs->serverCommandSequence;
             const auto newServerCommandSequence = clc->serverCommandSequence;
 
+            static constexpr auto dvar = 'd';
+            for (auto i = oldServerCommandSequence + 1; i <= newServerCommandSequence; ++i)
+            {
+                if (clc->serverCommands[i & 127][0] != dvar)
+                {
+                    continue;
+                }
+
+                const std::string_view cmd{clc->serverCommands[i & 127]};
+                if (cmd.find(R"("mpintro")") != std::string_view::npos ||
+                    cmd.find(R"("mpIntro")") != std::string_view::npos)
+                {
+                    // erase server commands that set black and white vision
+                    clc->serverCommands[i & 127][0] = '\0';
+                }
+            }
+
             // check if the command string backlog is equal to or greater than half the size of command string buffer
             // (128 / 2 = 64)
             if (oldServerCommandSequence > 0 &&
@@ -471,7 +488,7 @@ namespace IWXMVM::IW5
             {
                 for (auto i = oldServerCommandSequence + 1; i <= newServerCommandSequence; ++i)
                 {
-                    if (static constexpr auto dvar = 'd'; clc->serverCommands[i & 127][0] != dvar)
+                    if (clc->serverCommands[i & 127][0] != dvar)
                     {
                         // erase server commands that do not modify the gamestate strings
                         clc->serverCommands[i & 127][0] = '\0';
