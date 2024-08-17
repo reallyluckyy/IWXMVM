@@ -29,7 +29,7 @@ namespace IWXMVM::IW5::Signatures
         Sig("56 E8 ?? ?? ?? ?? 83 C4 04 85 C0 74 4D", GAType::Code, -5) > CG_ScoresUp;
         Sig("D9 C0 D9 05 ?? ?? ?? ?? DD E1 DF E0 DD D9 D9 44 24 04", GAType::Data, 4,
             Lambda::DereferenceAddress) > com_codeTimeScale;
-        Sig("53 56 8B 74 24 10 57 8B 7C 24 10 7E 70", GAType::Code, -5) > CG_VisionSetStartLerp_To;
+        Sig("56 8B 74 24 0C 3B C6 7D 1E", GAType::Code, -5) > CG_ExecuteNewServerCommands;
 
         Sig("68 38 0E 00 00", GAType::Data, 8, Lambda::DereferenceAddress) > s_compassActors;
 
