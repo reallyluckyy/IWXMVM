@@ -66,8 +66,6 @@ namespace IWXMVM::IW5
                 demoCamera->demoCameraAngles[0] = camera->GetRotation()[0];
                 demoCamera->demoCameraAngles[1] = camera->GetRotation()[1];
                 demoCamera->demoCameraAngles[2] = camera->GetRotation()[2];
-                
-                // TODO: set fov
             });
 
             Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
@@ -139,7 +137,7 @@ namespace IWXMVM::IW5
                     MessageBoxA(NULL,
                                 "It seems like you are running an unsupported game version.\nYou can download a "
                                 "supported version of MW3 at the following link:\n\n"
-                                "TODO: insert link here\n\nSimply replace the iw5mp.exe in your MW3 "
+                                "https://codmvm.com/data/iwxmvm/iw5mp.exe\n\nSimply replace the iw5mp.exe in your MW3 "
                                 "directory with this one.",
                                 "Unsupported game version", MB_OK);
                 }
