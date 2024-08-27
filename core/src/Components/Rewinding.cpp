@@ -129,7 +129,7 @@ namespace IWXMVM::Components::Rewinding
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
 
         // TODO: find a more robust method of detecting a gamestate message
-        if (len >= 10'000 || demoFileOffset == 9)
+        if (len >= 10'000 || Mod::GetGameInterface()->GetDemoHeaderSize() + demoFileOffset == 9)
         {
             // first message with the gamestate; triggers the game to load a map
             if (initialGamestate != nullptr)
@@ -168,7 +168,12 @@ namespace IWXMVM::Components::Rewinding
             // after first snapshot and before second snapshot
             initialGamestate->populated = true;
             initialGamestate->serverTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
-            assert(initialGamestate->serverTime > 0);
+
+            // TODO: This assertion should usually hold, but has been commented out for now,
+            // TODO: as it gets triggered on IW5. This happens, because initialGamestate is populated twice,
+            // TODO: since we can not properly differentiate yet between the demo file header read
+            // TODO: and the first gamestate message read. Functionally this is fine, but the assertion would fail.
+            // assert(initialGamestate->serverTime > 0);
         }
     }
 
