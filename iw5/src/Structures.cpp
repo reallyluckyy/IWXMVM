@@ -7,51 +7,51 @@ namespace IWXMVM::IW5::Structures
 {
     cg_s* GetClientGlobals()
     {
-        return reinterpret_cast<cg_s*>(0x900FA0);
+        return reinterpret_cast<cg_s*>(GetGameAddresses().clientGlobals());
     }
 
     cgs_t* GetClientGlobalsStatic()
     {
-        return reinterpret_cast<cgs_t*>(0x8FCA20);
+        return reinterpret_cast<cgs_t*>(GetGameAddresses().clientGlobalsStatic());
     }
 
     clientActive_t* GetClientActive()
     {
-        return reinterpret_cast<clientActive_t*>(0x1062790);
+        return reinterpret_cast<clientActive_t*>(GetGameAddresses().clientActive());
     }
 
     centity_s* GetEntities()
     {
-        return reinterpret_cast<centity_s*>(0xA0A5C0);
+        return reinterpret_cast<centity_s*>(GetGameAddresses().cg_entities());
     }
 
     clientInfo_t* GetClientInfo()
     {
-        return reinterpret_cast<clientInfo_t*>(0x9FE678);
+        return reinterpret_cast<clientInfo_t*>(GetGameAddresses().clientInfo());
     }
 
     clientStatic_t* GetClientStatic()
     {
-        return reinterpret_cast<clientStatic_t*>(0xBA4DC8);
+        return reinterpret_cast<clientStatic_t*>(GetGameAddresses().clientStatic());
     }
 
     gameState_t* GetGameState()
     {
-        return reinterpret_cast<gameState_t*>(0xFF7434);
+        return reinterpret_cast<gameState_t*>(GetGameAddresses().cls_gameState());
     }
 
     clientConnection_t* GetClientConnection()
     {
-        return reinterpret_cast<clientConnection_t*>(0xB3F730);
+        return reinterpret_cast<clientConnection_t*>(GetGameAddresses().clientConnection());
     }
 
     clientDemoPlayback_t* GetClientDemoPlayback()
     {
-        return *reinterpret_cast<clientDemoPlayback_t**>(0x66148C0);
+        return *reinterpret_cast<clientDemoPlayback_t**>(GetGameAddresses().s_clientDemoPlayback());
     }
 
     demoCameraData_t* GetDemoCameraData()
     {
-        return reinterpret_cast<demoCameraData_t*>(0x970D60);
+        return reinterpret_cast<demoCameraData_t*>(GetGameAddresses().demoCameraData());
     }
 }  // namespace IWXMVM::IW5::Structures

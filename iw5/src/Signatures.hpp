@@ -14,6 +14,18 @@ namespace IWXMVM::IW5::Signatures
         Sig("83 C4 04 89 06 8B 0E", GAType::Data, -5, Lambda::FollowCodeFlow) > Dvar_FindDvar;
         Sig("8B 44 24 0C 8A 08 83 C4 04", GAType::Code, -7) > Cbuf_AddText;
         Sig("56 89 74 24 0C E8", GAType::Code, -8) > Com_TimeScaleMsec;
+
+        Sig("8B F0 E8 ?? ?? ?? ?? 83 C4 14 84 C0", GAType::Data, -4, Lambda::DereferenceAddress) > clientGlobals;
+        Sig("E8 ?? ?? ?? ?? 68 B8 4D 10 00 53", GAType::Data, -4, Lambda::DereferenceAddress) > clientGlobalsStatic;
+        Sig("E8 ?? ?? ?? ?? 83 C4 04 84 C0 74 2A 8B 5C 24 20", GAType::Data, -4,
+            Lambda::DereferenceAddress) > clientActive;
+        Sig("53 51 E8 ?? ?? ?? ?? 33 C0", GAType::Data, -4, Lambda::DereferenceAddress) > cg_entities;
+        Sig("83 3E 00 74 05", GAType::Data, -4, Lambda::DereferenceAddress) > clientInfo;
+        Sig("75 19 68 ?? ?? ?? ?? 6A 00 C7 05", GAType::Data, -5, Lambda::DereferenceAddress) > clientStatic;
+        Sig("E8 ?? ?? ?? ?? 8B 44 24 2C 50 C7 05", GAType::Data, -4, Lambda::DereferenceAddress) > cls_gameState;
+        Sig("E8 ?? ?? ?? ?? 83 C4 04 5E 85 C0 75 08", GAType::Data, -4, Lambda::DereferenceAddress) > clientConnection;
+        Sig("85 C0 74 0E 8B 80 70 E2 31 00", GAType::Data, -4, Lambda::DereferenceAddress) > s_clientDemoPlayback;
+        Sig("D9 47 18 D9 1D", GAType::Data, -4, Lambda::DereferenceAddress) > demoCameraData;
         
         Sig("E8 ?? ?? ?? ?? 83 C4 04 84 C0 74 15 A1 ?? ?? ?? ?? 6A 00", GAType::Code, -5) > IN_Frame;
         Sig("56 E8 ?? ?? ?? ?? 83 C4 04 84 C0 0F 84 B9 04 00 00", GAType::Code, -6) > CL_Demo_HandleInput;
