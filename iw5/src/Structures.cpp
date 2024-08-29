@@ -49,9 +49,4 @@ namespace IWXMVM::IW5::Structures
     {
         return *reinterpret_cast<clientDemoPlayback_t**>(GetGameAddresses().s_clientDemoPlayback());
     }
-
-    demoCameraData_t* GetDemoCameraData()
-    {
-        return reinterpret_cast<demoCameraData_t*>(GetGameAddresses().demoCameraData());
-    }
 }  // namespace IWXMVM::IW5::Structures

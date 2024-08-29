@@ -794,5 +794,4 @@ namespace IWXMVM::IW5::Structures
     clientInfo_t* GetClientInfo();
     gameState_t* GetGameState();
     clientDemoPlayback_t* GetClientDemoPlayback();
-    demoCameraData_t* GetDemoCameraData();
 }  // namespace IWXMVM::IW5::Structures

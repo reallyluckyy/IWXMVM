@@ -24,8 +24,6 @@ namespace IWXMVM::IW5
 
         void InstallHooksAndPatches() final
         {
-            Structures::clientDemoPlayback_t* playback = new Structures::clientDemoPlayback_t;
-
             Hooks::Install();
             Patches::GetGamePatches();
         }
@@ -41,31 +39,6 @@ namespace IWXMVM::IW5
                 demoPlayback->cameraModeChanged = 1;
 
                 Functions::FindDvar("cg_draw2d")->current.boolean = isFreeCamera ? 0 : 1;
-            });
-
-            Events::RegisterListener(EventType::OnFrame, [this]() {
-                if (GetGameState() != Types::GameState::InDemo)
-                    return;
-
-                auto& camera = Components::CameraManager::Get().GetActiveCamera();
-                auto demoCamera = Structures::GetDemoCameraData();
-                auto cg = Structures::GetClientGlobals();
-
-                if (!camera->IsModControlledCameraMode())
-                {
-                    camera->GetPosition() = *reinterpret_cast<glm::vec3*>(cg->refdef.view.org);
-                    // TODO: set camera rotation
-                    camera->GetFov() = glm::degrees(std::atan(cg->refdef.view.tanHalfFovX) * 2.0f);
-                    return;
-                }
-
-                demoCamera->demoCameraOrigin[0] = camera->GetPosition()[0];
-                demoCamera->demoCameraOrigin[1] = camera->GetPosition()[1];
-                demoCamera->demoCameraOrigin[2] = camera->GetPosition()[2];
-
-                demoCamera->demoCameraAngles[0] = camera->GetRotation()[0];
-                demoCamera->demoCameraAngles[1] = camera->GetRotation()[1];
-                demoCamera->demoCameraAngles[2] = camera->GetRotation()[2];
             });
 
             Events::RegisterListener(EventType::PostDemoLoad, [&]() { 

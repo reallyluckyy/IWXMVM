@@ -25,12 +25,12 @@ namespace IWXMVM::IW5::Signatures
         Sig("E8 ?? ?? ?? ?? 8B 44 24 2C 50 C7 05", GAType::Data, -4, Lambda::DereferenceAddress) > cls_gameState;
         Sig("E8 ?? ?? ?? ?? 83 C4 04 5E 85 C0 75 08", GAType::Data, -4, Lambda::DereferenceAddress) > clientConnection;
         Sig("85 C0 74 0E 8B 80 70 E2 31 00", GAType::Data, -4, Lambda::DereferenceAddress) > s_clientDemoPlayback;
-        Sig("D9 47 18 D9 1D", GAType::Data, -4, Lambda::DereferenceAddress) > demoCameraData;
         
         Sig("E8 ?? ?? ?? ?? 83 C4 04 84 C0 74 15 A1 ?? ?? ?? ?? 6A 00", GAType::Code, -5) > IN_Frame;
         Sig("56 E8 ?? ?? ?? ?? 83 C4 04 84 C0 0F 84 B9 04 00 00", GAType::Code, -6) > CL_Demo_HandleInput;
         Sig("83 EC 78 56 8B 75 08", GAType::Code, -6) > CL_Demo_FreeCameraMove;
         Sig("83 EC 34 53 56 8B 75 08 57", GAType::Code, -6) > CL_Demo_FollowCameraMove;
+        Sig("68 ?? ?? ?? ?? D9 1D ?? ?? ?? ?? E8 ?? ?? ?? ?? D9 05", GAType::Code, -7) > CL_Demo_CalcViewValues;
         Sig("33 C0 83 C4 40 89 44 24 60", GAType::Code, -5, Lambda::FollowCodeFlow) > CL_Demo_GetStartAndEndTime;
         Sig("8B 04 8D ?? ?? ?? ?? 81 EC 4C 02 00 00", GAType::Code, -6) > CL_Demo_Play;
         Sig("56 74 2A A1 ?? ?? ?? ?? 8B 0D", GAType::Code, -7) > CL_Demo_ReadInternal;

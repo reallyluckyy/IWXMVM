@@ -19,6 +19,36 @@ namespace IWXMVM::MathUtils
         return glm::vec3(glm::degrees(pitch), glm::degrees(yaw), 0.0f);
     }
 
+    constexpr int32_t PITCH = 0;
+    constexpr int32_t YAW = 1;
+    constexpr int32_t ROLL = 2;
+
+    glm::mat3x3 AnglesToAxis(glm::vec3 angles)
+    {
+        float sy = sin(glm::radians(angles[YAW]));
+        float cy = cos(glm::radians(angles[YAW]));
+
+        float sp = sin(glm::radians(angles[PITCH]));
+        float cp = cos(glm::radians(angles[PITCH]));
+
+        float sr = sin(glm::radians(angles[ROLL]));
+        float cr = cos(glm::radians(angles[ROLL]));
+
+        glm::vec3 forward(cp * cy, cp * sy, -sp);
+        glm::vec3 right(
+            (-1 * sr * sp * cy + -1 * cr * -sy), 
+            (-1 * sr * sp * sy + -1 * cr * cy), 
+            -1 * sr * cp
+        );
+        glm::vec3 up(
+            (cr * sp * cy + -sr * -sy), 
+            (cr * sp * sy + -sr * cy),
+            cr * cp
+        );
+
+        return glm::mat3x3(forward, glm::vector3::zero - right, up);
+	}
+
     std::optional<ImVec2> WorldToScreenPoint(glm::vec3 point, Components::Camera& camera)
     {
         auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);
