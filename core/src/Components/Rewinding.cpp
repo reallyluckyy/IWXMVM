@@ -285,22 +285,6 @@ namespace IWXMVM::Components::Rewinding
 
     int FS_Seek(int offset, int origin)
     {
-        if (origin)
-        {
-            if (origin == 1)
-            {
-                origin = 2;
-            }
-            else
-            {
-                origin = 0;
-            }
-        }
-        else
-        {
-            origin = 1;
-        }
-
         LOG_DEBUG("Seeking to offset: {} with origin: {}", offset, origin);
         demoFile.seekg(offset, origin);
         demoFileOffset = (uint32_t)demoFile.tellg();

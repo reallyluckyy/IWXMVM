@@ -34,6 +34,7 @@ namespace IWXMVM::IW5::Signatures
         Sig("33 C0 83 C4 40 89 44 24 60", GAType::Code, -5, Lambda::FollowCodeFlow) > CL_Demo_GetStartAndEndTime;
         Sig("8B 04 8D ?? ?? ?? ?? 81 EC 4C 02 00 00", GAType::Code, -6) > CL_Demo_Play;
         Sig("56 74 2A A1 ?? ?? ?? ?? 8B 0D", GAType::Code, -7) > CL_Demo_ReadInternal;
+        Sig("74 46 8B 44 24 0C", GAType::Code, -8) > CL_Demo_SeekFile;
         Sig("68 ?? ?? ?? ?? D8 0D", GAType::Code, -7) > CG_UpdateFov;
 
         Sig("0F 85 94 00 00 00 53 E8", GAType::Code, -10) > CL_FirstSnapshot;

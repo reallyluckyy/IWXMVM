@@ -1,15 +1,29 @@
 #include "StdInclude.hpp"
 #include "Playback.hpp"
 
+#include "../Structures.hpp"
+#include "../Addresses.hpp"
+
 #include "Components/Playback.hpp"
 #include "Utilities/HookManager.hpp"
-#include "../Addresses.hpp"
+#include "Events.hpp"
 
 namespace IWXMVM::IW5::Hooks::Playback
 {
+
+    typedef void (*CL_Demo_Play_t)();
+    CL_Demo_Play_t CL_Demo_Play_Trampoline = nullptr;
+    void CL_Demo_Play_Hook()
+    {
+        CL_Demo_Play_Trampoline();
+
+        Events::Invoke(EventType::PostDemoLoad);
+        Events::Invoke(EventType::OnDemoBoundsDetermined);
+    }
+
+
     typedef int32_t(__cdecl *Com_TimeScaleMsec_t)(int32_t msec);
     Com_TimeScaleMsec_t Com_TimeScaleMsec_Trampoline = nullptr;
-
     int32_t Com_TimeScaleMsec_Hook(std::int32_t msec)
     {
         // TODO: this causes the framerate to drop when on low timescales,
@@ -18,13 +32,12 @@ namespace IWXMVM::IW5::Hooks::Playback
         return Components::Playback::CalculatePlaybackDelta(msec);
     }
 
-    typedef int (*CL_Demo_ReadInternal_t)(int handle, void* buffer, int len);
+    typedef int (*CL_Demo_ReadInternal_t)(void* handle, void* buffer, int len);
     CL_Demo_ReadInternal_t CL_Demo_ReadInternal_Trampoline;
-    int CL_Demo_ReadInternal_Hook(int handle, void* buffer, int len)
+    int CL_Demo_ReadInternal_Hook(void* handle, void* buffer, int len)
     {
-        bool isDemoFile = handle == *(int*)0xB7F984; // clc_clientDemo_demoFileHandle
-
-        if (!isDemoFile)
+        const auto clc = Structures::GetClientConnection();
+        if (handle != clc->clientDemo.demoFileHandle)
         {
             return CL_Demo_ReadInternal_Trampoline(handle, buffer, len);
         }
@@ -34,28 +47,23 @@ namespace IWXMVM::IW5::Hooks::Playback
         {
             return CL_Demo_ReadInternal_Trampoline(handle, buffer, len);
         }
-        else
-        {
-            *(DWORD*)0x65FBBC8 += len;
-        }
 
         return result;
     }
 
-    typedef int (*CL_Demo_SeekFile_t)(int, int, int);
+    typedef int (*CL_Demo_SeekFile_t)(void*, int, int);
     CL_Demo_SeekFile_t CL_Demo_SeekFile_Trampoline;
-    int CL_Demo_SeekFile_Hook(int handle, int offset, int origin)
+    int CL_Demo_SeekFile_Hook(void* handle, int offset, int origin)
     {
-        LOG_DEBUG("Seeking to offset: {} with origin: {}", offset, origin);
-        
-        bool isDemoFile = handle == *(int*)0xB7F984;  // clc_clientDemo_demoFileHandle
-
-        if (!isDemoFile)
+        const auto clc = Structures::GetClientConnection();
+        if (handle != clc->clientDemo.demoFileHandle)
         {
             return CL_Demo_SeekFile_Trampoline(handle, offset, origin);
         }
 
-        auto result = Components::Rewinding::FS_Seek(offset, origin);
+        auto convertedOrigin = (origin + 1) % 3;
+
+        auto result = Components::Rewinding::FS_Seek(offset, convertedOrigin);
         if (result == -1)
         {
             return CL_Demo_SeekFile_Trampoline(handle, offset, origin);
@@ -66,12 +74,16 @@ namespace IWXMVM::IW5::Hooks::Playback
 
     void Install()
     {
+        HookManager::CreateHook(GetGameAddresses().CL_Demo_Play(), (std::uintptr_t)CL_Demo_Play_Hook,
+                                (uintptr_t*)&CL_Demo_Play_Trampoline);
+
         HookManager::CreateHook(GetGameAddresses().Com_TimeScaleMsec(), (std::uintptr_t)Com_TimeScaleMsec_Hook,
                                 (uintptr_t *)&Com_TimeScaleMsec_Trampoline);
 
         HookManager::CreateHook(GetGameAddresses().CL_Demo_ReadInternal(), (std::uintptr_t)CL_Demo_ReadInternal_Hook,
                                 (uintptr_t*)&CL_Demo_ReadInternal_Trampoline);
 
-        HookManager::CreateHook(0x6A6130, (std::uintptr_t)CL_Demo_SeekFile_Hook, (uintptr_t*)&CL_Demo_SeekFile_Trampoline);
+        HookManager::CreateHook(GetGameAddresses().CL_Demo_SeekFile(), (std::uintptr_t)CL_Demo_SeekFile_Hook,
+                                (uintptr_t*)&CL_Demo_SeekFile_Trampoline);
     }
 }  // namespace IWXMVM::IW5::Hooks::Playback
