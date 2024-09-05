@@ -785,6 +785,12 @@ namespace IWXMVM::IW5::Structures
         int nextPortableRadarPingTimeList[18];
     };
 
+    struct sun
+    {
+        float color[3];
+        float direction[3];
+    };
+
     clientConnection_t* GetClientConnection();
     clientActive_t* GetClientActive();
     centity_s* GetEntities();
@@ -794,4 +800,5 @@ namespace IWXMVM::IW5::Structures
     clientInfo_t* GetClientInfo();
     gameState_t* GetGameState();
     clientDemoPlayback_t* GetClientDemoPlayback();
+    sun* GetSun();
 }  // namespace IWXMVM::IW5::Structures

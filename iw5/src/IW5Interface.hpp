@@ -243,20 +243,38 @@ namespace IWXMVM::IW5
 
         Types::Sun GetSun() final
         {
-            // TODO:
-            return {};
+            Structures::sun* sunStruct = Structures::GetSun();
+            Types::Sun sunType = {glm::make_vec3(sunStruct->color), glm::make_vec3(sunStruct->direction), 1};
+            return sunType;
         }
 
         Types::DoF GetDof()
         {
-            // TODO:
-            return {};
+            Types::DoF dof = {static_cast<bool>(Functions::FindDvar("r_dof_tweak")->current.boolean) &&
+                                  static_cast<bool>(Functions::FindDvar("r_dof_enable")->current.boolean),
+                              Functions::FindDvar("r_dof_farBlur")->current.value,
+                              Functions::FindDvar("r_dof_farStart")->current.value,
+                              Functions::FindDvar("r_dof_farEnd")->current.value,
+                              Functions::FindDvar("r_dof_nearBlur")->current.value,
+                              Functions::FindDvar("r_dof_nearStart")->current.value,
+                              Functions::FindDvar("r_dof_nearEnd")->current.value,
+                              Functions::FindDvar("r_dof_bias")->current.value};
+
+            return dof;
         }
 
         Types::Filmtweaks GetFilmtweaks()
         {
-            // TODO:
-            return {};
+            Types::Filmtweaks filmtweaks = {static_cast<bool> (Functions::FindDvar("r_filmUseTweaks")->current.boolean) &&
+                                                static_cast<bool> (Functions::FindDvar("r_filmTweakEnable")->current.boolean),
+                                            Functions::FindDvar("r_filmTweakBrightness")->current.value,
+                                            Functions::FindDvar("r_filmTweakContrast")->current.value,
+                                            Functions::FindDvar("r_filmTweakDesaturation")->current.value,
+                                            glm::make_vec3(Functions::FindDvar("r_filmTweakLightTint")->current.vec3),
+                                            glm::make_vec3(Functions::FindDvar("r_filmTweakDarkTint")->current.vec3),
+                                            static_cast<bool>(Functions::FindDvar("r_filmTweakInvert")->current.boolean)};
+
+            return filmtweaks;
         }
 
         Types::HudInfo GetHudInfo()
@@ -267,20 +285,52 @@ namespace IWXMVM::IW5
 
         void SetSun(Types::Sun sun) final
         {
-            // TODO:
-            return;
+            Structures::sun* sunStruct = Structures::GetSun();
+            for (int i = 0; i < 3; ++i)
+            {
+                sunStruct->color[i] = sun.color[i];
+                sunStruct->direction[i] = sun.direction[i];
+            }
         }
 
         void SetDof(Types::DoF dof) final
         {
-            // TODO:
-            return;
+            Functions::FindDvar("r_dof_tweak")->current.boolean = dof.enabled;
+            Functions::FindDvar("r_dof_enable")->current.boolean = dof.enabled;
+
+            Functions::FindDvar("r_dof_farBlur")->current.value = dof.farBlur;
+            Functions::FindDvar("r_dof_farStart")->current.value = dof.farStart;
+            Functions::FindDvar("r_dof_farEnd")->current.value = dof.farEnd;
+
+            // hacky workaround from the IW3 implementation because i think it carries over
+            if (dof.nearBlur < 1.3f)
+            {
+                dof.nearBlur = 5;
+                dof.nearStart = 0;
+                dof.nearEnd = 0;
+            }
+
+            Functions::FindDvar("r_dof_nearBlur")->current.value = dof.nearBlur;
+            Functions::FindDvar("r_dof_nearStart")->current.value = dof.nearStart;
+            Functions::FindDvar("r_dof_nearEnd")->current.value = dof.nearEnd;
+
+            Functions::FindDvar("r_dof_bias")->current.value = dof.bias;
         }
 
         void SetFilmtweaks(Types::Filmtweaks filmtweaks) final
         {
-            // TODO:
-            return;
+            Functions::FindDvar("r_filmUseTweaks")->current.boolean = filmtweaks.enabled;
+            Functions::FindDvar("r_filmTweakEnable")->current.boolean = filmtweaks.enabled;
+            Functions::FindDvar("r_filmTweakBrightness")->current.value = filmtweaks.brightness;
+            Functions::FindDvar("r_filmTweakContrast")->current.value = filmtweaks.contrast;
+            Functions::FindDvar("r_filmTweakDesaturation")->current.value = filmtweaks.desaturation;
+            for (int i = 0; i < 3; ++i)
+            {
+                Functions::FindDvar("r_filmTweakLightTint")->current.vec3[i] =
+                    glm::value_ptr(filmtweaks.tintLight)[i];
+                Functions::FindDvar("r_filmTweakDarkTint")->current.vec3[i] = glm::value_ptr(filmtweaks.tintDark)[i];
+            }
+            Functions::FindDvar("r_filmTweakInvert")->current.boolean = filmtweaks.invert;
         }
 
         void SetHudInfo(Types::HudInfo hudInfo) final
