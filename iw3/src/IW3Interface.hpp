@@ -552,6 +552,10 @@ namespace IWXMVM::IW3
 
             uint16_t dobjIndex = clientObjMap[entityId];
             Structures::DObj_s* dobj = &objBuf[dobjIndex];
+            if (!dobj)
+            {
+                return {.id = -1};
+            }
 
             auto entities = Structures::GetEntities();
             auto entity = &entities[entityId];
@@ -574,7 +578,7 @@ namespace IWXMVM::IW3
             dobj->skel.timeStamp = orgTimeStamp;
             if (!result)
             {
-                LOG_ERROR("Call to CG_DObjGetWorldTagMatrix failed");
+                LOG_ERROR("Call to CG_DObjGetWorldBoneMatrix failed");
                 return {.id = -1};
             }
 

@@ -39,6 +39,8 @@ namespace IWXMVM::IW5
                 demoPlayback->cameraModeChanged = 1;
 
                 Functions::FindDvar("cg_draw2d")->current.boolean = isFreeCamera ? 0 : 1;
+
+                // TODO: set znear to something low (r_znear doesnt exist :/)
             });
 
             Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
@@ -291,14 +293,109 @@ namespace IWXMVM::IW5
         
         std::vector<Types::Entity> GetEntities() final
         {
-            // TODO:
-            return {};
+            std::vector<Types::Entity> entities;
+
+            auto cg_entities = Structures::GetEntities();
+
+            auto ToEntityType = [](char eType) -> Types::EntityType {
+                switch (eType)
+                {
+                    case Structures::entityType_t::ET_PLAYER:
+                        return Types::EntityType::Player;
+                    case Structures::entityType_t::ET_PLAYER_CORPSE:
+                        return Types::EntityType::Corpse;
+                    case Structures::entityType_t::ET_ITEM:
+                        return Types::EntityType::Item;
+                    case Structures::entityType_t::ET_MISSILE:
+                        return Types::EntityType::Missile;
+                    case Structures::entityType_t::ET_HELICOPTER:
+                        return Types::EntityType::Helicopter;
+                    default:
+                        return Types::EntityType::Unsupported;
+                }
+            };
+
+            for (int i = 0; i < 256; i++)
+            {
+                auto entity = cg_entities[i];
+                entities.push_back(
+                    Types::Entity{
+                        .id = i,
+                        .type = ToEntityType(entity.pose.eType),
+                        .clientNum = entity.nextState.clientNum,
+                        .isValid = (bool)(entity.flags & 1),
+                    }
+                );
+            }
+
+            return entities;
+        }
+
+        auto FindBoneIndex(Structures::DObj* dobj, uint16_t boneName)
+        {
+            if (!dobj->models || !dobj->numModels)
+                return -1;
+
+            auto boneIndex = -1;
+
+            auto totalBones = 0;
+            for (int m = 0; m < dobj->numModels; m++)
+            {
+                auto model = dobj->models[m];
+                if (!model || !model->numBones)
+                    return -1;
+                for (int b = 0; b < model->numBones; b++)
+                {
+                    auto bone = model->boneNames[b];
+                    if (bone == boneName)
+                    {
+                        boneIndex = totalBones + b;
+                    }
+                }
+                totalBones += model->numBones;
+            }
+
+            return boneIndex;
         }
 
         Types::BoneData GetBoneData(int32_t entityId, const std::string& name) final
         {
-            // TODO:
-            return {};
+            Structures::DObj* dobj = Functions::Com_GetClientDObj(entityId);
+
+            if (!dobj)
+            {
+                return {.id = -1};
+            }
+
+            auto entities = Structures::GetEntities();
+            auto entity = &entities[entityId];
+            auto boneName = Functions::Scr_AllocString(name.c_str());
+
+            const auto orgTimeStamp = std::exchange(dobj->skel.timeStamp, Structures::GetClientStatic()->skelTimeStamp);
+
+            auto boneIndex = FindBoneIndex(dobj, boneName);
+            if (boneIndex == -1)
+            {
+                dobj->skel.timeStamp = orgTimeStamp;
+                return {.id = -1};
+            }
+
+            float rotationMatrix[3 * 3];
+            float origin[3];
+            auto result = Functions::CG_DObjGetWorldBoneMatrix(entity, boneIndex, (float*)rotationMatrix, dobj, origin);
+
+            dobj->skel.timeStamp = orgTimeStamp;
+            if (!result)
+            {
+                LOG_ERROR("Call to CG_DObjGetWorldBoneMatrix failed");
+                return {.id = -1};
+            }
+
+            Types::BoneData boneData;
+            boneData.id = boneIndex;
+            boneData.position = glm::make_vec3(origin);
+            boneData.rotation = glm::make_mat3(rotationMatrix);
+            return boneData;
         }
 
         constexpr std::vector<std::string> GetSupportedBoneNames()
@@ -306,6 +403,8 @@ namespace IWXMVM::IW5
             return
             {
                 "tag_weapon", 
+                "tag_weapon_left", 
+                "tag_weapon_right",
                 "tag_flash",     
                 "tag_clip",      
                 "tag_brass",

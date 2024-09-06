@@ -25,6 +25,7 @@ namespace IWXMVM::IW5::Signatures
         Sig("E8 ?? ?? ?? ?? 8B 44 24 2C 50 C7 05", GAType::Data, -4, Lambda::DereferenceAddress) > cls_gameState;
         Sig("E8 ?? ?? ?? ?? 83 C4 04 5E 85 C0 75 08", GAType::Data, -4, Lambda::DereferenceAddress) > clientConnection;
         Sig("85 C0 74 0E 8B 80 70 E2 31 00", GAType::Data, -4, Lambda::DereferenceAddress) > s_clientDemoPlayback;
+        Sig("68 38 0E 00 00", GAType::Data, 8, Lambda::DereferenceAddress) > s_compassActors;
         
         Sig("E8 ?? ?? ?? ?? 83 C4 04 84 C0 74 15 A1 ?? ?? ?? ?? 6A 00", GAType::Code, -5) > IN_Frame;
         Sig("56 E8 ?? ?? ?? ?? 83 C4 04 84 C0 0F 84 B9 04 00 00", GAType::Code, -6) > CL_Demo_HandleInput;
@@ -44,7 +45,11 @@ namespace IWXMVM::IW5::Signatures
             Lambda::DereferenceAddress) > com_codeTimeScale;
         Sig("56 8B 74 24 0C 3B C6 7D 1E", GAType::Code, -5) > CG_ExecuteNewServerCommands;
 
-        Sig("68 38 0E 00 00", GAType::Data, 8, Lambda::DereferenceAddress) > s_compassActors;
+        Sig("56 8B 74 24 40 57 8B 7C 24 40", GAType::Code, -7) > CG_DObjGetWorldBoneMatrix;
+        Sig("83 C4 08 85 C0 75 01 C3 8B 54 24 04 52", GAType::Code, -5,
+            Lambda::FollowCodeFlow) > Com_GetClientDObj;
+        Sig("56 8D 70 01 8D 9B 00 00 00 00 8A 08 40 84 C9 75 F9 2B C6 6A 07 40 50 6A 01", GAType::Code,
+            -6) > Scr_AllocString;
 
         Sig("C6 05 ?? ?? ?? ?? ?? 8B 08 8B 91 A4 00 00 00", GAType::Data, -4) > d3d9DevicePointer;
         Sig("6A 02 FF 15 ?? ?? ?? ?? 8B 6C 24 48", GAType::Code, -5) > MainWndProc;

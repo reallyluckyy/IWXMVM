@@ -452,6 +452,8 @@ namespace IWXMVM::IW5::Structures
         int frametime;
         float frametime_base;
         int realtime;
+        byte padding[0x412658 - 0x128];  // this is quite the big buffer
+        int skelTimeStamp;
         // ...
     };
 
@@ -758,9 +760,51 @@ namespace IWXMVM::IW5::Structures
         // ...
     };
 
+    enum entityType_t : __int32
+    {
+        ET_GENERAL = 0x0,
+        ET_PLAYER = 0x1,
+        ET_PLAYER_CORPSE = 0x2,
+        ET_ITEM = 0x3,
+        ET_MISSILE = 0x4,
+        ET_INVISIBLE = 0x5,
+        ET_SCRIPTMOVER = 0x6,
+        ET_SOUND_BLEND = 0x7,
+        ET_FX = 0x8,
+        ET_LOOP_FX = 0x9,
+        ET_PRIMARY_LIGHT = 0xA,
+        ET_TURRET = 0xB,
+        ET_HELICOPTER = 0xC,
+        ET_PLANE = 0xD,
+        ET_VEHICLE = 0xE,
+        ET_VEHICLE_COLLMAP = 0xF,
+        ET_VEHICLE_CORPSE = 0x10,
+        ET_VEHICLE_SPAWNER = 0x11,
+        ET_EVENTS = 0x12,
+    };
+
+    struct cpose_t
+    {
+        uint16_t lightingHandle;
+        uint8_t eType;  
+        uint8_t cullIn; 
+        uint32_t pad[4];        
+        float origin[3];        
+        float angles[3];        
+        // ...
+    };
+
     struct centity_s
     {
-        byte content[0x1F8];
+        cpose_t pose;
+        char padding[0x134];
+        struct
+        {
+            int32_t clientNum;  // part of entityState_s usually, i believe
+        } nextState;
+        char padding2[0x6C];
+        uint32_t flags;
+        char padding4[0x24];
     };
 
     struct gameState_t
@@ -783,6 +827,51 @@ namespace IWXMVM::IW5::Structures
         int flags;
         unsigned int perks[2];
         int nextPortableRadarPingTimeList[18];
+    };
+
+    struct DSkelPartBits
+    {
+        int anim[6];
+        int control[6];
+        int worldCtrl[6];
+        int skel[6];
+    };
+
+    struct DSkel
+    {
+        DSkelPartBits partBits;
+        int timeStamp;
+        void* mat; // DObjAnimMat
+    };
+
+    struct XModel
+    {
+        const char* name;
+        unsigned __int8 numBones;
+        unsigned __int8 numRootBones;
+        unsigned __int8 numsurfs;
+        float scale;
+        unsigned int noScalePartBits[6];
+        unsigned __int16* boneNames;
+        unsigned __int8* parentList;
+        // ...
+    };
+
+    struct DObj
+    {
+        void* tree;
+        unsigned __int16 duplicateParts;
+        unsigned __int16 entnum;
+        unsigned __int8 duplicatePartsSize;
+        unsigned __int8 numModels;
+        unsigned __int8 numBones;
+        unsigned __int8 flags;
+        unsigned int ignoreCollision;
+        volatile int locked;
+        DSkel skel;
+        float radius;
+        unsigned int hidePartBits[6];
+        XModel** models;
     };
 
     clientConnection_t* GetClientConnection();

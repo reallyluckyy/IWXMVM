@@ -66,11 +66,14 @@ namespace IWXMVM
 
         virtual bool IsConsoleOpen() = 0;
 
-        // perhaps dvars shouldnt be exposed to core at all?
+        // TODO: Perhaps dvars shouldnt be exposed to core at all?
         virtual std::optional<Types::Dvar> GetDvar(const std::string_view name) = 0;
 
+        // Required for setting the first person FOV
+        // TODO: Perhaps this can be removed and consolidated into how we already set FOV for freecam?
         virtual void SetFov(float fov) = 0;
 
+        // Required for all the settings of the "Visuals" tab
         virtual Types::Sun GetSun() = 0;
         virtual Types::DoF GetDof() = 0;
         virtual Types::Filmtweaks GetFilmtweaks() = 0;
@@ -80,16 +83,18 @@ namespace IWXMVM
         virtual void SetFilmtweaks(Types::Filmtweaks) = 0;
         virtual void SetHudInfo(Types::HudInfo) = 0;
 
+        // Required for BoneCamera
         virtual std::vector<Types::Entity> GetEntities() = 0;
         virtual Types::BoneData GetBoneData(int32_t entityId, const std::string& name) = 0;
         virtual constexpr std::vector<std::string> GetSupportedBoneNames() = 0;
 
-        // == things for rewinding ==
+        // Required for working rewinding
         virtual void CL_FirstSnapshot() = 0;
         virtual void ResetClientData(int serverTime) = 0;
         virtual Types::PlaybackData GetPlaybackDataAddresses() const = 0;
         virtual void HideScoreboard() = 0;
 
+        // Some games have demo file footers/headers (see IW5)
         virtual uint32_t GetDemoFooterSize() { return 0; }
         virtual uint32_t GetDemoHeaderSize() { return 0; }
 

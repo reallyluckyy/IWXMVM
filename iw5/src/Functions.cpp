@@ -33,4 +33,31 @@ namespace IWXMVM::IW5::Functions
 		CL_Demo_GetStartAndEndTime(0, start, end);
 	}
 
+        
+    bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity, int boneIndex,
+                                   float* matrix, Structures::DObj* dobj, float* origin)
+    {
+        typedef bool(__cdecl * CG_DObjGetWorldBoneMatrix_t)(Structures::centity_s* entity, Structures::DObj* dobj,
+            int boneIndex, float* matrix, float* origin);
+        CG_DObjGetWorldBoneMatrix_t CG_DObjGetWorldBoneMatrix = (CG_DObjGetWorldBoneMatrix_t)GetGameAddresses().CG_DObjGetWorldBoneMatrix();
+        
+		return CG_DObjGetWorldBoneMatrix(entity, dobj, boneIndex, matrix, origin);
+    }
+
+    Structures::DObj* Com_GetClientDObj(int handle)
+    {
+        typedef Structures::DObj*(__cdecl * Com_GetClientDObj_t)(int handle);
+		Com_GetClientDObj_t Com_GetClientDObj = (Com_GetClientDObj_t)GetGameAddresses().Com_GetClientDObj();
+
+		return Com_GetClientDObj(handle);
+    }
+
+    int Scr_AllocString(const char* string)
+    {
+        typedef int(__cdecl * Scr_AllocString_t)(const char* s, int sys);
+		Scr_AllocString_t Scr_AllocString = (Scr_AllocString_t)GetGameAddresses().Scr_AllocString();
+
+		return Scr_AllocString(string, 1);
+    }
+
 }  // namespace IWXMVM::IW5::Functions
