@@ -31,7 +31,12 @@ namespace IWXMVM::IW5::Hooks::Camera
         cg->refdef.view.org[1] = camera->GetPosition()[1];
         cg->refdef.view.org[2] = camera->GetPosition()[2];
 
-        cg->refdef.view.zNear = 0.01f;
+        cg->refdef.view.zNear = 1.0f;
+
+        const auto aspect = ((float)cg->refdef.displayViewport.width / (float)cg->refdef.displayViewport.height);
+        cg->refdef.view.tanHalfFovX = std::tan(glm::radians(camera->GetFov()) * 0.5f);
+        cg->refdef.view.tanHalfFovY =
+            cg->refdef.view.tanHalfFovX / aspect;
 
         const auto axis = MathUtils::AnglesToAxis(camera->GetRotation());
         for (int x = 0; x < 3; x++)
@@ -43,28 +48,9 @@ namespace IWXMVM::IW5::Hooks::Camera
         }
     }
 
-    typedef void (*CG_UpdateFov_t)(float);
-    CG_UpdateFov_t CG_UpdateFov_Trampoline;
-    void CG_UpdateFov_Hook(float fov)
-    {
-        if (Mod::GetGameInterface()->GetGameState() != Types::GameState::InDemo)
-            return;
-
-        auto& camera = Components::CameraManager::Get().GetActiveCamera();
-        if (camera->IsModControlledCameraMode())
-        {
-            fov = camera->GetFov();
-        }
-
-        CG_UpdateFov_Trampoline(fov);
-    }
-
     void Install()
     {
         HookManager::CreateHook(GetGameAddresses().CL_Demo_CalcViewValues(), (std::uintptr_t)CL_Demo_CalcViewValues_Hook,
 								(uintptr_t *)&CL_Demo_CalcViewValues_Trampoline);
-
-        HookManager::CreateHook(GetGameAddresses().CG_UpdateFov(), (std::uintptr_t)CG_UpdateFov_Hook,
-                                (uintptr_t *)&CG_UpdateFov_Trampoline);
     }
 }  // namespace IWXMVM::IW5::Hooks::Camera

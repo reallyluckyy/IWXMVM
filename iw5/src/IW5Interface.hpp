@@ -214,7 +214,7 @@ namespace IWXMVM::IW5
             // TODO: A hack. Once again, perhaps we shouldnt expose GetDvar to core...
             if (name.compare("r_znear") == 0)
             {
-                static float znear = 0.1f;
+                static float znear = 1.0f;
                 return Types::Dvar{name, (Types::Dvar::Value*)&znear};
             }
 
