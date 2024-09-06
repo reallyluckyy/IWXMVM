@@ -31,6 +31,8 @@ namespace IWXMVM::IW5::Hooks::Camera
         cg->refdef.view.org[1] = camera->GetPosition()[1];
         cg->refdef.view.org[2] = camera->GetPosition()[2];
 
+        cg->refdef.view.zNear = 0.01f;
+
         const auto axis = MathUtils::AnglesToAxis(camera->GetRotation());
         for (int x = 0; x < 3; x++)
         {

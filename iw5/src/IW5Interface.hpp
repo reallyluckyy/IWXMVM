@@ -39,8 +39,6 @@ namespace IWXMVM::IW5
                 demoPlayback->cameraModeChanged = 1;
 
                 Functions::FindDvar("cg_draw2d")->current.boolean = isFreeCamera ? 0 : 1;
-
-                // TODO: set znear to something low (r_znear doesnt exist :/)
             });
 
             Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
