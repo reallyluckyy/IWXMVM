@@ -50,8 +50,4 @@ namespace IWXMVM::IW5::Structures
         return *reinterpret_cast<clientDemoPlayback_t**>(GetGameAddresses().s_clientDemoPlayback());
     }
 
-    sun* GetSun()
-    {
-        return reinterpret_cast<sun*>(0x96C370); // TODO: Use sig
-    }
 }  // namespace IWXMVM::IW5::Structures

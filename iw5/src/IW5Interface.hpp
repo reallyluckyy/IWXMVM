@@ -243,9 +243,21 @@ namespace IWXMVM::IW5
 
         Types::Sun GetSun() final
         {
-            Structures::sun* sunStruct = Structures::GetSun();
-            Types::Sun sunType = {glm::make_vec3(sunStruct->color), glm::make_vec3(sunStruct->direction), 1};
-            return sunType;
+            const auto cg = Structures::GetClientGlobals();
+            for (auto& light : std::span{cg->refdef.primaryLights})
+            {
+            	if (light.type == Structures::GfxLightType::GFX_LIGHT_TYPE_DIR)
+				{
+					Types::Sun sunType = {
+						glm::make_vec3(light.color),
+						glm::degrees(glm::make_vec3(light.dir)),
+						light.radius,
+					};
+					return sunType;
+				}
+            }
+
+			return {};
         }
 
         Types::DoF GetDof()
@@ -285,11 +297,19 @@ namespace IWXMVM::IW5
 
         void SetSun(Types::Sun sun) final
         {
-            Structures::sun* sunStruct = Structures::GetSun();
-            for (int i = 0; i < 3; ++i)
+            const auto cg = Structures::GetClientGlobals();
+            for (auto& light : std::span{cg->refdef.primaryLights})
             {
-                sunStruct->color[i] = sun.color[i];
-                sunStruct->direction[i] = sun.direction[i];
+                if (light.type == Structures::GfxLightType::GFX_LIGHT_TYPE_DIR)
+                {
+                    light.color[0] = sun.color.x;
+                    light.color[1] = sun.color.y;
+                    light.color[2] = sun.color.z;
+                    light.dir[0] = glm::radians(sun.direction.x);
+                    light.dir[1] = glm::radians(sun.direction.y);
+                    light.dir[2] = glm::radians(sun.direction.z);
+                    light.radius = sun.brightness;
+                }
             }
         }
 
