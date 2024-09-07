@@ -262,29 +262,33 @@ namespace IWXMVM::IW5
 
         Types::DoF GetDof()
         {
-            Types::DoF dof = {static_cast<bool>(Functions::FindDvar("r_dof_tweak")->current.boolean) &&
-                                  static_cast<bool>(Functions::FindDvar("r_dof_enable")->current.boolean),
-                              Functions::FindDvar("r_dof_farBlur")->current.value,
-                              Functions::FindDvar("r_dof_farStart")->current.value,
-                              Functions::FindDvar("r_dof_farEnd")->current.value,
-                              Functions::FindDvar("r_dof_nearBlur")->current.value,
-                              Functions::FindDvar("r_dof_nearStart")->current.value,
-                              Functions::FindDvar("r_dof_nearEnd")->current.value,
-                              Functions::FindDvar("r_dof_bias")->current.value};
+            Types::DoF dof = {
+                static_cast<bool>(Functions::FindDvar("r_dof_tweak")->current.boolean) &&
+                    static_cast<bool>(Functions::FindDvar("r_dof_enable")->current.boolean),
+                Functions::FindDvar("r_dof_farBlur")->current.value,
+                Functions::FindDvar("r_dof_farStart")->current.value,
+                Functions::FindDvar("r_dof_farEnd")->current.value,
+                Functions::FindDvar("r_dof_nearBlur")->current.value,
+                Functions::FindDvar("r_dof_nearStart")->current.value,
+                Functions::FindDvar("r_dof_nearEnd")->current.value,
+                Functions::FindDvar("r_dof_bias")->current.value
+            };
 
             return dof;
         }
 
         Types::Filmtweaks GetFilmtweaks()
         {
-            Types::Filmtweaks filmtweaks = {static_cast<bool> (Functions::FindDvar("r_filmUseTweaks")->current.boolean) &&
-                                                static_cast<bool> (Functions::FindDvar("r_filmTweakEnable")->current.boolean),
-                                            Functions::FindDvar("r_filmTweakBrightness")->current.value,
-                                            Functions::FindDvar("r_filmTweakContrast")->current.value,
-                                            Functions::FindDvar("r_filmTweakDesaturation")->current.value,
-                                            glm::make_vec3(Functions::FindDvar("r_filmTweakLightTint")->current.vec3),
-                                            glm::make_vec3(Functions::FindDvar("r_filmTweakDarkTint")->current.vec3),
-                                            static_cast<bool>(Functions::FindDvar("r_filmTweakInvert")->current.boolean)};
+            Types::Filmtweaks filmtweaks = {
+                static_cast<bool> (Functions::FindDvar("r_filmUseTweaks")->current.boolean) &&
+                    static_cast<bool> (Functions::FindDvar("r_filmTweakEnable")->current.boolean),
+                Functions::FindDvar("r_filmTweakBrightness")->current.value,
+                Functions::FindDvar("r_filmTweakContrast")->current.value,
+                Functions::FindDvar("r_filmTweakDesaturation")->current.value,
+                glm::make_vec3(Functions::FindDvar("r_filmTweakLightTint")->current.vec3),
+                glm::make_vec3(Functions::FindDvar("r_filmTweakDarkTint")->current.vec3),
+                static_cast<bool>(Functions::FindDvar("r_filmTweakInvert")->current.boolean)
+            };
 
             return filmtweaks;
         }
