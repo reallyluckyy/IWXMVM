@@ -45,6 +45,14 @@ namespace IWXMVM::IW5::Signatures
             Lambda::DereferenceAddress) > com_codeTimeScale;
         Sig("56 8B 74 24 0C 3B C6 7D 1E", GAType::Code, -5) > CG_ExecuteNewServerCommands;
 
+        Sig("74 0E 83 3D ?? ?? ?? ?? ?? 0F 95 C0", GAType::Code, -7) > CG_DrawShellshockBlend;
+        Sig("50 E8 ?? ?? ?? ?? 83 C4 04 85 C0 0F 84 E9 00 00 00", GAType::Code, -5) > Item_GameMsgWindow_Paint;
+        Sig("0F 84 32 01 00 00 8D 50 01", GAType::Code, -7) > R_AddCmdDrawText;
+        Sig("85 F6 75 06 8B 35 ?? ?? ?? ?? 8B 46 54 8B 40 08 83 78 30 00 75 06 83 78 20 00 74 21", GAType::Code,
+            -5) > R_AddCmdDrawTextWithEffects;
+        Sig("84 C0 0F 84 8B 00 00 00 68", GAType::Code, -8) > CG_BloodOverlayDraw;
+        Sig("83 C4 28 3B 35", GAType::Code, -5, Lambda::FollowCodeFlow) > R_AddCmdDrawStretchPic;
+
         Sig("56 8B 74 24 40 57 8B 7C 24 40", GAType::Code, -7) > CG_DObjGetWorldBoneMatrix;
         Sig("83 C4 08 85 C0 75 01 C3 8B 54 24 04 52", GAType::Code, -5,
             Lambda::FollowCodeFlow) > Com_GetClientDObj;

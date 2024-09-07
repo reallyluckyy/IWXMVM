@@ -10,7 +10,7 @@ namespace IWXMVM::IW5::Structures
         std::uint32_t unsignedInteger;
         std::int32_t integer;
         float value;
-        byte boolean;
+        bool boolean;
         float vec2[2];
         float vec3[3];
         float vec4[4];

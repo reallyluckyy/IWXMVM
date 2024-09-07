@@ -7,6 +7,7 @@
 #include "Patches.hpp"
 #include "Functions.hpp"
 #include "Hooks.hpp"
+#include "Hooks/HUD.hpp"
 #include "Components/Rewinding.hpp"
 #include "Utilities/PathUtils.hpp"
 
@@ -295,8 +296,28 @@ namespace IWXMVM::IW5
 
         Types::HudInfo GetHudInfo()
         {
-            // TODO:
-            return {};
+            Types::HudInfo hudInfo = {
+                Functions::FindDvar("cg_draw2D")->current.boolean,
+                !Functions::FindDvar("ui_hud_hardcore")->current.boolean,
+                Hooks::HUD::showShellshockEffects,
+                Functions::FindDvar("ui_drawCrosshair")->current.boolean,
+                Hooks::HUD::showScore,
+                Hooks::HUD::showOtherText,
+                !Patches::GetGamePatches().CG_BloodOverlayDraw.IsApplied(),
+                Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
+                glm::vec3(
+                    Functions::FindDvar("cg_TeamColor_Allies")->current.color[0] / 255.0f,
+                    Functions::FindDvar("cg_TeamColor_Allies")->current.color[1] / 255.0f,
+                    Functions::FindDvar("cg_TeamColor_Allies")->current.color[2] / 255.0f
+                ),
+                glm::vec3(
+                    Functions::FindDvar("cg_TeamColor_Axis")->current.color[0] / 255.0f,
+                    Functions::FindDvar("cg_TeamColor_Axis")->current.color[1] / 255.0f,
+                    Functions::FindDvar("cg_TeamColor_Axis")->current.color[2] / 255.0f
+                ),
+            };
+
+            return hudInfo;
         }
 
         void SetSun(Types::Sun sun) final
@@ -358,8 +379,46 @@ namespace IWXMVM::IW5
 
         void SetHudInfo(Types::HudInfo hudInfo) final
         {
-            // TODO:
-            return;
+            Functions::FindDvar("con_gamemsgwindow0msgtime")->current.value = 5;
+            Functions::FindDvar("con_gamemsgwindow0linecount")->current.integer = 4;
+
+            Functions::FindDvar("cg_draw2D")->current.boolean = hudInfo.show2DElements;
+
+            Functions::FindDvar("g_hardcore")->current.boolean = !hudInfo.showPlayerHUD;
+            Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5.0f : 0.0f;
+            Functions::FindDvar("cg_overheadranksize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
+            Functions::FindDvar("cg_overheadnamessize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
+            Functions::FindDvar("cg_overheadiconsize")->current.value = hudInfo.showPlayerHUD ? 0.7f : 0;
+            Functions::FindDvar("waypointiconwidth")->current.value = hudInfo.showPlayerHUD ? 32.0f : 0.001f;
+            Functions::FindDvar("waypointoffscreenpointerwidth")->current.value = hudInfo.showPlayerHUD ? 32 : 0.001f;
+
+            Hooks::HUD::showShellshockEffects = hudInfo.showShellshock;
+            Functions::FindDvar("ui_drawCrosshair")->current.boolean = hudInfo.showCrosshair;
+            Hooks::HUD::showScore = hudInfo.showScore;
+
+            Hooks::HUD::showOtherText = hudInfo.showOtherText;
+
+            // TODO: This doesnt work properly yet. I mean, it removes the killstreak icon like its supposed to,
+            //       but it also removes the hitmarker icon unfortunately. 
+            if (hudInfo.showOtherText)
+                Patches::GetGamePatches().R_AddCmdDrawStretchPic.Revert();
+			else
+                Patches::GetGamePatches().R_AddCmdDrawStretchPic.Apply();
+            
+            if (hudInfo.showBloodOverlay)
+                Patches::GetGamePatches().CG_BloodOverlayDraw.Revert();
+            else
+                Patches::GetGamePatches().CG_BloodOverlayDraw.Apply();
+
+            if (hudInfo.showKillfeed)
+                Patches::GetGamePatches().Item_GameMsgWindow_Paint.Revert();
+			else
+				Patches::GetGamePatches().Item_GameMsgWindow_Paint.Apply();
+
+            for (int i = 0; i < 3; i++)
+                Functions::FindDvar("cg_TeamColor_Allies")->current.color[i] = static_cast<uint8_t>(hudInfo.killfeedTeam1Color[i] * 255.0f);
+            for (int i = 0; i < 3; i++)
+                Functions::FindDvar("cg_TeamColor_Axis")->current.color[i] = static_cast<uint8_t>(hudInfo.killfeedTeam2Color[i] * 255.0f);
         }
         
         std::vector<Types::Entity> GetEntities() final
