@@ -251,7 +251,7 @@ namespace IWXMVM::IW5
 					Types::Sun sunType = {
 						glm::make_vec3(light.color),
 						glm::degrees(glm::make_vec3(light.dir)),
-						light.radius,
+                        1.0f
 					};
 					return sunType;
 				}
@@ -308,7 +308,6 @@ namespace IWXMVM::IW5
                     light.dir[0] = glm::radians(sun.direction.x);
                     light.dir[1] = glm::radians(sun.direction.y);
                     light.dir[2] = glm::radians(sun.direction.z);
-                    light.radius = sun.brightness;
                 }
             }
         }
