@@ -15,35 +15,39 @@ namespace IWXMVM::UI
         // TODO: Come up with a proper plan on when we want to initialize the UI values from the games values
         // TODO: Ideally we dont want to ever overwrite a users custom settings, but what if the map changes
 
+        static bool justLoadedDemo = false;
+
         Events::RegisterListener(EventType::PostDemoLoad, [&]() {
-            if (visualsInitialized)
-                return;
-
-            auto dof = Mod::GetGameInterface()->GetDof();
-            auto sun = Mod::GetGameInterface()->GetSun();
-            auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
-            auto hudInfo = Mod::GetGameInterface()->GetHudInfo();
-
-            visuals = {
-                dof,
-                sun.color,
-                sun.direction,
-                sun.brightness,
-                filmtweaks,
-                hudInfo
-            };
-            recentPresets = {};
-
-            // We do this once to force r_dof_enable and r_dof_tweak
-            // into sync with each other
-            UpdateDof();
-
-            defaultVisuals = visuals;
-            defaultPreset = {"Default"};
-            currentPreset = defaultPreset;
-
-            visualsInitialized = true;
+            justLoadedDemo = true;
         });
+
+        Events::RegisterListener(EventType::OnFrame, [&]() {
+            if (IWXMVM::Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo && justLoadedDemo)
+            {
+                justLoadedDemo = false;
+
+                if (visualsInitialized)
+                    return;
+
+                auto sun = Mod::GetGameInterface()->GetSun();
+                auto dof = Mod::GetGameInterface()->GetDof();
+                auto filmtweaks = Mod::GetGameInterface()->GetFilmtweaks();
+                auto hudInfo = Mod::GetGameInterface()->GetHudInfo();
+
+                visuals = {dof, sun.color, sun.direction, sun.brightness, filmtweaks, hudInfo};
+                recentPresets = {};
+
+                // We do this once to force r_dof_enable and r_dof_tweak
+                // into sync with each other
+                UpdateDof();
+
+                defaultVisuals = visuals;
+                defaultPreset = {"Default"};
+                currentPreset = defaultPreset;
+
+                visualsInitialized = true;
+            }
+		});
 
         // This is a hack to get the keyframed visuals to update when the visual tab isnt selected
         Events::RegisterListener(EventType::OnFrame, [&]() {

@@ -49,4 +49,5 @@ namespace IWXMVM::IW5::Structures
     {
         return *reinterpret_cast<clientDemoPlayback_t**>(GetGameAddresses().s_clientDemoPlayback());
     }
+
 }  // namespace IWXMVM::IW5::Structures

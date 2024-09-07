@@ -263,6 +263,95 @@ namespace IWXMVM::IW5::Structures
         float zNear;
     };
 
+    struct GfxDepthOfField
+    {
+        float viewModelStart;
+        float viewModelEnd;
+        float nearStart;
+        float nearEnd;
+        float farStart;
+        float farEnd;
+        float nearBlur;
+        float farBlur;
+    };
+
+    struct GfxFilm
+    {
+        bool enabled;
+        float brightness;
+        float contrast;
+        float desaturation;
+        float desaturationDark;
+        float heroSaturation;
+        bool invert;
+        float tintDark[3];
+        float tintMedium[3];
+        float tintLight[3];
+    };
+
+    struct GfxGlow
+    {
+        bool enabled;
+        float bloomCutoff;
+        float bloomDesaturation;
+        float bloomIntensity;
+        float radius;
+    };
+
+    struct GfxLightScale
+    {
+        float diffuseScale;
+        float specularScale;
+    };
+
+    struct __declspec(align(4)) GfxCompositeFx
+    {
+        GfxFilm film;
+        float distortionScale[3];
+        float blurRadius;
+        float distortionMagnitude;
+        float frameRate;
+        int lastUpdate;
+        int frame;
+        int startMSec;
+        int currentTime;
+        int duration;
+        bool enabled;
+        bool scriptEnabled;
+    };
+
+    enum GfxLightType : unsigned __int8
+    {
+        GFX_LIGHT_TYPE_NONE = 0x0,
+        GFX_LIGHT_TYPE_DIR = 0x1,
+        GFX_LIGHT_TYPE_SPOT = 0x2,
+        GFX_LIGHT_TYPE_OMNI = 0x3,
+        GFX_LIGHT_TYPE_COUNT = 0x4,
+        GFX_LIGHT_TYPE_DIR_SHADOWMAP = 0x4,
+        GFX_LIGHT_TYPE_SPOT_SHADOWMAP = 0x5,
+        GFX_LIGHT_TYPE_OMNI_SHADOWMAP = 0x6,
+        GFX_LIGHT_TYPE_COUNT_WITH_SHADOWMAP_VERSIONS = 0x7,
+        GFX_LIGHT_TYPE_SPOT_SHADOWMAP_CUCOLORIS = 0x7,
+        GFX_LIGHT_TYPE_COUNT_WITH_ALL_VERSIONS = 0x8,
+    };
+
+    struct GfxLight
+    {
+        GfxLightType type;
+        unsigned __int8 canUseShadowMap;
+        unsigned __int8 unused[2];
+        float color[3];
+        float dir[3];
+        float up[3];
+        float origin[3];
+        float radius;
+        float cosHalfFovOuter;
+        float cosHalfFovInner;
+        int exponent;
+        unsigned int spotShadowIndex;
+        void* def; // GfxLightDef*
+    };
+
     struct refdef_t
     {
         GfxViewport displayViewport;
@@ -271,6 +360,15 @@ namespace IWXMVM::IW5::Structures
         int time;
         float blurRadius;
         bool uiBlur;
+        GfxDepthOfField dof;
+        GfxFilm film;
+        GfxGlow glow;
+        GfxLightScale charPrimaryLightScale;
+        GfxLightScale viewModelPrimaryLightScale;
+        float charAmbience[3];
+        float viewModelAmbience[3];
+        GfxCompositeFx waterSheetingFx;
+        GfxLight primaryLights[248];
         // ...
     };
 
@@ -414,26 +512,7 @@ namespace IWXMVM::IW5::Structures
         int landTime;
         float heightToCeiling;
         refdef_t refdef;
-        float refdefViewAngles[3];
-        float baseGunAngles[3];
-        float aimAssistEyeOrigin[3];
-        float aimAssistViewOrigin[3];
-        float aimAssistViewAngles[3];
-        float thirdPersonGunPitch;
-        float thirdPersonGunYaw;
-        float thirdPersonAdsLerp;
-        float swayViewAngles[3];
-        float swayAngles[3];
-        float swayOffset[3];
-        float recoilAngles[3];
-        float recoilSpeed[3];
-        float demoCameraOrigin[3];
-        float demoCameraAngles[3];
-        float demoCameraVelocity[3];
-        byte padding2[0x6884 + 0x4AC8];
-        int scoreFadeTime;
-        int scoresTop;
-        // ...
+        // ... (incomplete because refdef is)
     };
 
     // so snap is at 0x904304
