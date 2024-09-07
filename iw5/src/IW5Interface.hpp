@@ -246,18 +246,18 @@ namespace IWXMVM::IW5
             const auto cg = Structures::GetClientGlobals();
             for (auto& light : std::span{cg->refdef.primaryLights})
             {
-            	if (light.type == Structures::GfxLightType::GFX_LIGHT_TYPE_DIR)
-				{
-					Types::Sun sunType = {
-						glm::make_vec3(light.color),
-						glm::degrees(glm::make_vec3(light.dir)),
+                if (light.type == Structures::GfxLightType::GFX_LIGHT_TYPE_DIR)
+                {
+                    Types::Sun sunType = {
+                        glm::make_vec3(light.color),
+                        glm::degrees(glm::make_vec3(light.dir)),
                         1.0f
-					};
-					return sunType;
-				}
+                    };
+                    return sunType;
+                }
             }
 
-			return {};
+            return {};
         }
 
         Types::DoF GetDof()
@@ -569,8 +569,8 @@ namespace IWXMVM::IW5
 
         uint32_t GetDemoFooterSize() final
         {
-			return 596;
-		}
+            return 596;
+        }
 
         uint32_t GetDemoHeaderSize() final
         {
