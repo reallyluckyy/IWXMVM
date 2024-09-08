@@ -17,7 +17,6 @@ namespace IWXMVM::IW5::Patches
         NopPatch<5> Con_TimeJumped{GetGameAddresses().Con_TimeJumped_Call(), PatchApplySetting::Deferred};
 
         ReturnPatch Item_GameMsgWindow_Paint{GetGameAddresses().Item_GameMsgWindow_Paint(), PatchApplySetting::Deferred};
-        ReturnPatch CG_BloodOverlayDraw{GetGameAddresses().CG_BloodOverlayDraw(), PatchApplySetting::Deferred};
 
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };

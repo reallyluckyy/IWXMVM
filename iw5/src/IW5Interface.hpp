@@ -295,7 +295,7 @@ namespace IWXMVM::IW5
                 Functions::FindDvar("ui_drawCrosshair")->current.boolean,
                 Hooks::HUD::showScore,
                 Hooks::HUD::showOtherText,
-                !Patches::GetGamePatches().CG_BloodOverlayDraw.IsApplied(),
+                Hooks::HUD::showBloodOverlay,
                 Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
                 glm::vec3(
                     Functions::FindDvar("cg_TeamColor_Allies")->current.color[0] / 255.0f,
@@ -389,16 +389,12 @@ namespace IWXMVM::IW5
             Hooks::HUD::showScore = hudInfo.showScore;
 
             Hooks::HUD::showOtherText = hudInfo.showOtherText;
-
-            if (hudInfo.showBloodOverlay)
-                Patches::GetGamePatches().CG_BloodOverlayDraw.Revert();
-            else
-                Patches::GetGamePatches().CG_BloodOverlayDraw.Apply();
+            Hooks::HUD::showBloodOverlay = hudInfo.showBloodOverlay;
 
             if (hudInfo.showKillfeed)
                 Patches::GetGamePatches().Item_GameMsgWindow_Paint.Revert();
-			else
-				Patches::GetGamePatches().Item_GameMsgWindow_Paint.Apply();
+            else
+                Patches::GetGamePatches().Item_GameMsgWindow_Paint.Apply();
 
             for (int i = 0; i < 3; i++)
                 Functions::FindDvar("cg_TeamColor_Allies")->current.color[i] = static_cast<uint8_t>(hudInfo.killfeedTeam1Color[i] * 255.0f);

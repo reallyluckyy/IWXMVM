@@ -12,15 +12,17 @@ namespace IWXMVM::IW5::Hooks::HUD
     bool showScore = true;
     bool showOtherText = true;
 
-	typedef void (__cdecl * CG_DrawShellshockBlend_t)(int localClientNum);
+    bool showBloodOverlay = true;
+
+    typedef void (__cdecl * CG_DrawShellshockBlend_t)(int localClientNum);
     CG_DrawShellshockBlend_t CG_DrawShellshockBlend_Trampoline = nullptr;
     void CG_DrawShellshockBlend_Hook(int localClientNum)
-	{
-		if (showShellshockEffects)
-		{
-			CG_DrawShellshockBlend_Trampoline(localClientNum);
-		}
-	}
+    {
+        if (showShellshockEffects)
+        {
+            CG_DrawShellshockBlend_Trampoline(localClientNum);
+        }
+    }
 
     typedef void (*R_AddCmdDrawText_t)(const char* text, int a2, int a3, float a4, float a5, float a6,
                                                       float a7, float a8, int a9, int a10);
@@ -69,19 +71,37 @@ namespace IWXMVM::IW5::Hooks::HUD
     void R_AddCmdDrawStretchPic_Hook(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8,
                                      int a9, Structures::Material *material)
     {
-        bool isHitmarker = std::string_view(material->info.name).compare("damage_feedback") == 0;
-        if (!showOtherText && !isHitmarker)
+        bool isBloodOverlay = std::string_view(material->info.name).compare("splatter_alt") == 0;
+        if (isBloodOverlay)
         {
+            if (showBloodOverlay)
+            {
+                R_AddCmdDrawStretchPic_Trampoline(a1, a2, a3, a4, a5, a6, a7, a8, a9, material);
+            }
+
             return;
         }
 
-        R_AddCmdDrawStretchPic_Trampoline(a1, a2, a3, a4, a5, a6, a7, a8, a9, material);
+        bool isHitmarker = std::string_view(material->info.name).compare("damage_feedback") == 0;
+        if (isHitmarker)
+        {
+            // always draw the hitmarker
+            R_AddCmdDrawStretchPic_Trampoline(a1, a2, a3, a4, a5, a6, a7, a8, a9, material);
+        }
+        else
+        {
+            // everything else: only draw if showOtherText is true
+            if (showOtherText)
+            {
+                R_AddCmdDrawStretchPic_Trampoline(a1, a2, a3, a4, a5, a6, a7, a8, a9, material);
+            }
+        }
     }
 
     void Install()
     {
         HookManager::CreateHook(GetGameAddresses().CG_DrawShellshockBlend(), 
-			(std::uintptr_t)CG_DrawShellshockBlend_Hook, (uintptr_t*)&CG_DrawShellshockBlend_Trampoline);
+            (std::uintptr_t)CG_DrawShellshockBlend_Hook, (uintptr_t*)&CG_DrawShellshockBlend_Trampoline);
 
         HookManager::CreateHook(GetGameAddresses().R_AddCmdDrawText(),
             (std::uintptr_t)R_AddCmdDrawText_Hook, (uintptr_t*)&R_AddCmdDrawText_Trampoline);
