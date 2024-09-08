@@ -953,6 +953,35 @@ namespace IWXMVM::IW5::Structures
         XModel** models;
     };
 
+    struct __declspec(align(8)) MaterialInfo
+    {
+        const char* name;
+        unsigned __int8 gameFlags;
+        unsigned __int8 sortKey;
+        unsigned __int8 textureAtlasRowCount;
+        unsigned __int8 textureAtlasColumnCount;
+        union GfxDrawSurf
+        {
+            //GfxDrawSurfFields fields;
+            unsigned __int64 packed;
+        } drawSurf;
+        unsigned int surfaceTypeBits;
+    };
+
+    struct Material
+    {
+        MaterialInfo info;
+        unsigned __int8 stateBitsEntry[37];
+        unsigned __int8 textureCount;
+        unsigned __int8 constantCount;
+        unsigned __int8 stateBitsCount;
+        unsigned __int8 stateFlags;
+        unsigned __int8 cameraRegion;
+        unsigned __int8 materialType;
+        unsigned __int8 layerCount;
+        // ...
+    };
+
     clientConnection_t* GetClientConnection();
     clientActive_t* GetClientActive();
     centity_s* GetEntities();

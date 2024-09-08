@@ -18,7 +18,6 @@ namespace IWXMVM::IW5::Patches
 
         ReturnPatch Item_GameMsgWindow_Paint{GetGameAddresses().Item_GameMsgWindow_Paint(), PatchApplySetting::Deferred};
         ReturnPatch CG_BloodOverlayDraw{GetGameAddresses().CG_BloodOverlayDraw(), PatchApplySetting::Deferred};
-        ReturnPatch R_AddCmdDrawStretchPic{GetGameAddresses().R_AddCmdDrawStretchPic(), PatchApplySetting::Deferred};
 
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };
