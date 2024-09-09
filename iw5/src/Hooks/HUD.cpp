@@ -10,7 +10,7 @@ namespace IWXMVM::IW5::Hooks::HUD
     bool showShellshockEffects = true;
 
     bool showScore = true;
-    bool showOtherText = true;
+    bool showIconsAndText = true;
 
     bool showBloodOverlay = true;
 
@@ -37,7 +37,7 @@ namespace IWXMVM::IW5::Hooks::HUD
         }
         else
         {
-            if (!showOtherText)
+            if (!showIconsAndText)
                 return;
         }
 
@@ -58,7 +58,7 @@ namespace IWXMVM::IW5::Hooks::HUD
         }
         else
         {
-            if (!showOtherText)
+            if (!showIconsAndText)
                 return;
         }
 
@@ -90,8 +90,8 @@ namespace IWXMVM::IW5::Hooks::HUD
         }
         else
         {
-            // everything else: only draw if showOtherText is true
-            if (showOtherText)
+            // everything else: only draw if showIconsAndText is true
+            if (showIconsAndText)
             {
                 R_AddCmdDrawStretchPic_Trampoline(a1, a2, a3, a4, a5, a6, a7, a8, a9, material);
             }

@@ -204,11 +204,11 @@ namespace IWXMVM::UI
             modified = ImGui::Checkbox("##showScoreCheckbox", &visuals.hudInfo.showScore) || modified;
             
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Show \"Text with Effects\"");
+            ImGui::Text("Show Icons and Text");
             ImGui::SameLine();
             ImGui::SetCursorPosX(checkboxColumnPosition);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
-            modified = ImGui::Checkbox("##showOtherTextCheckbox", &visuals.hudInfo.showOtherText) || modified;
+            modified = ImGui::Checkbox("##showOtherTextCheckbox", &visuals.hudInfo.showIconsAndText) || modified;
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Show Blood Overlay");

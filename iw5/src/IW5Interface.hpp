@@ -294,7 +294,7 @@ namespace IWXMVM::IW5
                 Hooks::HUD::showShellshockEffects,
                 Functions::FindDvar("ui_drawCrosshair")->current.boolean,
                 Hooks::HUD::showScore,
-                Hooks::HUD::showOtherText,
+                Hooks::HUD::showIconsAndText,
                 Hooks::HUD::showBloodOverlay,
                 Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
                 glm::vec3(
@@ -388,7 +388,7 @@ namespace IWXMVM::IW5
             Functions::FindDvar("ui_drawCrosshair")->current.boolean = hudInfo.showCrosshair;
             Hooks::HUD::showScore = hudInfo.showScore;
 
-            Hooks::HUD::showOtherText = hudInfo.showOtherText;
+            Hooks::HUD::showIconsAndText = hudInfo.showIconsAndText;
             Hooks::HUD::showBloodOverlay = hudInfo.showBloodOverlay;
 
             if (hudInfo.showKillfeed)
