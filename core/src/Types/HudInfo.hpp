@@ -10,7 +10,7 @@ namespace IWXMVM::Types
         bool showShellshock;
         bool showCrosshair;
         bool showScore;
-        bool showOtherText;
+        bool showIconsAndText;
         bool showBloodOverlay;
 
         bool showKillfeed;

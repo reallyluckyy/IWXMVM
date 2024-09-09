@@ -377,6 +377,7 @@ namespace IWXMVM::IW5
             Functions::FindDvar("cg_draw2D")->current.boolean = hudInfo.show2DElements;
 
             Functions::FindDvar("g_hardcore")->current.boolean = !hudInfo.showPlayerHUD;
+            Functions::FindDvar("scr_gameended")->current.string = hudInfo.showPlayerHUD ? "0" : "1";
             Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5.0f : 0.0f;
             Functions::FindDvar("cg_overheadranksize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
             Functions::FindDvar("cg_overheadnamessize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;

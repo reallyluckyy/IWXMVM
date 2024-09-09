@@ -300,7 +300,7 @@ namespace IWXMVM::Components
         out << "cg_drawshellshock " << settings.hudInfo.showShellshock << "\n";
         out << "ui_drawcrosshair " << settings.hudInfo.showCrosshair << "\n";
         out << "iwxmvm_ui_showscore " << settings.hudInfo.showScore << "\n";
-        out << "iwxmvm_ui_showothertext " << settings.hudInfo.showOtherText << "\n";
+        out << "iwxmvm_ui_showothertext " << settings.hudInfo.showIconsAndText << "\n";
         out << "iwxmvm_ui_showbloodoverlay " << settings.hudInfo.showBloodOverlay << "\n";
         out << "ui_hud_obituaries " << settings.hudInfo.showKillfeed << "\n";
         out << "g_teamcolor_allies " << settings.hudInfo.killfeedTeam1Color[0] << " "
