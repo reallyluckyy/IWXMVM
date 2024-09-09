@@ -19,6 +19,11 @@ namespace IWXMVM::IW5::Patches
         ReturnPatch Item_GameMsgWindow_Paint{GetGameAddresses().Item_GameMsgWindow_Paint(), PatchApplySetting::Deferred};
 
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
+
+        NopPatch<4> CL_Demo_CalcViewValues_Location1{GetGameAddresses().CL_Demo_CalcViewValues_Location1(),
+													 PatchApplySetting::Immediately};
+        NopPatch<4> CL_Demo_CalcViewValues_Location2{GetGameAddresses().CL_Demo_CalcViewValues_Location2(),
+                                                     PatchApplySetting::Immediately};
     };
 
     inline IW5Patches& GetGamePatches()

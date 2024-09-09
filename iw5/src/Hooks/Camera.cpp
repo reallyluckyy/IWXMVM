@@ -8,6 +8,8 @@
 
 namespace IWXMVM::IW5::Hooks::Camera
 {
+    float firstPersonFOV = 90.0f;
+
     typedef void (*CL_Demo_CalcViewValues_t)();
     CL_Demo_CalcViewValues_t CL_Demo_CalcViewValues_Trampoline;
     void CL_Demo_CalcViewValues_Hook()
@@ -17,6 +19,11 @@ namespace IWXMVM::IW5::Hooks::Camera
 
         auto& camera = Components::CameraManager::Get().GetActiveCamera();
         auto cg = Structures::GetClientGlobals();
+
+        float fov = camera->IsModControlledCameraMode() ? camera->GetFov() : firstPersonFOV;
+        const auto aspect = ((float)cg->refdef.displayViewport.width / (float)cg->refdef.displayViewport.height);
+        cg->refdef.view.tanHalfFovX = std::tan(glm::radians(fov) * 0.5f);
+        cg->refdef.view.tanHalfFovY = cg->refdef.view.tanHalfFovX / aspect;
 
         if (!camera->IsModControlledCameraMode())
         {
@@ -33,11 +40,6 @@ namespace IWXMVM::IW5::Hooks::Camera
 
         cg->refdef.view.zNear = 1.0f;
 
-        const auto aspect = ((float)cg->refdef.displayViewport.width / (float)cg->refdef.displayViewport.height);
-        cg->refdef.view.tanHalfFovX = std::tan(glm::radians(camera->GetFov()) * 0.5f);
-        cg->refdef.view.tanHalfFovY =
-            cg->refdef.view.tanHalfFovX / aspect;
-
         const auto axis = MathUtils::AnglesToAxis(camera->GetRotation());
         for (int x = 0; x < 3; x++)
         {
@@ -50,7 +52,10 @@ namespace IWXMVM::IW5::Hooks::Camera
 
     void Install()
     {
-        HookManager::CreateHook(GetGameAddresses().CL_Demo_CalcViewValues(), (std::uintptr_t)CL_Demo_CalcViewValues_Hook,
-								(uintptr_t *)&CL_Demo_CalcViewValues_Trampoline);
+        HookManager::CreateHook(
+            IWXMVM::Signatures::Lambdas::FollowCodeFlow(GetGameAddresses().CL_Demo_CalcViewValues_Location1() + 5),
+            (std::uintptr_t)CL_Demo_CalcViewValues_Hook,
+			(uintptr_t *)&CL_Demo_CalcViewValues_Trampoline
+        );
     }
 }  // namespace IWXMVM::IW5::Hooks::Camera

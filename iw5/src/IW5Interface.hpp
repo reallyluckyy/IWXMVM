@@ -8,6 +8,7 @@
 #include "Functions.hpp"
 #include "Hooks.hpp"
 #include "Hooks/HUD.hpp"
+#include "Hooks/Camera.hpp"
 #include "Components/Rewinding.hpp"
 #include "Utilities/PathUtils.hpp"
 
@@ -231,7 +232,7 @@ namespace IWXMVM::IW5
 
         void SetFov(float fov) final
         {
-            Functions::FindDvar("cg_fov")->current.value = fov;
+            Hooks::Camera::firstPersonFOV = fov;
         }
 
         Types::Sun GetSun() final
