@@ -52,6 +52,7 @@ namespace IWXMVM::IW5::Signatures
         Sig("85 F6 75 06 8B 35 ?? ?? ?? ?? 8B 46 54 8B 40 08 83 78 30 00 75 06 83 78 20 00 74 21", GAType::Code,
             -5) > R_AddCmdDrawTextWithEffects;
         Sig("83 C4 28 3B 35", GAType::Code, -5, Lambda::FollowCodeFlow) > R_AddCmdDrawStretchPic;
+        Sig("74 39 80 3D ?? ?? ?? ?? ?? 74 1B", GAType::Code, -6) > CG_PainVisionUpdate_Location;
 
         Sig("56 8B 74 24 40 57 8B 7C 24 40", GAType::Code, -7) > CG_DObjGetWorldBoneMatrix;
         Sig("83 C4 08 85 C0 75 01 C3 8B 54 24 04 52", GAType::Code, -5,

@@ -392,6 +392,10 @@ namespace IWXMVM::IW5
 
             Hooks::HUD::showIconsAndText = hudInfo.showIconsAndText;
             Hooks::HUD::showBloodOverlay = hudInfo.showBloodOverlay;
+            if (hudInfo.showBloodOverlay)
+                Patches::GetGamePatches().CG_PainVisionUpdate.Revert();
+			else
+                Patches::GetGamePatches().CG_PainVisionUpdate.Apply();
 
             if (hudInfo.showKillfeed)
                 Patches::GetGamePatches().Item_GameMsgWindow_Paint.Revert();
