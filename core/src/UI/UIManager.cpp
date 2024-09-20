@@ -108,7 +108,10 @@ namespace IWXMVM::UI
         }
     }
 
-    HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    typedef LRESULT(__stdcall* GameWndProc_t)(HWND hWnd, UINT Msg, unsigned int wParam, LPARAM lParam);
+    GameWndProc_t GameWndProc_Trampoline;
+
+     HRESULT __stdcall ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         auto& uiManager = UIManager::Get();
         auto& gameView = uiManager.GetUIComponent(UI::Component::GameView);
@@ -128,7 +131,14 @@ namespace IWXMVM::UI
             return true;
         }
 
-        return CallWindowProc(uiManager.GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
+        if (Mod::GetGameInterface()->GetGame() == Types::Game::IW5)
+        {
+            return GameWndProc_Trampoline(hWnd, uMsg, wParam, lParam);
+        }
+        else
+        {
+            return CallWindowProc(uiManager.GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
+        }
     }
 
     void UIManager::ToggleOverlay()
@@ -205,7 +215,15 @@ namespace IWXMVM::UI
 
             // TODO: byte size is game dependent
             LOG_DEBUG("Hooking WndProc at {0:x}", Mod::GetGameInterface()->GetWndProc());
-            originalGameWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (std::uintptr_t)ImGuiWndProc);
+            // plutonium messes up the wndproc hook callback procedure, only keyboard events work 
+            if (Mod::GetGameInterface()->GetGame() == Types::Game::IW5)
+            {
+                HookManager::CreateHook(Mod::GetGameInterface()->GetWndProc(), (uintptr_t)ImGuiWndProc, (uintptr_t*)&GameWndProc_Trampoline);
+            }
+            else
+            {
+                originalGameWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (std::uintptr_t)ImGuiWndProc);
+            }
 
             auto windowSize = GetWindowSize(hwnd);
             auto fontSize = std::floor(windowSize.x / 106.0f);
