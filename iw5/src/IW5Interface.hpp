@@ -215,6 +215,10 @@ namespace IWXMVM::IW5
              // TODO: Hack #2. I would, once again, strongly advise against exposing dvars directly to core...
             if (name.compare("timescale") == 0)
             {
+                // in plutonium clientdemoplayback timescale is not initialized until you watch a demo
+                if (Structures::GetClientDemoPlayback() == nullptr)
+                    return std::nullopt;
+
                 return Types::Dvar{name, (Types::Dvar::Value*)&Structures::GetClientDemoPlayback()->timeScale};
             }
 

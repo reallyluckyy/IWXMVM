@@ -61,7 +61,7 @@ namespace IWXMVM::IW5::Signatures
             -6) > Scr_AllocString;
 
         Sig("C6 05 ?? ?? ?? ?? ?? 8B 08 8B 91 A4 00 00 00", GAType::Data, -4) > d3d9DevicePointer;
-        Sig("6A 02 FF 15 ?? ?? ?? ?? 8B 6C 24 48", GAType::Code, -5) > MainWndProc;
+        Sig("8B 6C 24 48 3B 2D 18 39 AA 05 0F 85", GAType::Code, -13) > MainWndProc;
 
 #undef Sig
 #undef Lambda
