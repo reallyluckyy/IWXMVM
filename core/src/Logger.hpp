@@ -4,6 +4,7 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/sinks/ansicolor_sink.h"
 #pragma warning(pop)
 
 #define LOG_INFO(...) Logger::GetInternalLogger()->info(__VA_ARGS__)
