@@ -207,6 +207,26 @@ namespace IWXMVM::UI
             ImGui_ImplDX9_Init(device);
 
             LOG_DEBUG("Hooking WndProc at {0:x}", Mod::GetGameInterface()->GetWndProc());
+
+            // mw3 plutonium has a wndproc callback hook that we need to remove
+            if (Mod::GetGameInterface()->GetGame() == Types::Game::IW5)
+            {
+                DWORD wndprocAddr = GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+                if (wndprocAddr != Mod::GetGameInterface()->GetWndProc())
+                {
+                    // remove plutoniums wndproc hook and restore it with the game's original wndproc
+                    SetWindowLongPtr(hwnd, GWL_WNDPROC, Mod::GetGameInterface()->GetWndProc());
+
+                    // remove plutonium's raw input device hook
+                    RAWINPUTDEVICE hid;
+                    hid.usUsagePage = 1;  // HID_USAGE_PAGE_GENERIC
+                    hid.usUsage = 2;      // HID_MOUSE
+                    hid.dwFlags = RIDEV_REMOVE;
+                    hid.hwndTarget = NULL;
+                    RegisterRawInputDevices(&hid, 1, sizeof(RAWINPUTDEVICE));
+                }
+            }
+
             HookManager::CreateHook(Mod::GetGameInterface()->GetWndProc(), (uintptr_t)ImGuiWndProc, (uintptr_t*)&GameWndProc_Trampoline);
 
             auto windowSize = GetWindowSize(hwnd);
