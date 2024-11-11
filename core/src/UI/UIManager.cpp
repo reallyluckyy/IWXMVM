@@ -207,6 +207,7 @@ namespace IWXMVM::UI
             ImGui_ImplDX9_Init(device);
 
             LOG_DEBUG("Hooking WndProc at {0:x}", Mod::GetGameInterface()->GetWndProc());
+
             HookManager::CreateHook(Mod::GetGameInterface()->GetWndProc(), (uintptr_t)ImGuiWndProc, (uintptr_t*)&GameWndProc_Trampoline);
 
             auto windowSize = GetWindowSize(hwnd);

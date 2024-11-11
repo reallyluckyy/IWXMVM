@@ -30,8 +30,31 @@ namespace IWXMVM::IW5
             Patches::GetGamePatches();
         }
 
+        void RemovePlutoniumCallbacks()
+        {
+            HWND hwnd = D3D9::FindWindowHandle();
+            DWORD wndprocAddr = GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+
+            // mw3 plutonium has a wndproc callback hook that we need to remove
+            if (wndprocAddr != Mod::GetGameInterface()->GetWndProc())
+            {
+                // remove plutonium's wndproc hook and restore it with the game's original wndproc
+                SetWindowLongPtr(hwnd, GWL_WNDPROC, Mod::GetGameInterface()->GetWndProc());
+
+                // remove plutonium's raw input device hook
+                RAWINPUTDEVICE hid;
+                hid.usUsagePage = 1;  // HID_USAGE_PAGE_GENERIC
+                hid.usUsage = 2;      // HID_MOUSE
+                hid.dwFlags = RIDEV_REMOVE;
+                hid.hwndTarget = NULL;
+                RegisterRawInputDevices(&hid, 1, sizeof(RAWINPUTDEVICE));
+            }
+        }
+
         void SetupEventListeners() final
         {
+            RemovePlutoniumCallbacks();
+
             Events::RegisterListener(EventType::OnCameraChanged, []() {
                 auto& camera = Components::CameraManager::Get().GetActiveCamera();
                 auto isFreeCamera = camera->IsModControlledCameraMode();
