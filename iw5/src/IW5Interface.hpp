@@ -429,6 +429,11 @@ namespace IWXMVM::IW5
             else
                 Patches::GetGamePatches().Item_GameMsgWindow_Paint.Apply();
 
+            if (hudInfo.showIconsAndText)
+                Patches::GetGamePatches().CG_DrawRotatedPic.Revert();
+            else
+                Patches::GetGamePatches().CG_DrawRotatedPic.Apply();
+
             for (int i = 0; i < 3; i++)
                 Functions::FindDvar("cg_TeamColor_Allies")->current.color[i] = static_cast<uint8_t>(hudInfo.killfeedTeam1Color[i] * 255.0f);
             for (int i = 0; i < 3; i++)

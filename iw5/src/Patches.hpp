@@ -29,6 +29,9 @@ namespace IWXMVM::IW5::Patches
         // disable red tint of screen when damaged
         NopPatch<8> CG_PainVisionUpdate{GetGameAddresses().CG_PainVisionUpdate_Location(), 
                                         PatchApplySetting::Deferred};
+
+        // disable theater mode ui when showIconsAndText is false
+        ReturnPatch CG_DrawRotatedPic{GetGameAddresses().CG_DrawRotatedPic(), PatchApplySetting::Immediately};
     };
 
     inline IW5Patches& GetGamePatches()
