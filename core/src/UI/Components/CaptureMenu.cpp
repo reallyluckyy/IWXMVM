@@ -10,6 +10,7 @@
 #include "Components/CameraManager.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Configuration/PreferencesConfiguration.hpp"
+#include "UI/TaskbarProgress.hpp"
 
 namespace IWXMVM::UI
 {
@@ -359,68 +360,16 @@ namespace IWXMVM::UI
 
             ImGui::BeginDisabled(captureManager.IsCapturing());
 
-            // TODO: Unicode directories will break this
             if (ImGui::Button(ICON_FA_FOLDER_OPEN " Browse",
                                 ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 2)))
             {
-                // Create FileOpenDialog object
-                IFileOpenDialog* pFileOpen = nullptr;
-                HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_IFileOpenDialog,
-                                              reinterpret_cast<void**>(&pFileOpen));
-
-                if (SUCCEEDED(hr))
+                auto folder = PathUtils::OpenFolderBrowseDialog();
+                if (folder.has_value())
                 {
-                    // Set options to allow only folder selection
-                    FILEOPENDIALOGOPTIONS options = {};
-                    hr = pFileOpen->GetOptions(&options);
-                    hr = pFileOpen->SetOptions(options | FOS_PICKFOLDERS);
-
-                    // Convert path to wchar string
-                    const std::string charPath = PathUtils::GetCurrentGameDirectory();
-                    const std::size_t convertedChars = mbstowcs(nullptr, charPath.c_str(), charPath.length());
-                    wchar_t* wcharPath = new wchar_t[convertedChars + 1];
-                    mbstowcs(wcharPath, charPath.c_str(), convertedChars + 1);
-
-                    // Set an initial folder
-                    IShellItem* pInitialFolder = nullptr;
-                    if (wcharPath)
-                    {
-                        hr = SHCreateItemFromParsingName(wcharPath, nullptr, IID_PPV_ARGS(&pInitialFolder));
-                        if (SUCCEEDED(hr))
-                        {
-                            pFileOpen->SetFolder(pInitialFolder);
-                            pInitialFolder->Release();
-                        }
-                    }
-                    delete[] wcharPath;
-
-                    // Show the dialog
-                    hr = pFileOpen->Show(NULL);
-
-                    // Get the selected folder path
-                    if (SUCCEEDED(hr))
-                    {
-                        IShellItem* pItem = nullptr;
-                        hr = pFileOpen->GetResult(&pItem);
-                        if (SUCCEEDED(hr))
-                        {
-                            PWSTR pszFilePath = nullptr;
-                            hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
-
-                            if (SUCCEEDED(hr))
-                            {
-                                std::filesystem::path outputPath(pszFilePath);
-                                LOG_INFO("Set recording output directory to: {}", outputPath.string());
-                                PreferencesConfiguration::Get().captureOutputDirectory = outputPath;
-                                Configuration::Get().Write(true);
-                            }
-
-                            CoTaskMemFree(pszFilePath);
-                            pItem->Release();
-                        }
-                    }
-                    pFileOpen->Release();
-                } 
+                    LOG_INFO("Set recording output directory to: {}", folder.value().string());
+                    PreferencesConfiguration::Get().captureOutputDirectory = folder.value();
+                    Configuration::Get().Write(true); 
+                }
             }
 
             ImGui::EndDisabled();
@@ -462,6 +411,13 @@ namespace IWXMVM::UI
                     ImGui::ProgressBar((float)captureManager.GetCapturedFrameCount() / totalFrames, ImVec2(-1, 0), "");
                 }
                 ImGui::PopStyleColor();
+
+                TaskbarProgress::SetProgressValue((int)captureManager.GetCapturedFrameCount(), (unsigned long long)totalFrames);
+                TaskbarProgress::SetProgressState(TBPF_NORMAL);
+            }
+            else
+            {
+                TaskbarProgress::SetProgressState(TBPF_NOPROGRESS);
             }
 
             ImGui::End();

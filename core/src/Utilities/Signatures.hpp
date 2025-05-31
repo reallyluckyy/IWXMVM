@@ -141,7 +141,8 @@ namespace IWXMVM::Signatures
             if (byteIndex >= (size + 2) / 3)
                 throw std::runtime_error("Incorrect signature input.");
 
-            bytes[byteIndex++] = (HexToDecimal(byteString[strIndex]) << 4) + HexToDecimal(byteString[strIndex + 1]);
+            bytes[byteIndex++] =
+                static_cast<uint16_t>((HexToDecimal(byteString[strIndex]) << 4) + HexToDecimal(byteString[strIndex + 1]));
             strIndex += 2;
         }
 

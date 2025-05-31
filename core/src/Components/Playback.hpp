@@ -13,8 +13,18 @@ namespace IWXMVM::Components
         void TogglePaused();
         bool IsPaused();
 
+        uint32_t GetTimelineTick();
+        void SetTimelineTick(uint32_t tick);
+
+        void ToggleFrozenTick();
+        std::optional<uint32_t> GetFrozenTick();
+        bool IsGameFrozen();
+
         void SkipForward(std::int32_t ticks);
+        void SkipDemoForward(std::int32_t ticks);
         void SetTickDelta(std::int32_t value, bool ignoreDeadzone = false);
+
+        void HandleImportedFrozenTickLogic(std::optional<std::uint32_t> frozenTick);
 
         std::int32_t CalculatePlaybackDelta(std::int32_t gameMsec);
     } // namespace Playback

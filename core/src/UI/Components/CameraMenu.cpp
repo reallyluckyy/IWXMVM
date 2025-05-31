@@ -162,6 +162,44 @@ namespace IWXMVM::UI
         ImGui::TextWrapped("There are no settings for this camera mode!");
     }
 
+    void DrawDollycamSettings()
+    {
+        auto columnPercent = 0.4f;
+
+        auto& keyframeManager = Components::KeyframeManager::Get();
+        const auto& property = keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera);
+        const auto& campathNodes = keyframeManager.GetKeyframes(property);
+
+        if (campathNodes.empty())
+        {
+            auto& config = InputConfiguration::Get();
+
+            ImGui::TextWrapped(
+                "No campath nodes set! To create a dollycam campath, go into Free Camera and press %s to place nodes.",
+                ImGui::GetKeyName(config.GetBoundKey(Action::DollyAddNode)));
+            return;
+        }
+
+        ImGui::Text("Placed Nodes");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+        ImGui::Text("%d", campathNodes.size());
+
+        ImGui::Text("Interpolation");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+        ImGui::Text("%s", campathNodes.size() < 4 ? "Linear" : "Cubic");
+
+        ImGui::Dummy(ImVec2(0, 5));
+
+        if (campathNodes.size() < 4)
+        {
+            ImGui::TextWrapped("You've placed less than 4 nodes. Your campath will use linear interpolation.");
+        }
+    }
+
     void CameraMenu::Render()
     {
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
@@ -191,6 +229,9 @@ namespace IWXMVM::UI
                 break;
             case Components::Camera::Mode::Bone:
                 DrawBoneCameraSettings();
+                break;
+            case Components::Camera::Mode::Dolly:
+                DrawDollycamSettings();
                 break;
             default:
                 DrawNoSettings();

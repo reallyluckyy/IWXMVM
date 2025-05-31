@@ -151,7 +151,8 @@ namespace IWXMVM::UI
 
     bool KeyframeEditor::DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                     uint32_t displayStartTick, uint32_t displayEndTick,
-                                                    std::vector<Types::Keyframe>& keyframes, uint32_t demoLength)
+                                                    std::vector<Types::Keyframe>& keyframes, uint32_t demoLength,
+                                                    std::optional<uint32_t> frozenTick)
     {
         using namespace ImGui;
 
@@ -188,7 +189,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength, frozenTick);
 
         bool isAnyKeyframeHovered = false;
 
@@ -278,7 +279,7 @@ namespace IWXMVM::UI
     }
 
 
-    ImVec2& GetValueDisplayRange(const Types::KeyframeableProperty& property,
+    ImVec2 GetValueDisplayRange(const Types::KeyframeableProperty& property,
                                                   const std::vector<Types::Keyframe>& keyframes,
                                                   int32_t keyframeValueIndex)
     {
@@ -353,7 +354,7 @@ namespace IWXMVM::UI
     bool KeyframeEditor::DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                                  uint32_t displayStartTick, uint32_t displayEndTick, const float width,
                                                  std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex,
-                                                 uint32_t demoLength)
+                                                 uint32_t demoLength, std::optional<uint32_t> frozenTick)
     {
         using namespace ImGui;
 
@@ -391,7 +392,7 @@ namespace IWXMVM::UI
                 grab_bb.Min, grab_bb.Max,
                 GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
-        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength);
+        ImGuiEx::DemoProgressBarLines(frame_bb, *currentTick, displayStartTick, displayEndTick, demoLength, frozenTick);
 
         bool isAnyKeyframeHovered = false;
 
@@ -595,24 +596,26 @@ namespace IWXMVM::UI
     bool KeyframeEditor::DrawKeyframeSlider(const Types::KeyframeableProperty& property)
     {
         auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-        auto currentTick = demoInfo.currentTick;
+        auto currentTick = Components::Playback::GetTimelineTick();
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
         return DrawKeyframeSliderInternal(property, &currentTick, displayStartTick, displayEndTick,
-                                          Components::KeyframeManager::Get().GetKeyframes(property), demoInfo.endTick);
+                                          Components::KeyframeManager::Get().GetKeyframes(property), demoInfo.endTick,
+                                          Components::Playback::GetFrozenTick());
     }
 
     bool KeyframeEditor::DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width)
     {
         auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-        auto currentTick = demoInfo.currentTick;
+        auto currentTick = Components::Playback::GetTimelineTick();
         auto [displayStartTick, displayEndTick] = GetDisplayTickRange();
 
         bool result = false;
         for (int i = 0; i < property.GetValueCount(); i++)
         {
             result = DrawCurveEditorInternal(property, &currentTick, displayStartTick, displayEndTick, width,
-                                             Components::KeyframeManager::Get().GetKeyframes(property), i, demoInfo.endTick) || result;
+                                             Components::KeyframeManager::Get().GetKeyframes(property), i,
+                                             demoInfo.endTick, Components::Playback::GetFrozenTick()) || result;
         }
         return result;
     }
@@ -620,20 +623,20 @@ namespace IWXMVM::UI
     void DrawKeyframeValueInput(const char* label, float dvalue, const Types::KeyframeableProperty& property, int index)
     {
         std::vector<Types::Keyframe>& keyframes = Components::KeyframeManager::Get().GetKeyframes(property);
-        static float v = 0;
-
-        v = dvalue;
-        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6.0f);
-        auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-        auto currentTick = demoInfo.currentTick;
+        
+        auto currentTick = Components::Playback::GetTimelineTick();
         auto keyframe = std::find_if(keyframes.begin(), keyframes.end(), [currentTick](const auto& k) { return k.tick == currentTick; });
-        if (ImGui::DragFloat(label, &v, 0.1f, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE, "%.2f"))
+
+        auto [rangeLow, rangeHigh] = property.defaultValueRange;
+        auto granularity = (rangeHigh - rangeLow) * 0.0001f;
+
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6.0f);
+        if (ImGui::DragFloat(label, &dvalue, granularity, -KEYFRAME_MAX_VALUE, KEYFRAME_MAX_VALUE, "%.2f"))
         {
-            auto [tick, val] = std::make_tuple(currentTick, v);
             if (keyframe == keyframes.end())
             {
-                auto value = Components::KeyframeManager::Get().Interpolate(property, tick);
-                Components::KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, tick, value));
+                auto value = Components::KeyframeManager::Get().Interpolate(property, currentTick);
+                Components::KeyframeManager::Get().AddKeyframe(property, Types::Keyframe(property, currentTick, value));
             }
             else
             {
@@ -641,7 +644,7 @@ namespace IWXMVM::UI
                 {
                     Components::KeyframeManager::Get().BeginModifyingKeyframeValue(*keyframe);
                 }
-                keyframe->value.SetByIndex(index, v);
+                keyframe->value.SetByIndex(index, dvalue);
             }
             Components::KeyframeManager::Get().SortAndSaveKeyframes(keyframes);
         }
@@ -661,8 +664,7 @@ namespace IWXMVM::UI
         ImGui::SameLine();
         if (ImGui::ArrowButton(label, 0))
         {
-            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            auto currentTick = demoInfo.currentTick;
+            auto currentTick = Components::Playback::GetTimelineTick();
             auto previousKeyframe = *keyframes.begin();
             for (const auto& keyframe : keyframes)
             {
@@ -671,7 +673,7 @@ namespace IWXMVM::UI
             }
             if (previousKeyframe.tick < currentTick)
             {
-                Components::Rewinding::RewindBy(previousKeyframe.tick - demoInfo.currentTick);
+                Components::Rewinding::RewindBy(previousKeyframe.tick - currentTick);
             }
         }
     }
@@ -682,8 +684,7 @@ namespace IWXMVM::UI
         ImGui::SameLine();
         if (ImGui::ArrowButton(label, 1))
         {
-            auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-            auto currentTick = demoInfo.currentTick;
+            auto currentTick = Components::Playback::GetTimelineTick();
             auto nextKeyframe = *keyframes.rbegin();
             for (std::vector<Types::Keyframe>::reverse_iterator keyframe = keyframes.rbegin(); keyframe != keyframes.rend(); ++keyframe)
             {
@@ -692,7 +693,7 @@ namespace IWXMVM::UI
             }
             if (nextKeyframe.tick > currentTick)
             {
-                Components::Playback::SkipForward(nextKeyframe.tick - demoInfo.currentTick);
+                Components::Playback::SkipForward(nextKeyframe.tick - currentTick);
             }
         }
     }
@@ -750,8 +751,7 @@ namespace IWXMVM::UI
 
         const auto padding = ImGui::GetStyle().WindowPadding;
 
-        const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
-        auto currentTick = demoInfo.currentTick;
+        auto currentTick = Components::Playback::GetTimelineTick();
         const auto& propertyKeyframes = Components::KeyframeManager::Get().GetKeyframes();
 
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
@@ -775,7 +775,9 @@ namespace IWXMVM::UI
                 auto firstColumnSize = ImGui::GetFontSize() * 1.4f + GetSize().x / 8 + padding.x * 3;
 
                 ImGui::TableSetupColumn("Properties", ImGuiTableColumnFlags_NoSort, firstColumnSize);
-                ImGui::TableSetupColumn("Keyframes", ImGuiTableColumnFlags_NoSort, GetSize().x / 8 * 7);
+                ImGui::TableSetupColumn(
+                    "Keyframes", ImGuiTableColumnFlags_NoSort,
+                    GetSize().x / 8 * 7 + ImGui::GetStyle().ItemSpacing.x + ImGui::GetFontSize() * 1.4f);
 
                 for (const auto& pair : propertyKeyframes)
                 {
@@ -831,6 +833,16 @@ namespace IWXMVM::UI
                     ImGui::SetNextItemWidth(progressBarWidth);
                     ImGui::TableSetColumnIndex(1);
                     wasInnerAreaHovered = DrawKeyframeSlider(property) || wasInnerAreaHovered;
+
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 0.1f, 0.1f, 1));
+                    if (ImGui::Button(std::format(ICON_FA_TRASH "##deleteProperty{}Button", property.name).c_str(), 
+                                      ImVec2(1, 1) * (ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2.0f)))
+                    {
+                        Components::KeyframeManager::Get().GetKeyframes(property).clear();
+                        propertyVisible[property] = false;
+                    }
+                    ImGui::PopStyleColor();
 
                     if (showCurve)
                     {

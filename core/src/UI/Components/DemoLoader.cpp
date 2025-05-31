@@ -5,6 +5,7 @@
 #include "UI/UIManager.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "Resources.hpp"
+#include "Configuration/PreferencesConfiguration.hpp"
 
 namespace IWXMVM::UI
 {
@@ -212,19 +213,24 @@ namespace IWXMVM::UI
 
         LOG_DEBUG("Searching for demo files...");
         isScanningDemoPaths.store(true);
+        std::thread([&] { 
+            demoDirectories.clear();
+            demoPaths.clear();
 
-        demoDirectories.clear();
-        demoPaths.clear();
+            auto searchPaths = std::vector(PreferencesConfiguration::Get().additionalDemoSearchDirectories);
+            searchPaths.push_back(PathUtils::GetCurrentGameDirectory());
 
-        AddPathsToSearch({PathUtils::GetCurrentGameDirectory()});
-        Search();
+            AddPathsToSearch(searchPaths);
+            Search();
 
-        // 'demoDirectories' and 'demoPaths' are complete here, but we still need to find out the relevancy of each
-        // directory
-        MarkDirsRelevancy();
+            // 'demoDirectories' and 'demoPaths' are complete here, but we still need to find out the relevancy of each
+            // directory
+            MarkDirsRelevancy();
 
-        LOG_DEBUG("Found {0} demo files", demoPaths.size());
-        isScanningDemoPaths.store(false);
+            LOG_DEBUG("Found {0} demo files", demoPaths.size());
+
+            isScanningDemoPaths.store(false);            
+        }).detach();
     }
 
     bool DemoLoader::DemoFilter(const std::u8string& demoFileName)
@@ -441,7 +447,7 @@ namespace IWXMVM::UI
 
     void DemoLoader::Initialize()
     {
-        std::thread([&] { FindAllDemos(); }).detach();
+        FindAllDemos();
     }
 
     void DemoLoader::Render()
@@ -476,17 +482,23 @@ namespace IWXMVM::UI
 
                 ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttonSize.x * 2 - ImGui::GetStyle().ItemSpacing.x -
                                      ImGui::GetStyle().WindowPadding.x);
-
+                
                 if (ImGui::Button(addPathButtonLabel.c_str(), buttonSize))
                 {
-                    // TODO: Implement
+                    auto path = PathUtils::OpenFolderBrowseDialog();
+                    if (path.has_value())
+                    {
+                        PreferencesConfiguration::Get().additionalDemoSearchDirectories.push_back(path.value());
+                        Configuration::Get().Write(true); 
+						FindAllDemos();
+                    }
                 }
 
                 ImGui::SameLine();
 
                 if (ImGui::Button(refreshButtonLabel.c_str(), buttonSize))
                 {
-                    std::thread([&] { FindAllDemos(); }).detach();
+                    FindAllDemos();
                     ImGui::End();
                     return;
                 }

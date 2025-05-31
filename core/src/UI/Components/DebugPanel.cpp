@@ -1,6 +1,7 @@
 #include "StdInclude.hpp"
 #include "DebugPanel.hpp"
 
+#include "Components/Playback.hpp"
 #include "Utilities/HookManager.hpp"
 #include "UI/UIManager.hpp"
 #include "Mod.hpp"
@@ -15,10 +16,16 @@ namespace IWXMVM::UI
     {
         if (ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
+            const auto demoInfo = Mod::GetGameInterface()->GetDemoInfo();
+
             ImGui::Text("Game State: %s", Types::ToString(Mod::GetGameInterface()->GetGameState()).data());
-            ImGui::Text("Demo Name: %s", Mod::GetGameInterface()->GetDemoInfo().name.c_str());
-            ImGui::Text("Demo Tick: %d", Mod::GetGameInterface()->GetDemoInfo().currentTick);
-            ImGui::Text("Demo End Tick: %d", Mod::GetGameInterface()->GetDemoInfo().endTick);
+            ImGui::Text("Demo Name: %s", demoInfo.name.c_str());
+            if (Components::Playback::IsGameFrozen())
+            {
+                ImGui::Text("Frozen Demo Tick: %d", Components::Playback::GetFrozenTick().value());
+            }
+            ImGui::Text("Demo Tick: %d", Components::Playback::GetTimelineTick());
+            ImGui::Text("Demo End Tick: %d", demoInfo.endTick);
 
             auto keyframeEditor = UIManager::Get().GetUIComponent<KeyframeEditor>(UI::Component::KeyframeEditor);
             auto [displayStartTick, displayEndTick] = keyframeEditor->GetDisplayTickRange();

@@ -70,7 +70,7 @@ namespace IWXMVM::IW3::Functions
     bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity /*@<eax>*/, int boneIndex /*@<ecx>*/, 
                                    float* matrix /*@<esi>*/, Structures::DObj_s* dobj, float* origin)
     {
-        static uintptr_t address = GetGameAddresses().CG_DObjGetWorldBoneMatrix.GetAddress();
+        static uintptr_t address = GetGameAddresses().CG_DObjGetWorldBoneMatrix();
         __asm 
         {
             mov eax, entity
@@ -83,6 +83,7 @@ namespace IWXMVM::IW3::Functions
         }
     }
 
+
     Structures::Material* Material_RegisterHandle(const char* materialName)
     {
         typedef Structures::Material*(__cdecl * Material_RegisterHandle_t)(const char* materialName, int a2);
@@ -90,6 +91,18 @@ namespace IWXMVM::IW3::Functions
             reinterpret_cast<Material_RegisterHandle_t>(GetGameAddresses().Material_RegisterHandle());
 
         return Material_RegisterHandle(materialName, 3);
+    }
+
+    void Dvar_SetStringByName(const char* dvarName, const char* value)
+    {
+        static uintptr_t address = GetGameAddresses().Dvar_SetStringByName();
+        __asm 
+        {
+            mov eax, dvarName
+            push value
+            call address
+            add esp, 4
+        }
     }
 
 }  // namespace IWXMVM::IW3::Structures

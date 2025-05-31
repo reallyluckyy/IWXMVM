@@ -21,6 +21,8 @@ namespace IWXMVM
         Configuration::ReadValueInto<float>(j, NODE_ORBIT_MOVE_SPEED, orbitMoveSpeed);
         Configuration::ReadValueInto<float>(j, NODE_ORBIT_ZOOM_SPEED, orbitZoomSpeed);
         Configuration::ReadValueInto<std::filesystem::path>(j, NODE_CAPTURE_OUTPUT_DIRECTORY, captureOutputDirectory);
+        Configuration::ReadValueInto<std::vector<std::filesystem::path>>(j, NODE_ADDITIONAL_DEMO_SEARCH_DIRECTORIES,
+                                                                         additionalDemoSearchDirectories);
     }
 
     void PreferencesConfiguration::Serialize(nlohmann::json& j) const
@@ -32,5 +34,11 @@ namespace IWXMVM
         j[NODE_ORBIT_MOVE_SPEED] = orbitMoveSpeed;
         j[NODE_ORBIT_ZOOM_SPEED] = orbitZoomSpeed;
         j[NODE_CAPTURE_OUTPUT_DIRECTORY] = captureOutputDirectory;
+        
+        j[NODE_ADDITIONAL_DEMO_SEARCH_DIRECTORIES] = nlohmann::json::array();
+        for (const auto& dir : additionalDemoSearchDirectories)
+        {
+			j[NODE_ADDITIONAL_DEMO_SEARCH_DIRECTORIES].push_back(dir);
+        }
     }
 }  // namespace IWXMVM

@@ -65,7 +65,7 @@ namespace ImGuiEx
 
     constexpr std::size_t MARKER_DISTANCE = 5000;
     void DemoProgressBarLines(const ImRect rect, uint32_t currentTick, uint32_t displayStartTick,
-                              uint32_t displayEndTick, std::uint32_t demoLength)
+                              uint32_t displayEndTick, std::uint32_t demoLength, std::optional<uint32_t> frozenTick)
     {
         using namespace ImGui;
 
@@ -83,6 +83,12 @@ namespace ImGuiEx
                                displayEndTick);
         DrawProgressLineAtTick(rect, captureSettings.endTick, GetColorU32(ImVec4(1, 0, 0, 1)), 2, displayStartTick,
                                displayEndTick);
+
+        if (frozenTick)
+        {
+            DrawProgressLineAtTick(rect, frozenTick.value(), GetColorU32(ImVec4(1, 0.9f, 0, 1)), 2, displayStartTick,
+                                   displayEndTick);
+        }
     }
 
     bool TimescaleSliderInternal(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min,

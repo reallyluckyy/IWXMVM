@@ -198,6 +198,20 @@ namespace IWXMVM::UI
             ImGui::SetCursorPosX(checkboxColumnPosition);
             ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
             modified = ImGui::Checkbox("##showScoreCheckbox", &visuals.hudInfo.showScore) || modified;
+            
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show \"Text with Effects\"");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(checkboxColumnPosition);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::Checkbox("##showOtherTextCheckbox", &visuals.hudInfo.showOtherText) || modified;
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Show Blood Overlay");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(checkboxColumnPosition);
+            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.6f - ImGui::GetStyle().WindowPadding.x);
+            modified = ImGui::Checkbox("##showBloodOverlayCheckbox", &visuals.hudInfo.showBloodOverlay) || modified;
 
             ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
@@ -287,7 +301,7 @@ namespace IWXMVM::UI
             "Far Start", &visuals.dof.farStart, 0, 5000,
             Types::KeyframeablePropertyType::DepthOfFieldFarStart) || modified;
         modified = ImGuiEx::Keyframeable::SliderFloat(
-            "Far End", &visuals.dof.farEnd, 0, 5000,
+            "Far End", &visuals.dof.farEnd, 0, 10000,
             Types::KeyframeablePropertyType::DepthOfFieldFarEnd) || modified;
 
         ImGui::Dummy(ImVec2(0.0f, 20.0f));  // Spacing

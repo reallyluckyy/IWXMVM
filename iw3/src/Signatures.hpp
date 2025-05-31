@@ -77,6 +77,11 @@ namespace IWXMVM::IW3::Signatures
         Sig("A1 ?? ?? ?? ?? C3 A1 ?? ?? ?? ?? 80 78 0C 00", GAType::Code, -5) > Material_RegisterHandle;
         Sig("E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 33 C0 A3", GAType::Data, -4, Lambda::DereferenceAddress) > rgp;
 
+        Sig("83 C4 2C 5D 5B 59", GAType::Code, -5) > CG_DrawPlayerLowHealthOverlay;
+        Sig("83 EC 14 53 8B 5D 08 56 57 8B F8 E8 ?? ?? ?? ?? 8B F0 85 F6 74 0E", GAType::Code, -6) > Dvar_SetStringByName;
+        Sig("E8 ?? ?? ?? ?? 8B BB ?? ?? ?? ?? 8B F5", GAType::Code, 13,
+            Lambda::FollowCodeFlow) > CG_ExecuteNewServerCommands;
+
 
 #undef Sig
 #undef Lambda

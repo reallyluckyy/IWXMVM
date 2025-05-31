@@ -41,7 +41,7 @@ namespace IWXMVM::UI
         std::pair<std::size_t, std::size_t> searchPaths;  // Pair of indices representing the [first, second) interval
                                                           // of search paths in the 'demoDirectories' vector
         std::vector<DemoDirectory> demoDirectories;
-        std::vector<std::filesystem::path> demoPaths;
+        std::vector<std::filesystem::path> demoPaths; // Path to every demo found
         std::atomic<bool> isScanningDemoPaths;
 
         std::string searchBarText;

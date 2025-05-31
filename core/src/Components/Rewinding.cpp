@@ -129,7 +129,7 @@ namespace IWXMVM::Components::Rewinding
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
 
         // TODO: find a more robust method of detecting a gamestate message
-        if (len >= 10'000)
+        if (len >= 10'000 || demoFileOffset == 9)
         {
             // first message with the gamestate; triggers the game to load a map
             if (initialGamestate != nullptr)
@@ -143,6 +143,7 @@ namespace IWXMVM::Components::Rewinding
             // after gamestate before first snapshot
             initialGamestate = std::make_unique<InitialGamestate>();
             initialGamestate->fileOffset = demoFileOffset - 9;
+            assert(initialGamestate->fileOffset > 0);
 
             initialGamestate->lastExecutedServerCommand =
                 *reinterpret_cast<int*>(addresses.clc.lastExecutedServerCommand);
@@ -167,6 +168,7 @@ namespace IWXMVM::Components::Rewinding
             // after first snapshot and before second snapshot
             initialGamestate->populated = true;
             initialGamestate->serverTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
+            assert(initialGamestate->serverTime > 0);
         }
     }
 
@@ -180,7 +182,7 @@ namespace IWXMVM::Components::Rewinding
 
         if (latestRewindTo > curTime)
         {
-            Components::Playback::SkipForward(latestRewindTo - curTime);
+            Components::Playback::SkipDemoForward(latestRewindTo - curTime);
         }
         
         latestRewindTo = NOT_IN_USE;
@@ -196,6 +198,12 @@ namespace IWXMVM::Components::Rewinding
 
     void RewindBy(std::int32_t ticks)
     {
+        if (Playback::IsGameFrozen())
+        {
+            Playback::SetTimelineTick(Playback::GetTimelineTick() + ticks);
+            return;
+        }
+
         if (ticks >= SKIPPING_FORWARD)
         {
             LOG_DEBUG("Cannot rewind invalid tick value {}", ticks);
@@ -249,6 +257,9 @@ namespace IWXMVM::Components::Rewinding
         }
         else if (len > 12)
         {
+            // execute server commands here otherwise they may be lost when skipping forward a lot
+            Mod::GetGameInterface()->ExecuteNewServerCommands();
+
             // to exclude client archives (and CoD4X protocol header)
             StoreCurrentGamestate(len);
         }

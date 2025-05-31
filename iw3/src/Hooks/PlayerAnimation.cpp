@@ -59,7 +59,7 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
 
             auto IsBadIndex = [](auto index)
             {
-                static constexpr std::array animIndexRanges{std::array{253, 264}, std::array{273, 280}};
+                static constexpr std::array animIndexRanges{std::array{253, 260}, std::array{273, 280}};
 
                 return std::any_of(animIndexRanges.begin(), animIndexRanges.end(), [index](const auto range) {
                     return index >= range.front() && index <= range.back();
@@ -100,13 +100,34 @@ namespace IWXMVM::IW3::Hooks::PlayerAnimation
                     centity.nextState.weapon = weaponIndices[centity.nextState.clientNum];
                 }
             }
+            else
+            {
+                // detach any previously attached weapon from corpse
+                centity.nextState.weapon = 0;
+            }
+
+            if (Components::PlayerAnimation::HideAllCorpses())
+            {
+                // hide corpses
+                centity.nextState.lerp.eFlags |= 32;
+            }
+            else
+            {
+                // reveal corpses
+                centity.nextState.lerp.eFlags &= ~32;
+            }
         }
         else if (centity.nextState.eType == entityType_t::ET_ITEM)
         {
             if (Components::PlayerAnimation::AttachWeaponToCorpse())
             {
                 // hide dropped weapons
-                centity.nextState.lerp.eFlags = 32;
+                centity.nextState.lerp.eFlags |= 32;
+            }
+            else
+            {
+                // reveal dropped weapons
+                centity.nextState.lerp.eFlags &= ~32;
             }
         }
     }

@@ -23,13 +23,14 @@ namespace IWXMVM::UI
         bool DrawCurveEditorInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                      uint32_t displayStartTick, uint32_t displayEndTick, const float width,
                                      std::vector<Types::Keyframe>& keyframes, int32_t keyframeValueIndex, 
-                                     uint32_t demoLength);
+                                     uint32_t demoLength, std::optional<uint32_t> frozenTick);
 
         bool DrawCurveEditor(const Types::KeyframeableProperty& property, const auto width);
 
         bool DrawKeyframeSliderInternal(const Types::KeyframeableProperty& property, uint32_t* currentTick,
                                         uint32_t displayStartTick, uint32_t displayEndTick, 
-                                        std::vector<Types::Keyframe>& keyframes, uint32_t demoLength);
+                                        std::vector<Types::Keyframe>& keyframes, uint32_t demoLength,
+                                        std::optional<uint32_t> frozenTick);
         bool DrawKeyframeSlider(const Types::KeyframeableProperty& property);
 
         void DrawMiscButtons(ImVec2 padding, bool hasKeyframes);

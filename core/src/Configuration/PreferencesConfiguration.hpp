@@ -30,6 +30,8 @@ namespace IWXMVM
 
         std::filesystem::path captureOutputDirectory = std::filesystem::path();
 
+        std::vector<std::filesystem::path> additionalDemoSearchDirectories;  // Directories added by the user, to be searched
+
        private:
         PreferencesConfiguration();
 
@@ -40,6 +42,7 @@ namespace IWXMVM
         const std::string_view NODE_ORBIT_MOVE_SPEED = "orbitMoveSpeed";
         const std::string_view NODE_ORBIT_ZOOM_SPEED = "orbitZoomSpeed";
         const std::string_view NODE_CAPTURE_OUTPUT_DIRECTORY = "captureOutputDirectory";
+        const std::string_view NODE_ADDITIONAL_DEMO_SEARCH_DIRECTORIES = "additionalDemoSearchDirectories";
 
     };
 }  // namespace IWXMVM

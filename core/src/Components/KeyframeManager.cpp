@@ -20,7 +20,7 @@ namespace IWXMVM::Components
         Types::KeyframeablePropertyType::SunLightColor,
         ICON_FA_SUN " Sun Light Color",
         Types::KeyframeValueType::Vector3,
-        0, 255
+        0, 1
     );
     Types::KeyframeableProperty sunLightBrightnessProperty(
         Types::KeyframeablePropertyType::SunLightBrightness,
@@ -55,14 +55,14 @@ namespace IWXMVM::Components
     Types::KeyframeableProperty filmtweakTintLightProperty(
         Types::KeyframeablePropertyType::FilmtweakTintLight,
         ICON_FA_IMAGE " Filmtweak Tint Light",
-        Types::KeyframeValueType::Vector3,
-        0, 255
+        Types::KeyframeValueType::Vector3, 
+        0, 1
     );
     Types::KeyframeableProperty filmtweakTintDarkProperty(
         Types::KeyframeablePropertyType::FilmtweakTintDark,
         ICON_FA_IMAGE " Filmtweak Tint Dark",
-        Types::KeyframeValueType::Vector3,
-        0, 255
+        Types::KeyframeValueType::Vector3, 
+        0, 1
     );
     Types::KeyframeableProperty dofFarBlur(
         Types::KeyframeablePropertyType::DepthOfFieldFarBlur,
@@ -147,14 +147,24 @@ namespace IWXMVM::Components
         InitializeProperty(dofNearEnd);
         InitializeProperty(dofBias);
 
+        static bool justLoadedDemo = false;
+
         Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
             ClearKeyframes();
             actionHistory.clear();
             undidActionHistory.clear();
-            Components::KeyframeSerializer::ReadRecent();
+            justLoadedDemo = true;
         });
 
-        Events::RegisterListener(EventType::OnFrame, [&]() { HandleInput(); });
+        Events::RegisterListener(EventType::OnFrame, [&]() { 
+            HandleInput(); 
+
+            if (IWXMVM::Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo && justLoadedDemo)
+            {
+                Components::KeyframeSerializer::ReadRecent();
+                justLoadedDemo = false;
+            }
+        });
     }
 
     const Types::KeyframeableProperty& KeyframeManager::GetProperty(const Types::KeyframeablePropertyType property) const

@@ -9,6 +9,7 @@
 #include "DemoParser.hpp"
 #include "Hooks/Camera.hpp"
 #include "Hooks/Playback.hpp"
+#include "Hooks/HUD.hpp"
 #include "Addresses.hpp"
 #include "Patches.hpp"
 #include "Components/Rewinding.hpp"
@@ -25,20 +26,75 @@ namespace IWXMVM::IW3
         {
         }
 
+        void ExecuteNewServerCommands() final
+        {
+            const auto clc = Structures::GetClientConnection();
+            const auto cgs = Structures::GetClientGlobalsStatic();
+
+            const auto oldServerCommandSequence = cgs->serverCommandSequence;
+            const auto newServerCommandSequence = clc->serverCommandSequence;
+
+            // check if the command string backlog is equal to or greater than half the size of command string buffer (128 / 2 = 64)
+            if (oldServerCommandSequence > 0 && oldServerCommandSequence + std::ssize(clc->serverCommands) / 2 <= newServerCommandSequence)
+            {
+                for (auto i = oldServerCommandSequence + 1; i <= newServerCommandSequence; ++i)
+                {
+                    if (static constexpr auto dvar = 'd'; clc->serverCommands[i & 127][0] != dvar)
+                    {
+                        // erase server commands that do not modify the gamestate strings
+                        clc->serverCommands[i & 127][0] = '\0';
+                    }
+                }
+
+                const auto CG_ExecuteNewServerCommands = GetGameAddresses().CG_ExecuteNewServerCommands();
+                __asm
+                {
+                    pushad
+                    mov edi, newServerCommandSequence
+                    xor esi, esi // localClientNum
+                    push edi
+                    push esi
+                    call CG_ExecuteNewServerCommands
+                    add esp, 8
+                    popad
+                }
+
+                for (auto i = oldServerCommandSequence + 1; i <= newServerCommandSequence; ++i)
+                {
+                    // erase server commands to prevent double processing; shouldn't be necessary but just to be sure
+                    clc->serverCommands[i & 127][0] = '\0';
+                }
+            }
+        }
+
         void InstallHooksAndPatches() final
         {
             Hooks::Install();
             Patches::GetGamePatches();
         }
 
+        void DisableRawInput()
+        {
+            // disable raw_input because it messes with our IN_Frame patch
+            // on cod4x
+            auto raw_input = Functions::FindDvar("raw_input");
+            if (raw_input)
+            {
+                raw_input->current.enabled = false;
+            }
+        }
+
         void SetupEventListeners() final
         {
+            DisableRawInput();
+
             Events::RegisterListener(EventType::PostDemoLoad, DemoParser::Run);
 
             Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
 
-            Events::RegisterListener(EventType::PostDemoLoad, []() { 
+            Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
                 Functions::FindDvar("sv_cheats")->current.enabled = true; 
+                DisableRawInput();
                     
                 // ensure these are set to their defaults, so our killfeed toggle works properly
                 Functions::FindDvar("con_gamemsgwindow0msgtime")->current.value = 5;
@@ -82,7 +138,35 @@ namespace IWXMVM::IW3
 
         void InitializeGameAddresses() final
         {
-            GetGameAddresses();
+            bool isRunningIW3xo = GetModuleHandle("iw3x") != NULL;
+            LOG_DEBUG("Using IW3xo: {}", isRunningIW3xo);
+
+            try
+            {
+                GetGameAddresses();
+            }
+            catch (std::exception& ex)
+            {
+                LOG_ERROR("Failed to find required signature: {}", ex.what());
+                if (isRunningIW3xo)
+                {
+                    MessageBoxA(NULL,
+                                "It seems like you are running an unsupported iw3xo version.\nPlease make sure "
+                                "you are running the latest iw3xo version, which you can find here:\n\n"
+                                "https://github.com/xoxor4d/iw3xo-dev/releases\n\nWe can confirm IWXMVM works with IW3xo 3495!",
+                                "Unsupported iw3xo version", MB_OK);
+                }
+                else
+                {
+                    MessageBoxA(NULL,
+                                "It seems like you are running an unsupported game version.\nYou can download a "
+                                "supported version of COD4 (1.7) at the following link:\n\n"
+                                "https://codmvm.com/data/iwxmvm/iw3mp.exe\n\nSimply replace the iw3mp.exe in your COD4 "
+                                "directory with this one.",
+                                "Unsupported game version", MB_OK);
+                }
+                ExitProcess(0);
+            }
         }
 
         static HMODULE GetCoD4xModuleHandle()
@@ -127,11 +211,10 @@ namespace IWXMVM::IW3
             }
         }
 
+        Types::DemoInfo demoInfo;
+
         Types::DemoInfo GetDemoInfo() final
         {
-            static uint32_t lastValidTick = 0;
-
-            Types::DemoInfo demoInfo;
             demoInfo.name = Structures::GetClientStatic()->servername;
             demoInfo.name = demoInfo.name.starts_with(DEMO_TEMP_DIRECTORY)
                                 ? demoInfo.name.substr(strlen(DEMO_TEMP_DIRECTORY) + 1)
@@ -145,8 +228,9 @@ namespace IWXMVM::IW3
 
             const auto serverTime = Structures::GetClientActive()->serverTime;
             if (serverTime > demoStartTick && serverTime < demoEndTick && !Components::Rewinding::IsRewinding())
-                lastValidTick = serverTime - demoStartTick;
-            demoInfo.currentTick = lastValidTick;
+            {
+                demoInfo.gameTick = serverTime - demoStartTick;
+            }
             demoInfo.endTick = demoEndTick - demoStartTick;
 
             return demoInfo;
@@ -290,9 +374,11 @@ namespace IWXMVM::IW3
             Types::HudInfo hudInfo = {
                 Functions::FindDvar("cg_draw2D")->current.enabled,
                 !Functions::FindDvar("ui_hud_hardcore")->current.enabled,
-                Functions::FindDvar("cg_drawShellshock")->current.value,
+                Functions::FindDvar("cg_drawShellshock")->current.enabled,
                 Functions::FindDvar("ui_drawCrosshair")->current.enabled, 
-                !Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.IsApplied(),
+                Hooks::HUD::showScore,
+                Hooks::HUD::showOtherText, 
+                !Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.IsApplied(),
                 Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
                 teamColorAllies,   
                 teamColorAxis
@@ -369,27 +455,31 @@ namespace IWXMVM::IW3
             Functions::FindDvar("cg_draw2D")->current.enabled = hudInfo.show2DElements;
 
             Functions::FindDvar("ui_hud_hardcore")->current.enabled = !hudInfo.showPlayerHUD;
-            Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5 : 0;
+            Functions::FindDvar("cg_centertime")->current.value = hudInfo.showPlayerHUD ? 5.0f : 0.0f;
+            Functions::FindDvar("cg_overheadranksize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
             Functions::FindDvar("cg_overheadnamessize")->current.value = hudInfo.showPlayerHUD ? 0.5f : 0;
             Functions::FindDvar("cg_overheadiconsize")->current.value = hudInfo.showPlayerHUD ? 0.7f : 0;
 
-            Functions::FindDvar("cg_drawShellshock")->current.value = hudInfo.showShellshock;
+            Functions::FindDvar("cg_drawShellshock")->current.enabled = hudInfo.showShellshock;
             Functions::FindDvar("ui_hud_obituaries")->current.string = hudInfo.showKillfeed ? "1" : "0";
             Functions::FindDvar("ui_drawCrosshair")->current.enabled = hudInfo.showCrosshair;
-            if (hudInfo.showScore)
-                Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.Revert();
+            Hooks::HUD::showScore = hudInfo.showScore;
+            Hooks::HUD::showOtherText = hudInfo.showOtherText;
+            if (hudInfo.showBloodOverlay)
+                Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Revert();
             else
-                Patches::GetGamePatches().R_AddCmdDrawTextWithEffects.Apply();
-            
+                Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Apply();
+
             std::stringstream teamColorAllies;
             teamColorAllies << hudInfo.killfeedTeam1Color[0] << " " << hudInfo.killfeedTeam1Color[1] << " "
                             << hudInfo.killfeedTeam1Color[2] << " 1\0";
-            std::strcpy((char*)Functions::FindDvar("g_TeamColor_Allies")->current.string, teamColorAllies.str().c_str());
+
+            Functions::Dvar_SetStringByName("g_TeamColor_Allies", teamColorAllies.str().c_str());
 
             std::stringstream teamColorAxis;
             teamColorAxis << hudInfo.killfeedTeam2Color[0] << " " << hudInfo.killfeedTeam2Color[1] << " " 
                           << hudInfo.killfeedTeam2Color[2] << " 1\0";
-            std::strcpy((char*)Functions::FindDvar("g_TeamColor_Axis")->current.string, teamColorAxis.str().c_str());
+            Functions::Dvar_SetStringByName("g_TeamColor_Axis", teamColorAxis.str().c_str());
         }
         
         std::vector<Types::Entity> GetEntities() final

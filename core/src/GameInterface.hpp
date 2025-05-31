@@ -35,6 +35,7 @@ namespace IWXMVM
             return game;
         }
 
+        virtual void ExecuteNewServerCommands() = 0;
         virtual void InstallHooksAndPatches() = 0;
         virtual void SetupEventListeners() = 0;
 

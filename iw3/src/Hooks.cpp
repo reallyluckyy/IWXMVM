@@ -6,6 +6,7 @@
 #include "Hooks/Camera.hpp"
 #include "Hooks/Rendering.hpp"
 #include "Hooks/PlayerAnimation.hpp"
+#include "Hooks/HUD.hpp"
 
 namespace IWXMVM::IW3::Hooks
 {
@@ -16,5 +17,6 @@ namespace IWXMVM::IW3::Hooks
         Hooks::Camera::Install();
         Hooks::PlayerAnimation::Install();
         Hooks::Rendering::Install();
+        Hooks::HUD::Install();
     }
 }  // namespace IWXMVM::IW3::Hooks

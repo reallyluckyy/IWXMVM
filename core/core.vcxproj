@@ -68,6 +68,7 @@
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -220,6 +221,7 @@
     <ClInclude Include="src\UI\ImGuiEx\KeyframeableControls.hpp" />
     <ClInclude Include="src\Utilities\GLMExtensions.hpp" />
     <ClInclude Include="src\Utilities\MathUtils.hpp" />
+    <ClCompile Include="src\UI\TaskbarProgress.cpp" />
     <ClCompile Include="src\WindowsConsole.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -248,6 +250,7 @@
     <ClInclude Include="src\Utilities\Patches.hpp" />
     <ClInclude Include="src\Utilities\PathUtils.hpp" />
     <ClInclude Include="src\Utilities\Signatures.hpp" />
+    <ClInclude Include="src\UI\TaskbarProgress.hpp" />
     <ClInclude Include="src\Version.hpp" />
     <ClInclude Include="src\WindowsConsole.hpp" />
   </ItemGroup>

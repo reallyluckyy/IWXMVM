@@ -27,12 +27,15 @@ namespace IWXMVM::Components
 
             if (Input::BindDown(Action::DollyAddNode))
             {
-                const auto tick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
+                const auto tick = Components::Playback::GetTimelineTick();
                 
                 for (const auto& keyframe : KeyframeManager::Get().GetKeyframes(property))
                 {
                     if (keyframe.tick == tick)
+                    {
+                        LOG_WARN("A campath node already exists at the current tick. Not creating a new one.");
                         return;
+                    }
                 }
 
                 Types::CameraData node;
@@ -59,8 +62,11 @@ namespace IWXMVM::Components
             if (Input::BindDown(Action::DollyPlayPath))
             {
                 CameraManager::Get().SetActiveCamera(Camera::Mode::Dolly);
-                Playback::SetTickDelta(KeyframeManager::Get().GetKeyframes(property).front().tick -
-                                       Mod::GetGameInterface()->GetDemoInfo().currentTick, true);
+                if (!KeyframeManager::Get().GetKeyframes(property).empty())
+                {
+                    Playback::SetTickDelta(KeyframeManager::Get().GetKeyframes(property).front().tick -
+                                               Components::Playback::GetTimelineTick(), true);
+                }
             }
 
             if (Input::BindDown(Action::FirstPersonToggle))

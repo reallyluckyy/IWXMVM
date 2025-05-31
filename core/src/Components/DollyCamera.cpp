@@ -3,6 +3,7 @@
 
 #include "Mod.hpp"
 #include "Components/Rewinding.hpp"
+#include "Components/Playback.hpp"
 
 namespace IWXMVM::Components
 {
@@ -12,13 +13,17 @@ namespace IWXMVM::Components
 
     void DollyCamera::Update()
     {
-        if (Rewinding::IsRewinding())
+        if (Rewinding::IsRewinding() )
             return;
-        const auto currentTick = Mod::GetGameInterface()->GetDemoInfo().currentTick;
-        
-        const auto& keyframeManager = KeyframeManager::Get();
-        const auto interpolatedValue = keyframeManager.Interpolate(
-            keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera), currentTick);
+
+        auto& keyframeManager = KeyframeManager::Get();
+        const auto& property = keyframeManager.GetProperty(Types::KeyframeablePropertyType::CampathCamera);
+
+        if (keyframeManager.GetKeyframes(property).empty())
+            return;
+
+        const auto currentTick = Playback::GetTimelineTick();
+        const auto interpolatedValue = keyframeManager.Interpolate(property, currentTick);
 
         this->GetPosition() = interpolatedValue.cameraData.position;
         this->GetRotation() = interpolatedValue.cameraData.rotation;
