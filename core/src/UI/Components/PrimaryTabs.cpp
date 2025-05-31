@@ -75,6 +75,16 @@ namespace IWXMVM::UI
         {
             if (ImGui::Button(text.c_str(), size))
             {
+                if (UIManager::Get().GetSelectedTab() == Tab::Record)
+                {
+                    auto captureMenu =
+                        UI::UIManager::Get().GetUIComponent<UI::CaptureMenu>(UI::Component::Component::CaptureMenu);
+                    if (captureMenu->GetDisplayPassIndex().has_value())
+                    {
+                        captureMenu->ResetPassPreview();
+                    }
+                }
+
                 UIManager::Get().SelectTab(tab);
             }
         }

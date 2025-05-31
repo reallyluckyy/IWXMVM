@@ -1,5 +1,6 @@
 #pragma once
 #include "UI/UIComponent.hpp"
+#include "Components/CaptureManager.hpp"
 
 namespace IWXMVM::UI
 {
@@ -10,8 +11,11 @@ namespace IWXMVM::UI
         void Release() final;
 
         std::optional<int32_t> GetDisplayPassIndex() const;
+        void ResetPassPreview();
 
        private:
         void Initialize() final;
+
+        void DrawStreamsSection(Components::CaptureSettings& captureSettings);
     };
 }  // namespace IWXMVM::UI

@@ -27,11 +27,17 @@ namespace IWXMVM::UI
         return displayPassIndex;
     }
 
+    void CaptureMenu::ResetPassPreview()
+    {
+        displayPassIndex = std::nullopt;
+        Components::Rendering::ResetVisibleElements();
+    }
+
     void CaptureMenu::Initialize()
     {
     }
 
-    void DrawStreamsSection(Components::CaptureSettings& captureSettings)
+    void CaptureMenu::DrawStreamsSection(Components::CaptureSettings& captureSettings)
     {
         using namespace Components;
 
@@ -76,8 +82,7 @@ namespace IWXMVM::UI
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_EYE_SLASH))
                 {
-                    displayPassIndex = std::nullopt;
-                    Components::Rendering::ResetVisibleElements();
+                    ResetPassPreview();
                 }
                 else
                 {
@@ -94,7 +99,7 @@ namespace IWXMVM::UI
                 }
 
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_MINUS))
+                if (ImGui::Button(ICON_FA_TRASH_CAN))
                 {
                     captureSettings.passes.erase(it);
                     ImGui::PopID();
@@ -129,6 +134,10 @@ namespace IWXMVM::UI
                 if (it->type == PassType::Default)
                 {
                     ImGui::Checkbox("Enable Reshade", &it->useReshade);
+
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() * fieldLayoutPercentage);
+                    ImGui::SetNextItemWidth(comboWidth);
+                    ImGui::Text(ICON_FA_TRIANGLE_EXCLAMATION " Make sure Reshade isn't \ndisabled (globally)!");
                 }
                 else
                 {
