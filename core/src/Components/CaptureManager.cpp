@@ -237,10 +237,10 @@ namespace IWXMVM::Components
             case OutputFormat::ImageSequence:
                 return std::format(
                     "{} -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -q:v 0 "
-                    "-vf scale={}:{} -y \"{}\\output_%06d.tga\" > ffmpeg_log.txt 2>&1",
+                    "-vf scale={}:{} -y \"{}\\output_{}_%06d.tga\" 2>&1",
                     shortPath,
                     screenDimensions.width, screenDimensions.height, captureSettings.framerate,
-                    captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string());
+                    captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string(), passIndex);
             case OutputFormat::Video:
             {
                 std::int32_t profile = 0;
@@ -284,7 +284,7 @@ namespace IWXMVM::Components
 
                 return std::format(
                     "{} -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -c:v prores -profile:v {} -q:v 1 "
-                    "-pix_fmt {} -vf scale={}:{} -y \"{}\\{}\" > ffmpeg_log.txt 2>&1",
+                    "-pix_fmt {} -vf scale={}:{} -y \"{}\\{}\" 2>&1",
                     shortPath, screenDimensions.width, screenDimensions.height, captureSettings.framerate, profile,
                     pixelFormat, captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string(), filename);
             }
