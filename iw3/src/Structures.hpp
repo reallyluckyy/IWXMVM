@@ -1369,7 +1369,7 @@ namespace IWXMVM::IW3::Structures
         unsigned __int64 packed;
     };
 
-    struct __declspec(align(4)) MaterialInfo
+    struct MaterialInfo
     {
         const char* name;
         char gameFlags;
@@ -1381,7 +1381,7 @@ namespace IWXMVM::IW3::Structures
         unsigned __int16 hashIndex;
     };
 
-    struct __declspec(align(4)) MaterialPass
+    struct MaterialPass
     {
         void** vertexDecl;   // MaterialVertexDeclaration
         void* vertexShader;  // MaterialVertexShader

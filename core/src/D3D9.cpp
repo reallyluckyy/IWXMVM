@@ -415,8 +415,6 @@ namespace IWXMVM::D3D9
             (std::uintptr_t*)&SwapChainPresent);
         HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[42], (std::uintptr_t)EndScene_Hook,
             (std::uintptr_t*)&EndScene);
-        HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[16], (std::uintptr_t)Reset_Hook,
-            (std::uintptr_t*)&Reset);
         HookManager::CreateHook((std::uintptr_t)d3d9DeviceVTable[39], (std::uintptr_t)SetDepthStencilSurface_Hook,
             (std::uintptr_t*)&SetDepthStencilSurface);
         
