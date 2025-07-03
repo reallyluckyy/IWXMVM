@@ -71,6 +71,13 @@ namespace IWXMVM::IW5::Hooks::HUD
     void R_AddCmdDrawStretchPic_Hook(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8,
                                      int a9, Structures::Material *material)
     {
+        // always draw the scope overlay
+        bool isScopeTexture = std::string_view(material->info.name).starts_with("scope_overlay");
+        if (isScopeTexture)
+        {
+            R_AddCmdDrawStretchPic_Trampoline(a1, a2, a3, a4, a5, a6, a7, a8, a9, material);
+        }
+        
         bool isBloodOverlay = std::string_view(material->info.name).compare("splatter_alt") == 0;
         if (isBloodOverlay)
         {

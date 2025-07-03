@@ -49,6 +49,7 @@ namespace IWXMVM::IW5::Signatures
         Sig("74 0E 83 3D ?? ?? ?? ?? ?? 0F 95 C0", GAType::Code, -7) > CG_DrawShellshockBlend;
         Sig("50 E8 ?? ?? ?? ?? 83 C4 04 85 C0 0F 84 E9 00 00 00", GAType::Code, -5) > Item_GameMsgWindow_Paint;
         Sig("0F 84 32 01 00 00 8D 50 01", GAType::Code, -7) > R_AddCmdDrawText;
+        Sig("52 8D 44 24 20 50 8D 4C 24 20 51 8D 54 24 20 52 56", GAType::Code, -18) > CG_DrawRotatedPic;
         Sig("85 F6 75 06 8B 35 ?? ?? ?? ?? 8B 46 54 8B 40 08 83 78 30 00 75 06 83 78 20 00 74 21", GAType::Code,
             -5) > R_AddCmdDrawTextWithEffects;
         Sig("83 C4 28 3B 35", GAType::Code, -5, Lambda::FollowCodeFlow) > R_AddCmdDrawStretchPic;
