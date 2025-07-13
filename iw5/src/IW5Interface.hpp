@@ -403,6 +403,16 @@ namespace IWXMVM::IW5
             Functions::FindDvar("con_gamemsgwindow0linecount")->current.integer = 4;
 
             Functions::FindDvar("cg_draw2D")->current.boolean = hudInfo.show2DElements;
+            if (!hudInfo.show2DElements)
+            {
+                hudInfo.showPlayerHUD = false;
+                hudInfo.showShellshock = false;
+                hudInfo.showCrosshair = false;
+                hudInfo.showScore = false;
+                hudInfo.showIconsAndText = false;
+                hudInfo.showBloodOverlay = false;
+                hudInfo.showKillfeed = false;
+            }
 
             Functions::FindDvar("g_hardcore")->current.boolean = !hudInfo.showPlayerHUD;
             Functions::FindDvar("scr_gameended")->current.string = hudInfo.showPlayerHUD ? "0" : "1";
