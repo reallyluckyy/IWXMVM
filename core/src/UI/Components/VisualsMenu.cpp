@@ -412,11 +412,11 @@ namespace IWXMVM::UI
 
     void VisualsMenu::LoadPreset(Preset preset)
     {
-        auto newConfiguration = Components::VisualConfiguration::Load(preset.path);
-        if (newConfiguration.has_value())
-        {
-            visuals = newConfiguration.value();
+        Components::VisualConfiguration::Settings newVisuals = defaultVisuals;
 
+        if (Components::VisualConfiguration::Load(preset.path, newVisuals))
+        {
+            visuals = newVisuals;
             UpdateDof();
             UpdateSun();
             UpdateFilmtweaks();
