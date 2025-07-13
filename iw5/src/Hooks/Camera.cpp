@@ -4,6 +4,7 @@
 #include "Utilities/HookManager.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "../Addresses.hpp"
+#include "../Functions.hpp"
 #include "../Structures.hpp"
 
 namespace IWXMVM::IW5::Hooks::Camera
@@ -20,10 +21,8 @@ namespace IWXMVM::IW5::Hooks::Camera
         auto& camera = Components::CameraManager::Get().GetActiveCamera();
         auto cg = Structures::GetClientGlobals();
 
-        float fov = camera->IsModControlledCameraMode() ? camera->GetFov() : firstPersonFOV;
-        const auto aspect = ((float)cg->refdef.displayViewport.width / (float)cg->refdef.displayViewport.height);
-        cg->refdef.view.tanHalfFovX = std::tan(glm::radians(fov) * 0.5f);
-        cg->refdef.view.tanHalfFovY = cg->refdef.view.tanHalfFovX / aspect;
+        Functions::FindDvar("cg_fov")->current.value =
+            camera->IsModControlledCameraMode() ? camera->GetFov() : firstPersonFOV;
 
         if (!camera->IsModControlledCameraMode())
         {
