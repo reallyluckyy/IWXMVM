@@ -100,8 +100,11 @@ namespace IWXMVM::D3D9
     {
         LOG_DEBUG("CreateDevice called with hwnd {0:x}", (std::uintptr_t)pPresentationParameters->hDeviceWindow);
 
-        GFX::GraphicsManager::Get().Uninitialize();
-        UI::UIManager::Get().ShutdownImGui();
+        if (UI::UIManager::Get().IsInitialized())
+        {
+            GFX::GraphicsManager::Get().Uninitialize();
+            UI::UIManager::Get().ShutdownImGui();
+        }
 
 		foundInterceptedDepthTexture = false;
 
@@ -244,7 +247,7 @@ namespace IWXMVM::D3D9
             component->Release();
         }
 
-        GFX::GraphicsManager::Get().Uninitialize();
+        //GFX::GraphicsManager::Get().Uninitialize();
 
         ImGui_ImplDX9_InvalidateDeviceObjects();
         HRESULT hr = Reset(pDevice, pPresentationParameters);
@@ -252,10 +255,10 @@ namespace IWXMVM::D3D9
 
         // do we need to re-initialize the UI components?
 
-        if (UI::UIManager::Get().IsInitialized())
-        {
-            GFX::GraphicsManager::Get().Initialize();
-        }
+        //if (UI::UIManager::Get().IsInitialized())
+        //{
+            //GFX::GraphicsManager::Get().Initialize();
+        //}
 
         return hr;
     }
