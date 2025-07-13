@@ -55,11 +55,30 @@ namespace IWXMVM::D3D9
         DWORD MultisampleQuality, BOOL Discard,
         IDirect3DSurface9** ppSurface, HANDLE* pSharedHandle)
     {
+        if (IsReshadePresent())
+        {
+			return CreateDepthStencilSurface(pDevice, Width, Height, Format, MultiSample, MultisampleQuality, Discard, ppSurface, pSharedHandle);
+        }
+
+        HRESULT hr = D3D_OK;
+
         if (MultiSample == D3DMULTISAMPLE_NONE && Width == gameWidth && Height == gameHeight)
         {
             LOG_DEBUG("Intercepting depth stencil surface creation");
 
-            HRESULT hr = depthTexture->GetSurfaceLevel(0, ppSurface);
+			if (depthTexture)
+			{
+				depthTexture->Release();
+				depthTexture = nullptr;
+			}
+			hr = device->CreateTexture(Width, Height, 1, D3DUSAGE_DEPTHSTENCIL, static_cast<D3DFORMAT>(MAKEFOURCC('I', 'N', 'T', 'Z')), D3DPOOL_DEFAULT,
+				&depthTexture, nullptr);
+			if (FAILED(hr))
+			{
+				LOG_ERROR("Failed to create depth texture");
+			}
+
+            hr = depthTexture->GetSurfaceLevel(0, ppSurface);
             if (SUCCEEDED(hr))
             {
                 LOG_DEBUG("Successfully changed depth stencil format");
@@ -81,14 +100,13 @@ namespace IWXMVM::D3D9
     {
         LOG_DEBUG("CreateDevice called with hwnd {0:x}", (std::uintptr_t)pPresentationParameters->hDeviceWindow);
 
-        GFX::GraphicsManager::Get().Uninitialize();
-        UI::UIManager::Get().ShutdownImGui();
-        if (depthTexture)
+        if (UI::UIManager::Get().IsInitialized())
         {
-            depthTexture->Release();
-            depthTexture = nullptr;
+            GFX::GraphicsManager::Get().Uninitialize();
+            UI::UIManager::Get().ShutdownImGui();
         }
-        foundInterceptedDepthTexture = false;
+
+		foundInterceptedDepthTexture = false;
 
         HRESULT hr = CreateDevice(pInterface, Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters,
             ppReturnedDeviceInterface);
@@ -101,17 +119,7 @@ namespace IWXMVM::D3D9
         gameHeight = pPresentationParameters->BackBufferHeight;
 
         device = *ppReturnedDeviceInterface;
-
-        if (!reshadeEndSceneAddress.has_value())
-        {
-            hr = device->CreateTexture(gameWidth, gameHeight, 1, D3DUSAGE_DEPTHSTENCIL, static_cast<D3DFORMAT>(MAKEFOURCC('I', 'N', 'T', 'Z')), D3DPOOL_DEFAULT,
-                &depthTexture, nullptr);
-            if (FAILED(hr))
-            {
-                LOG_ERROR("Failed to create depth texture");
-            }
-        }
-
+        
         UI::UIManager::Get().Initialize(device, pPresentationParameters->hDeviceWindow);
         GFX::GraphicsManager::Get().Initialize();
 
@@ -234,21 +242,30 @@ namespace IWXMVM::D3D9
 
     HRESULT __stdcall Reset_Hook(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
     {
-        for (const auto& component : UI::UIManager::Get().GetUIComponents())
-        {
-            component->Release();
-        }
+		if (depthTexture)
+		{
+			depthTexture->Release();
+			depthTexture = nullptr;
+			foundInterceptedDepthTexture = false;
+		}
 
-        GFX::GraphicsManager::Get().Uninitialize();
+        const bool wasUIInitialized = UI::UIManager::Get().IsInitialized();
+        if (wasUIInitialized)
+		{
+			for (const auto& component : UI::UIManager::Get().GetUIComponents())
+			{
+				component->Release();
+			}
 
-        ImGui_ImplDX9_InvalidateDeviceObjects();
+			GFX::GraphicsManager::Get().Uninitialize();
+			UI::UIManager::Get().ShutdownImGui();
+		}
+
         HRESULT hr = Reset(pDevice, pPresentationParameters);
-        ImGui_ImplDX9_CreateDeviceObjects();
-
-        // do we need to re-initialize the UI components?
-
-        if (UI::UIManager::Get().IsInitialized())
+        
+        if (wasUIInitialized)
         {
+            UI::UIManager::Get().Initialize(pDevice);
             GFX::GraphicsManager::Get().Initialize();
         }
 
