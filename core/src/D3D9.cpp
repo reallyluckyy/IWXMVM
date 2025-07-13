@@ -242,23 +242,32 @@ namespace IWXMVM::D3D9
 
     HRESULT __stdcall Reset_Hook(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
     {
-        for (const auto& component : UI::UIManager::Get().GetUIComponents())
-        {
-            component->Release();
-        }
+		if (depthTexture)
+		{
+			depthTexture->Release();
+			depthTexture = nullptr;
+			foundInterceptedDepthTexture = false;
+		}
 
-        //GFX::GraphicsManager::Get().Uninitialize();
+        const bool wasUIInitialized = UI::UIManager::Get().IsInitialized();
+        if (wasUIInitialized)
+		{
+			for (const auto& component : UI::UIManager::Get().GetUIComponents())
+			{
+				component->Release();
+			}
 
-        ImGui_ImplDX9_InvalidateDeviceObjects();
+			GFX::GraphicsManager::Get().Uninitialize();
+			UI::UIManager::Get().ShutdownImGui();
+		}
+
         HRESULT hr = Reset(pDevice, pPresentationParameters);
-        ImGui_ImplDX9_CreateDeviceObjects();
-
-        // do we need to re-initialize the UI components?
-
-        //if (UI::UIManager::Get().IsInitialized())
-        //{
-            //GFX::GraphicsManager::Get().Initialize();
-        //}
+        
+        if (wasUIInitialized)
+        {
+            UI::UIManager::Get().Initialize(pDevice);
+            GFX::GraphicsManager::Get().Initialize();
+        }
 
         return hr;
     }
