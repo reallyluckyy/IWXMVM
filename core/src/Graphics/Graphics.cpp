@@ -1,5 +1,4 @@
 #include "StdInclude.hpp"
-
 #include "Graphics.hpp"
 
 #include "UI/UIManager.hpp"
@@ -13,50 +12,55 @@
 
 INCBIN_EXTERN(VERTEX_SHADER);
 INCBIN_EXTERN(PIXEL_SHADER);
+INCBIN_EXTERN(DEPTH_VERTEX_SHADER);
+INCBIN_EXTERN(DEPTH_PIXEL_SHADER);
 
 namespace IWXMVM::GFX
 {
-    void GraphicsManager::Initialize()
+    void GraphicsManager::CreateGraphicsResources()
     {
         IDirect3DDevice9* device = D3D9::GetDevice();
+        HRESULT hr = D3D_OK;
+
         ID3DXBuffer* errorMessageBuffer = nullptr;
 
         ID3DXBuffer* vertexShaderBuffer = nullptr;
-        HRESULT result = D3DXCompileShader((LPCSTR)VERTEX_SHADER_data, VERTEX_SHADER_size, nullptr, NULL, "main",
-                                           "vs_3_0",
-                                           NULL,
-                                   &vertexShaderBuffer, &errorMessageBuffer, nullptr);
-        if (result != D3D_OK)
+        hr = D3DXCompileShader((LPCSTR)VERTEX_SHADER_data, VERTEX_SHADER_size, nullptr, NULL, "main",
+            "vs_3_0",
+            NULL,
+            &vertexShaderBuffer, &errorMessageBuffer, nullptr);
+        if (FAILED(hr))
         {
             LOG_ERROR("Failed to compile vertex shader: {}",
-                      reinterpret_cast<const char*>(errorMessageBuffer->GetBufferPointer()));
+                reinterpret_cast<const char*>(errorMessageBuffer->GetBufferPointer()));
             errorMessageBuffer->Release();
             return;
         }
-
-        result = device->CreateVertexShader(reinterpret_cast<const DWORD*>(vertexShaderBuffer->GetBufferPointer()),
-                                            &vertexShader);
-        if (result != D3D_OK)
+        hr = device->CreateVertexShader(reinterpret_cast<const DWORD*>(vertexShaderBuffer->GetBufferPointer()),
+            &vertexShader);
+        if (FAILED(hr))
         {
             LOG_ERROR("Failed to create vertex shader");
         }
+        vertexShaderBuffer->Release();
 
         ID3DXBuffer* pixelShaderBuffer = nullptr;
-        result = D3DXCompileShader((LPCSTR)PIXEL_SHADER_data, PIXEL_SHADER_size, nullptr, NULL, "main", "ps_3_0",
-                                           NULL, &pixelShaderBuffer, &errorMessageBuffer, nullptr);
-        if (result != D3D_OK)
+        hr = D3DXCompileShader((LPCSTR)PIXEL_SHADER_data, PIXEL_SHADER_size, nullptr, NULL, "main", "ps_3_0",
+            NULL, &pixelShaderBuffer, &errorMessageBuffer, nullptr);
+        if (FAILED(hr))
         {
             LOG_ERROR("Failed to compile pixel shader: {}",
-                      reinterpret_cast<const char*>(errorMessageBuffer->GetBufferPointer()));
+                reinterpret_cast<const char*>(errorMessageBuffer->GetBufferPointer()));
             errorMessageBuffer->Release();
             return;
         }
-        result = device->CreatePixelShader(reinterpret_cast<const DWORD*>(pixelShaderBuffer->GetBufferPointer()),
-                                           &pixelShader);
-        if (result != D3D_OK)
+        hr = device->CreatePixelShader(reinterpret_cast<const DWORD*>(pixelShaderBuffer->GetBufferPointer()),
+            &pixelShader);
+        if (FAILED(hr))
         {
             LOG_ERROR("Failed to create pixel shader");
         }
+        pixelShaderBuffer->Release();
 
         D3DVERTEXELEMENT9 decl[] = {
             {0, offsetof(Types::Vertex, pos), D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
@@ -64,11 +68,115 @@ namespace IWXMVM::GFX
             {0, offsetof(Types::Vertex, col), D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
             D3DDECL_END(),
         };
-        result = device->CreateVertexDeclaration(decl, &vertexDeclaration);
-        if (result != D3D_OK)
+        hr = device->CreateVertexDeclaration(decl, &vertexDeclaration);
+        if (FAILED(hr))
         {
             LOG_ERROR("Failed to create vertex declaration");
         }
+    }
+    void GraphicsManager::DestroyGraphicsResources()
+    {
+        if (vertexDeclaration != nullptr)
+        {
+            vertexDeclaration->Release();
+            vertexDeclaration = nullptr;
+        }
+        if (pixelShader != nullptr)
+        {
+            pixelShader->Release();
+            pixelShader = nullptr;
+        }
+        if (vertexShader != nullptr)
+        {
+            vertexShader->Release();
+            vertexShader = nullptr;
+        }
+    }
+
+    void GraphicsManager::CreateDepthPassResources()
+    {
+        IDirect3DDevice9* device = D3D9::GetDevice();
+        HRESULT hr = D3D_OK;
+
+        constexpr Types::FSVertex squareData[] = {
+            {{-1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}, {{-1.0f, -1.0f, 0.0f}, {0.0f, 1.0f}}, {{1.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+            {{-1.0f, -1.0f, 0.0f}, {0.0f, 1.0f}}, {{1.0f, -1.0f, 0.0f}, {1.0f, 1.0f}}, {{1.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+        };
+
+        hr = device->CreateVertexBuffer(sizeof(squareData), D3DUSAGE_WRITEONLY, NULL, D3DPOOL_DEFAULT, &depthPassVertices, nullptr);
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Failed to create depth pass vertex buffer");
+        }
+
+        void* tmp = nullptr;
+        depthPassVertices->Lock(0, sizeof(squareData), &tmp, NULL);
+        std::memcpy(tmp, squareData, sizeof(squareData));
+        depthPassVertices->Unlock();
+
+        D3DVERTEXELEMENT9 decl[] = {
+            {0, offsetof(Types::FSVertex, p), D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
+            {0, offsetof(Types::FSVertex, uv), D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+            D3DDECL_END(),
+        };
+        hr = device->CreateVertexDeclaration(decl, &depthPassVDecl);
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Failed to create depth pass vertex declaration");
+        }
+
+        ID3DXBuffer* errorMessageBuffer = nullptr;
+
+        ID3DXBuffer* vertexShaderBuffer = nullptr;
+        hr = D3DXCompileShader((LPCSTR)DEPTH_VERTEX_SHADER_data, DEPTH_VERTEX_SHADER_size, nullptr, NULL, "main",
+            "vs_3_0",
+            NULL,
+            &vertexShaderBuffer, &errorMessageBuffer, nullptr);
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Failed to compile depth vertex shader: {}",
+                reinterpret_cast<const char*>(errorMessageBuffer->GetBufferPointer()));
+            errorMessageBuffer->Release();
+            return;
+        }
+        hr = device->CreateVertexShader(reinterpret_cast<const DWORD*>(vertexShaderBuffer->GetBufferPointer()),
+            &depthPassVS);
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Failed to create depth pass vertex shader");
+        }
+        vertexShaderBuffer->Release();
+
+        ID3DXBuffer* pixelShaderBuffer = nullptr;
+        hr = D3DXCompileShader((LPCSTR)DEPTH_PIXEL_SHADER_data, DEPTH_PIXEL_SHADER_size, nullptr, NULL, "main", "ps_3_0",
+            NULL, &pixelShaderBuffer, &errorMessageBuffer, nullptr);
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Failed to compile depth pixel shader: {}",
+                reinterpret_cast<const char*>(errorMessageBuffer->GetBufferPointer()));
+            errorMessageBuffer->Release();
+            return;
+        }
+        hr = device->CreatePixelShader(reinterpret_cast<const DWORD*>(pixelShaderBuffer->GetBufferPointer()),
+            &depthPassPS);
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Failed to create depth pass pixel shader");
+        }
+        pixelShaderBuffer->Release();
+    }
+    void GraphicsManager::DestroyDepthPassResources()
+    {
+        depthPassPS->Release();
+        depthPassVS->Release();
+        depthPassVDecl->Release();
+        depthPassVertices->Release();
+    }
+
+    void GraphicsManager::Initialize()
+    {
+        CreateGraphicsResources();
+        CreateDepthPassResources();
 
         BufferManager::Get().Initialize();
 
@@ -99,22 +207,9 @@ namespace IWXMVM::GFX
 
     void GraphicsManager::Uninitialize()
     {
-        if (vertexDeclaration != nullptr)
-        {
-            vertexDeclaration->Release();
-            vertexDeclaration = nullptr;
-        }
-        if (pixelShader != nullptr)
-        {
-            pixelShader->Release();
-            pixelShader = nullptr;
-        }
-        if (vertexShader != nullptr)
-        {
-            vertexShader->Release();
-            vertexShader = nullptr;
-        }
         BufferManager::Get().Uninitialize();
+        DestroyDepthPassResources();
+        DestroyGraphicsResources();
     }
 
     glm::mat4 GetViewMatrix()
@@ -542,6 +637,121 @@ namespace IWXMVM::GFX
         }
     }
 
+    void GraphicsManager::DrawStreamsShader(Components::PassType passType, bool onlyDrawViewmodel) const
+    {
+        IDirect3DDevice9* device = D3D9::GetDevice();
+        IDirect3DTexture9* depthTexture = D3D9::GetDepthTexture();
+
+        if (!depthTexture)
+        {
+            return;
+        }
+
+        IDirect3DStateBlock9* d3d9_state_block = nullptr;
+        D3DMATRIX last_world = {}, last_view = {}, last_projection = {};
+
+        // Backup the DX9 state
+        HRESULT result = device->CreateStateBlock(D3DSBT_ALL, &d3d9_state_block);
+        if (FAILED(result))
+        {
+            throw std::runtime_error("Failed to get the D3D9 state block");
+        }
+
+        device->GetTransform(D3DTS_WORLD, &last_world);
+        device->GetTransform(D3DTS_VIEW, &last_view);
+        device->GetTransform(D3DTS_PROJECTION, &last_projection);
+
+        device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+        device->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+        device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+        device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+        device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+        device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+        device->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
+        device->SetRenderState(D3DRS_SRCBLENDALPHA, D3DBLEND_ONE);
+        device->SetRenderState(D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA);
+        device->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+        device->SetRenderState(D3DRS_FOGENABLE, FALSE);
+        device->SetRenderState(D3DRS_RANGEFOGENABLE, FALSE);
+        device->SetRenderState(D3DRS_SPECULARENABLE, FALSE);
+        device->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+        device->SetRenderState(D3DRS_CLIPPING, FALSE);
+        device->SetRenderState(D3DRS_LIGHTING, FALSE);
+
+        const auto identityMatrix = glm::identity<glm::mat4>();
+        device->SetTransform(D3DTS_WORLD, reinterpret_cast<const D3DMATRIX*>(&identityMatrix));
+        device->SetTransform(D3DTS_VIEW, reinterpret_cast<const D3DMATRIX*>(&identityMatrix));
+        device->SetTransform(D3DTS_PROJECTION, reinterpret_cast<const D3DMATRIX*>(&identityMatrix));
+
+        device->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+        device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+        device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+        device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+        device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+
+        device->SetTexture(10, depthTexture);
+
+        const auto gameSize = ImGui::GetIO().DisplaySize;
+        const float texelOffset[4] = { -1.0f / gameSize.x, 1.0f / gameSize.y, 0.0f, 0.0f };
+        device->SetVertexDeclaration(depthPassVDecl);
+        device->SetVertexShaderConstantF(0, reinterpret_cast<const float*>(&texelOffset), 1);
+        device->SetVertexShader(depthPassVS);
+        device->SetPixelShaderConstantF(
+            0, 
+            std::array<float, 4>{
+                passType == Components::PassType::Depth ? 1.0f : 0.0f, 
+                0.0f, 0.0f, 0.0f
+            }.data(), 
+            1
+        );
+        device->SetPixelShaderConstantF(
+            4,
+            std::array<float, 4>{
+                passType == Components::PassType::Normal ? 1.0f : 0.0f,
+                0.0f, 0.0f, 0.0f
+            }.data(),
+            1
+        );
+        device->SetPixelShaderConstantF(
+            8,
+            std::array<float, 4>{
+                onlyDrawViewmodel ? 1.0f : 0.0f, 
+                0.0f, 0.0f, 0.0f
+            }.data(),
+            1
+        );
+        //device->SetPixelShaderConstantF(
+        //    1, std::array<float, 4>{passType == Components::PassType::Normal ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f}.data(), 1);
+        //device->SetPixelShaderConstantB(6, (BOOL*)&onlyDrawViewmodel, 1);
+        device->SetPixelShader(depthPassPS);
+        device->SetStreamSource(0, depthPassVertices, 0, sizeof(Types::FSVertex));
+        device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
+
+        // Restore the DX9 transform
+        device->SetTransform(D3DTS_WORLD, &last_world);
+        device->SetTransform(D3DTS_VIEW, &last_view);
+        device->SetTransform(D3DTS_PROJECTION, &last_projection);
+
+        // Restore the DX9 state
+        d3d9_state_block->Apply();
+        d3d9_state_block->Release();
+    }
+
+    void GraphicsManager::DrawShaderForPassIndex(int32_t passIndex)
+    {
+        auto& captureSettings = Components::CaptureManager::Get().GetCaptureSettings();
+        auto& pass = captureSettings.passes[passIndex];
+        
+        if (pass.type != Components::PassType::Default || pass.elements == Components::VisibleElements::OnlyGun)
+        {
+            DrawStreamsShader(
+                pass.type,
+                pass.elements == Components::VisibleElements::OnlyGun
+            );
+        }
+    }
+
     void GraphicsManager::Render()
     {
         if (ImGui::GetMainViewport()->Size.x == 0.0f || ImGui::GetMainViewport()->Size.y == 0.0f)
@@ -567,7 +777,7 @@ namespace IWXMVM::GFX
         device->GetTransform(D3DTS_WORLD, &last_world);
         device->GetTransform(D3DTS_VIEW, &last_view);
         device->GetTransform(D3DTS_PROJECTION, &last_projection);
-
+        
         SetupRenderState();
 
         BufferManager::Get().BindBuffers(BufferType::Static);
@@ -667,6 +877,12 @@ namespace IWXMVM::GFX
                 BufferManager::Get().DrawMesh(campath, glm::identity<glm::mat4>(), true);
             }
         }
+
+        auto captureMenu = UI::UIManager::Get().GetUIComponent<UI::CaptureMenu>(UI::Component::Component::CaptureMenu);
+        if (captureMenu->GetDisplayPassIndex().has_value())
+        {
+            DrawShaderForPassIndex(captureMenu->GetDisplayPassIndex().value());
+		}
 
         // Restore the DX9 transform
         device->SetTransform(D3DTS_WORLD, &last_world);

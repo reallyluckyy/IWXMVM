@@ -31,6 +31,8 @@ namespace IWXMVM::UI
         ImGui_ImplDX9_Shutdown();
         ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
+
+        isInitialized = false;
     }
 
     void UIManager::RunImGuiFrame()

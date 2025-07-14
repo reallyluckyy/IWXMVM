@@ -5,6 +5,7 @@
 #include "Components/KeyframeManager.hpp"
 #include "Components/CaptureManager.hpp"
 #include "Components/Rewinding.hpp"
+#include "Components/Rendering.hpp"
 
 namespace IWXMVM
 {

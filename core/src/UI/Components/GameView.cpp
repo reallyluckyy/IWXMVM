@@ -8,6 +8,7 @@
 #include "Utilities/MathUtils.hpp"
 #include "Events.hpp"
 #include "Input.hpp"
+#include "Components/Rewinding.hpp"
 #include "Graphics/Graphics.hpp"
 #include "Configuration/PreferencesConfiguration.hpp"
 
@@ -333,7 +334,8 @@ namespace IWXMVM::UI
         ImGui::Begin("GameView", NULL, flags);
 
         auto isGameFocused = D3D9::FindWindowHandle() == GetForegroundWindow();
-        if (HasFocus() && (Input::KeyDown(ImGuiKey_Escape) || Input::BindDown(Action::FreeCameraActivate) || !isGameFocused))
+        if (HasFocus() &&
+            (Input::KeyDown(ImGuiKey_Escape) || Input::BindDown(Action::FreeCameraActivate) || !isGameFocused))
         {
             SetHasFocus(false);
             ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
@@ -380,9 +382,14 @@ namespace IWXMVM::UI
             D3D9::CreateTexture(texture, textureSize);
         }
 
-        if (!D3D9::CaptureBackBuffer(texture))
+        // only update the game view if we're not rewinding to reduce "glitchiness"
+        // otherwise, for a brief second, you'd see the first frame of the demo
+        if (!Components::Rewinding::IsRewinding())
         {
-            throw std::exception("Failed to capture game view");
+            if (!D3D9::CaptureBackBuffer(texture))
+            {
+                throw std::exception("Failed to capture game view");
+            }
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));

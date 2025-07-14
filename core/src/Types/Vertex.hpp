@@ -16,5 +16,10 @@ namespace IWXMVM::Types
         }
     };
 
+    struct FSVertex {
+        glm::vec3 p;
+        glm::vec2 uv;
+    };
+
     typedef std::uint32_t Index;
 }  // namespace IWXMVM::Types

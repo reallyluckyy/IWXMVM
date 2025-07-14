@@ -83,6 +83,16 @@ namespace IWXMVM::IW3::Functions
         }
     }
 
+
+    Structures::Material* Material_RegisterHandle(const char* materialName)
+    {
+        typedef Structures::Material*(__cdecl * Material_RegisterHandle_t)(const char* materialName, int a2);
+        Material_RegisterHandle_t Material_RegisterHandle =
+            reinterpret_cast<Material_RegisterHandle_t>(GetGameAddresses().Material_RegisterHandle());
+
+        return Material_RegisterHandle(materialName, 3);
+    }
+
     void Dvar_SetStringByName(const char* dvarName, const char* value)
     {
         static uintptr_t address = GetGameAddresses().Dvar_SetStringByName();

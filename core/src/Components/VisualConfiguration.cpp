@@ -101,15 +101,13 @@ namespace IWXMVM::Components
         }
     }
 
-    std::optional<VisualConfiguration::Settings> VisualConfiguration::Load(std::filesystem::path file)
+    bool VisualConfiguration::Load(std::filesystem::path file, VisualConfiguration::Settings& visuals)
     {
-        VisualConfiguration::Settings visuals;
-
         std::ifstream in(file);
         if (!in.is_open())
         {
             LOG_ERROR("Failed to load config file: {}", file.string());
-            return std::nullopt;
+            return false;
         }
 
         std::string dvar;
@@ -255,7 +253,7 @@ namespace IWXMVM::Components
             }
         }
 
-        return visuals;
+        return true;
     }
 
     void VisualConfiguration::Save(std::filesystem::path file, VisualConfiguration::Settings settings)

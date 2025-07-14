@@ -25,7 +25,7 @@ namespace IWXMVM::Components
             Types::HudInfo hudInfo;
         };
 
-        static std::optional<Settings> Load(std::filesystem::path file);
+        static bool Load(std::filesystem::path file, Settings& visuals);
         static void Save(std::filesystem::path file, Settings settings);
     };
 }
