@@ -839,7 +839,7 @@ namespace IWXMVM::UI
                     if (ImGui::Button(std::format(ICON_FA_TRASH "##deleteProperty{}Button", property.name).c_str(), 
                                       ImVec2(1, 1) * (ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2.0f)))
                     {
-                        Components::KeyframeManager::Get().GetKeyframes(property).clear();
+                        Components::KeyframeManager::Get().ClearKeyframes(property);
                         propertyVisible[property] = false;
                     }
                     ImGui::PopStyleColor();
