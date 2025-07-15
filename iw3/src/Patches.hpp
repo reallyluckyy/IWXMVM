@@ -35,8 +35,9 @@ namespace IWXMVM::IW3::Patches
                                   PatchApplySetting::Immediately};  // Prevents cg_thirdperson from being reset
 
         // to remove the blood overlay when player gets hit
-        NopPatch<5> CG_DrawPlayerLowHealthOverlay{GetGameAddresses().CG_DrawPlayerLowHealthOverlay(),
-                                                  PatchApplySetting::Deferred};
+        NopPatch<5> CG_DrawPlayerLowHealthOverlay{GetGameAddresses().CG_DrawPlayerLowHealthOverlay(), PatchApplySetting::Deferred};
+        ReturnPatch CG_DrawFlashDamage{GetGameAddresses().CG_DrawFlashDamage(), PatchApplySetting::Deferred};
+        ReturnPatch CG_DrawDamageDirectionIndicators{GetGameAddresses().CG_DrawDamageDirectionIndicators(), PatchApplySetting::Deferred};
          
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };
