@@ -151,12 +151,11 @@ namespace IWXMVM::UI
                 ImGui::SameLine(0, smallSpacing);
                 DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraRight)));
                 ImGui::SameLine(0, smallSpacing);
-                DrawKeybindEntry(ICON_FA_COMPUTER_MOUSE, "Move Camera");
-
-                ImGui::SameLine(0, spacing);
                 DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraUp)));
                 ImGui::SameLine(0, smallSpacing);
-                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)), "Up/Down");
+                DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)));
+                ImGui::SameLine(0, smallSpacing);
+                DrawKeybindEntry(ICON_FA_COMPUTER_MOUSE, "Move Camera");
 
                 ImGui::SameLine(0, spacing);
                 DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraFaster)));
