@@ -399,7 +399,7 @@ namespace IWXMVM::UI
         ImGui::BeginChildFrame(ImGui::GetID("gameViewportInternal"), textureSize,
                                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
                                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
-                                   ImGuiWindowFlags_NoScrollbar);
+                                   ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMouseInputs);
         this->viewportPosition = ImGui::GetCurrentWindow()->DC.CursorPos;
         this->viewportSize = textureSize;
         ImGui::Image((void*)texture, textureSize);
