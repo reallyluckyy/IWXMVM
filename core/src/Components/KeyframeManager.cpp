@@ -4,6 +4,8 @@
 #include "Resources.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "KeyframeSerializer.hpp"
+#include "../UI/Components/KeyframeEditor.hpp"
+#include "../UI/UIManager.hpp"
 #include "Components/Playback.hpp"
 #include "Events.hpp"
 #include "Mod.hpp"
@@ -15,7 +17,7 @@ namespace IWXMVM::Components
         Types::KeyframeablePropertyType::CampathCamera, 
         ICON_FA_VIDEO " Campath Camera",
         Types::KeyframeValueType::CameraData,
-        -3000, 3000 // TODO: this is not super helpful for rotation and fov
+        -50, 50 // TODO: this is not super helpful for rotation and fov
     );
     Types::KeyframeableProperty sunLightColorProperty(
         Types::KeyframeablePropertyType::SunLightColor,
@@ -171,6 +173,7 @@ namespace IWXMVM::Components
             {
                 Components::KeyframeSerializer::ReadRecent();
                 justLoadedDemo = false;
+                UI::UIManager::Get().GetUIComponent<UI::KeyframeEditor>(UI::Component::KeyframeEditor)->SetDefaultVerticalZoom();
             }
         });
     }
