@@ -403,11 +403,7 @@ namespace IWXMVM::UI
 
         if (!keyframes.empty())
         {
-            const auto lowestTickKeyframe = std::min_element(keyframes.begin(), keyframes.end());
-            const auto highestTickKeyframe = std::max_element(keyframes.begin(), keyframes.end());
-
-            const auto EVALUATION_DISTANCE =
-                glm::clamp(100 * (highestTickKeyframe->tick - lowestTickKeyframe->tick) / 5000, 50u, 1000u);
+            const auto EVALUATION_DISTANCE = (displayEndTick - displayStartTick) / 100;
 
             std::vector<ImVec2> polylinePoints;
 
