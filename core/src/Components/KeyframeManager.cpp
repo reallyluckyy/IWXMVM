@@ -4,6 +4,7 @@
 #include "Resources.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "KeyframeSerializer.hpp"
+#include "Components/Playback.hpp"
 #include "Events.hpp"
 #include "Mod.hpp"
 #include "../Input.hpp"
@@ -150,7 +151,14 @@ namespace IWXMVM::Components
         static bool justLoadedDemo = false;
 
         Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
+            
             ClearKeyframes();
+            
+            if (Components::Playback::IsGameFrozen())
+            {
+                Components::Playback::ToggleFrozenTick();
+            }
+            
             actionHistory.clear();
             undidActionHistory.clear();
             justLoadedDemo = true;
