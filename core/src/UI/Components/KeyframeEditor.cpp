@@ -92,7 +92,7 @@ namespace IWXMVM::UI
 
     void KeyframeEditor::HandleTimelineZoomInteractions(const ImVec2 rectMin, const ImVec2 rectMax, const Types::KeyframeableProperty& property, std::optional<int32_t> valueIndex)
     {
-        constexpr auto ZOOM_MULTIPLIER = 2000;
+        constexpr auto ZOOM_MULTIPLIER = 1000;
         constexpr auto MOVE_MULTIPLIER = 1;
 
         constexpr int32_t MINIMUM_ZOOM = 500;
@@ -106,7 +106,8 @@ namespace IWXMVM::UI
         const auto barLength = rectMax.x - rectMin.x;
         const auto mousePercentage = (ImGui::GetMousePos().x - rectMin.x) / barLength;
 
-        scrollDelta = scrollDelta * 100 * ZOOM_MULTIPLIER * maxTick / 50000;
+        const auto alreadyZoomedInFactor = std::fminf((displayEndTick - displayStartTick) / 10000.0f, 100);
+        scrollDelta = scrollDelta * 100 * alreadyZoomedInFactor * ZOOM_MULTIPLIER;
         displayStartTick += static_cast<uint32_t>(scrollDelta * mousePercentage);
         displayStartTick = glm::clamp(displayStartTick, minTick, displayEndTick - MINIMUM_ZOOM);
         displayEndTick -= static_cast<uint32_t>(scrollDelta * (1.0f - mousePercentage));
