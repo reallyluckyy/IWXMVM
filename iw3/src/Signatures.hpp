@@ -60,12 +60,10 @@ namespace IWXMVM::IW3::Signatures
         Sig("83 3D ?? ?? ?? ?? ?? 0F 85 92 01 00 00", GAType::Code, -5,
             Lambda::FollowCodeFlow) > CL_FirstSnapshot;
         Sig("8B 15 ?? ?? ?? ?? 8B 42 0C 83 C4 04 80 38 00", GAType::Code, -5) > Con_TimeJumpedCall;
-        //Sig("EB 0F 68 ?? ?? ?? ?? 6A 01 E8 ?? ?? ?? ?? 83 C4 08 83 3D", GAType::Code, -9) > CL_SetCGameTimeError;
-        //Sig("6A 01 E8 ?? ?? ?? ?? 83 C4 08 8B 15 ?? ?? ?? ?? 8B FE", GAType::Code,
-            //-7) > CL_CGameNeedsServerCommandError;
-        //Sig("6A 01 E8 ?? ?? ?? ?? 83 C4 08 57 53", GAType::Code, -7) > CG_ProcessSnapshotsError;
-        //Sig("6A 0E E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? A1", GAType::Code, -9) > CG_ReadNextSnapshotWarning;
         Sig("8B C7 69 C0 58 02 00 00", GAType::Code, -5) > CG_MapRestartSetThirdpersonCall;
+
+        // for depth patch
+        Sig("33 D2 85 F6 57 74 4A", GAType::Code, -5) > R_DoesDrawSurfListInfoNeedFloatz;
 
         // for changing (death) animations
         Sig("E8 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 83 F8 0E 0F 87", GAType::Code, 5) > CG_ProcessEntity;

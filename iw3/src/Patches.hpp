@@ -20,19 +20,21 @@ namespace IWXMVM::IW3::Patches
         JumpPatch CG_AddPlayerSpriteDrawSurfs{GetGameAddresses().CG_AddPlayerSpriteDrawSurfs(),
                                               PatchApplySetting::Immediately};
         JumpPatch CL_CGameRendering{GetGameAddresses().CL_CGameRendering(), PatchApplySetting::Immediately};
+
+        // Ensure the depth buffer is always filled
+        ReturnValuePatch<1> R_DoesDrawSurfListInfoNeedFloatz{GetGameAddresses().R_DoesDrawSurfListInfoNeedFloatz(),
+                                                             PatchApplySetting::Immediately};
+
+        // Modify CL_KeyEvent to prevent the game hud from disappearing on left mouse click
         Patch<1> CL_KeyEvent{GetGameAddresses().CL_KeyEvent(), std::array<std::uint8_t, 1>{0x4E},
-                             PatchApplySetting::Immediately};  // modify CL_KeyEvent to prevent the game hud from
-                                                               // disappearing on left mouse click
+                             PatchApplySetting::Immediately};
         
         // For rewinding (not sure if all of these are actually necessary)
         NopPatch<5> Con_TimeJumped{GetGameAddresses().Con_TimeJumpedCall(), PatchApplySetting::Deferred};
-        //NopPatch<2> CL_SetCGameTime{GetGameAddresses().CL_SetCGameTimeError(), PatchApplySetting::Immediately};
-        //JumpPatch CL_CGameNeedsServerCommand{GetGameAddresses().CL_CGameNeedsServerCommandError(),
-                                             //PatchApplySetting::Immediately};
-        //JumpPatch CG_ProcessSnapshots{GetGameAddresses().CG_ProcessSnapshotsError(), PatchApplySetting::Immediately};
-        //JumpPatch CG_ReadNextSnapshot{GetGameAddresses().CG_ReadNextSnapshotWarning(), PatchApplySetting::Immediately};
+
+        // Prevents cg_thirdperson from being reset
         NopPatch<5> CG_MapRestart{GetGameAddresses().CG_MapRestartSetThirdpersonCall(),
-                                  PatchApplySetting::Immediately};  // Prevents cg_thirdperson from being reset
+                                  PatchApplySetting::Immediately};
 
         // to remove the blood overlay when player gets hit
         NopPatch<5> CG_DrawPlayerLowHealthOverlay{GetGameAddresses().CG_DrawPlayerLowHealthOverlay(), PatchApplySetting::Deferred};
