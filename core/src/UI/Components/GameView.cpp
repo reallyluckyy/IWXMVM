@@ -9,12 +9,13 @@
 #include "Events.hpp"
 #include "Input.hpp"
 #include "Components/Rewinding.hpp"
+#include "Components/CaptureManager.hpp"
 #include "Graphics/Graphics.hpp"
 #include "Configuration/PreferencesConfiguration.hpp"
 
 namespace IWXMVM::UI
 {
-    ImVec2 ClampImage(ImVec2 window)  // Clamp for texture/image
+    ImVec2 ClampImage(ImVec2 window)
     {
         float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y;
 
@@ -401,7 +402,25 @@ namespace IWXMVM::UI
                                    ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMouseInputs);
         this->viewportPosition = ImGui::GetCurrentWindow()->DC.CursorPos;
         this->viewportSize = textureSize;
-        ImGui::Image((void*)texture, textureSize);
+
+        if (Components::CaptureManager::Get().IsCapturing() && Components::CaptureManager::Get().MultiPassEnabled())
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.05f);
+            ImGui::Image((void*)texture, textureSize);
+            ImGui::PopStyleVar();
+
+            const char* label = "PREVIEW IS DIMMED DURING MULTIPASS RECORDING";
+            ImGui::PushFont(UIManager::Get().GetBoldFont());
+            ImGui::SetCursorPos(ImVec2((textureSize.x - ImGui::CalcTextSize(label).x) / 2.0f,
+                                       (textureSize.y - ImGui::GetTextLineHeight()) / 2.0f));
+            ImGui::Text(label);
+            ImGui::PopFont();
+        }
+        else
+        {
+            ImGui::Image((void*)texture, textureSize); 
+        }
+
         Events::Invoke(EventType::OnRenderGameView);
         if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo)
         {
