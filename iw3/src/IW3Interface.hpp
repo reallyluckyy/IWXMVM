@@ -279,6 +279,11 @@ namespace IWXMVM::IW3
             Functions::Cbuf_AddText("disconnect");
         }
 
+        void Vid_Restart()
+        {
+            Functions::Cbuf_AddText("vid_restart");
+        }
+
         bool IsConsoleOpen() final
         {
             return (Structures::GetClientUIActives()->keyCatchers & 1) != 0;
@@ -461,9 +466,17 @@ namespace IWXMVM::IW3
             Hooks::HUD::showScore = hudInfo.showScore;
             Hooks::HUD::showOtherText = hudInfo.showOtherText;
             if (hudInfo.showBloodOverlay)
+            {
                 Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Revert();
+                Patches::GetGamePatches().CG_DrawFlashDamage.Revert();
+                Patches::GetGamePatches().CG_DrawDamageDirectionIndicators.Revert();
+            }
             else
+            {
                 Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Apply();
+                Patches::GetGamePatches().CG_DrawFlashDamage.Apply();
+                Patches::GetGamePatches().CG_DrawDamageDirectionIndicators.Apply();
+            }
 
             std::stringstream teamColorAllies;
             teamColorAllies << hudInfo.killfeedTeam1Color[0] << " " << hudInfo.killfeedTeam1Color[1] << " "

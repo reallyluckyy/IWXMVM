@@ -8,12 +8,14 @@
 #include "Utilities/MathUtils.hpp"
 #include "Events.hpp"
 #include "Input.hpp"
+#include "Components/Rewinding.hpp"
+#include "Components/CaptureManager.hpp"
 #include "Graphics/Graphics.hpp"
 #include "Configuration/PreferencesConfiguration.hpp"
 
 namespace IWXMVM::UI
 {
-    ImVec2 ClampImage(ImVec2 window)  // Clamp for texture/image
+    ImVec2 ClampImage(ImVec2 window)
     {
         float aspectRatio = ImGui::GetIO().DisplaySize.x / ImGui::GetIO().DisplaySize.y;
 
@@ -150,12 +152,11 @@ namespace IWXMVM::UI
                 ImGui::SameLine(0, smallSpacing);
                 DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraRight)));
                 ImGui::SameLine(0, smallSpacing);
-                DrawKeybindEntry(ICON_FA_COMPUTER_MOUSE, "Move Camera");
-
-                ImGui::SameLine(0, spacing);
                 DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraUp)));
                 ImGui::SameLine(0, smallSpacing);
-                DrawKeybindEntry(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)), "Up/Down");
+                DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraDown)));
+                ImGui::SameLine(0, smallSpacing);
+                DrawKeybindEntry(ICON_FA_COMPUTER_MOUSE, "Move Camera");
 
                 ImGui::SameLine(0, spacing);
                 DrawKeyBox(ImGui::GetKeyName(config.GetBoundKey(Action::FreeCameraFaster)));
@@ -333,7 +334,8 @@ namespace IWXMVM::UI
         ImGui::Begin("GameView", NULL, flags);
 
         auto isGameFocused = D3D9::FindWindowHandle() == GetForegroundWindow();
-        if (HasFocus() && (Input::KeyDown(ImGuiKey_Escape) || Input::BindDown(Action::FreeCameraActivate) || !isGameFocused))
+        if (HasFocus() &&
+            (Input::KeyDown(ImGuiKey_Escape) || Input::BindDown(Action::FreeCameraActivate) || !isGameFocused))
         {
             SetHasFocus(false);
             ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
@@ -380,9 +382,14 @@ namespace IWXMVM::UI
             D3D9::CreateTexture(texture, textureSize);
         }
 
-        if (!D3D9::CaptureBackBuffer(texture))
+        // only update the game view if we're not rewinding to reduce "glitchiness"
+        // otherwise, for a brief second, you'd see the first frame of the demo
+        if (!Components::Rewinding::IsRewinding())
         {
-            throw std::exception("Failed to capture game view");
+            if (!D3D9::CaptureBackBuffer(texture))
+            {
+                throw std::exception("Failed to capture game view");
+            }
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
@@ -392,10 +399,28 @@ namespace IWXMVM::UI
         ImGui::BeginChildFrame(ImGui::GetID("gameViewportInternal"), textureSize,
                                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
                                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
-                                   ImGuiWindowFlags_NoScrollbar);
+                                   ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMouseInputs);
         this->viewportPosition = ImGui::GetCurrentWindow()->DC.CursorPos;
         this->viewportSize = textureSize;
-        ImGui::Image((void*)texture, textureSize);
+
+        if (Components::CaptureManager::Get().IsCapturing() && Components::CaptureManager::Get().MultiPassEnabled())
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.05f);
+            ImGui::Image((void*)texture, textureSize);
+            ImGui::PopStyleVar();
+
+            const char* label = "PREVIEW IS DIMMED DURING MULTIPASS RECORDING";
+            ImGui::PushFont(UIManager::Get().GetBoldFont());
+            ImGui::SetCursorPos(ImVec2((textureSize.x - ImGui::CalcTextSize(label).x) / 2.0f,
+                                       (textureSize.y - ImGui::GetTextLineHeight()) / 2.0f));
+            ImGui::Text(label);
+            ImGui::PopFont();
+        }
+        else
+        {
+            ImGui::Image((void*)texture, textureSize); 
+        }
+
         Events::Invoke(EventType::OnRenderGameView);
         if (Mod::GetGameInterface()->GetGameState() == Types::GameState::InDemo)
         {

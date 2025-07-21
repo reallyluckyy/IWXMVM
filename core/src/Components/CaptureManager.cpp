@@ -5,6 +5,7 @@
 #include "Configuration/PreferencesConfiguration.hpp"
 #include "Components/Rewinding.hpp"
 #include "Components/Playback.hpp"
+#include "Graphics/Graphics.hpp"
 #include "Utilities/PathUtils.hpp"
 #include "D3D9.hpp"
 #include "Events.hpp"
@@ -117,12 +118,21 @@ namespace IWXMVM::Components
         Events::RegisterListener(EventType::OnFrame, [&]() { OnRenderFrame(); });
     }
 
-    void CaptureManager::OnRenderFrame()
+    void CaptureManager::CaptureFrame()
     {
-        if (!isCapturing || Rewinding::IsRewinding())
-            return;
+        framePrepared = false;
+
+        FILE* outputPipe = pipe;
+        if (MultiPassEnabled())
+        {
+            const auto passIndex = static_cast<std::size_t>(capturedFrameCount) % captureSettings.passes.size();
+            GFX::GraphicsManager::Get().DrawShaderForPassIndex(passIndex);
+
+            outputPipe = captureSettings.passes[passIndex].pipe;
+        }
 
         IDirect3DDevice9* device = D3D9::GetDevice();
+
         if (FAILED(device->StretchRect(backBuffer, NULL, downsampledRenderTarget, NULL, D3DTEXF_NONE)))
         {
             LOG_ERROR("Failed to copy data from backbuffer to render target");
@@ -146,7 +156,7 @@ namespace IWXMVM::Components
         }
 
         const auto surfaceByteSize = screenDimensions.width * screenDimensions.height * 4;
-        std::fwrite(lockedRect.pBits, surfaceByteSize, 1, pipe);
+        std::fwrite(lockedRect.pBits, surfaceByteSize, 1, outputPipe);
 
         capturedFrameCount++;
 
@@ -162,12 +172,40 @@ namespace IWXMVM::Components
         {
             StopCapture();
         }
+    }
 
+    void CaptureManager::PrepareFrame()
+    {
+        if (!isCapturing.load())
+        	return;
+
+        if (MultiPassEnabled())
+        {
+            const auto passIndex = static_cast<std::size_t>(capturedFrameCount) % captureSettings.passes.size();
+            const auto& pass = captureSettings.passes[passIndex];
+
+            Rendering::SetVisibleElements(pass.elements);
+        }
+
+        framePrepared = true;
+    }
+
+    void CaptureManager::OnRenderFrame()
+    {
+        if (!isCapturing || Rewinding::IsRewinding())
+            return;
     }
 
     int32_t CaptureManager::OnGameFrame()
     {
-        return 1000 / GetCaptureSettings().framerate;
+        if (MultiPassEnabled())
+        {
+            return capturedFrameCount % captureSettings.passes.size() == 0 ? 1000 / GetCaptureSettings().framerate : 0;
+        }
+        else
+        {
+            return 1000 / GetCaptureSettings().framerate;
+        }
     }
 
     void CaptureManager::ToggleCapture()
@@ -188,7 +226,7 @@ namespace IWXMVM::Components
         return appdataPath / "codmvm_launcher" / "ffmpeg.exe";
     }
 
-    std::string GetFFmpegCommand(const Components::CaptureSettings& captureSettings, const std::filesystem::path& outputDirectory, const Resolution screenDimensions)
+    std::string GetFFmpegCommand(const Components::CaptureSettings& captureSettings, const std::filesystem::path& outputDirectory, const Resolution screenDimensions, std::size_t passIndex)
     {
         auto path = GetFFmpegPath();
         char shortPathBuf[MAX_PATH];
@@ -199,10 +237,10 @@ namespace IWXMVM::Components
             case OutputFormat::ImageSequence:
                 return std::format(
                     "{} -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -q:v 0 "
-                    "-vf scale={}:{} -y \"{}\\output_%06d.tga\" > ffmpeg_log.txt 2>&1",
+                    "-vf scale={}:{} -y \"{}\\output_{}_%06d.tga\" 2>&1",
                     shortPath,
                     screenDimensions.width, screenDimensions.height, captureSettings.framerate,
-                    captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string());
+                    captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string(), passIndex);
             case OutputFormat::Video:
             {
                 std::int32_t profile = 0;
@@ -237,16 +275,16 @@ namespace IWXMVM::Components
                         break;
                 }
 
-                std::string filename = "output.mov";
+                std::string filename = std::format("Pass {}.mov", passIndex);
                 auto i = 0;
                 while (std::filesystem::exists(outputDirectory / filename))
                 {
-                    filename = std::format("output{0}.mov", ++i);
+                    filename = std::format("Pass {}({}).mov", passIndex, ++i);
                 }
 
                 return std::format(
                     "{} -f rawvideo -pix_fmt bgra -s {}x{} -r {} -i - -c:v prores -profile:v {} -q:v 1 "
-                    "-pix_fmt {} -vf scale={}:{} -y \"{}\\{}\" > ffmpeg_log.txt 2>&1",
+                    "-pix_fmt {} -vf scale={}:{} -y \"{}\\{}\" 2>&1",
                     shortPath, screenDimensions.width, screenDimensions.height, captureSettings.framerate, profile,
                     pixelFormat, captureSettings.resolution.width, captureSettings.resolution.height, outputDirectory.string(), filename);
             }
@@ -314,7 +352,6 @@ namespace IWXMVM::Components
         screenDimensions.width = static_cast<std::int32_t>(bbDesc.Width);
         screenDimensions.height = static_cast<std::int32_t>(bbDesc.Height);
 
-        std::string ffmpegCommand = GetFFmpegCommand(captureSettings, outputDirectory, screenDimensions);
         if (!std::filesystem::exists(GetFFmpegPath()))
         {
             LOG_ERROR("ffmpeg is not present in the game directory");
@@ -324,13 +361,34 @@ namespace IWXMVM::Components
         }
         ffmpegNotFound = false;
 
-        LOG_DEBUG("ffmpeg command: {}", ffmpegCommand);
-        pipe = _popen(ffmpegCommand.c_str(), "wb");
-        if (!pipe)
+        if (captureSettings.passes.empty())
         {
-            LOG_ERROR("ffmpeg pipe open error");
-            StopCapture();
-            return;
+            std::string ffmpegCommand = GetFFmpegCommand(captureSettings, outputDirectory, screenDimensions, 0);
+            LOG_DEBUG("ffmpeg command: {}", ffmpegCommand);
+            pipe = _popen(ffmpegCommand.c_str(), "wb");
+            if (!pipe)
+            {
+                LOG_ERROR("ffmpeg pipe open error");
+                StopCapture();
+                return;
+            }
+        }
+        else
+        {
+            for (std::size_t i = 0; i < captureSettings.passes.size(); i++)
+            {
+                auto& pass = captureSettings.passes[i];
+
+                std::string ffmpegCommand = GetFFmpegCommand(captureSettings, outputDirectory, screenDimensions, i);
+                LOG_DEBUG("ffmpeg command: {}", ffmpegCommand);
+                pass.pipe = _popen(ffmpegCommand.c_str(), "wb");
+                if (!pass.pipe)
+                {
+                    LOG_ERROR("ffmpeg pipe open error");
+                    StopCapture();
+                    return;
+                }
+            }
         }
 
         isCapturing.store(true);
@@ -341,11 +399,24 @@ namespace IWXMVM::Components
         LOG_INFO("Stopped capture (wrote {0} frames)", capturedFrameCount);
         isCapturing.store(false);
 
+        Rendering::ResetVisibleElements();
+        framePrepared = false;
+
         if (pipe)
         {
             fflush(pipe);
             fclose(pipe);
             pipe = nullptr;
+        }
+
+        for (auto& pass : captureSettings.passes)
+        {
+            if (pass.pipe)
+            {
+                fflush(pass.pipe);
+                fclose(pass.pipe);
+                pass.pipe = nullptr;
+            }
         }
 
         if (tempSurface)
@@ -364,6 +435,18 @@ namespace IWXMVM::Components
         {
             downsampledRenderTarget->Release();
             downsampledRenderTarget = nullptr;
+        }
+
+        if (depthSurface)
+        {
+            depthSurface->Release();
+            depthSurface = nullptr;
+        }
+
+        if (depthShader)
+        {
+            depthShader->Release();
+            depthShader = nullptr;
         }
     }
 }

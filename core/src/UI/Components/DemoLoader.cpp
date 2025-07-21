@@ -208,6 +208,10 @@ namespace IWXMVM::UI
 
     void DemoLoader::FindAllDemos()
     {
+        if (isScanningDemoPaths.load())
+			return;
+
+        LOG_DEBUG("Searching for demo files...");
         isScanningDemoPaths.store(true);
         std::thread([&] { 
             demoDirectories.clear();
@@ -222,6 +226,8 @@ namespace IWXMVM::UI
             // 'demoDirectories' and 'demoPaths' are complete here, but we still need to find out the relevancy of each
             // directory
             MarkDirsRelevancy();
+
+            LOG_DEBUG("Found {0} demo files", demoPaths.size());
 
             isScanningDemoPaths.store(false);            
         }).detach();

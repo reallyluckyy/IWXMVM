@@ -1265,6 +1265,293 @@ namespace IWXMVM::IW3::Structures
         int iwdIsClone;
     };
 
+        enum MaterialTechniqueType
+    {
+        TECHNIQUE_DEPTH_PREPASS = 0x0,
+        TECHNIQUE_BUILD_FLOAT_Z = 0x1,
+        TECHNIQUE_BUILD_SHADOWMAP_DEPTH = 0x2,
+        TECHNIQUE_BUILD_SHADOWMAP_COLOR = 0x3,
+        TECHNIQUE_UNLIT = 0x4,
+        TECHNIQUE_EMISSIVE = 0x5,
+        TECHNIQUE_EMISSIVE_SHADOW = 0x6,
+        TECHNIQUE_LIT_BEGIN = 0x7,
+        TECHNIQUE_LIT = 0x7,
+        TECHNIQUE_LIT_SUN = 0x8,
+        TECHNIQUE_LIT_SUN_SHADOW = 0x9,
+        TECHNIQUE_LIT_SPOT = 0xA,
+        TECHNIQUE_LIT_SPOT_SHADOW = 0xB,
+        TECHNIQUE_LIT_OMNI = 0xC,
+        TECHNIQUE_LIT_OMNI_SHADOW = 0xD,
+        TECHNIQUE_LIT_INSTANCED = 0xE,
+        TECHNIQUE_LIT_INSTANCED_SUN = 0xF,
+        TECHNIQUE_LIT_INSTANCED_SUN_SHADOW = 0x10,
+        TECHNIQUE_LIT_INSTANCED_SPOT = 0x11,
+        TECHNIQUE_LIT_INSTANCED_SPOT_SHADOW = 0x12,
+        TECHNIQUE_LIT_INSTANCED_OMNI = 0x13,
+        TECHNIQUE_LIT_INSTANCED_OMNI_SHADOW = 0x14,
+        TECHNIQUE_LIT_END = 0x15,
+        TECHNIQUE_LIGHT_SPOT = 0x15,
+        TECHNIQUE_LIGHT_OMNI = 0x16,
+        TECHNIQUE_LIGHT_SPOT_SHADOW = 0x17,
+        TECHNIQUE_FAKELIGHT_NORMAL = 0x18,
+        TECHNIQUE_FAKELIGHT_VIEW = 0x19,
+        TECHNIQUE_SUNLIGHT_PREVIEW = 0x1A,
+        TECHNIQUE_CASE_TEXTURE = 0x1B,
+        TECHNIQUE_WIREFRAME_SOLID = 0x1C,
+        TECHNIQUE_WIREFRAME_SHADED = 0x1D,
+        TECHNIQUE_SHADOWCOOKIE_CASTER = 0x1E,
+        TECHNIQUE_SHADOWCOOKIE_RECEIVER = 0x1F,
+        TECHNIQUE_DEBUG_BUMPMAP = 0x20,
+        TECHNIQUE_DEBUG_BUMPMAP_INSTANCED = 0x21,
+        TECHNIQUE_COUNT = 0x22,
+        TECHNIQUE_TOTAL_COUNT = 0x23,
+        TECHNIQUE_NONE = 0x24,
+    };
+
+    struct __declspec(align(16)) GfxCmdBufSourceState
+    {
+        // ...
+    };
+
+    struct $C6651C03833075F2AE4768F11066A2E3
+    {
+        unsigned int stride;
+        IDirect3DVertexBuffer9* vb;
+        unsigned int offset;
+    };
+
+    enum MaterialVertexDeclType
+    {
+        VERTDECL_GENERIC = 0x0,
+        VERTDECL_PACKED = 0x1,
+        VERTDECL_WORLD = 0x2,
+        VERTDECL_WORLD_T1N0 = 0x3,
+        VERTDECL_WORLD_T1N1 = 0x4,
+        VERTDECL_WORLD_T2N0 = 0x5,
+        VERTDECL_WORLD_T2N1 = 0x6,
+        VERTDECL_WORLD_T2N2 = 0x7,
+        VERTDECL_WORLD_T3N0 = 0x8,
+        VERTDECL_WORLD_T3N1 = 0x9,
+        VERTDECL_WORLD_T3N2 = 0xA,
+        VERTDECL_WORLD_T4N0 = 0xB,
+        VERTDECL_WORLD_T4N1 = 0xC,
+        VERTDECL_WORLD_T4N2 = 0xD,
+        VERTDECL_POS_TEX = 0xE,
+        VERTDECL_STATICMODELCACHE = 0xF,
+        VERTDECL_COUNT = 0x10,
+    };
+
+    struct GfxCmdBufPrimState
+    {
+        IDirect3DDevice9* device;
+        IDirect3DIndexBuffer9* indexBuffer;
+        MaterialVertexDeclType vertDeclType;
+        $C6651C03833075F2AE4768F11066A2E3 streams[2];
+        IDirect3DVertexDeclaration9* vertexDecl;
+    };
+
+    struct GfxDrawSurfFields
+    {
+        unsigned __int64 objectId : 16;
+        unsigned __int64 reflectionProbeIndex : 8;
+        unsigned __int64 customIndex : 5;
+        unsigned __int64 materialSortedIndex : 11;
+        unsigned __int64 prepass : 2;
+        unsigned __int64 primaryLightIndex : 8;
+        unsigned __int64 surfType : 4;
+        unsigned __int64 primarySortKey : 6;
+        unsigned __int64 unused : 4;
+    };
+
+    union GfxDrawSurf
+    {
+        GfxDrawSurfFields fields;
+        unsigned __int64 packed;
+    };
+
+    struct MaterialInfo
+    {
+        const char* name;
+        char gameFlags;
+        char sortKey;
+        char textureAtlasRowCount;
+        char textureAtlasColumnCount;
+        GfxDrawSurf drawSurf;
+        unsigned int surfaceTypeBits;
+        unsigned __int16 hashIndex;
+    };
+
+    struct MaterialPass
+    {
+        void** vertexDecl;   // MaterialVertexDeclaration
+        void* vertexShader;  // MaterialVertexShader
+        void* pixelShader;   // MaterialPixelShader
+        char perPrimArgCount;
+        char perObjArgCount;
+        char stableArgCount;
+        char customSamplerFlags;
+        void* args;  // MaterialShaderArgument
+    };
+
+    struct MaterialTechnique
+    {
+        const char* name;
+        unsigned __int16 flags;
+        unsigned __int16 passCount;
+        MaterialPass passArray[1];
+    };
+
+    struct MaterialTechniqueSet
+    {
+        const char* name;
+        char worldVertFormat;
+        bool hasBeenUploaded;
+        char unused[1];
+        MaterialTechniqueSet* remappedTechniqueSet;
+        MaterialTechnique* techniques[34];
+    };
+
+    struct Material
+    {
+        MaterialInfo info;
+        char stateBitsEntry[34];
+        char textureCount;
+        char constantCount;
+        char stateBitsCount;
+        char stateFlags;
+        char cameraRegion;
+        MaterialTechniqueSet* techniqueSet;
+        void* textureTable;    // MaterialTextureDef
+        void* constantTable;   // MaterialConstantDef
+        void* stateBitsTable;  // GfxStateBits
+    };
+
+    enum GfxDepthRangeType
+    {
+        GFX_DEPTH_RANGE_SCENE = 0x0,
+        GFX_DEPTH_RANGE_VIEWMODEL = 0x2,
+        GFX_DEPTH_RANGE_FULL = 0xFFFFFFFF,
+    };
+
+    struct GfxViewport
+    {
+        int x;
+        int y;
+        int width;
+        int height;
+    };
+
+    enum GfxRenderTargetId
+    {
+        R_RENDERTARGET_SAVED_SCREEN = 0x0,
+        R_RENDERTARGET_FRAME_BUFFER = 0x1,
+        R_RENDERTARGET_SCENE = 0x2,
+        R_RENDERTARGET_RESOLVED_POST_SUN = 0x3,
+        R_RENDERTARGET_RESOLVED_SCENE = 0x4,
+        R_RENDERTARGET_FLOAT_Z = 0x5,
+        R_RENDERTARGET_DYNAMICSHADOWS = 0x6,
+        R_RENDERTARGET_PINGPONG_0 = 0x7,
+        R_RENDERTARGET_PINGPONG_1 = 0x8,
+        R_RENDERTARGET_SHADOWCOOKIE = 0x9,
+        R_RENDERTARGET_SHADOWCOOKIE_BLUR = 0xA,
+        R_RENDERTARGET_POST_EFFECT_0 = 0xB,
+        R_RENDERTARGET_POST_EFFECT_1 = 0xC,
+        R_RENDERTARGET_SHADOWMAP_SUN = 0xD,
+        R_RENDERTARGET_SHADOWMAP_SPOT = 0xE,
+        R_RENDERTARGET_COUNT = 0xF,
+        R_RENDERTARGET_NONE = 0x10,
+    };
+
+    struct GfxCmdBufState
+    {
+        char refSamplerState[16];
+        unsigned int samplerState[16];
+        void* samplerTexture[16];  // GfxTexture
+        GfxCmdBufPrimState prim;
+        Material* material;
+        MaterialTechniqueType techType;
+        void* technique;  // MaterialTechnique
+        void* pass;       // MaterialPass
+        unsigned int passIndex;
+        GfxDepthRangeType depthRangeType;
+        float depthRangeNear;
+        float depthRangeFar;
+        unsigned __int64 vertexShaderConstState[32];
+        unsigned __int64 pixelShaderConstState[256];
+        char alphaRef;
+        unsigned int refStateBits[2];
+        unsigned int activeStateBits[2];
+        void* pixelShader;   // MaterialPixelShader
+        void* vertexShader;  // MaterialVertexShader
+        GfxViewport viewport;
+        GfxRenderTargetId renderTargetId;
+        Material* origMaterial;
+        MaterialTechniqueType origTechType;
+    };
+
+    struct __declspec(align(128)) r_global_permanent_t
+    {
+        Material* sortedMaterials[2048];
+        int needSortMaterials;
+        int materialCount;
+        void* whiteImage;               // GfxImage
+        void* blackImage;               // GfxImage
+        void* blackImage3D;             // GfxImage
+        void* blackImageCube;           // GfxImage
+        void* grayImage;                // GfxImage
+        void* identityNormalMapImage;   // GfxImage
+        void* specularityImage;         // GfxImage
+        void* outdoorImage;             // GfxImage
+        void* pixelCostColorCodeImage;  // GfxImage
+        void* dlightDef;                // GfxLightDef
+        Material* defaultMaterial;
+        Material* whiteMaterial;
+        Material* additiveMaterial;
+        Material* pointMaterial;
+        Material* lineMaterial;
+        Material* lineMaterialNoDepth;
+        Material* clearAlphaStencilMaterial;
+        Material* shadowClearMaterial;
+        Material* shadowCookieOverlayMaterial;
+        Material* shadowCookieBlurMaterial;
+        Material* shadowCasterMaterial;
+        Material* shadowOverlayMaterial;
+        Material* depthPrepassMaterial;
+        Material* glareBlindMaterial;
+        Material* pixelCostAddDepthAlwaysMaterial;
+        Material* pixelCostAddDepthDisableMaterial;
+        Material* pixelCostAddDepthEqualMaterial;
+        Material* pixelCostAddDepthLessMaterial;
+        Material* pixelCostAddDepthWriteMaterial;
+        Material* pixelCostAddNoDepthWriteMaterial;
+        Material* pixelCostColorCodeMaterial;
+        Material* stencilShadowMaterial;
+        Material* stencilDisplayMaterial;
+        Material* floatZDisplayMaterial;
+        Material* colorChannelMixerMaterial;
+        Material* frameColorDebugMaterial;
+        Material* frameAlphaDebugMaterial;
+        void* rawImage;  // GfxImage
+        void* world;     // GfxWorld
+        Material* feedbackReplaceMaterial;
+        Material* feedbackBlendMaterial;
+        Material* feedbackFilmBlendMaterial;
+        Material* cinematicMaterial;
+        Material* dofDownsampleMaterial;
+        Material* dofNearCocMaterial;
+        Material* smallBlurMaterial;
+        Material* postFxDofMaterial;
+        Material* postFxDofColorMaterial;
+        Material* postFxColorMaterial;
+        Material* postFxMaterial;
+        Material* symmetricFilterMaterial[8];
+        Material* shellShockBlurredMaterial;
+        Material* shellShockFlashedMaterial;
+        Material* glowConsistentSetupMaterial;
+        Material* glowApplyBloomMaterial;
+        int savedScreenTimes[4];
+    };
+
     struct fileHandleData_t
     {
         qfile_us handleFiles;

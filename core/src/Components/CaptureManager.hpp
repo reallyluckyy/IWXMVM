@@ -1,5 +1,6 @@
 #pragma once
 #include "Camera.hpp"
+#include "Types/RenderingFlags.hpp"
 
 namespace IWXMVM::Components
 {
@@ -10,6 +11,32 @@ namespace IWXMVM::Components
         ImageSequence,
 
         Count
+    };
+
+    enum class PassType
+    {
+        Default,
+        Depth,
+        Normal,
+        Count
+    };
+
+    enum class VisibleElements
+    {
+        Everything,
+        WorldAndPlayers,
+        OnlyGun,
+        OnlyWorld,
+        OnlyPlayers,
+        Count
+    };
+
+    struct PassData
+    {
+        PassType type;
+        VisibleElements elements;
+        FILE* pipe = nullptr;
+        bool useReshade = true;
     };
 
     struct Resolution
@@ -47,6 +74,8 @@ namespace IWXMVM::Components
 
         Resolution resolution;
         int32_t framerate;
+
+        std::vector<PassData> passes;
     };
 
     class CaptureManager
@@ -65,6 +94,8 @@ namespace IWXMVM::Components
         void ToggleCapture();
         void StartCapture();
         void StopCapture();
+        void CaptureFrame();
+        void PrepareFrame();
 
         std::string_view GetOutputFormatLabel(OutputFormat outputFormat);
         std::string_view GetVideoCodecLabel(VideoCodec codec);
@@ -99,6 +130,11 @@ namespace IWXMVM::Components
             return isCapturing;
         }
 
+        bool IsFramePrepared() const
+        {
+            return framePrepared;
+        }
+
         bool IsFFmpegPresent() const
         {
             return !ffmpegNotFound;
@@ -108,6 +144,16 @@ namespace IWXMVM::Components
 		{
 			return capturedFrameCount;
 		}
+
+        bool MultiPassEnabled() const
+        {
+            return !captureSettings.passes.empty();
+        }
+
+        const PassData& GetCurrentPass() const
+        {
+            return captureSettings.passes[static_cast<std::size_t>(capturedFrameCount) % captureSettings.passes.size()];
+        }
 
         int32_t OnGameFrame();
 
@@ -121,8 +167,10 @@ namespace IWXMVM::Components
         std::array<Resolution, 4> supportedResolutions;
         CaptureSettings captureSettings;
 
+        IDirect3DSurface9* depthSurface = nullptr;
+        IDirect3DPixelShader9* depthShader = nullptr;
+
         // internal capture state
-        FILE* pipe = nullptr;
         Resolution screenDimensions = Resolution(0, 0);
         IDirect3DSurface9* backBuffer = nullptr;
         IDirect3DSurface9* downsampledRenderTarget = nullptr;
@@ -130,5 +178,7 @@ namespace IWXMVM::Components
         std::atomic_bool isCapturing = false;
         std::int32_t capturedFrameCount = 0;
         bool ffmpegNotFound = false;
+        bool framePrepared = false;
+        FILE* pipe = nullptr;
     };
 }  // namespace IWXMVM::Components

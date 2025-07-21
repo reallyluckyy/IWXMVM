@@ -4,6 +4,7 @@
 #include "Graphics/Resource.hpp"
 #include "Resources.hpp"
 #include "Types/Keyframe.hpp"
+#include "Components/CaptureManager.hpp"
 
 namespace IWXMVM::GFX
 {
@@ -42,6 +43,7 @@ namespace IWXMVM::GFX
         void Initialize();
         void Uninitialize();
         void Render();
+        void DrawShaderForPassIndex(int32_t passIndex);
 
         std::optional<int32_t> GetSelectedNodeId() const { return selectedNodeId; }
         bool WasObjectHoveredThisFrame() const { return objectHoveredThisFrame; }
@@ -77,12 +79,23 @@ namespace IWXMVM::GFX
         void DrawTranslationGizmo(glm::vec3& position, glm::mat4 translation, glm::mat4 rotation);
         void DrawRotationGizmo(glm::vec3& rotation, glm::mat4 translation);
 
+        void DrawStreamsShader(Components::PassType passType, bool onlyDrawViewmodel) const;
+        
         void BuildCampathMesh();
         void SetupRenderState() const noexcept;
 
+        void CreateGraphicsResources();
+        void DestroyGraphicsResources();
         IDirect3DPixelShader9* pixelShader = nullptr;
         IDirect3DVertexShader9* vertexShader = nullptr;
         IDirect3DVertexDeclaration9* vertexDeclaration = nullptr;
+
+        void CreateDepthPassResources();
+        void DestroyDepthPassResources();
+        IDirect3DPixelShader9* depthPassPS = nullptr;
+        IDirect3DVertexShader9* depthPassVS = nullptr;
+        IDirect3DVertexDeclaration9* depthPassVDecl = nullptr;
+        IDirect3DVertexBuffer9* depthPassVertices = nullptr;
 
         Mesh axis;
         Mesh camera;

@@ -135,6 +135,28 @@ namespace IWXMVM::Patches
         static constexpr std::uint8_t RETURN_OPCODE = 0xC3;
     };
 
+    
+    template <std::uint8_t value>
+    class ReturnValuePatch : public Patch<3>
+    {
+       public:
+        ReturnValuePatch(std::uintptr_t dst, PatchApplySetting setting = {}) : Patch<3>(dst, _bytes, setting)
+        {
+        }
+
+       private:
+        static constexpr std::uint8_t RETURN_OPCODE = 0xC2;
+
+        static constexpr auto _bytes = []() {
+            std::array<std::uint8_t, 3> tmp;
+            tmp[0] = RETURN_OPCODE;
+            tmp[1] = value;
+            tmp[2] = 0x00;
+
+            return tmp;
+        }();
+    };
+
     class JumpPatch : public Patch<1>
     {
        public:
