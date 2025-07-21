@@ -22,6 +22,7 @@ namespace IWXMVM::UI
         playbackSpeed = 1.0f;
     }
 
+    bool lastSkipWasSmartSkip = false;
     void SmartSetTickDelta(int32_t value)
     {
         // Skip forward/backward by the desired amount of ticks, while snapping to the closest capturing marker if 
@@ -33,9 +34,10 @@ namespace IWXMVM::UI
         auto frozenTick = Components::Playback::GetFrozenTick();
         auto targetTick = currentTick + value;
 
-        if (value > 0)
+        if (!lastSkipWasSmartSkip && value > 0)
         {
             // skipping forward
+            lastSkipWasSmartSkip = true;
             if (captureSettings.startTick > currentTick && captureSettings.startTick < targetTick)
             {
                 Components::Playback::SetTickDelta(captureSettings.startTick - currentTick);
@@ -53,9 +55,10 @@ namespace IWXMVM::UI
                 return;
             }
         }
-        else if (value < 0)
+        else if (!lastSkipWasSmartSkip && value < 0)
         {
             // skipping backward
+            lastSkipWasSmartSkip = true;
             if (captureSettings.endTick < currentTick && captureSettings.endTick > targetTick)
             {
                 Components::Playback::SetTickDelta(captureSettings.endTick - currentTick, true);
@@ -74,6 +77,7 @@ namespace IWXMVM::UI
             }
         }
         Components::Playback::SetTickDelta(value);
+        lastSkipWasSmartSkip = false;
     }
 
     void HandlePlaybackInput()
