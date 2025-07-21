@@ -11,6 +11,9 @@ namespace IWXMVM::Components::Rendering
     {
         auto r_clearcolor = Mod::GetGameInterface()->GetDvar("r_clearcolor").value();
         r_clearcolor.value->uint32 = color;
+
+        auto r_clear = Mod::GetGameInterface()->GetDvar("r_clear").value();
+        r_clear.value->int32 = 3; // 3 = "steady" - clear every frame with the specified color
     }
 
     void SetDrawGun(bool drawGun)
