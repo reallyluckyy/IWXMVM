@@ -1,11 +1,24 @@
 #include "StdInclude.hpp"
 #include "Camera.hpp"
 
+#include "Components/ShakeManager.hpp"
 #include "Utilities/MathUtils.hpp"
 #include "glm/vec3.hpp"
 
 namespace IWXMVM::Components
 {
+    glm::vec3 Camera::GetFinalPosition() const
+    {
+        glm::vec3 shake = ShakeManager::Get().CalculatePositionShake();
+        return position + positionOffset + shake;
+    }
+
+    glm::vec3 Camera::GetFinalRotation() const
+    {
+        glm::vec3 shake = ShakeManager::Get().CalculateRotationShake();
+        return rotation + rotationOffset + shake;
+    }
+
     bool Camera::IsModControlledCameraMode()
     {
         return mode != Mode::FirstPerson && mode != Mode::ThirdPerson;

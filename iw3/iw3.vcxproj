@@ -62,7 +62,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\core\third-party/imgui;$(SolutionDir)core\src;$(SolutionDir)\core\third-party/spdlog/include/;$(SolutionDir)\core\third-party/glm;$(SolutionDir)\core\third-party/json/single_include;$(SolutionDir)\core\third-party/magic_enum/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\core\third-party/imgui;$(SolutionDir)core\src;$(SolutionDir)\core\third-party/spdlog/include/;$(SolutionDir)\core\third-party/glm;$(SolutionDir)\core\third-party/json/single_include;$(SolutionDir)\core\third-party/magic_enum/include;$(SolutionDir)\core\third-party/FastNoiseLite/Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -86,7 +86,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\core\third-party/imgui;$(SolutionDir)core\src;$(SolutionDir)\core\third-party/spdlog/include/;$(SolutionDir)\core\third-party/glm;$(SolutionDir)\core\third-party/json/single_include;$(SolutionDir)\core\third-party/magic_enum/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\core\third-party/imgui;$(SolutionDir)core\src;$(SolutionDir)\core\third-party/spdlog/include/;$(SolutionDir)\core\third-party/glm;$(SolutionDir)\core\third-party/json/single_include;$(SolutionDir)\core\third-party/magic_enum/include;$(SolutionDir)\core\third-party/FastNoiseLite/Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>

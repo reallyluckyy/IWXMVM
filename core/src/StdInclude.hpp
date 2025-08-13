@@ -14,6 +14,7 @@
 #include <map>
 #include <memory>
 #include <numeric>
+#include <random>
 #include <span>
 #include <string>
 #include <string_view>
@@ -54,3 +55,5 @@
 #pragma warning(pop)
 
 #include "magic_enum/magic_enum.hpp"
+
+#include "FastNoiseLite.h"
