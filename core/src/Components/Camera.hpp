@@ -19,7 +19,9 @@ namespace IWXMVM::Components
        protected:
         Mode mode;
         glm::vec3 position{};
+        glm::vec3 positionOffset{};
         glm::vec3 rotation{};
+        glm::vec3 rotationOffset{};
         float fov = 90;
 
        public:
@@ -34,14 +36,25 @@ namespace IWXMVM::Components
         {
             return position;
         }
-        glm::vec3& GetRotation()
+        glm::vec3& GetPositionOffset()
+        {
+            return positionOffset;
+        }
+	    glm::vec3& GetRotation()
         {
             return rotation;
+        }
+        glm::vec3& GetRotationOffset()
+        {
+            return rotationOffset;
         }
         float& GetFov()
         {
             return fov;
         }
+
+		glm::vec3 GetFinalPosition() const;
+        glm::vec3 GetFinalRotation() const;
 
         glm::vec3 GetForwardVector();
         glm::vec3 GetRightVector();

@@ -109,6 +109,34 @@ namespace IWXMVM::Components
         Types::KeyframeValueType::FloatingPoint, 
         0.1f, 10
     );
+    Types::KeyframeableProperty shake1(
+        Types::KeyframeablePropertyType::Shake1,
+        ICON_FA_CAMERA " Shake 1",
+        Types::KeyframeValueType::FloatingPoint,
+        0.0f,
+        1.0f
+    );
+    Types::KeyframeableProperty shake2(
+        Types::KeyframeablePropertyType::Shake2,
+        ICON_FA_CAMERA " Shake 2",
+        Types::KeyframeValueType::FloatingPoint,
+        0.0f,
+        1.0f
+    );
+    Types::KeyframeableProperty shake3(
+        Types::KeyframeablePropertyType::Shake3,
+        ICON_FA_CAMERA " Shake 3",
+        Types::KeyframeValueType::FloatingPoint,
+        0.0f,
+        1.0f
+    );
+    Types::KeyframeableProperty shake4(
+        Types::KeyframeablePropertyType::Shake4,
+        ICON_FA_CAMERA " Shake 4",
+        Types::KeyframeValueType::FloatingPoint,
+        0.0f,
+        1.0f
+    );
 
     void KeyframeManager::HandleInput()
     {
@@ -149,6 +177,10 @@ namespace IWXMVM::Components
         InitializeProperty(dofNearStart);
         InitializeProperty(dofNearEnd);
         InitializeProperty(dofBias);
+        InitializeProperty(shake1);
+        InitializeProperty(shake2);
+        InitializeProperty(shake3);
+        InitializeProperty(shake4);
 
         static bool justLoadedDemo = false;
 

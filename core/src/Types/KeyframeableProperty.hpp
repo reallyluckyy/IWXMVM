@@ -19,7 +19,11 @@ namespace IWXMVM::Types
         DepthOfFieldNearBlur,
         DepthOfFieldNearStart,
         DepthOfFieldNearEnd,
-        DepthOfFieldBias
+        DepthOfFieldBias,
+        Shake1,
+        Shake2,
+        Shake3,
+        Shake4,
     };
 
     enum class KeyframeValueType
