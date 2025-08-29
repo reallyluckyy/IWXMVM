@@ -7,7 +7,7 @@
 </div>
 
 ## About
-An in-development editing mod for multiple Call of Duty games.
+An in-development recording mod for multiple Call of Duty games.
 
 ![iwxmvmscreenshot](https://github.com/reallyluckyy/IWXMVM/assets/7430330/9680c479-1ed3-4690-9c29-b99f4b1b392b)
 
