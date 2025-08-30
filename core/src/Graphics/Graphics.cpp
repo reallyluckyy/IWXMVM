@@ -216,8 +216,8 @@ namespace IWXMVM::GFX
     {
         const auto& camera = Components::CameraManager::Get().GetActiveCamera();
 
-        const auto& position = camera->GetPosition();
-        const auto& rotation = camera->GetRotation();
+        const auto& position = camera->GetFinalPosition();
+        const auto& rotation = camera->GetFinalRotation();
 
         const auto rotationMatrix =
             glm::eulerAngleZYX(glm::radians(rotation.y), glm::radians(rotation.x), glm::radians(rotation.z));
@@ -811,7 +811,7 @@ namespace IWXMVM::GFX
                 const auto* orbitCam = reinterpret_cast<const Components::OrbitCamera*>(activeCam.get());
 
                 const auto translate = glm::translate(orbitCam->GetOrigin());
-                const auto scale = glm::scale(glm::vec3(1, 1, 1) * glm::distance(activeCam->GetPosition(), orbitCam->GetOrigin()) / 45.0f);
+                const auto scale = glm::scale(glm::vec3(1, 1, 1) * glm::distance(activeCam->GetFinalPosition(), orbitCam->GetOrigin()) / 45.0f);
 
                 device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE); // Disable depth test
                 BufferManager::Get().DrawMesh(axis, translate * scale);

@@ -1,10 +1,13 @@
 #include "StdInclude.hpp"
 #include "CameraMenu.hpp"
 
+#include "D3D9.hpp"
 #include "Mod.hpp"
 #include "UI/UIManager.hpp"
 #include "UI/ImGuiEx/ImGuiExtensions.hpp"
+#include "UI/ImGuiEx/KeyframeableControls.hpp"
 #include "Components/CameraManager.hpp"
+#include "Components/ShakeManager.hpp"
 #include "Input.hpp"
 #include "Events.hpp"
 #include "Utilities/MathUtils.hpp"
@@ -21,6 +24,104 @@ namespace IWXMVM::UI
     void DrawFirstPersonSettings()
     {
         auto columnPercent = 0.4f;
+
+        auto& campathManager = Components::CampathManager::Get();
+        auto& cameraManager = Components::CameraManager::Get();
+        auto& camera = cameraManager.GetActiveCamera();
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Position Offset");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+		ImGui::DragFloat3("##fpsCameraPositionOffset", (float*)&camera->GetPositionOffset(), 1, -10000, 10000,
+						  "%.1f");
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Rotation Offset");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+		ImGui::DragFloat3("##fpsCameraRotationOffset", (float*)&camera->GetRotationOffset(), 1, -180, 180,
+						  "%.1f");
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Field of View");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+        if (ImGui::SliderFloat("##fovSlider", &fov, 45, 160, "%.1f"))
+        {
+            Mod::GetGameInterface()->SetFov(fov);
+        }
+    }
+
+    void DrawThirdPersonSettings()
+    {
+		auto columnPercent = 0.4f;
+
+        auto& campathManager = Components::CampathManager::Get();
+        auto& cameraManager = Components::CameraManager::Get();
+        auto& camera = cameraManager.GetActiveCamera();
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Position Offset");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+		ImGui::DragFloat3("##fpsCameraPositionOffset", (float*)&camera->GetPositionOffset(), 1, -10000, 10000,
+						  "%.1f");
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Rotation Offset");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+		ImGui::DragFloat3("##fpsCameraRotationOffset", (float*)&camera->GetRotationOffset(), 1, -180, 180,
+						  "%.1f");
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Field of View");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+        ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+        if (ImGui::SliderFloat("##fovSlider", &fov, 45, 160, "%.1f"))
+        {
+            Mod::GetGameInterface()->SetFov(fov);
+        }
+
+    }
+
+    void DrawFreeCameraSettings()
+    {
+		auto columnPercent = 0.4f;
+
+        auto& campathManager = Components::CampathManager::Get();
+        auto& cameraManager = Components::CameraManager::Get();
+        auto& camera = cameraManager.GetActiveCamera();
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Position");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+		ImGui::DragFloat3("##fpsCameraPositionOffset", (float*)&camera->GetPosition(), 1, -10000, 10000,
+						  "%.1f");
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Rotation");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+		ImGui::DragFloat3("##fpsCameraRotationOffset", (float*)&camera->GetRotation(), 1, -180, 180,
+						  "%.1f");
+
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Field of View");
         ImGui::SameLine();
@@ -36,14 +137,33 @@ namespace IWXMVM::UI
     {
         auto columnPercent = 0.4f;
 
+		auto& campathManager = Components::CampathManager::Get();
         auto& cameraManager = Components::CameraManager::Get();
-        auto& currentCamera = cameraManager.GetActiveCamera();
+        auto& camera = cameraManager.GetActiveCamera();
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Position Offset");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+		ImGui::DragFloat3("##boneCameraPositionOffset", (float*)&camera->GetPositionOffset(), 1, -10000, 10000,
+						  "%.1f");
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Rotation Offset");
+		ImGui::SameLine();
+
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
+		ImGui::DragFloat3("##boneCameraRotationOffset", (float*)&camera->GetRotationOffset(), 1, -180, 180,
+						  "%.1f");
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Entity");
         ImGui::SameLine();
 
-        auto boneCamera = static_cast<Components::BoneCamera*>(currentCamera.get());
+        auto boneCamera = static_cast<Components::BoneCamera*>(camera.get());
         ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
         ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
         auto entities = Mod::GetGameInterface()->GetEntities();
@@ -108,26 +228,7 @@ namespace IWXMVM::UI
         {
             ImGui::Dummy(ImVec2(0, 10));
 
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Offset");
-            ImGui::SameLine();
-
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
-            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
-            ImGui::DragFloat3("##gameViewBoneCameraOffset", &boneCamera->GetPositionOffset().x, 1, -10000, 10000,
-                              "%.1f");
-
-
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Rotation");
-            ImGui::SameLine();
-
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() * columnPercent);
-            ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * (1.0f - columnPercent) - ImGui::GetStyle().WindowPadding.x);
-            ImGui::DragFloat3("##gameViewBoneCameraRotation", &boneCamera->GetRotationOffset().x, 1, -180, 180, "%.1f");
-
-
-            ImGui::AlignTextToFramePadding();
+			ImGui::AlignTextToFramePadding();
             ImGui::Text("Field of View");
             ImGui::SameLine();
 
@@ -200,6 +301,52 @@ namespace IWXMVM::UI
         }
     }
 
+    void DrawShakeSection()
+    {
+        auto& shakeManager = Components::ShakeManager::Get();
+
+        for (size_t i = 0; i < shakeManager.shakes.size(); i++)
+        {
+            ImGui::PushID(std::format("##shake{}", i).c_str());
+
+            Types::KeyframeablePropertyType keyframePropertyType = {};
+            switch (i)
+            {
+                case 0:
+                    keyframePropertyType = Types::KeyframeablePropertyType::Shake1;
+                    break;
+                case 1:
+                    keyframePropertyType = Types::KeyframeablePropertyType::Shake2;
+                    break;
+                case 2:
+                    keyframePropertyType = Types::KeyframeablePropertyType::Shake3;
+                    break;
+                case 3:
+                    keyframePropertyType = Types::KeyframeablePropertyType::Shake4;
+                    break;
+            }
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Shake %d", i);
+
+            auto& it = shakeManager.shakes[i];
+            ImGuiEx::Keyframeable::SliderFloat("Amplitude", &it.amplitude, 0.0f, 1.0f, keyframePropertyType);
+            ImGui::SliderFloat("Frequency", &it.frequency, 0.001f, 10.0f);
+
+            ImGui::SliderFloat("Forwards", &it.forwards, 0.0f, 50.0f);
+            ImGui::SliderFloat("Sideways", &it.sideways, 0.0f, 50.0f);
+            ImGui::SliderFloat("Vertical", &it.vertical, 0.0f, 50.0f);
+
+            ImGui::SliderFloat("Yaw", &it.yaw, 0.0f, 45.0f);
+            ImGui::SliderFloat("Pitch", &it.pitch, 0.0f, 45.0f);
+            ImGui::SliderFloat("Roll", &it.roll, 0.0f, 45.0f);
+
+            ImGui::SliderInt("Seed", &it.seed, 0, 10000);
+
+            ImGui::PopID();
+        }
+    }
+
     void CameraMenu::Render()
     {
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar;
@@ -214,19 +361,25 @@ namespace IWXMVM::UI
 
         auto& campathManager = Components::CampathManager::Get();
         auto& cameraManager = Components::CameraManager::Get();
+        auto& camera = cameraManager.GetActiveCamera();
 
         ImGui::Dummy(ImVec2(0.0f, 10.0f));
         ImGui::PushFont(UIManager::Get().GetBoldFont());
-        ImGui::Text(ICON_FA_CAMERA "  %s Settings",
-                    cameraManager.GetCameraModeLabel(cameraManager.GetActiveCamera()->GetMode()));
+        ImGui::Text(ICON_FA_CAMERA "  %s Settings", cameraManager.GetCameraModeLabel(camera->GetMode()));
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-        switch (cameraManager.GetActiveCamera()->GetMode())
+        switch (camera->GetMode())
         {
-            case Components::Camera::Mode::FirstPerson:
+			case Components::Camera::Mode::FirstPerson:
                 DrawFirstPersonSettings();
                 break;
+			case Components::Camera::Mode::ThirdPerson:
+				DrawThirdPersonSettings();
+				break;
+			case Components::Camera::Mode::Free:
+				DrawFreeCameraSettings();
+				break;
             case Components::Camera::Mode::Bone:
                 DrawBoneCameraSettings();
                 break;
@@ -237,6 +390,8 @@ namespace IWXMVM::UI
                 DrawNoSettings();
                 break;
         }
+
+        DrawShakeSection();
 
         ImGui::End();
     }

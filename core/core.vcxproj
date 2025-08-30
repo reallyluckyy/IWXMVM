@@ -62,7 +62,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;third-party/magic_enum/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;third-party/magic_enum/include;third-party/FastNoiseLite/Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -92,7 +92,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;third-party/magic_enum/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;third-party/imgui/;third-party/spdlog/include/;third-party/incbin/;third-party/minhook/include/;third-party/minhook/src/;third-party/glm;third-party/IconFontCppHeaders;third-party/json/single_include;third-party/tinyobjloader;third-party/magic_enum/include;third-party/FastNoiseLite/Cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdInclude.hpp</PrecompiledHeaderFile>
@@ -128,6 +128,7 @@
     <ClCompile Include="src\Components\PlayerAnimation.cpp" />
     <ClCompile Include="src\Components\Rendering.cpp" />
     <ClCompile Include="src\Components\Rewinding.cpp" />
+    <ClCompile Include="src\Components\ShakeManager.cpp" />
     <ClCompile Include="src\Components\VisualConfiguration.cpp" />
     <ClCompile Include="src\Configuration\Configuration.cpp" />
     <ClCompile Include="src\Configuration\InputConfiguration.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="src\Components\PlayerAnimation.hpp" />
     <ClInclude Include="src\Components\Rendering.hpp" />
     <ClInclude Include="src\Components\Rewinding.hpp" />
+    <ClInclude Include="src\Components\ShakeManager.hpp" />
     <ClInclude Include="src\Components\VisualConfiguration.hpp" />
     <ClInclude Include="src\Configuration\Configuration.hpp" />
     <ClInclude Include="src\Configuration\InputConfiguration.hpp" />

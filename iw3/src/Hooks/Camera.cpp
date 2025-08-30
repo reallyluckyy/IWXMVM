@@ -13,20 +13,13 @@ namespace IWXMVM::IW3::Hooks::Camera
 
     void R_SetViewParmsForScene()
     {
+        auto& camera = Components::CameraManager::Get().GetActiveCamera();
         auto& refdef = Structures::GetClientGlobals()->refdef;
 
-        auto& camera = Components::CameraManager::Get().GetActiveCamera();
-
-        if (!camera->IsModControlledCameraMode())
-        {
-            camera->GetPosition() = *reinterpret_cast<glm::vec3*>(refdef.vieworg);
-            camera->GetFov() = glm::degrees(std::atan(refdef.tanHalfFovX) * 2.0f);
-            return;
-        }
-
-        refdef.vieworg[0] = camera->GetPosition()[0];
-        refdef.vieworg[1] = camera->GetPosition()[1];
-        refdef.vieworg[2] = camera->GetPosition()[2];
+        const glm::vec3 position = camera->GetFinalPosition();
+        refdef.vieworg[0] = position[0];
+        refdef.vieworg[1] = position[1];
+        refdef.vieworg[2] = position[2];
 
         refdef.tanHalfFovX = std::tan(glm::radians(camera->GetFov()) * 0.5f);
         refdef.tanHalfFovY = refdef.tanHalfFovX * ((float)refdef.height / (float)refdef.width);
@@ -50,12 +43,12 @@ namespace IWXMVM::IW3::Hooks::Camera
         if (!camera->IsModControlledCameraMode())
         {
             camera->GetRotation() = *reinterpret_cast<glm::vec3*>(angles);
-            return;
         }
 
-        angles[0] = camera->GetRotation()[0];
-        angles[1] = camera->GetRotation()[1];
-        angles[2] = camera->GetRotation()[2];
+        const glm::vec3 rotation = camera->GetFinalRotation();
+        angles[0] = rotation[0];
+        angles[1] = rotation[1];
+        angles[2] = rotation[2];
     }
 
     uintptr_t AnglesToAxis_Address;
@@ -75,14 +68,18 @@ namespace IWXMVM::IW3::Hooks::Camera
     void FX_SetupCamera()
     {
         auto& camera = Components::CameraManager::Get().GetActiveCamera();
-
-        if (!camera->IsModControlledCameraMode())
-            return;
-
         auto& refdef = Structures::GetClientGlobals()->refdef;
-        refdef.vieworg[0] = camera->GetPosition()[0];
-        refdef.vieworg[1] = camera->GetPosition()[1];
-        refdef.vieworg[2] = camera->GetPosition()[2];
+
+		if (!camera->IsModControlledCameraMode())
+        {
+            camera->GetPosition() = *reinterpret_cast<glm::vec3*>(refdef.vieworg);
+            camera->GetFov() = glm::degrees(std::atan(refdef.tanHalfFovX) * 2.0f);
+        }
+
+        const glm::vec3 position = camera->GetFinalPosition();
+        refdef.vieworg[0] = position[0];
+        refdef.vieworg[1] = position[1];
+        refdef.vieworg[2] = position[2];
     }
 
     uintptr_t FX_SetupCamera_Trampoline;
