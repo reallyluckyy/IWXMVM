@@ -259,7 +259,17 @@ namespace IWXMVM::IW3
                 if (!std::filesystem::exists(tempDemoDirectory))
                     std::filesystem::create_directories(tempDemoDirectory);
 
-                const auto targetPath = tempDemoDirectory / demoPath.filename();
+                // an inline sanitation, should remove all invalid characters for IW3.
+                std::string sanitizedFileName;
+                for (char c : demoPath.filename().string())
+                {
+                    if (std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '-' || c == '.')
+                    {
+                        sanitizedFileName += c;
+                    }
+                }
+
+                const auto targetPath = tempDemoDirectory / sanitizedFileName;
                 if (std::filesystem::exists(targetPath) && std::filesystem::is_regular_file(targetPath))
                     std::filesystem::remove(targetPath);
 
