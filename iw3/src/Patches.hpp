@@ -37,6 +37,10 @@ namespace IWXMVM::IW3::Patches
         // to remove the blood overlay when player gets hit
         NopPatch<5> CG_DrawPlayerLowHealthOverlay{GetGameAddresses().CG_DrawPlayerLowHealthOverlay(),
                                                   PatchApplySetting::Deferred};
+
+        // to prevent cvars (e.g. cg_draw2D or r_fullbright) to be applied by the demo itself
+        ReturnPatch CG_SetClientDvarFromServer{GetGameAddresses().CG_SetClientDvarFromServer(),
+                                                  PatchApplySetting::Immediately};
          
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };
