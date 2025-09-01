@@ -40,7 +40,7 @@ namespace IWXMVM::IW3::Patches
 
         // to prevent cvars (e.g. cg_draw2D or r_fullbright) to be applied by the demo itself
         ReturnPatch CG_SetClientDvarFromServer{GetGameAddresses().CG_SetClientDvarFromServer(),
-                                                  PatchApplySetting::Immediately};
+                                               PatchApplySetting::Deferred};
          
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };

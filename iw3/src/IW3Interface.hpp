@@ -67,6 +67,27 @@ namespace IWXMVM::IW3
             }
         }
 
+        bool demoCvarsDisabled;
+
+        bool Disable_DemoCvars(bool toggle) final
+        {
+            if (toggle)
+            {
+                if (!demoCvarsDisabled)
+                {
+                    Patches::GetGamePatches().CG_SetClientDvarFromServer.Apply();
+                    demoCvarsDisabled = true;
+                }
+                else
+                {
+                    Patches::GetGamePatches().CG_SetClientDvarFromServer.Revert();
+                    demoCvarsDisabled = false;
+                }
+            }
+
+            return demoCvarsDisabled;
+        }
+
         void InstallHooksAndPatches() final
         {
             Hooks::Install();

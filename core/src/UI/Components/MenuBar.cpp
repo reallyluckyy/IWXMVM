@@ -65,6 +65,12 @@ namespace IWXMVM::UI
                 {
                     UIManager::Get().GetUIComponent<PlayerAnimation>(Component::PlayerAnimation)->ToggleVisibility();
                 }
+                if (ImGui::MenuItem("Miscellaneous Settings##0"))
+                {
+                    UIManager::Get()
+                        .GetUIComponent<MiscellaneousSettings>(Component::MiscellaneousSettings)
+                        ->ToggleVisibility();
+                }
 
                 ImGui::EndDisabled();
 

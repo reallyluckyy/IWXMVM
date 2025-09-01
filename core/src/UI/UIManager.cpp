@@ -75,6 +75,7 @@ namespace IWXMVM::UI
                 GetUIComponent(Component::ControlsMenu)->Render();
                 GetUIComponent(Component::Preferences)->Render();
                 GetUIComponent(Component::PlayerAnimation)->Render();
+                GetUIComponent(Component::MiscellaneousSettings)->Render();
                 GetUIComponent(Component::Credits)->Render();
             }
 

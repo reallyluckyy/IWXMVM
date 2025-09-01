@@ -35,6 +35,7 @@ namespace IWXMVM
         }
 
         virtual void ExecuteNewServerCommands() = 0;
+        virtual bool Disable_DemoCvars(bool toggle) = 0;
         virtual void InstallHooksAndPatches() = 0;
         virtual void SetupEventListeners() = 0;
 

@@ -17,6 +17,7 @@
 #include "Components/ControlsMenu.hpp"
 #include "Components/Preferences.hpp"
 #include "Components/PlayerAnimationUI.hpp"
+#include "Components/MiscellaneousSettings.hpp"
 #include "Components/Readme.hpp"
 #include "Components/Credits.hpp"
 
@@ -42,6 +43,7 @@ namespace IWXMVM::UI
             ControlsMenu,
             Preferences,
             PlayerAnimation,
+            MiscellaneousSettings,
             Readme,
             Credits,
 
@@ -139,8 +141,8 @@ namespace IWXMVM::UI
             std::make_unique<PrimaryTabs>(), std::make_unique<DemoLoader>(),  std::make_unique<CameraMenu>(),
             std::make_unique<VisualsMenu>(), std::make_unique<CaptureMenu>(), std::make_unique<ControlBar>(),
             std::make_unique<DebugPanel>(),  std::make_unique<KeyframeEditor>(), std::make_unique<ControlsMenu>(),
-            std::make_unique<Preferences>(), std::make_unique<PlayerAnimation>(), std::make_unique<Readme>(),
-            std::make_unique<Credits>(),
+            std::make_unique<Preferences>(), std::make_unique<PlayerAnimation>(), std::make_unique<MiscellaneousSettings>(),
+            std::make_unique<Readme>(), std::make_unique<Credits>(),
         };
 
         Tab selectedTab = Tab::Demos;
