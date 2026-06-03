@@ -54,6 +54,7 @@ namespace IWXMVM
             Components::CampathManager::Get().Initialize();
             Components::KeyframeManager::Get().Initialize();
             Components::Rewinding::Initialize();
+            Components::Rendering::Initialize();
 
             LOG_DEBUG("Installing game hooks and patches...");
             D3D9::Initialize();

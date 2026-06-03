@@ -25,20 +25,26 @@ namespace IWXMVM::UI
         {
 
             ImGui::PushFont(UIManager::Get().GetBoldFont()); 
-            ImGui::Text("IWXMVM BETA");
+            ImGui::Text("Hello!");
             ImGui::PopFont();
 
-            ImGui::Dummy(ImVec2(0, 20));
+            ImGui::Dummy(ImVec2(0, 10));
 
             auto indent = 10;
 
-            ImGui::TextWrapped("This is an early access, beta version of IWXMVM.");
-            ImGui::TextWrapped("This is *not* the final version of the mod yet. There are features missing.");
-            ImGui::TextWrapped(
-                "Hearing how you use the mod, what kind of issues you experience and where you expected a better "
-                "experience will help us make IWXMVM the best it can be. Please send us all the feedback you may have!");
+            ImGui::TextWrapped("Welcome to IWXMVM, a recording mod for various Call of Duty games!");
+            ImGui::TextWrapped("While this is an official release, there will still be bugs. If you find any, feel free to open an issue on https://github.com/reallyluckyy/IWXMVM/.");
 
             ImGui::Dummy(ImVec2(0, 20));
+
+            ImGui::PushFont(UIManager::Get().GetBoldFont());
+            ImGui::TextWrapped(ICON_FA_BELL "  WHATS NEW");
+            ImGui::PopFont();
+
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
+            ImGui::TextWrapped("Multipass Recording! Navigate to the " ICON_FA_CIRCLE "  RECORD tab to select from multiple options, such as greenscreened footage, depth or even normals.");
+
+            ImGui::Dummy(ImVec2(0, 10));
 
             ImGui::PushFont(UIManager::Get().GetBoldFont()); 
             ImGui::TextWrapped(ICON_FA_SIGNS_POST "  THE INTERFACE");
@@ -52,7 +58,7 @@ namespace IWXMVM::UI
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
             ImGui::BulletText(ICON_FA_FILE "  DEMOS: for loading demos");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
-            ImGui::BulletText(ICON_FA_VIDEO "  CAMERA: for camera related settings; currently mostly a placeholder");
+            ImGui::BulletText(ICON_FA_VIDEO "  CAMERA: for camera related settings, such as fov");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
             ImGui::BulletText(ICON_FA_SLIDERS "  VISUALS: for modifying settings such as filmtweaks, sun, dof, hud, etc.");
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
@@ -86,21 +92,6 @@ namespace IWXMVM::UI
             }
             
             ImGui::Dummy(ImVec2(0, 20));
-
-            ImGui::PushFont(UIManager::Get().GetBoldFont());
-            ImGui::TextWrapped(ICON_FA_CLIPBOARD "  FINAL NOTES");
-            ImGui::PopFont();
-
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
-            ImGui::TextWrapped("Try everything! Press every button you can find!");
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
-            ImGui::TextWrapped("Try to follow your recording workflow and write down whatever is confusing to you or what you're missing from the current set of features.");
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
-            ImGui::TextWrapped("Please report anything and everything so we can get an overview over what works and what doesnt.");
-            
-            ImGui::Dummy(ImVec2(0, 20));
-            
-            ImGui::TextWrapped("Thank you!");
 
             ImGui::End();
         }

@@ -32,7 +32,7 @@ namespace IWXMVM::Components
             {
                 auto label = std::format(ICON_FA_VIDEO " {0:.0f} ", this->GetFov());
                 auto pos = gameView->GetPosition() + gameView->GetSize() -
-                           ImVec2(ImGui::GetFontSize() * 5, ImGui::GetFontSize() * 2) -
+                           ImVec2(ImGui::GetFontSize() * 5, ImGui::GetFontSize() * 4) -
                            ImGui::CalcTextSize(label.c_str());
                 ImGui::GetWindowDrawList()->AddText(pos,
                                                     ImColor(255, 255, 255, GetAlphaForTimer(fovDisplayTimer)),
@@ -44,7 +44,7 @@ namespace IWXMVM::Components
             {
                 auto label = std::format(ICON_FA_ARROW_ROTATE_RIGHT " {0:.0f} ", this->GetRotation()[2]);
                 auto pos = gameView->GetPosition() +
-                           ImVec2(ImGui::GetFontSize() * 5, gameView->GetSize().y - ImGui::GetFontSize() * 2) - 
+                           ImVec2(ImGui::GetFontSize() * 5, gameView->GetSize().y - ImGui::GetFontSize() * 4) - 
                            ImVec2(0, ImGui::CalcTextSize(label.c_str()).y);
                 ImGui::GetWindowDrawList()->AddText(pos, ImColor(255, 255, 255, GetAlphaForTimer(rotationDisplayTimer)),
                                                     label.c_str());

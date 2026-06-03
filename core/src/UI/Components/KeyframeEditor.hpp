@@ -13,6 +13,8 @@ namespace IWXMVM::UI
 
         std::tuple<int32_t, int32_t> GetDisplayTickRange() const;
 
+        void SetDefaultVerticalZoom();
+
        private:
         void Initialize() final;
 

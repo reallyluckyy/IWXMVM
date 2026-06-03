@@ -15,6 +15,7 @@
 #include "Types/Entity.hpp"
 #include "Types/PlaybackData.hpp"
 #include "Types/HudInfo.hpp"
+#include "Types/RenderingFlags.hpp"
 #include "Types/Features.hpp"
 
 namespace IWXMVM
@@ -63,6 +64,7 @@ namespace IWXMVM
 
         virtual void PlayDemo(std::filesystem::path demoPath) = 0;
         virtual void Disconnect() = 0;
+        virtual void Vid_Restart() = 0;
 
         virtual bool IsConsoleOpen() = 0;
 

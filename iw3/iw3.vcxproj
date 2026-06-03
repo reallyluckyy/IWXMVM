@@ -116,6 +116,7 @@
     <ClCompile Include="src\Hooks\HUD.cpp" />
     <ClCompile Include="src\Hooks\Playback.cpp" />
     <ClCompile Include="src\Hooks\PlayerAnimation.cpp" />
+    <ClCompile Include="src\Hooks\Rendering.cpp" />
     <ClCompile Include="src\IW3Interface.hpp" />
     <ClCompile Include="src\StdInclude.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -133,6 +134,7 @@
     <ClInclude Include="src\Hooks\HUD.hpp" />
     <ClInclude Include="src\Hooks\Playback.hpp" />
     <ClInclude Include="src\Hooks\PlayerAnimation.hpp" />
+    <ClInclude Include="src\Hooks\Rendering.hpp" />
     <ClInclude Include="src\Patches.hpp" />
     <ClInclude Include="src\Signatures.hpp" />
     <ClInclude Include="src\Structures.hpp" />

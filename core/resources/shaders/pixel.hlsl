@@ -17,7 +17,7 @@ cbuffer LightInfo : register(c12)
 
 float4 main(PS_INPUT input) : COLOR
 {
-    if(ignoreLighting)
+    if (ignoreLighting)
     {
 	    return float4(input.color, 1);
     }

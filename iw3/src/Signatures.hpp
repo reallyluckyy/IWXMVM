@@ -22,12 +22,8 @@ namespace IWXMVM::IW3::Signatures
         Sig("8B C5 E8 ?? ?? ?? ?? BA", GAType::Code, 17) > CG_CalcViewValues;  // first call to AnglesToAxis we need to replace
         Sig("5C 24 ?? 55 8B 6C 24 ?? 56 8D 44 24 ?? 50 51 8B CB C6 44 24", GAType::Code, -5) > CG_DObjGetWorldTagMatrix;
         Sig("00 53 56 57 8B F0 0F 85 ?? ?? ?? ?? 8D 44 24", GAType::Code, -9) > CG_DrawDisconnect;
-        Sig("6B FF ?? 81 C7 ?? ?? ?? ?? ?? ?? ?? ?? ?? 8D 74 24 ?? F3 A5 83 05 ?? ?? ?? ?? 01", GAType::Code,
-            9) > CG_DrawTracer;
         Sig("8D 74 24 ?? D9 5C 24 ?? ?? ?? ?? ?? ?? 5F 5E 5B 8B E5 5D C3", GAType::Code,
             8) > CG_OffsetThirdPersonView;  // second call to AnglesToAxis we need to replace
-        Sig("53 55 56 8B F0 05 ?? ?? ?? ?? 8B C8 57 8B", GAType::Code, -8) > CL_SystemInfoChanged;
-        Sig("81 EC ?? ?? 00 00 A1 ?? ?? ?? ?? 53 33 DB 39", GAType::Code, -6) > CL_Vid_Restart_f;
         Sig("85 C0 74 ?? 8B FE E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? D9 41 ?? D8 4C 24 0C D9 5E 0C 5F 5E C3", GAType::Code,
             -5, Lambda::FollowCodeFlow) > Dvar_FindMalleableVar;
         Sig("83 EC ?? D9 46 ?? D9 1D ?? ?? ?? ?? D9 46 ?? D9 1D", GAType::Code, -6) > FX_SetupCamera;
@@ -64,27 +60,29 @@ namespace IWXMVM::IW3::Signatures
         Sig("83 3D ?? ?? ?? ?? ?? 0F 85 92 01 00 00", GAType::Code, -5,
             Lambda::FollowCodeFlow) > CL_FirstSnapshot;
         Sig("8B 15 ?? ?? ?? ?? 8B 42 0C 83 C4 04 80 38 00", GAType::Code, -5) > Con_TimeJumpedCall;
-        //Sig("EB 0F 68 ?? ?? ?? ?? 6A 01 E8 ?? ?? ?? ?? 83 C4 08 83 3D", GAType::Code, -9) > CL_SetCGameTimeError;
-        //Sig("6A 01 E8 ?? ?? ?? ?? 83 C4 08 8B 15 ?? ?? ?? ?? 8B FE", GAType::Code,
-            //-7) > CL_CGameNeedsServerCommandError;
-        //Sig("6A 01 E8 ?? ?? ?? ?? 83 C4 08 57 53", GAType::Code, -7) > CG_ProcessSnapshotsError;
-        //Sig("6A 0E E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? A1", GAType::Code, -9) > CG_ReadNextSnapshotWarning;
         Sig("8B C7 69 C0 58 02 00 00", GAType::Code, -5) > CG_MapRestartSetThirdpersonCall;
+
+        // for depth patch
+        Sig("33 D2 85 F6 57 74 4A", GAType::Code, -5) > R_DoesDrawSurfListInfoNeedFloatz;
 
         // for changing (death) animations
         Sig("E8 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 83 F8 0E 0F 87", GAType::Code, 5) > CG_ProcessEntity;
 
         Sig("55 8B 6C 24 38 85 ED", GAType::Code, -5) > R_AddCmdDrawTextWithEffects;
         Sig("83 3D ?? ?? ?? ?? 09 75 ?? ?? ?? ?? ?? ?? 8B CD", GAType::Code, 9, Lambda::FollowCodeFlow) > IN_Frame;
+
+        Sig("51 08 53 8B 5C", GAType::Code, -5) > R_SetupMaterial;
+        Sig("A1 ?? ?? ?? ?? C3 A1 ?? ?? ?? ?? 80 78 0C 00", GAType::Code, -5) > Material_RegisterHandle;
+        Sig("E8 ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 33 C0 A3", GAType::Data, -4, Lambda::DereferenceAddress) > rgp;
+
         Sig("83 C4 2C 5D 5B 59", GAType::Code, -5) > CG_DrawPlayerLowHealthOverlay;
+        Sig("0F 84 C9 00 00 00 8B 81 FC 03 05 00", GAType::Code, -7) > CG_DrawFlashDamage;
+        Sig("53 56 57 0F 84 EE 01 00 00", GAType::Code, -10) > CG_DrawDamageDirectionIndicators;
+
         Sig("83 EC 14 53 8B 5D 08 56 57 8B F8 E8 ?? ?? ?? ?? 8B F0 85 F6 74 0E", GAType::Code, -6) > Dvar_SetStringByName;
         Sig("E8 ?? ?? ?? ?? 8B BB ?? ?? ?? ?? 8B F5", GAType::Code, 13,
             Lambda::FollowCodeFlow) > CG_ExecuteNewServerCommands;
 
-        // cod4x
-        using MType = Types::ModuleType;
-        Sig("00 00 E8 ?? ?? ?? ?? 29 C4 C7 04 24 01 00 00 00 E8", GAType::Code, -7), MType::SecondaryModules
-                                                                                         > CL_SystemInfoChangedCoD4X;
 
 #undef Sig
 #undef Lambda

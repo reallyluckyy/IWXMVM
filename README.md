@@ -7,7 +7,7 @@
 </div>
 
 ## About
-An in-development editing mod for multiple Call of Duty games.
+An in-development recording mod for multiple Call of Duty games.
 
 ![iwxmvmscreenshot](https://github.com/reallyluckyy/IWXMVM/assets/7430330/9680c479-1ed3-4690-9c29-b99f4b1b392b)
 
@@ -25,7 +25,10 @@ Then build the included solution file using Visual Studio.
 
 ## Contributing
 
-Feel free to contribute by submitting a pull request!
+If you like the project and want to help out, feel free to submit a pull request!
+You can either look at the [issues page](https://github.com/reallyluckyy/IWXMVM/issues) for what still needs to be done from our perspective or just bring your own ideas.
+Theres also a bunch of TODOs littered throughout the codebase, which need attention at some point.
+
 There are no style or structure guidelines yet so please just refer to the already existing code.
 
 ## Project Structure

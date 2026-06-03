@@ -3,12 +3,8 @@
 
 namespace IWXMVM::Resources
 {
-    INCBIN(IBMPLEX_FONT, "resources/IBMPlexSans-Regular.ttf");
-    INCBIN(TASA_ORBITER_FONT, "resources/TASAOrbiterDisplay-Regular.ttf");
-    INCBIN(TASA_ORBITER_BOLD_FONT, "resources/TASAOrbiterDisplay-Bold.ttf");
     INCBIN(RUBIK_FONT, "resources/Rubik-Regular.ttf");
     INCBIN(RUBIK_BOLD_FONT, "resources/Rubik-SemiBold.ttf");
-    INCBIN(WORK_SANS_FONT, "resources/WorkSans-Regular.ttf");
     INCBIN(FA_ICONS_FONT, "resources/fa-solid-900.ttf");
 
     INCBIN(AXIS_MODEL, "resources/axis.obj");
@@ -19,4 +15,7 @@ namespace IWXMVM::Resources
 
     INCBIN(VERTEX_SHADER, "resources/shaders/vertex.hlsl");
     INCBIN(PIXEL_SHADER, "resources/shaders/pixel.hlsl");
+
+    INCBIN(DEPTH_VERTEX_SHADER, "resources/shaders/depth_vs.hlsl");
+    INCBIN(DEPTH_PIXEL_SHADER, "resources/shaders/depth_ps.hlsl");
 };  // namespace IWXMVM::Resources
