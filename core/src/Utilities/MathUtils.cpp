@@ -49,6 +49,47 @@ namespace IWXMVM::MathUtils
         return glm::mat3x3(forward, glm::vector3::zero - right, up);
 	}
 
+    glm::vec3 AxisToAngles(glm::mat3x3 axis)
+    {
+        // axis was constructed as (forward, -right, up)
+        glm::vec3 forward = axis[0];
+        glm::vec3 negRight = axis[1];
+        glm::vec3 right = glm::vector3::zero - negRight;
+        glm::vec3 up = axis[2];
+
+        // Pitch from forward.z = -sp => sp = -forward.z
+        float sp = -forward.z;
+        // Clamp to [-1,1]
+        sp = glm::clamp(sp, -1.0f, 1.0f);
+        float pitch = glm::degrees(std::asin(sp));
+
+        // Yaw from forward x/y: forward = (cp * cy, cp * sy, -sp)
+        float cp = std::cos(glm::radians(pitch));
+        float yaw = 0.0f;
+        if (std::abs(cp) > 1e-6f)
+        {
+            yaw = glm::degrees(std::atan2(forward.y / cp, forward.x / cp));
+        }
+
+        // Roll: from right and up vectors. Using up.z = cr * cp
+        float cr = 1.0f;
+        if (std::abs(cp) > 1e-6f)
+            cr = up.z / cp;
+        cr = glm::clamp(cr, -1.0f, 1.0f);
+        float roll = glm::degrees(std::acos(cr));
+
+        // Determine sign of roll using right.z = -sr * cp  (from AnglesToAxis)
+        if (std::abs(cp) > 1e-6f)
+        {
+            float sr = -right.z / cp;
+            // If sr is negative, roll should be negative
+            if (sr < 0.0f)
+                roll = -roll;
+        }
+
+        return glm::vec3(pitch, yaw, roll);
+    }
+
     std::optional<ImVec2> WorldToScreenPoint(glm::vec3 point, Components::Camera& camera)
     {
         auto& gameView = UI::UIManager::Get().GetUIComponent(UI::Component::GameView);

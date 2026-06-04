@@ -20,7 +20,6 @@ namespace IWXMVM::IW3::Hooks::Camera
         if (!camera->IsModControlledCameraMode())
         {
             camera->GetPosition() = *reinterpret_cast<glm::vec3*>(refdef.vieworg);
-            // TODO: set camera rotation
             camera->GetFov() = glm::degrees(std::atan(refdef.tanHalfFovX) * 2.0f);
             return;
         }
