@@ -193,7 +193,7 @@ namespace IWXMVM::Components::Rewinding
         latestRewindTo = NOT_IN_USE;
         rewindTo.store(NOT_IN_USE);
 
-        Mod::GetGameInterface()->HideScoreboard();
+        Events::Invoke(EventType::OnRewindCompleted);
 
         return true;
     }

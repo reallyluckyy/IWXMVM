@@ -94,7 +94,6 @@ namespace IWXMVM
         virtual void CL_FirstSnapshot() = 0;
         virtual void ResetClientData(int serverTime) = 0;
         virtual Types::PlaybackData GetPlaybackDataAddresses() const = 0;
-        virtual void HideScoreboard() = 0;
 
         // Some games have demo file footers/headers (see IW5)
         virtual uint32_t GetDemoFooterSize() { return 0; }

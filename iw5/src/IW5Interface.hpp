@@ -71,6 +71,10 @@ namespace IWXMVM::IW5
                 Functions::FindDvar("con_gamemsgwindow0msgtime")->current.value = 5;
                 Functions::FindDvar("con_gamemsgwindow0linecount")->current.integer = 4;
             });
+
+            Events::RegisterListener(EventType::OnRewindCompleted, [&]() {
+                Functions::HideScoreboard();
+            });
             
         }
 
@@ -743,19 +747,6 @@ namespace IWXMVM::IW5
             }
         }
 
-        
-        void HideScoreboard() final
-        {
-            typedef void (*CG_ScoresUp_t)(int localClientNum);
-            CG_ScoresUp_t CG_ScoresUp = (CG_ScoresUp_t)GetGameAddresses().CG_ScoresUp();
-
-            CG_ScoresUp(0);
-
-            // We need to set this to 1 in case we were in a match ending killcam
-            // before the rewind happened
-            float* com_codeTimescale = (float*)GetGameAddresses().com_codeTimeScale();
-            *com_codeTimescale = 1.0f;
-        }
 
         // IW5 demos have both a header and a footer that contain some metadata.
         // We need to account for these when reading the demo file ourselves to determine when the

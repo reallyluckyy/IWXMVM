@@ -15,4 +15,6 @@ namespace IWXMVM::IW5::Functions
     Structures::DObj* Com_GetClientDObj(int handle);
     
     int Scr_AllocString(const char* string);
+
+    void HideScoreboard();
 }  // namespace IWXMVM::IW5::Functions
