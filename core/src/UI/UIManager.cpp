@@ -17,7 +17,7 @@ namespace IWXMVM::UI
     {
         LOG_DEBUG("Shutting down ImGui");
 
-        SetWindowLongPtr(D3D9::FindWindowHandle(), GWLP_WNDPROC, (LONG_PTR)originalGameWndProc);
+        HookManager::Unhook(Mod::GetGameInterface()->GetWndProc());
         Mod::GetGameInterface()->SetMouseMode(Types::MouseMode::Passthrough);
 
         for (const auto& component : uiComponents)
@@ -113,7 +113,7 @@ namespace IWXMVM::UI
     typedef LRESULT(__stdcall* GameWndProc_t)(HWND hWnd, UINT Msg, unsigned int wParam, LPARAM lParam);
     GameWndProc_t GameWndProc_Trampoline;
 
-     HRESULT __stdcall ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    HRESULT __stdcall ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         auto& uiManager = UIManager::Get();
         auto& gameView = uiManager.GetUIComponent(UI::Component::GameView);
@@ -133,7 +133,7 @@ namespace IWXMVM::UI
             return true;
         }
 
-            return GameWndProc_Trampoline(hWnd, uMsg, wParam, lParam);
+        return GameWndProc_Trampoline(hWnd, uMsg, wParam, lParam);
     }
 
     void UIManager::ToggleOverlay()

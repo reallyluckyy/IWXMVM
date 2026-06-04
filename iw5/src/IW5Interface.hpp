@@ -220,6 +220,11 @@ namespace IWXMVM::IW5
             Functions::Cbuf_AddText("disconnect");
         }
 
+        void Vid_Restart()
+        {
+            Functions::Cbuf_AddText("vid_restart");
+        }
+
         bool IsConsoleOpen() final
         {
             // Theres no console on IW5
