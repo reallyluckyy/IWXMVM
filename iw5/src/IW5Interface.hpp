@@ -672,11 +672,11 @@ namespace IWXMVM::IW5
                 },
                 .s_compassActors = {.address = GetGameAddresses().s_compassActors(),
                                     .size = 18 * sizeof(Structures::CompassActor)},
-                //.teamChatMsgs = 
-                //{
-                //    .address = reinterpret_cast<uintptr_t>(Structures::GetClientGlobalsStatic()->teamChatMsgs),
-                //    .size = 8 * 160 + 4 * 8 + 4 + 4
-                //},
+                .teamChatMsgs = 
+                {
+                    // TODO: maybe implement sometime
+                    .address = 0,
+                },
                 .cg_entities = 
                 {
                     .address = reinterpret_cast<uintptr_t>(Structures::GetEntities()), 
@@ -692,7 +692,8 @@ namespace IWXMVM::IW5
                     .address = reinterpret_cast<uintptr_t>(Structures::GetGameState()),
                     .size = sizeof(Structures::gameState_t)
                 },
-                //.killfeed = GetGameAddresses().conGameMsgWindow0()
+                // Resetting killfeed manually doesnt seem necessary on IW5
+                .killfeed = 0
             };
         }
 
