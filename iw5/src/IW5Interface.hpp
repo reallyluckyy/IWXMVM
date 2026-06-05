@@ -55,7 +55,7 @@ namespace IWXMVM::IW5
         {
             RemovePlutoniumCallbacks();
 
-            Events::RegisterListener(EventType::OnCameraChanged, []() {
+            Events::RegisterListener(EventType::OnCameraChanged, [&]() {
                 auto& camera = Components::CameraManager::Get().GetActiveCamera();
                 auto isFreeCamera = camera->IsModControlledCameraMode();
 
@@ -63,7 +63,9 @@ namespace IWXMVM::IW5
                 demoPlayback->cameraMode = isFreeCamera ? 2 : 0;
                 demoPlayback->cameraModeChanged = 1;
 
-                Functions::FindDvar("cg_draw2d")->current.boolean = isFreeCamera ? 0 : 1;
+                Types::HudInfo hudInfo = GetHudInfo();
+                hudInfo.show2DElements = false;
+                SetHudInfo(hudInfo);
             });
 
             Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
