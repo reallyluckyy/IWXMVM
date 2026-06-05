@@ -61,6 +61,8 @@ namespace IWXMVM::IW5::Signatures
         Sig("56 8D 70 01 8D 9B 00 00 00 00 8A 08 40 84 C9 75 F9 2B C6 6A 07 40 50 6A 01", GAType::Code,
             -6) > Scr_AllocString;
 
+        Sig("8B 3D ?? ?? ?? ?? 85 FF 0F 84 ?? ?? ?? ?? 8B 47 0C", GAType::Data, 2) > fs_searchpaths;
+
         Sig("C6 05 ?? ?? ?? ?? ?? 8B 08 8B 91 A4 00 00 00", GAType::Data, -4) > d3d9DevicePointer;
         Sig("8B 6C 24 48 3B 2D 18 39 AA 05 0F 85", GAType::Code, -13) > MainWndProc;
 

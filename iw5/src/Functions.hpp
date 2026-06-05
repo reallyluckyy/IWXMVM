@@ -5,6 +5,8 @@ namespace IWXMVM::IW5::Functions
 {
     Structures::dvar_t* FindDvar(const std::string_view name);
 
+    std::string GetFilePath(const std::string_view demoName);
+
     void Cbuf_AddText(std::string command);
 
     void CL_Demo_GetStartAndEndTime(uint32_t* start, uint32_t* end);

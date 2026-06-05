@@ -174,7 +174,9 @@ namespace IWXMVM::IW5
                                 ? demoInfo.name.substr(strlen(DEMO_TEMP_DIRECTORY) + 1)
                                 : demoInfo.name;
 
-            demoInfo.path = (GetDemoDirectory() / demoInfo.name).string();
+            std::string str = static_cast<std::string>(Structures::GetClientStatic()->servername);
+            str += (str.ends_with(GetDemoExtension())) ? "" : GetDemoExtension();
+            demoInfo.path = Functions::GetFilePath(std::move(str));
 
             demoInfo.endTick = demoEndTick - demoStartTick;
             demoInfo.gameTick = Structures::GetClientGlobals()->time - demoStartTick;

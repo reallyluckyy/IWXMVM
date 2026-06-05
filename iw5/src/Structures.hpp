@@ -38,6 +38,28 @@ namespace IWXMVM::IW5::Structures
         dvar_t* hashNext;
     };
 
+    struct directory_t
+    {
+        char path[256];
+        char gamedir[256];
+    };
+
+    struct iwd_t
+    {
+        // ...
+    };
+
+    struct searchpath_s
+    {
+        searchpath_s* next;
+        iwd_t* iwd;
+        directory_t* dir;
+        int bLocalized;
+        int ignore;
+        int ignorePureCheck;
+        int language;
+    };
+
     enum netadrtype_t
     {
         NA_BOT = 0x0,

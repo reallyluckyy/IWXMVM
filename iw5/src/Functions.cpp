@@ -73,4 +73,25 @@ namespace IWXMVM::IW5::Functions
         *com_codeTimescale = 1.0f;
     }
 
+    std::string GetFilePath(const std::string_view demoName)
+    {
+        auto searchpath = (Structures::searchpath_s*)GetGameAddresses().fs_searchpaths();
+        while (searchpath->next)
+        {
+            searchpath = searchpath->next;
+            if (!searchpath->dir)
+                continue;
+
+            auto path = std::filesystem::path(searchpath->dir->path);
+            path.append(searchpath->dir->gamedir);
+            path.append("demo");
+            path.append(demoName);
+
+            if (std::filesystem::exists(path))
+                return path.string();
+        }
+
+        return "";
+    }
+
 }  // namespace IWXMVM::IW5::Functions
