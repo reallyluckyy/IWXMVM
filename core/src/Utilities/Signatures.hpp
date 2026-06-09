@@ -157,6 +157,8 @@ namespace IWXMVM::Signatures
 
     inline std::uintptr_t SignatureScanner(const auto& signature, const auto& moduleHandles)
     {
+        LOG_INFO("Scanning for signature:\n\t {}", signature._string.data());
+
         for (const auto handle : moduleHandles)
         {
             MODULEINFO process{};
@@ -209,7 +211,11 @@ namespace IWXMVM::Signatures
             const std::uintptr_t address = SignatureScanner(*this, moduleHandles);
 
             if (address == 0)
-                throw std::runtime_error(std::format("Failed to find signature:\n\t {}", _string.data()));
+            {
+                LOG_ERROR("Failed to find signature: {}",
+                          _string.data());  // throw std::runtime_error(std::format("Failed to find signature:\n\t {}", _string.data()));
+                return address;
+            } 
             else
             {
                 if constexpr (requires { std::declval<Callable>()(address); })
