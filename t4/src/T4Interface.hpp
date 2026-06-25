@@ -129,8 +129,7 @@ namespace IWXMVM::T4
             if (!Functions::FindDvar("cl_ingame")->current.enabled)
                 return Types::GameState::MainMenu;
 
-            // TODO: 
-            if (*(uint32_t*)0xBB1528)//(Structures::GetClientConnection()->demoplaying)
+            if (Structures::GetClientConnection()->demoplaying)
                 return Types::GameState::InDemo;
 
             return Types::GameState::InGame;
@@ -642,7 +641,6 @@ namespace IWXMVM::T4
 
         Types::PlaybackData GetPlaybackDataAddresses() const
         {
-            LOG_WARN("GetPlaybackDataAddresses will likely return a lot of crap");
             auto cl = Structures::GetClientActive();
             auto clc = Structures::GetClientConnection();
             auto cgs = Structures::GetClientGlobalsStatic();
@@ -679,7 +677,7 @@ namespace IWXMVM::T4
                 .s_compassActors = {.address = GetGameAddresses().s_compassActors(), .size = 64 * 48},
                 .teamChatMsgs = 
                 {
-                    .address = reinterpret_cast<uintptr_t>(Structures::GetClientGlobalsStatic()->teamChatMsgs),
+                    .address = 0,//reinterpret_cast<uintptr_t>(Structures::GetClientGlobalsStatic()->teamChatMsgs),
                     .size = 8 * 160 + 4 * 8 + 4 + 4
                 },
                 .cg_entities = {.address = reinterpret_cast<uintptr_t>(Structures::GetEntities()), .size = 72 * 476},

@@ -42,8 +42,9 @@ namespace IWXMVM::T4::Hooks::Rendering
 
     void ReplaceMaterial(Structures::GfxDrawSurf &drawSurf, Structures::Material *newMaterial)
     {
-        drawSurf.fields.materialSortedIndex &= ~(0x7FF);
-        drawSurf.fields.materialSortedIndex |= (newMaterial->info.drawSurf.fields.materialSortedIndex & 0x7FF);
+        // TODO: 
+        //drawSurf.fields.materialSortedIndex &= ~(0x7FF);
+        //drawSurf.fields.materialSortedIndex |= (newMaterial->info.drawSurf.fields.materialSortedIndex & 0x7FF);
     }
 
     typedef int32_t(__cdecl *R_SetupMaterial_t)(Structures::GfxCmdBufSourceState *a1, void *a2,
@@ -55,10 +56,11 @@ namespace IWXMVM::T4::Hooks::Rendering
     int32_t R_SetupMaterial_Hook(Structures::GfxCmdBufSourceState *a1, void *a2, Structures::GfxCmdBufSourceState *src,
                                  Structures::GfxCmdBufState *state, uint32_t drawSurfLow, uint32_t drawSurfHigh)
     {
-        Structures::GfxDrawSurf drawSurf;
-        drawSurf.packed = ((uint64_t)(drawSurfHigh) << 32) | (uint32_t)(drawSurfLow);
+        // TODO: Structures::GfxDrawSurf drawSurf;
+        // TODO: drawSurf.packed = ((uint64_t)(drawSurfHigh) << 32) | (uint32_t)(drawSurfLow);
 
-        auto rgp = reinterpret_cast<Structures::r_global_permanent_t *>(GetGameAddresses().rgp());
+        // TODO:
+        /*auto rgp = reinterpret_cast<Structures::r_global_permanent_t *>(GetGameAddresses().rgp());
         auto material = rgp->sortedMaterials[drawSurf.fields.materialSortedIndex & 0x7FF];
 
         auto renderingFlags = Components::Rendering::GetRenderingFlags();
@@ -81,9 +83,11 @@ namespace IWXMVM::T4::Hooks::Rendering
         {
             ReplaceMaterial(drawSurf, Functions::Material_RegisterHandle("overlay_low_health"));
         }
-
+        
         return R_SetupMaterial_Trampoline(a1, a2, src, state, drawSurf.packed & 0xFFFFFFFF,
                                           (drawSurf.packed >> 32) & 0xFFFFFFFF);
+        */
+        return 0;
     }
 
     void Install()

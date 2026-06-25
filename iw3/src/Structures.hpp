@@ -1265,7 +1265,7 @@ namespace IWXMVM::IW3::Structures
         int iwdIsClone;
     };
 
-        enum MaterialTechniqueType
+    enum MaterialTechniqueType
     {
         TECHNIQUE_DEPTH_PREPASS = 0x0,
         TECHNIQUE_BUILD_FLOAT_Z = 0x1,
