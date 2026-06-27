@@ -29,18 +29,24 @@ namespace IWXMVM::UI
         void Search();
         void MarkDirsRelevancy();
         void FindAllDemos();
+        void SaveRecentDemos();
+        void LoadRecentDemos();
 
-        void RenderDemos(const std::vector<std::filesystem::path>& demos);
+        template <typename T>
+        void RenderDemos(const T& demos, bool addToRecentOnPlay = true);
         bool DemoFilter(const std::u8string& demoFileName);
         void FilteredRenderDemos(const std::pair<std::size_t, std::size_t>& demos);
         void RenderDir(const DemoDirectory& dir);  // Recursive render function
         void RecacheSearchBarTextSplit();
         void RenderSearchBar();
+        void RenderRecentDemos();
         void RenderSearchPaths();
 
         std::pair<std::size_t, std::size_t> searchPaths;  // Pair of indices representing the [first, second) interval
                                                           // of search paths in the 'demoDirectories' vector
         std::vector<DemoDirectory> demoDirectories;
+        constexpr static std::size_t maxRecentDemos = 5;
+        std::deque<std::filesystem::path> recentDemos;
         std::vector<std::filesystem::path> demoPaths; // Path to every demo found
         std::atomic<bool> isScanningDemoPaths;
 
