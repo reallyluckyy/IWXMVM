@@ -60,22 +60,20 @@ namespace IWXMVM::T4::Functions
     }
 
     
-    bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity /*@<eax>*/, int boneIndex /*@<ecx>*/, 
-                                   float* matrix /*@<esi>*/, Structures::DObj_s* dobj, float* origin)
+    bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity, int boneIndex, 
+                                   float* matrix, Structures::DObj_s* dobj, float* origin)
     {
-        // TODO: 
-        return false;
-        /*static uintptr_t address = GetGameAddresses().CG_DObjGetWorldBoneMatrix();
+        static uintptr_t address = GetGameAddresses().CG_DObjGetWorldBoneMatrix();
         __asm 
         {
             mov eax, entity
             mov ecx, boneIndex
-            mov esi, matrix
+            mov edi, dobj
             push origin
-            push dobj
+            push matrix
             call address
             add esp, 8
-        }*/
+        }
     }
 
 

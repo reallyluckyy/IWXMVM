@@ -11,8 +11,8 @@ namespace IWXMVM::T4::Functions
 
     uint16_t SL_GetStringOfSize(const char* string, int entityType, int stringLength);
 
-    bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity /*@<eax>*/, int boneIndex /*@<ecx>*/,
-                                        float* matrix /*@<esi>*/, Structures::DObj_s* dobj, float* origin);
+    bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity, int boneIndex,
+                                        float* matrix, Structures::DObj_s* dobj, float* origin);
 
     Structures::Material* Material_RegisterHandle(const char* materialName);
 

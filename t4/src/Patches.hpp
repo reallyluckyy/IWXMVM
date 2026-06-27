@@ -9,12 +9,10 @@ namespace IWXMVM::T4::Patches
 
     struct T4Patches
     {
-        // TODO:
-        //ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
+        ReturnPatch CG_DrawDisconnect{GetGameAddresses().CG_DrawDisconnect(), PatchApplySetting::Immediately};
         
-        // TODO:
-        //JumpPatch CG_AddPlayerSpriteDrawSurfs{GetGameAddresses().CG_AddPlayerSpriteDrawSurfs(),
-        //                                      PatchApplySetting::Immediately};
+        JumpPatch CG_AddPlayerSpriteDrawSurfs{GetGameAddresses().CG_AddPlayerSpriteDrawSurfs(),
+                                              PatchApplySetting::Immediately};
         
         JumpPatch CL_CGameRendering{GetGameAddresses().CL_CGameRendering(), PatchApplySetting::Immediately};
 
@@ -34,9 +32,9 @@ namespace IWXMVM::T4::Patches
                                   PatchApplySetting::Immediately};
 
         // to remove the blood overlay when player gets hit
-        // TODO: NopPatch<5> CG_DrawPlayerLowHealthOverlay{GetGameAddresses().CG_DrawPlayerLowHealthOverlay(), PatchApplySetting::Deferred};
-        // TODO: ReturnPatch CG_DrawFlashDamage{GetGameAddresses().CG_DrawFlashDamage(), PatchApplySetting::Deferred};
-        // TODO: ReturnPatch CG_DrawDamageDirectionIndicators{GetGameAddresses().CG_DrawDamageDirectionIndicators(), PatchApplySetting::Deferred};
+        NopPatch<5> CG_DrawPlayerLowHealthOverlay{GetGameAddresses().CG_DrawPlayerLowHealthOverlay(), PatchApplySetting::Deferred};
+        ReturnPatch CG_DrawFlashDamage{GetGameAddresses().CG_DrawFlashDamage(), PatchApplySetting::Deferred};
+        ReturnPatch CG_DrawDamageDirectionIndicators{GetGameAddresses().CG_DrawDamageDirectionIndicators(), PatchApplySetting::Deferred};
          
         ReturnPatch IN_Frame{GetGameAddresses().IN_Frame(), PatchApplySetting::Deferred};
     };

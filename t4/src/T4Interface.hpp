@@ -28,9 +28,6 @@ namespace IWXMVM::T4
 
         void ExecuteNewServerCommands() final
         {
-            // TODO: Fix this, because it causes some Com_Error currently
-            return;
-
             const auto clc = Structures::GetClientConnection();
             const auto cgs = Structures::GetClientGlobalsStatic();
 
@@ -78,9 +75,7 @@ namespace IWXMVM::T4
 
         void DisableRawInput()
         {
-            // TODO: is this needed on t4?
             // disable raw_input because it messes with our IN_Frame patch
-            // on cod4x
             auto raw_input = Functions::FindDvar("raw_input");
             if (raw_input)
             {
@@ -137,7 +132,7 @@ namespace IWXMVM::T4
 
         Types::Features GetSupportedFeatures() final
         {
-            return Types::Features_ChangeAnimations;
+            return Types::Features_None;
         }
 
         void InitializeGameAddresses() final
@@ -342,7 +337,7 @@ namespace IWXMVM::T4
                 Functions::FindDvar("ui_drawCrosshair")->current.enabled, 
                 Hooks::HUD::showScore,
                 Hooks::HUD::showIconsAndText, 
-                false,// TODO: !Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.IsApplied(),
+                !Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.IsApplied(),
                 Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
                 teamColorAllies,   
                 teamColorAxis
@@ -431,15 +426,15 @@ namespace IWXMVM::T4
             Hooks::HUD::showIconsAndText = hudInfo.showIconsAndText;
             if (hudInfo.showBloodOverlay)
             {
-                // TODO: Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Revert();
-                // TODO: Patches::GetGamePatches().CG_DrawFlashDamage.Revert();
-                // TODO: Patches::GetGamePatches().CG_DrawDamageDirectionIndicators.Revert();
+                Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Revert();
+                Patches::GetGamePatches().CG_DrawFlashDamage.Revert();
+                Patches::GetGamePatches().CG_DrawDamageDirectionIndicators.Revert();
             }
             else
             {
-                // TODO: Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Apply();
-                // TODO: Patches::GetGamePatches().CG_DrawFlashDamage.Apply();
-                // TODO: Patches::GetGamePatches().CG_DrawDamageDirectionIndicators.Apply();
+                Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Apply();
+                Patches::GetGamePatches().CG_DrawFlashDamage.Apply();
+                Patches::GetGamePatches().CG_DrawDamageDirectionIndicators.Apply();
             }
 
             std::stringstream teamColorAllies;

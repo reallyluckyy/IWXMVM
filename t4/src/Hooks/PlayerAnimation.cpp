@@ -13,7 +13,7 @@ namespace IWXMVM::T4::Hooks::PlayerAnimation
 
     bool GetAnimationNames()
     {
-        // TODO: when bgs is figured out
+        // TODO:
         /*
         const auto animations = std::span{Structures::GetClientGlobals()->bgs.animScriptData.animations};
         std::vector<std::pair<std::string_view, std::uint32_t>> anims;
@@ -45,11 +45,13 @@ namespace IWXMVM::T4::Hooks::PlayerAnimation
         static bool foundDeathAnimations = GetAnimationNames();
         static std::array<std::uint8_t, 64> weaponIndices;
 
-        // TODO: const auto& ps = Structures::GetClientGlobals()->predictedPlayerState;
-        // TODO: if (static_cast<std::size_t>(ps.clientNum) < weaponIndices.size() && ps.weapon != 0)
-        // TODO: {
-        // TODO:     weaponIndices[ps.clientNum] = ps.weapon;
-        // TODO: }
+        /*
+        const auto& ps = Structures::GetClientGlobals()->predictedPlayerState;
+        if (static_cast<std::size_t>(ps.clientNum) < weaponIndices.size() && ps.weapon != 0)
+        {
+            weaponIndices[ps.clientNum] = ps.weapon;
+        }
+        */
 
         if (centity.nextState.eType == entityType_t::ET_PLAYER)
         {
@@ -77,22 +79,25 @@ namespace IWXMVM::T4::Hooks::PlayerAnimation
         }
         else if (centity.nextState.eType == entityType_t::ET_PLAYER_CORPSE)
         {
-            // TODO: auto& legsAnim = reinterpret_cast<std::uint32_t&>(centity.nextState.legsAnim);
-            // TODO: 
-            // TODO: if ((legsAnim & 511) != 0 && foundDeathAnimations)
-            // TODO: {
-            // TODO:     const auto animations = std::span{GetClientGlobals()->bgs.animScriptData.animations};
-            // TODO: 
-            // TODO:     if ((legsAnim & 511) < std::min(ANIM_COUNT, animations.size()))
-            // TODO:     {
-            // TODO:         const std::string_view animName{animations[(legsAnim & 511)].name};
-            // TODO:         if (animName.find("death") != std::string_view::npos)
-            // TODO:         {
-            // TODO:             // replace death animation
-            // TODO:             Components::PlayerAnimation::SetPlayerAnimation(animName, legsAnim);
-            // TODO:         } 
-            // TODO:     }
-            // TODO: }
+            // TODO:
+            /*
+            auto& legsAnim = reinterpret_cast<std::uint32_t&>(centity.nextState.legsAnim);
+            
+            if ((legsAnim & 511) != 0 && foundDeathAnimations)
+            {
+                const auto animations = std::span{GetClientGlobals()->bgs.animScriptData.animations};
+            
+                if ((legsAnim & 511) < std::min(ANIM_COUNT, animations.size()))
+                {
+                    const std::string_view animName{animations[(legsAnim & 511)].name};
+                    if (animName.find("death") != std::string_view::npos)
+                    {
+                        // replace death animation
+                        Components::PlayerAnimation::SetPlayerAnimation(animName, legsAnim);
+                    } 
+                }
+            }
+            */
 
             if (Components::PlayerAnimation::AttachWeaponToCorpse()) 
             {
@@ -111,12 +116,12 @@ namespace IWXMVM::T4::Hooks::PlayerAnimation
             if (Components::PlayerAnimation::HideAllCorpses())
             {
                 // hide corpses
-                // TODO: centity.nextState.lerp.eFlags |= 32;
+                centity.nextState.lerp.eFlags |= 32;
             }
             else
             {
                 // reveal corpses
-               // TODO: centity.nextState.lerp.eFlags &= ~32;
+               centity.nextState.lerp.eFlags &= ~32;
             }
         }
         else if (centity.nextState.eType == entityType_t::ET_ITEM)
@@ -124,12 +129,12 @@ namespace IWXMVM::T4::Hooks::PlayerAnimation
             if (Components::PlayerAnimation::AttachWeaponToCorpse())
             {
                 // hide dropped weapons
-                // TODO: centity.nextState.lerp.eFlags |= 32;
+                centity.nextState.lerp.eFlags |= 32;
             }
             else
             {
                 // reveal dropped weapons
-                // TODO: centity.nextState.lerp.eFlags &= ~32;
+                centity.nextState.lerp.eFlags &= ~32;
             }
         }
     }
@@ -150,7 +155,7 @@ namespace IWXMVM::T4::Hooks::PlayerAnimation
 
     void Install()
     {
-        // TODO: 
+        // TODO: Implement this feature eventually
         // HookManager::CreateHook(GetGameAddresses().CG_ProcessEntity(), (std::uintptr_t)CG_ProcessEntity_Hook,
         //                        &CG_ProcessEntity_Trampoline);
     }

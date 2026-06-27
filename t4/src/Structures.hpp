@@ -216,11 +216,18 @@ namespace IWXMVM::T4::Structures
         ET_EVENTS = 0x11,
     };
 
+    struct LerpEntityState 
+    {
+        int eFlags;
+        // ...
+    };
+
     struct entityState_s
     {
         int number;
         int eType;
-        char unk[168];
+        LerpEntityState lerp;
+        char unk[164];
         int clientNum;
         char unk2[52];
         int weapon;
