@@ -21,12 +21,12 @@ namespace IWXMVM::T4::Signatures
         //    15) > CG_AddPlayerSpriteDrawSurfs;  // killcam 'you' marker
         Sig("C3 F6 05 ?? ?? ?? 00 10", GAType::Code, 8) > CL_CGameRendering;  // hide class menus
         Sig("E8 ?? ?? ?? ?? A1 ?? ?? ?? ?? 85 C0 74 1D", GAType::Code, -5) > CG_CalcViewValues;  // first call to AnglesToAxis we need to replace
-        Sig("56 57 8B F8 8D 44 24 0F 50 51 8B CF C6 44 24 17 FE E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 25", GAType::Code, -5) > CG_DObjGetWorldTagMatrix;
+        Sig("56 57 8B F8 8D 44 24 0F 50 51 8B CF C6 44 24 17 FE E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 25", GAType::Code, -6) > CG_DObjGetWorldTagMatrix;
         // TODO:
         //Sig("00 53 56 57 8B F0 0F 85 ?? ?? ?? ?? 8D 44 24", GAType::Code, -9) > CG_DrawDisconnect;
         Sig("8D 74 24 50 D9 5C 24 50", GAType::Code, 8) > CG_OffsetThirdPersonView;  // second call to AnglesToAxis we need to replace
         Sig("8B F0 83 C4 04 85 F6 8B C7 74 14", GAType::Code, -5, Lambda::FollowCodeFlow) > Dvar_FindMalleableVar;
-        // TODO: Sig("83 EC ?? D9 46 ?? D9 1D ?? ?? ?? ?? D9 46 ?? D9 1D", GAType::Code, -6) > FX_SetupCamera;
+        Sig("F3 0F 10 40 1C F3 0F 11 05 ?? ?? ?? ?? F3 0F 10 40 20", GAType::Code, -6) > FX_SetupCamera;
         Sig("6A 00 56 8B F8 E8 ?? ?? ?? ?? D9 47 1C", GAType::Code, -9) > R_SetViewParmsForScene;
         Sig("8B C6 59 C3 56 E8 ?? ?? ?? ?? 83 C4 04 ?? ?? ?? ?? ?? CC", GAType::Code, 13) > SV_Frame;
         Sig("BA ?? ?? ?? ?? E8 ?? ?? ?? ?? 80 3D", GAType::Data, 1, Lambda::DereferenceAddress) > clientConnection;

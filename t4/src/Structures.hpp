@@ -342,7 +342,7 @@ namespace IWXMVM::T4::Structures
         unsigned int height;
         float tanHalfFovX;
         float tanHalfFovY;
-        char pad[8];
+        int pad;
         float vieworg[3];
         char pad2[4];
         float viewaxis[3][3];
@@ -400,8 +400,8 @@ namespace IWXMVM::T4::Structures
         int renderScreen;
         int latestSnapshotNum;
         int latestSnapshotTime;
-        snapshot_s* snap;
-        snapshot_s* nextSnap;
+        snapshot_s *snap;
+        snapshot_s *nextSnap;
         snapshot_s activeSnapshots[2];
         float frameInterpolation;
         int frametime;
@@ -418,8 +418,9 @@ namespace IWXMVM::T4::Structures
         float landChange;
         int landTime;
         float heightToCeiling;
+        int unk_0;
         refdef_s refdef;
-        char unk[12];
+        char unk_1[12];
         float refdefViewAngles[3];
         float lastVieworg[3];
         char pad[12296];

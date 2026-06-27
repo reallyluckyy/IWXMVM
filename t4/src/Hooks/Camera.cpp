@@ -96,46 +96,54 @@ namespace IWXMVM::T4::Hooks::Camera
         __asm jmp FX_SetupCamera_Trampoline
     }
 
-    // TODO: copied from iw3, registers etc may be wrong
     uint32_t CG_DObjGetWorldTagMatrix_Trampoline;
     void __declspec(naked) CG_DObjGetWorldTagMatrix_Hook()
     {
-        static float* tempEDI;
+        static void* pose;
+        static float* tagMat;
+        static float* origin;
         static float dummyViewAxis[9];
 
-        __asm mov tempEDI, edi 
-        __asm pushad
+        __asm {
+            pop pose
+            pop tagMat
+            pop origin
+            pushad
+        }
 
         {
             if (Components::CameraManager::Get().GetActiveCamera()->IsModControlledCameraMode() &&
                 Components::CameraManager::Get().GetActiveCamera()->GetMode() != Components::Camera::Mode::Bone)
-                tempEDI = dummyViewAxis;
+                tagMat = dummyViewAxis;
         }
 
-        __asm popad
-        __asm mov edi, tempEDI 
-        __asm jmp CG_DObjGetWorldTagMatrix_Trampoline
+        __asm {
+            popad
+            push origin
+            push tagMat
+            push pose
+            jmp CG_DObjGetWorldTagMatrix_Trampoline
+        }
     }
 
     void Install()
     {
         // rewrite the camera position and fov
-        //HookManager::CreateHook(GetGameAddresses().R_SetViewParmsForScene(), (uintptr_t)R_SetViewParmsForScene_Hook,
-        //                        &R_SetViewParmsForScene_Trampoline);
+        HookManager::CreateHook(GetGameAddresses().R_SetViewParmsForScene(), (uintptr_t)R_SetViewParmsForScene_Hook,
+                                &R_SetViewParmsForScene_Trampoline);
 
         // rewrite the camera angles
-        //AnglesToAxis_Address = GetGameAddresses().AnglesToAxis();
-        //HookManager::WriteCall(GetGameAddresses().CG_CalcViewValues(), (uintptr_t)AnglesToAxis_Hook);
-        //HookManager::WriteCall(GetGameAddresses().CG_OffsetThirdPersonView(), (uintptr_t)AnglesToAxis_Hook);
+        AnglesToAxis_Address = GetGameAddresses().AnglesToAxis();
+        HookManager::WriteCall(GetGameAddresses().CG_CalcViewValues(), (uintptr_t)AnglesToAxis_Hook);
+        HookManager::WriteCall(GetGameAddresses().CG_OffsetThirdPersonView(), (uintptr_t)AnglesToAxis_Hook);
 
-        // TODO:
         // update position of world-space effects (such as smoke) with our new position
-        //HookManager::CreateHook(GetGameAddresses().FX_SetupCamera(), (uintptr_t)FX_SetupCamera_Hook,
-        //                        &FX_SetupCamera_Trampoline);
+        HookManager::CreateHook(GetGameAddresses().FX_SetupCamera(), (uintptr_t)FX_SetupCamera_Hook,
+                                &FX_SetupCamera_Trampoline);
 
         // ignore writes to camera angles (this fixes things like the player knifing affecting the freecam)
-        //HookManager::CreateHook(GetGameAddresses().CG_DObjGetWorldTagMatrix(), (uintptr_t)CG_DObjGetWorldTagMatrix_Hook,
-        //                        &CG_DObjGetWorldTagMatrix_Trampoline);
+        HookManager::CreateHook(GetGameAddresses().CG_DObjGetWorldTagMatrix(), (uintptr_t)CG_DObjGetWorldTagMatrix_Hook,
+                                &CG_DObjGetWorldTagMatrix_Trampoline);
     }
 
     void OnCameraChanged()
