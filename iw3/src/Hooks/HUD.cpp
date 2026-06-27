@@ -8,7 +8,7 @@
 namespace IWXMVM::IW3::Hooks::HUD
 {
     bool showScore = true;
-    bool showOtherText = true;
+    bool showIconsAndText = true;
 
     typedef void (*R_AddCmdDrawTextWithEffects_t)(const char*, int, void*, float, float, float, float, float, const float*,
                                                   int, const float*, void*, void*, int, int, int, int);
@@ -25,7 +25,7 @@ namespace IWXMVM::IW3::Hooks::HUD
         }
         else
         {
-            if (!showOtherText)
+            if (!showIconsAndText)
                 return;
         }
 

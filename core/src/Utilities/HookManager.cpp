@@ -74,7 +74,25 @@ namespace IWXMVM::HookManager
         }
     }
 
-    void Unhook()
+    void Unhook(std::uintptr_t originalPtr)
+    {
+        auto result = MH_DisableHook((void*)originalPtr);
+        if (result != MH_OK)
+        {
+            throw std::runtime_error(
+                std::format("Failed to disable hook for address {:X}: {}", originalPtr, magic_enum::enum_name(result))
+                    .c_str());
+        }
+        result = MH_RemoveHook((void*)originalPtr);
+        if (result != MH_OK)
+        {
+            throw std::runtime_error(
+                std::format("Failed to remove hook for address {:X}: {}", originalPtr, magic_enum::enum_name(result))
+                    .c_str());
+        }
+    }
+
+    void UnhookAll()
     {
         if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK)
             throw std::runtime_error("Failed to disable hooks");

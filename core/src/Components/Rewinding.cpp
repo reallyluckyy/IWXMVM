@@ -103,7 +103,11 @@ namespace IWXMVM::Components::Rewinding
         *reinterpret_cast<int*>(addresses.clc.lastExecutedServerCommand) = initialGamestate->lastExecutedServerCommand;
         *reinterpret_cast<int*>(addresses.clc.serverCommandSequence) = initialGamestate->serverCommandSequence1;
         *reinterpret_cast<int*>(addresses.cgs.serverCommandSequence) = initialGamestate->serverCommandSequence2;
-        *reinterpret_cast<int*>(addresses.killfeed) = 0;
+
+        if (addresses.killfeed)
+        {
+            *reinterpret_cast<int*>(addresses.killfeed) = 0;
+        }
 
         // can be 0 as its cod4x only
         if (addresses.clc.serverConfigDataSequence)
@@ -112,8 +116,12 @@ namespace IWXMVM::Components::Rewinding
                 initialGamestate->serverConfigDataSequence;
         }
 
+        if (addresses.teamChatMsgs.address)
+        {
+            memset(reinterpret_cast<char*>(addresses.teamChatMsgs.address), 0, addresses.teamChatMsgs.size);
+        }
+
         memset(reinterpret_cast<char*>(addresses.s_compassActors.address), 0, addresses.s_compassActors.size);
-        memset(reinterpret_cast<char*>(addresses.teamChatMsgs.address), 0, addresses.teamChatMsgs.size);
         memset(reinterpret_cast<char*>(addresses.clc.serverCommands.address), 0, addresses.clc.serverCommands.size);
         memset(reinterpret_cast<char*>(addresses.cg_entities.address), 0, addresses.cg_entities.size);
         memcpy(reinterpret_cast<char*>(addresses.clientInfo.address), initialGamestate->clientInfo,
@@ -129,7 +137,7 @@ namespace IWXMVM::Components::Rewinding
         auto addresses = Mod::GetGameInterface()->GetPlaybackDataAddresses();
 
         // TODO: find a more robust method of detecting a gamestate message
-        if (len >= 10'000 || demoFileOffset == 9)
+        if (len >= 10'000 || Mod::GetGameInterface()->GetDemoHeaderSize() + demoFileOffset == 9)
         {
             // first message with the gamestate; triggers the game to load a map
             if (initialGamestate != nullptr)
@@ -168,7 +176,12 @@ namespace IWXMVM::Components::Rewinding
             // after first snapshot and before second snapshot
             initialGamestate->populated = true;
             initialGamestate->serverTime = *reinterpret_cast<int*>(addresses.cl.snap_serverTime);
-            assert(initialGamestate->serverTime > 0);
+
+            // TODO: This assertion should usually hold, but has been commented out for now,
+            // TODO: as it gets triggered on IW5. This happens, because initialGamestate is populated twice,
+            // TODO: since we can not properly differentiate yet between the demo file header read
+            // TODO: and the first gamestate message read. Functionally this is fine, but the assertion would fail.
+            // assert(initialGamestate->serverTime > 0);
         }
     }
 
@@ -187,6 +200,8 @@ namespace IWXMVM::Components::Rewinding
         
         latestRewindTo = NOT_IN_USE;
         rewindTo.store(NOT_IN_USE);
+
+        Events::Invoke(EventType::OnRewindCompleted);
 
         return true;
     }
@@ -252,7 +267,10 @@ namespace IWXMVM::Components::Rewinding
         // only reset when the game has just requested the one byte message type
         if (len == 1)
         {
-            auto wouldReadDemoFooter = demoFileOffset + 9 >= demoFileSize;
+            auto wouldReadDemoFooter = 
+                demoFileOffset + 
+                Mod::GetGameInterface()->GetDemoFooterSize() +
+                Mod::GetGameInterface()->GetDemoHeaderSize() + 9 >= demoFileSize;
             RestoreOldGamestate(wouldReadDemoFooter);
         }
         else if (len > 12)
@@ -268,9 +286,17 @@ namespace IWXMVM::Components::Rewinding
         demoFileOffset += len;
 
         // gets triggered when a demo is loaded when playing another demo!
-        assert(demoFileOffset == demoFile.tellg());
+        //assert(demoFileOffset == demoFile.tellg());
 
         return len;
+    }
+
+    int FS_Seek(int offset, int origin)
+    {
+        LOG_DEBUG("Seeking to offset: {} with origin: {}", offset, origin);
+        demoFile.seekg(offset, origin);
+        demoFileOffset = (uint32_t)demoFile.tellg();
+        return 0;
     }
 
     void Initialize()

@@ -17,7 +17,7 @@ namespace IWXMVM::UI
     {
         LOG_DEBUG("Shutting down ImGui");
 
-        SetWindowLongPtr(D3D9::FindWindowHandle(), GWLP_WNDPROC, (LONG_PTR)originalGameWndProc);
+        HookManager::Unhook(Mod::GetGameInterface()->GetWndProc());
         Mod::GetGameInterface()->SetMouseMode(Types::MouseMode::Passthrough);
 
         for (const auto& component : uiComponents)
@@ -110,7 +110,10 @@ namespace IWXMVM::UI
         }
     }
 
-    HRESULT ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    typedef LRESULT(__stdcall* GameWndProc_t)(HWND hWnd, UINT Msg, unsigned int wParam, LPARAM lParam);
+    GameWndProc_t GameWndProc_Trampoline;
+
+    HRESULT __stdcall ImGuiWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         auto& uiManager = UIManager::Get();
         auto& gameView = uiManager.GetUIComponent(UI::Component::GameView);
@@ -130,7 +133,7 @@ namespace IWXMVM::UI
             return true;
         }
 
-        return CallWindowProc(uiManager.GetOriginalGameWndProc(), hWnd, uMsg, wParam, lParam);
+        return GameWndProc_Trampoline(hWnd, uMsg, wParam, lParam);
     }
 
     void UIManager::ToggleOverlay()
@@ -201,9 +204,9 @@ namespace IWXMVM::UI
             LOG_DEBUG("Initializing ImGui_ImplDX9 with D3D9 Device {0:x}", (std::uintptr_t)device);
             ImGui_ImplDX9_Init(device);
 
-            // TODO: byte size is game dependent
             LOG_DEBUG("Hooking WndProc at {0:x}", Mod::GetGameInterface()->GetWndProc());
-            originalGameWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (std::uintptr_t)ImGuiWndProc);
+
+            HookManager::CreateHook(Mod::GetGameInterface()->GetWndProc(), (uintptr_t)ImGuiWndProc, (uintptr_t*)&GameWndProc_Trampoline);
 
             auto windowSize = GetWindowSize(hwnd);
             auto fontSize = std::floor(windowSize.x / 106.0f);

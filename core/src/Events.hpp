@@ -10,6 +10,7 @@ namespace IWXMVM
         OnDemoBoundsDetermined,
         OnCameraChanged,
         OnRenderGameView,
+        OnRewindCompleted,
     };
 
     namespace Events

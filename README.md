@@ -7,9 +7,20 @@
 </div>
 
 ## About
-An in-development recording mod for multiple Call of Duty games.
+An eternally in-development recording mod for multiple Call of Duty games, featuring keyframeable campaths, a fully rewindable video editor-like timeline and built-in ProRes video capturing support.
 
 ![iwxmvmscreenshot](https://github.com/reallyluckyy/IWXMVM/assets/7430330/9680c479-1ed3-4690-9c29-b99f4b1b392b)
+
+## Supported Games
+
+All game implementations use signature scanning to support as many game individual game versions as possible. Usually, the latest Steam version should work, if nothing else is specified in the table below.
+
+| Game                            | Status         | Notes          |
+| ------------------------------- | -------------- | -------------- |
+| Call of Duty 4: Modern Warfare  | Well supported     | Reference Implementation. Should also mostly work with cod4x and [iw3xo](https://github.com/xoxor4d/iw3xo-dev). |
+| Call of Duty: Modern Warfare 3  | Mostly functional  | Partial support for [Plutonium IW5](https://plutonium.pw/). |
+
+The mod was built with [ReShade](https://reshade.me/) compatibility in mind, but some issues may remain.
 
 ## Requirements
 - Visual Studio 2022
@@ -35,4 +46,5 @@ There are no style or structure guidelines yet so please just refer to the alrea
 
 The project is structured into the following sub-projects:
 - [`core`](core/) contains the core mod logic
-- [`iw3`](iw3/) contains game-specific bindings for creating the IW3 version of the mod
+- [`iw3`](iw3/) contains game-specific bindings for creating the Call of Duty 4 version of the mod
+- [`iw5`](iw5/) contains game-specific bindings for creating the Modern Warfare 3 version of the mod

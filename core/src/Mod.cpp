@@ -66,7 +66,7 @@ namespace IWXMVM
             while (!ejectRequested.load())
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-            HookManager::Unhook();
+            HookManager::UnhookAll();
             LOG_DEBUG("Unhooked");
 
             // TODO: extract the entire resource release operation to a single function?

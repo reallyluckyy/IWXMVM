@@ -10,8 +10,21 @@ namespace IWXMVM
 
     void Logger::Initialize()
     {
+        DWORD mode = NULL;
+        HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<spdlog::sink_ptr> sinks;
-        sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>(spdlog::color_mode::always));
+
+        // Try to force ansi mode for the windows console, if it fails fallback to the regular mode
+        if (!GetConsoleMode(hStdOut, &mode))
+        {
+            SetConsoleMode(hStdOut, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+            sinks.push_back(std::make_shared<spdlog::sinks::ansicolor_stdout_sink_mt>(spdlog::color_mode::always));
+        }
+        else
+        {
+            sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>(spdlog::color_mode::always));
+        }
+
         sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(LOG_FILE, (size_t)5e6, 1));
         internalLogger = std::make_shared<spdlog::logger>(LOGGER_NAME, sinks.begin(), sinks.end());
         internalLogger->set_pattern("[%d.%m.%C %H:%M:%S] [%n] [%^%l%$] %v");

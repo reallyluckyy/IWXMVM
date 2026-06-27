@@ -377,7 +377,7 @@ namespace IWXMVM::IW3
                 Functions::FindDvar("cg_drawShellshock")->current.enabled,
                 Functions::FindDvar("ui_drawCrosshair")->current.enabled, 
                 Hooks::HUD::showScore,
-                Hooks::HUD::showOtherText, 
+                Hooks::HUD::showIconsAndText, 
                 !Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.IsApplied(),
                 Functions::FindDvar("ui_hud_obituaries")->current.string[0] == '1',
                 teamColorAllies,   
@@ -464,7 +464,7 @@ namespace IWXMVM::IW3
             Functions::FindDvar("ui_hud_obituaries")->current.string = hudInfo.showKillfeed ? "1" : "0";
             Functions::FindDvar("ui_drawCrosshair")->current.enabled = hudInfo.showCrosshair;
             Hooks::HUD::showScore = hudInfo.showScore;
-            Hooks::HUD::showOtherText = hudInfo.showOtherText;
+            Hooks::HUD::showIconsAndText = hudInfo.showIconsAndText;
             if (hudInfo.showBloodOverlay)
             {
                 Patches::GetGamePatches().CG_DrawPlayerLowHealthOverlay.Revert();
@@ -565,6 +565,10 @@ namespace IWXMVM::IW3
 
             uint16_t dobjIndex = clientObjMap[entityId];
             Structures::DObj_s* dobj = &objBuf[dobjIndex];
+            if (!dobj)
+            {
+                return {.id = -1};
+            }
 
             auto entities = Structures::GetEntities();
             auto entity = &entities[entityId];
@@ -587,7 +591,7 @@ namespace IWXMVM::IW3
             dobj->skel.timeStamp = orgTimeStamp;
             if (!result)
             {
-                LOG_ERROR("Call to CG_DObjGetWorldTagMatrix failed");
+                LOG_ERROR("Call to CG_DObjGetWorldBoneMatrix failed");
                 return {.id = -1};
             }
 

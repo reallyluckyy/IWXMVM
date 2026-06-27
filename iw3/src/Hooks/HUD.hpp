@@ -3,7 +3,7 @@
 namespace IWXMVM::IW3::Hooks::HUD
 {
     extern bool showScore;
-    extern bool showOtherText;
+    extern bool showIconsAndText;
 
     void Install();
 }
