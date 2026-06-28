@@ -90,6 +90,9 @@ namespace IWXMVM::T4
             Events::RegisterListener(EventType::PostDemoLoad, DemoParser::Run);
 
             Events::RegisterListener(EventType::OnCameraChanged, Hooks::Camera::OnCameraChanged);
+            
+            // more or less hacky workaround to rewinding causing cg_thirdperson to be reset on WaW
+            Events::RegisterListener(EventType::OnFrame, Hooks::Camera::OnCameraChanged);
 
             Events::RegisterListener(EventType::PostDemoLoad, [&]() { 
                 Functions::FindDvar("sv_cheats")->current.enabled = true; 
