@@ -30,8 +30,8 @@ namespace IWXMVM::IW5::Patches
         NopPatch<8> CG_PainVisionUpdate{GetGameAddresses().CG_PainVisionUpdate_Location(), 
                                         PatchApplySetting::Deferred};
 
-        // disable theater mode ui when showIconsAndText is false
-        ReturnPatch CG_DrawRotatedPic{GetGameAddresses().CG_DrawRotatedPic(), PatchApplySetting::Immediately};
+        // disable built-in theater mode ui
+        ReturnPatch DrawDemoMenuBar{GetGameAddresses().DrawDemoMenuBar(), PatchApplySetting::Immediately};
     };
 
     inline IW5Patches& GetGamePatches()
