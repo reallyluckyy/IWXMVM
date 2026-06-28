@@ -107,6 +107,7 @@ namespace IWXMVM::IW3::Hooks::Commands
        private:
         Structures::cmd_function_t* FindCommand()
         {
+            // TODO: Why are there hardcoded addresses here?
             Structures::cmd_function_t** cmd_functions = (Structures::cmd_function_t**)0x1410B3C;
             Structures::cmd_function_t** sv_cmd_functions = (Structures::cmd_function_t**)0x14099DC;
 

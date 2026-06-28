@@ -1,0 +1,20 @@
+#pragma once
+#include "Structures.hpp"
+
+namespace IWXMVM::T4::Functions
+{
+    Structures::dvar_s* FindDvar(const std::string_view name);
+
+    std::string GetFilePath(const std::string_view demoName);
+
+    void Cbuf_AddText(std::string command);
+
+    uint16_t SL_GetStringOfSize(const char* string, int entityType, int stringLength);
+
+    bool CG_DObjGetWorldBoneMatrix(Structures::centity_s* entity, int boneIndex,
+                                        float* matrix, Structures::DObj_s* dobj, float* origin);
+
+    Structures::Material* Material_RegisterHandle(const char* materialName);
+
+    void Dvar_SetStringByName(const char* dvarName, const char* value);
+}  // namespace IWXMVM::T4::Functions
