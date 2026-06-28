@@ -206,8 +206,7 @@ namespace IWXMVM::UI
 
     void GameView::LockMouse()
     {
-        // calling FindWindowHandle every frame here is probably not a good idea
-        auto windowPosition = UIManager::Get().GetWindowPosition(D3D9::FindWindowHandle());
+        auto windowPosition = UIManager::Get().GetWindowPosition();
 
         POINT cursorPosition;
         GetCursorPos(&cursorPosition);

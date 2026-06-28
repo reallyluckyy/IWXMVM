@@ -1,6 +1,7 @@
 #include "StdInclude.hpp"
 #include "HUD.hpp"
 
+#include "UI/UIManager.hpp"
 #include "Utilities/HookManager.hpp"
 #include "../Addresses.hpp"
 #include "../Structures.hpp"
@@ -8,11 +9,19 @@
 namespace IWXMVM::IW5::Hooks::HUD
 {
     bool showShellshockEffects = true;
-
     bool showScore = true;
     bool showIconsAndText = true;
-
     bool showBloodOverlay = true;
+
+    bool IsLikelyScorePopup(float x, float y, int color, int referenceColor) 
+    {
+        float windowQuarterWidth = IWXMVM::UI::UIManager::Get().GetWindowSize().x * 0.25f;
+        float windowQuarterHeight = IWXMVM::UI::UIManager::Get().GetWindowSize().y * 0.25f;
+        ImVec2 windowCenter = IWXMVM::UI::UIManager::Get().GetWindowSize() / 2.0f;
+
+        bool isInMiddleSquare = x < windowCenter.x + windowQuarterWidth && x > windowQuarterWidth && y < windowCenter.y + windowQuarterHeight && y > windowQuarterHeight;
+        return isInMiddleSquare && glm::abs(color - referenceColor) < 0x14;
+    }
 
     typedef void (__cdecl * CG_DrawShellshockBlend_t)(int localClientNum);
     CG_DrawShellshockBlend_t CG_DrawShellshockBlend_Trampoline = nullptr;
@@ -24,13 +33,20 @@ namespace IWXMVM::IW5::Hooks::HUD
         }
     }
 
-    typedef void (*R_AddCmdDrawText_t)(const char* text, int a2, int a3, float a4, float a5, float a6,
+    typedef void (*R_AddCmdDrawText_t)(const char* text, int maxChars, int font, float x, float y, float a6,
                                                       float a7, float a8, int a9, int a10);
     R_AddCmdDrawText_t R_AddCmdDrawText_Trampoline;
-    void R_AddCmdDrawText_Hook(const char* text, int a2, int a3, float a4, float a5, float a6, float a7,
-                                          float a8, int a9, int a10)
+    void R_AddCmdDrawText_Hook(const char* text, int maxChars, int font, float x, float y, float a6, float a7,
+                                          float a8, int color, int style)
     {
+        static int lastScoreColor = 0;
         if (text[0] == '+')
+        {
+            lastScoreColor = color;
+        }
+
+        // +500 or something like "Buzzkill!"
+        if (text[0] == '+' || IsLikelyScorePopup(x, y, color, lastScoreColor))
         {
             if (!showScore)
                 return;
@@ -41,17 +57,24 @@ namespace IWXMVM::IW5::Hooks::HUD
                 return;
         }
 
-        R_AddCmdDrawText_Trampoline(text, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+        R_AddCmdDrawText_Trampoline(text, maxChars, font, x, y, a6, a7, a8, color, style);
     }
 
-    typedef void (*R_AddCmdDrawTextWithEffects_t)(const char* text, int a2, int a3, float a4, float a5, float a6,
-                                                  float a7, float a8, int a9, int a10, float *a11, char *a12, char *a13,
+    typedef void (*R_AddCmdDrawTextWithEffects_t)(const char* text, int maxChars, int font, float x, float y, float a6,
+                                                  float a7, float a8, int color, int a10, float *a11, char *a12, char *a13,
                                                   int a14, int a15, int a16, int a17);
     R_AddCmdDrawTextWithEffects_t R_AddCmdDrawTextWithEffects_Trampoline;
-    void R_AddCmdDrawTextWithEffects_Hook(const char *text, int a2, int a3, float a4, float a5, float a6, float a7, float a8,
-                               int a9, int a10, float *a11, char *a12, char *a13, int a14, int a15, int a16, int a17)
+    void R_AddCmdDrawTextWithEffects_Hook(const char *text, int maxChars, int font, float x, float y, float a6, float a7, float a8,
+                               int color, int a10, float *a11, char *a12, char *a13, int a14, int a15, int a16, int a17)
     {
+        static int lastScoreColor = 0;
         if (text[0] == '+')
+        {
+            lastScoreColor = color;
+        }
+
+        // +500 or something like "Buzzkill!"
+        if (text[0] == '+' || IsLikelyScorePopup(x, y, color, lastScoreColor))
         {
             if (!showScore)
                 return;
@@ -62,7 +85,7 @@ namespace IWXMVM::IW5::Hooks::HUD
                 return;
         }
 
-        R_AddCmdDrawTextWithEffects_Trampoline(text, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17);
+        R_AddCmdDrawTextWithEffects_Trampoline(text, maxChars, font, x, y, a6, a7, a8, color, a10, a11, a12, a13, a14, a15, a16, a17);
     }
 
     typedef void(*R_AddCmdDrawStretchPic_t)(float a1, float a2, float a3, float a4, float a5, float a6,

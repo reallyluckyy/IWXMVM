@@ -67,8 +67,8 @@ namespace IWXMVM::UI
 
         bool IsControllableCameraModeSelected();
 
-        ImVec2 GetWindowSize(HWND hwnd);
-        ImVec2 GetWindowPosition(HWND hwnd);
+        ImVec2 GetWindowSize();
+        ImVec2 GetWindowPosition();
 
         bool IsInitialized() const
         {
@@ -152,5 +152,7 @@ namespace IWXMVM::UI
         bool showDebugPanel = false;
 
         WNDPROC originalGameWndProc = nullptr;
+
+        HWND windowHandle = NULL;
     };
 }  // namespace IWXMVM::UI

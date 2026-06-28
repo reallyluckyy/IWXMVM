@@ -148,19 +148,19 @@ namespace IWXMVM::UI
         return mode == Components::Camera::Mode::Free || mode == Components::Camera::Mode::Bone;
     }
 
-    ImVec2 UIManager::GetWindowSize(HWND hwnd)
+    ImVec2 UIManager::GetWindowSize()
     {
         RECT windowRect = {};
-        GetWindowRect(hwnd, &windowRect);
+        GetWindowRect(windowHandle, &windowRect);
         ImVec2 windowSize = {static_cast<float>(windowRect.right - windowRect.left),
                              static_cast<float>(windowRect.bottom - windowRect.top)};
         return windowSize;
     }
 
-    ImVec2 UIManager::GetWindowPosition(HWND hwnd)
+    ImVec2 UIManager::GetWindowPosition()
     {
         RECT windowRect = {};
-        GetWindowRect(hwnd, &windowRect);
+        GetWindowRect(windowHandle, &windowRect);
         ImVec2 windowSize = {static_cast<float>(windowRect.left), static_cast<float>(windowRect.top)};
         return windowSize;
     }
@@ -198,6 +198,8 @@ namespace IWXMVM::UI
             {
                 hwnd = D3D9::FindWindowHandle();
             }
+            this->windowHandle = hwnd;
+            
             LOG_DEBUG("Initializing ImGui_ImplWin32 with HWND {0:x}", (std::uintptr_t)hwnd);
             ImGui_ImplWin32_Init(hwnd);
 
@@ -208,7 +210,7 @@ namespace IWXMVM::UI
 
             HookManager::CreateHook(Mod::GetGameInterface()->GetWndProc(), (uintptr_t)ImGuiWndProc, (uintptr_t*)&GameWndProc_Trampoline);
 
-            auto windowSize = GetWindowSize(hwnd);
+            auto windowSize = GetWindowSize();
             auto fontSize = std::floor(windowSize.x / 106.0f);
 
             ImGuiIO& io = ImGui::GetIO();
